@@ -16,4 +16,8 @@ class Sources:
         for i, item in enumerate(args):
             jargs[i] = item
 
-        self.sources = neuralogic.cz.cvut.fel.ida.neuralogic.cli.utils.Runner.getSources(jargs, settings.settings)
+        self.sources = (
+            neuralogic.cz.cvut.fel.ida.neuralogic.cli.utils.Runner.getSources(
+                jargs, settings.settings
+            )
+        )

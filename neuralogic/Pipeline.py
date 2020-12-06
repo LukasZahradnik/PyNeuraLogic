@@ -7,7 +7,9 @@ from .Sources import Sources
 class Pipeline:
     def __init__(self, settings: Settings, sources: Sources):
         self.namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.building
-        self.pipeline = self.namespace.LearningSchemeBuilder.getPipeline(settings.settings, sources.sources)
+        self.pipeline = self.namespace.LearningSchemeBuilder.getPipeline(
+            settings.settings, sources.sources
+        )
 
     def execute(self, sources: Sources):
         result = self.pipeline.execute(sources.sources)

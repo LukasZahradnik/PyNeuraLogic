@@ -20,11 +20,17 @@ def set_environment(java_home: Union[Path, str], class_path: Union[Path, str]):
     os.environ["CLASS_PATH"] = class_path
 
 
-def initialize(path: Union[Path, str], std_out=sys.stdout, std_err=sys.stderr, die_on_exit=True):
+def initialize(
+    path: Union[Path, str], std_out=sys.stdout, std_err=sys.stderr, die_on_exit=True
+):
     global gateway, neuralogic
 
-    gateway = JavaGateway.launch_gateway(classpath=path, redirect_stdout=std_out, redirect_stderr=std_err,
-                                         die_on_exit=die_on_exit)
+    gateway = JavaGateway.launch_gateway(
+        classpath=path,
+        redirect_stdout=std_out,
+        redirect_stderr=std_err,
+        die_on_exit=die_on_exit,
+    )
     neuralogic = gateway.jvm
 
 
