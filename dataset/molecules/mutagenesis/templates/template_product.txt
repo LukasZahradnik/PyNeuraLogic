@@ -1,0 +1,6 @@
+import ./embeddings.txt
+
+{4,3} bond_embed2(A,X) :- bond(A,B,X).
+
+atom_embed2(B) :- bond_embed2(A,X), atom_embed(A), bond(A,B,X). [activation=product-tanh]
+{1,4} predict :- atom_embed2(B).

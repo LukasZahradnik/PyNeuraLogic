@@ -1,0 +1,4 @@
+import ./embeddings.txt
+
+{1,243} predict :- atom_embed(A), bond(A,B,X), bond_embed(X), atom_embed(B), bond(B,C,Y), bond_embed(Y), atom_embed(C). [activation=crosssum-tanh]
+predict/0 {1}

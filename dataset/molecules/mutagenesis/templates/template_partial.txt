@@ -1,0 +1,5 @@
+l1_embed(X) :- {3,3} atom_embed(X), {3,3} atom_embed(Y), bond(X,Y,B), bond_embed(B).
+l2_embed(X) :- {3,3} l1_embed(X), {3,3} l1_embed(Y), bond(X,Y,B), bond_embed(B).
+l3_embed(X) :- {3,3} l2_embed(X), {3,3} l2_embed(Y), bond(X,Y,B), bond_embed(B).
+
+{1,3} predict :- l3_embed(X).
