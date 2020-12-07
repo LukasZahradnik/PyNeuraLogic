@@ -4,6 +4,13 @@ import sys
 import os
 from py4j.java_gateway import JavaGateway
 
+from . import GCNNLayer
+from . import Pipeline
+from . import PytorchLayer
+from . import Settings
+from . import Sources
+from . import Rule
+
 neuralogic = None
 gateway = None
 
