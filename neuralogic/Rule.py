@@ -1,18 +1,33 @@
 from neuralogic import get_neuralogic
 from py4j.java_gateway import get_field
 
+from antlr4 import InputStream, CommonTokenStream
+from .grammar import NeuralogicLexer, NeuralogicParser, NeuralogicVisitor, NeuralogicListener
+from .error import InvalidRuleException
 
 class Rule:
-    def __init__(self, other: "Rule" = None):
-        self.neuralogic = get_neuralogic()
-        self.namespace = (
-            self.neuralogic.cz.cvut.fel.ida.logic.constructs.template.components
-        )
+    @staticmethod
+    def from_str(rule: str) -> 'Rule':
+        lexer = NeuralogicLexer(InputStream(rule))
+        stream = CommonTokenStream(lexer)
+        parser = NeuralogicParser(stream)
+        parser.examplesFile()
 
-        if other is None:
-            self.rule = self.namespace.WeightedRule()
-        else:
-            self.rule = self.namespace.WeightedRule(other.rule)
+        if parser.getNumberOfSyntaxErrors() != 0:
+            raise InvalidRuleException
+
+        return Rule()
+
+    # def __init__(self, other: "Rule" = None):
+    #     self.neuralogic = get_neuralogic()
+    #     self.namespace = (
+    #         self.neuralogic.cz.cvut.fel.ida.logic.constructs.template.components
+    #     )
+    #
+    #     if other is None:
+    #         self.rule = self.namespace.WeightedRule()
+    #     else:
+    #         self.rule = self.namespace.WeightedRule(other.rule)
 
     @property
     def weight(self):
