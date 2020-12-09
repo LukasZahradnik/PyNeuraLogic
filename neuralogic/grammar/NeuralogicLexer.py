@@ -5,7 +5,6 @@ from typing.io import TextIO
 import sys
 
 
-
 def serializedATN():
     with StringIO() as buf:
         buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\2\34")
@@ -28,23 +27,23 @@ def serializedATN():
         buf.write("\36\r\36\16\36\u00ba\3\37\6\37\u00be\n\37\r\37\16\37\u00bf")
         buf.write("\3\37\3\37\3 \3 \7 \u00c6\n \f \16 \u00c9\13 \3 \5 \u00cc")
         buf.write("\n \3 \3 \3!\3!\3!\3!\3!\7!\u00d5\n!\f!\16!\u00d8\13!")
-        buf.write("\3!\3!\3!\5!\u00dd\n!\3!\3!\3\u00d6\2\"\3\3\5\4\7\5\t")
+        buf.write('\3!\3!\3!\5!\u00dd\n!\3!\3!\3\u00d6\2"\3\3\5\4\7\5\t')
         buf.write("\6\13\7\r\b\17\t\21\n\23\13\25\f\27\r\31\16\33\17\35\20")
-        buf.write("\37\21!\22#\23%\24\'\25)\26+\27-\30/\31\61\2\63\2\65\2")
+        buf.write("\37\21!\22#\23%\24'\25)\26+\27-\30/\31\61\2\63\2\65\2")
         buf.write("\67\29\2;\2=\32?\33A\34\3\2\f\4\2--//\4\2GGgg\4\2//aa")
-        buf.write("\3\2c|\3\2C\\\3\2\62;\4\2\f\f\16\17\5\2\13\f\17\17\"\"")
+        buf.write('\3\2c|\3\2C\\\3\2\62;\4\2\f\f\16\17\5\2\13\f\17\17""')
         buf.write("\4\2\f\f\17\17\4\3\f\f\17\17\2\u00f0\2\3\3\2\2\2\2\5\3")
         buf.write("\2\2\2\2\7\3\2\2\2\2\t\3\2\2\2\2\13\3\2\2\2\2\r\3\2\2")
         buf.write("\2\2\17\3\2\2\2\2\21\3\2\2\2\2\23\3\2\2\2\2\25\3\2\2\2")
         buf.write("\2\27\3\2\2\2\2\31\3\2\2\2\2\33\3\2\2\2\2\35\3\2\2\2\2")
-        buf.write("\37\3\2\2\2\2!\3\2\2\2\2#\3\2\2\2\2%\3\2\2\2\2\'\3\2\2")
+        buf.write("\37\3\2\2\2\2!\3\2\2\2\2#\3\2\2\2\2%\3\2\2\2\2'\3\2\2")
         buf.write("\2\2)\3\2\2\2\2+\3\2\2\2\2-\3\2\2\2\2/\3\2\2\2\2=\3\2")
         buf.write("\2\2\2?\3\2\2\2\2A\3\2\2\2\3C\3\2\2\2\5S\3\2\2\2\7V\3")
         buf.write("\2\2\2\t^\3\2\2\2\13~\3\2\2\2\r\u0080\3\2\2\2\17\u0083")
         buf.write("\3\2\2\2\21\u0085\3\2\2\2\23\u0087\3\2\2\2\25\u0089\3")
         buf.write("\2\2\2\27\u008b\3\2\2\2\31\u008d\3\2\2\2\33\u008f\3\2")
         buf.write("\2\2\35\u0091\3\2\2\2\37\u0093\3\2\2\2!\u0095\3\2\2\2")
-        buf.write("#\u0097\3\2\2\2%\u0099\3\2\2\2\'\u009b\3\2\2\2)\u00a0")
+        buf.write("#\u0097\3\2\2\2%\u0099\3\2\2\2'\u009b\3\2\2\2)\u00a0")
         buf.write("\3\2\2\2+\u00a2\3\2\2\2-\u00a4\3\2\2\2/\u00a6\3\2\2\2")
         buf.write("\61\u00aa\3\2\2\2\63\u00af\3\2\2\2\65\u00b1\3\2\2\2\67")
         buf.write("\u00b3\3\2\2\29\u00b5\3\2\2\2;\u00b8\3\2\2\2=\u00bd\3")
@@ -60,7 +59,7 @@ def serializedATN():
         buf.write("9\35\2gf\3\2\2\2hi\3\2\2\2ig\3\2\2\2ij\3\2\2\2jt\3\2\2")
         buf.write("\2km\t\3\2\2ln\t\2\2\2ml\3\2\2\2mn\3\2\2\2np\3\2\2\2o")
         buf.write("q\59\35\2po\3\2\2\2qr\3\2\2\2rp\3\2\2\2rs\3\2\2\2su\3")
-        buf.write("\2\2\2tk\3\2\2\2tu\3\2\2\2u\n\3\2\2\2v\177\5\'\24\2w{")
+        buf.write("\2\2\2tk\3\2\2\2tu\3\2\2\2u\n\3\2\2\2v\177\5'\24\2w{")
         buf.write("\5\65\33\2xz\5\61\31\2yx\3\2\2\2z}\3\2\2\2{y\3\2\2\2{")
         buf.write("|\3\2\2\2|\177\3\2\2\2}{\3\2\2\2~v\3\2\2\2~w\3\2\2\2\177")
         buf.write("\f\3\2\2\2\u0080\u0081\7<\2\2\u0081\u0082\7/\2\2\u0082")
@@ -70,7 +69,7 @@ def serializedATN():
         buf.write("\u008c\7@\2\2\u008c\30\3\2\2\2\u008d\u008e\7]\2\2\u008e")
         buf.write("\32\3\2\2\2\u008f\u0090\7_\2\2\u0090\34\3\2\2\2\u0091")
         buf.write("\u0092\7*\2\2\u0092\36\3\2\2\2\u0093\u0094\7+\2\2\u0094")
-        buf.write(" \3\2\2\2\u0095\u0096\7.\2\2\u0096\"\3\2\2\2\u0097\u0098")
+        buf.write(' \3\2\2\2\u0095\u0096\7.\2\2\u0096"\3\2\2\2\u0097\u0098')
         buf.write("\7\61\2\2\u0098$\3\2\2\2\u0099\u009a\7`\2\2\u009a&\3\2")
         buf.write("\2\2\u009b\u009c\7v\2\2\u009c\u009d\7t\2\2\u009d\u009e")
         buf.write("\7w\2\2\u009e\u009f\7g\2\2\u009f(\3\2\2\2\u00a0\u00a1")
@@ -88,7 +87,7 @@ def serializedATN():
         buf.write("\u00be\t\t\2\2\u00bd\u00bc\3\2\2\2\u00be\u00bf\3\2\2\2")
         buf.write("\u00bf\u00bd\3\2\2\2\u00bf\u00c0\3\2\2\2\u00c0\u00c1\3")
         buf.write("\2\2\2\u00c1\u00c2\b\37\2\2\u00c2>\3\2\2\2\u00c3\u00c7")
-        buf.write("\7\'\2\2\u00c4\u00c6\n\n\2\2\u00c5\u00c4\3\2\2\2\u00c6")
+        buf.write("\7'\2\2\u00c4\u00c6\n\n\2\2\u00c5\u00c4\3\2\2\2\u00c6")
         buf.write("\u00c9\3\2\2\2\u00c7\u00c5\3\2\2\2\u00c7\u00c8\3\2\2\2")
         buf.write("\u00c8\u00cb\3\2\2\2\u00c9\u00c7\3\2\2\2\u00ca\u00cc\t")
         buf.write("\13\2\2\u00cb\u00ca\3\2\2\2\u00cc\u00cd\3\2\2\2\u00cd")
@@ -109,7 +108,7 @@ class NeuralogicLexer(Lexer):
 
     atn = ATNDeserializer().deserialize(serializedATN())
 
-    decisionsToDFA = [ DFA(ds, i) for i, ds in enumerate(atn.decisionToState) ]
+    decisionsToDFA = [DFA(ds, i) for i, ds in enumerate(atn.decisionToState)]
 
     T__0 = 1
     VARIABLE = 2
@@ -138,35 +137,104 @@ class NeuralogicLexer(Lexer):
     COMMENT = 25
     MULTILINE_COMMENT = 26
 
-    channelNames = [ u"DEFAULT_TOKEN_CHANNEL", u"HIDDEN" ]
+    channelNames = [u"DEFAULT_TOKEN_CHANNEL", u"HIDDEN"]
 
-    modeNames = [ "DEFAULT_MODE" ]
+    modeNames = ["DEFAULT_MODE"]
 
-    literalNames = [ "<INVALID>",
-            "'.'", "':-'", "'='", "'{'", "'}'", "'<'", "'>'", "'['", "']'", 
-            "'('", "')'", "','", "'/'", "'^'", "'true'", "'$'", "'~'", "'@'", 
-            "'*'" ]
+    literalNames = [
+        "<INVALID>",
+        "'.'",
+        "':-'",
+        "'='",
+        "'{'",
+        "'}'",
+        "'<'",
+        "'>'",
+        "'['",
+        "']'",
+        "'('",
+        "')'",
+        "','",
+        "'/'",
+        "'^'",
+        "'true'",
+        "'$'",
+        "'~'",
+        "'@'",
+        "'*'",
+    ]
 
-    symbolicNames = [ "<INVALID>",
-            "VARIABLE", "INT", "FLOAT", "ATOMIC_NAME", "IMPLIED_BY", "ASSIGN", 
-            "LCURL", "RCURL", "LANGLE", "RANGLE", "LBRACKET", "RBRACKET", 
-            "LPAREN", "RPAREN", "COMMA", "SLASH", "CARET", "TRUE", "DOLLAR", 
-            "NEGATION", "SPECIAL", "PRIVATE", "WS", "COMMENT", "MULTILINE_COMMENT" ]
+    symbolicNames = [
+        "<INVALID>",
+        "VARIABLE",
+        "INT",
+        "FLOAT",
+        "ATOMIC_NAME",
+        "IMPLIED_BY",
+        "ASSIGN",
+        "LCURL",
+        "RCURL",
+        "LANGLE",
+        "RANGLE",
+        "LBRACKET",
+        "RBRACKET",
+        "LPAREN",
+        "RPAREN",
+        "COMMA",
+        "SLASH",
+        "CARET",
+        "TRUE",
+        "DOLLAR",
+        "NEGATION",
+        "SPECIAL",
+        "PRIVATE",
+        "WS",
+        "COMMENT",
+        "MULTILINE_COMMENT",
+    ]
 
-    ruleNames = [ "T__0", "VARIABLE", "INT", "FLOAT", "ATOMIC_NAME", "IMPLIED_BY", 
-                  "ASSIGN", "LCURL", "RCURL", "LANGLE", "RANGLE", "LBRACKET", 
-                  "RBRACKET", "LPAREN", "RPAREN", "COMMA", "SLASH", "CARET", 
-                  "TRUE", "DOLLAR", "NEGATION", "SPECIAL", "PRIVATE", "ALPHANUMERIC", 
-                  "ALPHA", "LCASE_LETTER", "UCASE_LETTER", "DIGIT", "BOL", 
-                  "WS", "COMMENT", "MULTILINE_COMMENT" ]
+    ruleNames = [
+        "T__0",
+        "VARIABLE",
+        "INT",
+        "FLOAT",
+        "ATOMIC_NAME",
+        "IMPLIED_BY",
+        "ASSIGN",
+        "LCURL",
+        "RCURL",
+        "LANGLE",
+        "RANGLE",
+        "LBRACKET",
+        "RBRACKET",
+        "LPAREN",
+        "RPAREN",
+        "COMMA",
+        "SLASH",
+        "CARET",
+        "TRUE",
+        "DOLLAR",
+        "NEGATION",
+        "SPECIAL",
+        "PRIVATE",
+        "ALPHANUMERIC",
+        "ALPHA",
+        "LCASE_LETTER",
+        "UCASE_LETTER",
+        "DIGIT",
+        "BOL",
+        "WS",
+        "COMMENT",
+        "MULTILINE_COMMENT",
+    ]
 
     grammarFileName = "Neuralogic.g4"
 
-    def __init__(self, input=None, output:TextIO = sys.stdout):
+    def __init__(self, input=None, output: TextIO = sys.stdout):
         super().__init__(input, output)
         self.checkVersion("4.8")
-        self._interp = LexerATNSimulator(self, self.atn, self.decisionsToDFA, PredictionContextCache())
+        self._interp = LexerATNSimulator(
+            self, self.atn, self.decisionsToDFA, PredictionContextCache()
+        )
         self._actions = None
         self._predicates = None
-
-
