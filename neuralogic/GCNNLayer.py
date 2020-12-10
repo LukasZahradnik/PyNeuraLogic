@@ -1,4 +1,5 @@
 from enum import Enum
+import torch
 
 
 class GCNNLayerMode(Enum):
@@ -7,8 +8,10 @@ class GCNNLayerMode(Enum):
     PYTORCH = 2
 
 
-class GCNNLayer:
+class GCNNLayer(torch.nn.Module):
     def __init__(self, mode: GCNNLayerMode = GCNNLayerMode.DEFAULT):
+        super(GCNNLayer, self).__init__()
+
         self.mode = mode
 
     def forward(self):
