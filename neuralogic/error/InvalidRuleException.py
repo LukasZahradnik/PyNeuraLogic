@@ -1,2 +1,2 @@
-class InvalidRuleException(BaseException):
+class InvalidRuleException(Exception):
     pass

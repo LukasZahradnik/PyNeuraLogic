@@ -1,0 +1,2 @@
+class InvalidLearningModeException(Exception):
+    pass

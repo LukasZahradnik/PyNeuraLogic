@@ -1,23 +1,56 @@
 from . import get_neuralogic, get_gateway
 from .Settings import Settings
+from .error import InvalidLearningModeException
+
+from enum import Enum
 
 from typing import Union
 from pathlib import Path
 
 
+class LearningMode(Enum):
+    CROSSVALIDATION = 0
+    TRAIN_TEST = 1
+    TRAIN_ONLY = 2
+    TEST_ONLY = 3
+
+
 class Sources:
-    def __init__(self, settings: Settings, source_dir: Union[Path, str]):
+    @staticmethod
+    def from_str(text: str, settings: Settings, mode: LearningMode) -> "Sources":
         neuralogic = get_neuralogic()
-        gateway = get_gateway()
+        reader = neuralogic.java.io.StringReader(text)
 
-        args = ["-sd", str(source_dir), "-ts", "100"]
-        jargs = gateway.new_array(gateway.jvm.java.lang.String, len(args))
+        sources = neuralogic.cz.cvut.fel.ida.setup.Sources(settings.settings)
+        sources.setTemplateReader(reader)
 
-        for i, item in enumerate(args):
-            jargs[i] = item
+        if mode == LearningMode.CROSSVALIDATION:
+            sources.crossvalidation = True
+        elif mode == LearningMode.TRAIN_TEST:
+            sources.trainTest = True
+        elif mode == LearningMode.TRAIN_ONLY:
+            sources.trainOnly = True
+        elif mode == LearningMode.TEST_ONLY:
+            sources.testOnly = True
+        else:
+            raise InvalidLearningModeException()
+        return Sources(sources)
 
-        self.sources = (
-            neuralogic.cz.cvut.fel.ida.neuralogic.cli.utils.Runner.getSources(
-                jargs, settings.settings
-            )
-        )
+    def __init__(self, sources):
+        self.sources = sources
+
+    # def __init__(self, settings: Settings, source_dir: Union[Path, str]):
+    #     neuralogic = get_neuralogic()
+    #     gateway = get_gateway()
+    #
+    #     args = ["-sd", str(source_dir), "-ts", "100"]
+    #     jargs = gateway.new_array(gateway.jvm.java.lang.String, len(args))
+    #
+    #     for i, item in enumerate(args):
+    #         jargs[i] = item
+    #
+    #     self.sources = (
+    #         neuralogic.cz.cvut.fel.ida.neuralogic.cli.utils.Runner.getSources(
+    #             jargs, settings.settings
+    #         )
+    #     )
