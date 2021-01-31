@@ -17,7 +17,7 @@ class DyNetDeserializer:
         self.weights = self.deserialize_weights(model.weights)
 
     def deserialize_weights(self, weights: List[Weight]):
-        return [self.model.add_parameters(weight.dimensions) for weight in weights]
+        return [weight.value if weight.fixed else self.model.add_parameters(weight.dimensions) for weight in weights]
 
     def build_neuron_expr(self, neuron: Neuron, neuron_expressions: List):
         return DyNetDeserializer.to_dynet_expression(neuron, neuron_expressions, self.weights)
