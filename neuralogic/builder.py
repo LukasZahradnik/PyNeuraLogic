@@ -53,6 +53,7 @@ class Weight(object):
         self.name = get_field(weight, 'name')
         self.dimensions = tuple(get_field(weight, 'dimensions'))
         self.value = json.loads(get_field(weight, 'value'))
+        self.fixed = get_field(weight, 'isFixed')
 
         if not self.dimensions:
             self.dimensions = (1,)
