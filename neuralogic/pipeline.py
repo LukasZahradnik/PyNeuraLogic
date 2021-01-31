@@ -1,7 +1,7 @@
 from . import get_neuralogic
 from py4j.java_gateway import get_field
-from .Settings import Settings
-from .Sources import Sources
+from .settings import Settings
+from .sources import Sources
 
 
 class Pipeline:
