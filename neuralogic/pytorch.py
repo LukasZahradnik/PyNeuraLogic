@@ -104,7 +104,10 @@ class NeuraLogicLayer(torch.nn.Module):
     def __init__(self, weights: List[Weight]):
         super(NeuraLogicLayer, self).__init__()
 
-        params = [Parameter(torch.tensor(weight.dimensions, dtype=torch.float), requires_grad=not weight.fixed) for weight in weights]
+        params = [
+            Parameter(torch.tensor(weight.dimensions, dtype=torch.float), requires_grad=not weight.fixed)
+            for weight in weights
+        ]
 
         self.built_layers = False
         self.neura_layers: List[NeuraLogicHelperLayer] = []

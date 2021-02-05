@@ -33,27 +33,27 @@ class Sample:
 class Neuron:
     def __init__(self, neuron, index):
         self.index = index
-        self.name = get_field(neuron, 'name')
+        self.name = get_field(neuron, "name")
 
-        self.weighted = get_field(neuron, 'weighted')
+        self.weighted = get_field(neuron, "weighted")
 
-        self.activation = get_field(neuron, 'activation')
-        self.inputs = get_field(neuron, 'inputs')
+        self.activation = get_field(neuron, "activation")
+        self.inputs = get_field(neuron, "inputs")
 
-        self.weights = get_field(neuron, 'weights')
-        self.offset = get_field(neuron, 'offset')
+        self.weights = get_field(neuron, "weights")
+        self.offset = get_field(neuron, "offset")
 
-        self.value = get_field(neuron, 'value')
-        self.pooling = get_field(neuron, 'pooling')
+        self.value = get_field(neuron, "value")
+        self.pooling = get_field(neuron, "pooling")
 
 
 class Weight(object):
     def __init__(self, weight):
-        self.index = get_field(weight, 'index')
-        self.name = get_field(weight, 'name')
-        self.dimensions = tuple(get_field(weight, 'dimensions'))
-        self.value = json.loads(get_field(weight, 'value'))
-        self.fixed = get_field(weight, 'isFixed')
+        self.index = get_field(weight, "index")
+        self.name = get_field(weight, "name")
+        self.dimensions = tuple(get_field(weight, "dimensions"))
+        self.value = json.loads(get_field(weight, "value"))
+        self.fixed = get_field(weight, "isFixed")
 
         if not isinstance(self.value, list):
             self.value = [self.value]
@@ -68,7 +68,7 @@ class Model:
         self.samples = samples
 
     @staticmethod
-    def from_neuralogic(settings: Settings, sources: Sources) -> 'Model':
+    def from_neuralogic(settings: Settings, sources: Sources) -> "Model":
         namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.building
         pipes_namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.pipes.specific
 
