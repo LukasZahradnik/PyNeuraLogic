@@ -55,6 +55,9 @@ class Weight(object):
         self.value = json.loads(get_field(weight, 'value'))
         self.fixed = get_field(weight, 'isFixed')
 
+        if not isinstance(self.value, list):
+            self.value = [self.value]
+
         if not self.dimensions:
             self.dimensions = (1,)
 
