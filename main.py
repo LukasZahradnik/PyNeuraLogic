@@ -1,4 +1,3 @@
-import os.path as osp
 import os
 from dotenv import load_dotenv
 from neuralogic.settings import Settings
@@ -12,7 +11,7 @@ import torch
 load_dotenv()
 
 
-def train(neuralogic_path, pytorch_path):
+def train(neuralogic_path):
     initialize(os.environ["CLASSPATH"])
 
     settings = Settings()
@@ -22,15 +21,13 @@ def train(neuralogic_path, pytorch_path):
     neuralogic_model = Model.from_neuralogic(settings, sources)
 
     model = NeuraLogicLayer(neuralogic_model.weights)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
 
     total_loss = 0
     seen_instances = 0
     printouts = 10
 
-    print([w.value for w in neuralogic_model.weights])
-
-    for iter in range(500):
+    for iter in range(200):
         if iter > 0 and iter % printouts == 0:
             print(iter, " average loss is:", total_loss / seen_instances)
         seen_instances = 0
@@ -44,7 +41,7 @@ def train(neuralogic_path, pytorch_path):
             optimizer.zero_grad()
             out = model(sample)
 
-            loss = F.mse_loss(out[0], label)
+            loss = F.mse_loss(torch.take(out, torch.tensor([0])), label)
             loss.backward()
             optimizer.step()
 
@@ -57,7 +54,4 @@ def train(neuralogic_path, pytorch_path):
         print(f"label: {label}, output: {output}")
 
 
-train(
-    "./dataset/molecules/mutagenesis",
-    osp.join(osp.dirname(osp.realpath(__file__)), "..", "dataset", "pytorch_mutagenesis"),
-)
+train("./dataset/molecules/mutagenesis",)
