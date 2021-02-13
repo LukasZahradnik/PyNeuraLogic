@@ -40,13 +40,14 @@ class NeuraLogicHelperLayer(MessagePassing):
         edge_index = torch.tensor([from_neuron, to_neuron])
         out = self.propagate(edge_index, x=x, edge_weight=edge_weight)
 
+        if self.activation:
+            out = self.activation(out)
+
         return x + out
 
     def message(self, x_j: Tensor, edge_weight=None) -> Tensor:
         out = x_j
 
-        if self.activation:
-            out = self.activation(out)
         if edge_weight is None:
             return out
 
