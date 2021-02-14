@@ -19,6 +19,10 @@ PyNeuraLogic is a framework built on top of [NeuraLogic](https://github.com/Gust
 
 ### Installation
 
+```commandline
+$ pip install neuralogic
+```
+
 ### How to use
 
 #### With PyTorch Geometric
@@ -36,5 +40,11 @@ PyNeuraLogic is a framework built on top of [NeuraLogic](https://github.com/Gust
 #### With Deep Graph Library
 
 ```python
+
+```
+
+### Development
+
+```commandline
 
 ```
