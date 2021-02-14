@@ -3,3 +3,6 @@ out/
 venv/
 __pycache__/
 .idea/
+pyneuralogic.egg-info
+dist/
+build/
