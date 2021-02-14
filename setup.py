@@ -8,7 +8,7 @@ from typing import Dict
 from setuptools import find_packages, setup
 
 # Package meta-data.
-NAME = "pyneuralogic"
+NAME = "neuralogic"
 DESCRIPTION = "PyNeuraLogic is a framework which combines relational and deep learning."
 URL = "https://github.com/LukasZahradnik/PyNeuraLogic"
 EMAIL = "lukaszahradnik96@seznam.cz"
