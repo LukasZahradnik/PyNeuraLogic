@@ -1,0 +1,23 @@
+
+name: Run black and mypy
+
+on: [pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-lates
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: |
+          pip install pipenv
+          pipenv install --deploy --dev
+
+      - run: pipenv run black --check .
+      - run: pipenv run mypy
