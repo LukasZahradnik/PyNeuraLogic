@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/neuralogic.svg)](https://badge.fury.io/py/neuralogic)
 
 
-[Documentation](https://pyneuralogic.readthedocs.io/en/latest/) | [Examples](#examples) | [Papers]()
+[Documentation](https://pyneuralogic.readthedocs.io/en/latest/) | [Examples](#examples) | [Papers](https://github.com/GustikS/NeuraLogic#papers)
 
 PyNeuraLogic is a framework built on top of [NeuraLogic](https://github.com/GustikS/NeuraLogic) which combines relational and deep learning.
 
