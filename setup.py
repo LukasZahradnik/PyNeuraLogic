@@ -33,8 +33,7 @@ except FileNotFoundError:
 
 about: Dict = {}
 if not VERSION:
-    project_slug = NAME.lower().replace("-", "_").replace(" ", "_")
-    with open(os.path.join(here, project_slug, "__version__.py")) as f:  # type: ignore
+    with open(os.path.join(here, "neuralogic", "__version__.py")) as f:  # type: ignore
         exec(f.read(), about)
 
 setup(
