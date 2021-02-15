@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/neuralogic.svg)](https://badge.fury.io/py/neuralogic)
 [![License](https://img.shields.io/pypi/l/neuralogic)](https://badge.fury.io/py/neuralogic)
 
-https://img.shields.io/pypi/dm/neuralogic
+
 
 [Documentation](https://pyneuralogic.readthedocs.io/en/latest/) | [Examples](#examples) | [Papers](https://github.com/GustikS/NeuraLogic#papers)
 
