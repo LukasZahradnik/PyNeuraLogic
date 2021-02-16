@@ -13,7 +13,7 @@ DESCRIPTION = "PyNeuraLogic is a framework which combines relational and deep le
 URL = "https://github.com/LukasZahradnik/PyNeuraLogic"
 EMAIL = "lukaszahradnik96@seznam.cz"
 AUTHOR = "Lukáš Zahradník"
-REQUIRES_PYTHON = ">=3.8.0"
+REQUIRES_PYTHON = ">=3.7.0"
 VERSION = None
 
 REQUIRED = [
@@ -32,9 +32,8 @@ except FileNotFoundError:
     long_description = DESCRIPTION
 
 about: Dict = {}
-if not VERSION:
-    with open(os.path.join(here, "neuralogic", "__version__.py")) as f:  # type: ignore
-        exec(f.read(), about)
+with open(os.path.join(here, NAME, "__version__.py")) as f:  # type: ignore
+    exec(f.read(), about)
 
 setup(
     name=NAME,
@@ -53,7 +52,13 @@ setup(
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
+        "Development Status :: 1 - Planning",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Developers",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
 )
