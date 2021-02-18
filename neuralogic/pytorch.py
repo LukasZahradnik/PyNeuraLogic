@@ -1,41 +1,11 @@
 from .builder import Weight, Sample
+from .utils import to_layers
 from typing import List
 import torch
 from torch import Tensor
 from torch.nn import Parameter, ParameterList
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.inits import zeros
-
-
-def already_seen(seen, neurons):
-    for neuron in neurons:
-        if not seen[neuron]:
-            return False
-    return True
-
-
-def to_layers(sample: Sample):
-    seen = [False] * len(sample.neurons)
-    layers = []
-
-    while True:
-        index = 0
-        current_layer = []
-
-        for i in range(index, len(sample.neurons)):
-            neuron = sample.neurons[i]
-            if seen[neuron.index]:
-                continue
-            if not already_seen(seen, neuron.inputs):
-                if index == 0:
-                    index = i
-                continue
-            current_layer.append(neuron)
-        layers.append(current_layer)
-        for n in current_layer:
-            seen[n.index] = True
-        if index == 0:
-            return layers
 
 
 class NeuraLogicHelperLayer(MessagePassing):
