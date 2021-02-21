@@ -1,0 +1,7 @@
+hidden1 :- 1 x, -1 y, 0.5. [activation=signum]
+hidden2 :- 1 x, -1 y, -0.5. [activation=signum]
+
+-1 xor :- hidden1. [activation=identity]
+1 xor :- hidden2. [activation=identity]
+
+xor/0 [offset=1.0, activation=identity]

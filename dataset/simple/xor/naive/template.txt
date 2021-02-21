@@ -1,0 +1,17 @@
+hidden1 :- {1} a, {1} b.
+hidden2 :- {1} a, {1} b.
+hidden3 :- {1} a, {1} b.
+hidden4 :- {1} a, {1} b.
+hidden5 :- {1} a, {1} b.
+hidden6 :- {1} a, {1} b.
+hidden7 :- {1} a, {1} b.
+hidden8 :- {1} a, {1} b.
+
+{1} xor :- hidden1.
+{1} xor :- hidden2.
+{1} xor :- hidden3.
+{1} xor :- hidden4.
+{1} xor :- hidden5.
+{1} xor :- hidden6.
+{1} xor :- hidden7.
+{1} xor :- hidden8.
