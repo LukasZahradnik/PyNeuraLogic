@@ -1,11 +1,13 @@
 from . import get_neuralogic
-from py4j.java_gateway import get_field
+from py4j.java_gateway import set_field
 
 
 class Settings:
     def __init__(self):
         self.namespace = get_neuralogic().cz.cvut.fel.ida.setup
-        self.settings = self.namespace.Settings.forFastTest()
+        self.settings = self.namespace.Settings()
+        set_field(self.settings, "isoValueCompression", False)
+        # set_field(self.settings, "chainPruning", False)
 
     @property
     def seed(self) -> int:
