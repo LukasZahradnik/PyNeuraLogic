@@ -2,32 +2,27 @@ from .builder import Sample, Neuron
 from typing import List
 
 
-def already_seen(seen: List[bool], neurons: List[int]) -> bool:
-    for neuron in neurons:
-        if not seen[neuron]:
-            return False
-    return True
-
-
 def to_layers(sample: Sample) -> List[List[Neuron]]:
-    seen = [False] * len(sample.neurons)
-    current_seen = []
-
-    layers = []
-    layer = []
+    neuron_layers = [0] * len(sample.neurons)
+    layers: List[List[Neuron]] = [[]]
 
     for neuron in sample.neurons:
-        if already_seen(seen, neuron.inputs):
-            layer.append(neuron)
-            current_seen.append(neuron.index)
+        if len(neuron.inputs) == 0:
+            layers[0].append(neuron)
+            continue
+
+        layer = max(neuron_layers[input] for input in neuron.inputs) + 1
+        if len(layers) <= layer:
+            layers.append([neuron])
+            neuron_layers[neuron.index] = len(layers)
+            continue
+
+        for layer in layers[layer:]:
+            if layer[0].activation == neuron.activation:
+                layer.append(neuron)
+                neuron_layers[neuron.index] = neuron_layers[layer[0].index]
+                break
         else:
-            layers.append(layer)
-
-            for n in current_seen:
-                seen[n] = True
-
-            layer = [neuron]
-            current_seen = [neuron.index]
-    else:
-        layers.append(layer)
+            layers.append([neuron])
+            neuron_layers[neuron.index] = len(layers)
     return layers
