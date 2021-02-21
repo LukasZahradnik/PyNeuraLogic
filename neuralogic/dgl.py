@@ -25,9 +25,7 @@ class NeuraLogicHelperLayer(torch.nn.Module):
         self.layer = layer
         self.weights = weights
 
-    def forward(self, layer_input: torch.Tensor) -> torch.Tensor:
-        x = layer_input
-
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         if len(self.layer.u) == 0:
             return x
 
@@ -35,14 +33,16 @@ class NeuraLogicHelperLayer(torch.nn.Module):
         old_x[self.layer.targets] = 0
 
         g = dgl.graph((self.layer.u, self.layer.v), num_nodes=self.neuron_count)
-
-        message = self.message
+        message = self.message if self.layer.has_weights else fn.copy_src(src="x", out="m")
         reduce = fn.sum(msg="m", out="x") if self.reduce == "Sum" else self.reduce_function
 
         with g.local_scope():
             g.ndata["x"] = x
             g.update_all(message, reduce)
-            return old_x + g.ndata["x"]
+
+            if len(old_x.shape) < len(g.ndata["x"]):
+                old_x = old_x.reshape(old_x.shape + tuple(1 for _ in range(len(g.ndata["x"].shape) - len(old_x.shape))))
+            return g.ndata["x"] + old_x
 
     def reduce_function(self, nodes):
         x = torch.sum(nodes.mailbox["m"], dim=1)
@@ -52,7 +52,12 @@ class NeuraLogicHelperLayer(torch.nn.Module):
 
     def message(self, edges):
         xs = edges.src["x"]
-        return {"m": torch.stack([x * self.weights[w] for x, w in zip(xs, self.layer.weights)])}
+        out = [
+            (self.weights[w] @ x) if x.shape != (1,) and self.weights[w].shape != (1,) else (x * self.weights[w])
+            for x, w in zip(xs, self.layer.weights)
+        ]
+
+        return {"m": torch.stack(out)}
 
 
 class NeuraLogicLayer(torch.nn.Module):
@@ -60,7 +65,9 @@ class NeuraLogicLayer(torch.nn.Module):
         super(NeuraLogicLayer, self).__init__()
 
         params = [
-            Parameter(torch.tensor(weight.value, dtype=torch.float), requires_grad=not weight.fixed)
+            Parameter(
+                torch.tensor(weight.value, dtype=torch.float).reshape(weight.dimensions), requires_grad=not weight.fixed
+            )
             for weight in weights
         ]
 
@@ -80,9 +87,9 @@ class NeuraLogicLayer(torch.nn.Module):
 
         x = torch.zeros((neuron_count, 1))
 
-        for neuron in sample.neurons:
-            if neuron.value is not None:
-                x[neuron.index] = neuron.value
+        for neuron_index in sample.layers[0].targets:
+            neuron = sample.neurons[neuron_index]
+            x[neuron.index] = neuron.value
 
         x = model(x)
         return torch.take(x, torch.tensor([sample.neurons[-1].index]))
