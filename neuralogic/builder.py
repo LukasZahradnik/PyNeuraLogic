@@ -7,7 +7,7 @@ from typing import List
 from py4j.java_gateway import get_field
 
 
-OFFSET = 1
+OFFSET = 0
 
 
 class Sample:
@@ -46,10 +46,13 @@ class Neuron:
         self.value = get_field(neuron, "value")
         self.pooling = get_field(neuron, "pooling")
 
+        if self.value:
+            self.value = float(self.value)
+
 
 class Weight(object):
     def __init__(self, weight):
-        self.index = get_field(weight, "index")
+        self.index: int = get_field(weight, "index")
         self.name = get_field(weight, "name")
         self.dimensions = tuple(get_field(weight, "dimensions"))
         self.value = json.loads(get_field(weight, "value"))
@@ -82,7 +85,13 @@ class Model:
         pipeline.execute(sources.sources)
         result = serializer_pipe.get()
 
-        weights = sorted([Weight(x) for x in get_field(result, "r")], key=lambda a: a.index)
+        serialized_weights = list(get_field(result, "r"))
+        weights: List = [None] * len(serialized_weights)
+
+        for x in serialized_weights:
+            weight = Weight(x)
+            weights[weight.index] = weight
+
         sample = [Sample(x) for x in stream_to_list(get_field(result, "s"))]
 
         return Model(weights, sample)
