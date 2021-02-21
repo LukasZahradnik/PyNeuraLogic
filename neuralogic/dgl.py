@@ -1,8 +1,8 @@
 import dgl
 import dgl.function as fn
 import torch
-from typing import List, Tuple
-from torch.nn import Parameter, ParameterList
+from typing import List
+from torch.nn import Parameter, ParameterList, Sequential
 from neuralogic.builder import Weight
 from neuralogic.preprocessing import ProcessedSample, Layer
 
@@ -16,24 +16,25 @@ class NeuraLogicHelperLayer(torch.nn.Module):
         "Maximum": lambda x: torch.max(x, 1, True),
     }
 
-    def __init__(self, layer, weights):
+    def __init__(self, layer: Layer, neuron_count: int, weights: ParameterList):
         super(NeuraLogicHelperLayer, self).__init__()
 
         self.reduce = "Sum" if layer.activation not in NeuraLogicHelperLayer.activations else layer.activation
+
+        self.neuron_count = neuron_count
+        self.layer = layer
         self.weights = weights
-        self.temp_weights = None
 
-    def forward(self, layer_input: Tuple[torch.Tensor, Layer, int]):
-        x, layer, num_nerons = layer_input
+    def forward(self, layer_input: torch.Tensor) -> torch.Tensor:
+        x = layer_input
 
-        if len(layer.u) == 0:
+        if len(self.layer.u) == 0:
             return x
 
         old_x = x.clone()
-        old_x[layer.targets] = 0
+        old_x[self.layer.targets] = 0
 
-        g = dgl.graph((layer.u, layer.v), num_nodes=num_nerons)
-        self.temp_weights = layer.weights
+        g = dgl.graph((self.layer.u, self.layer.v), num_nodes=self.neuron_count)
 
         message = self.message
         reduce = fn.sum(msg="m", out="x") if self.reduce == "Sum" else self.reduce_function
@@ -51,7 +52,7 @@ class NeuraLogicHelperLayer(torch.nn.Module):
 
     def message(self, edges):
         xs = edges.src["x"]
-        return {"m": torch.stack([x * self.weights[w] for x, w in zip(xs, self.temp_weights)])}
+        return {"m": torch.stack([x * self.weights[w] for x, w in zip(xs, self.layer.weights)])}
 
 
 class NeuraLogicLayer(torch.nn.Module):
@@ -63,10 +64,7 @@ class NeuraLogicLayer(torch.nn.Module):
             for weight in weights
         ]
 
-        self.built_layers = False
-        self.neura_layers: List[NeuraLogicHelperLayer] = []
         self.weights = ParameterList(params)
-
         self.reset_params(weights)
 
     def reset_params(self, meta_weights: List[Weight]):
@@ -75,17 +73,16 @@ class NeuraLogicLayer(torch.nn.Module):
                 torch.nn.init.uniform_(weight)
 
     def forward(self, sample: ProcessedSample):
-        if not self.built_layers:
-            self.built_layers = True
-            self.neura_layers = [NeuraLogicHelperLayer(layer, self.weights) for layer in sample.layers]
+        neuron_count = len(sample.neurons)
 
-        x = torch.zeros((len(sample.neurons), 1))
+        neural_layers = [NeuraLogicHelperLayer(layer, neuron_count, self.weights) for layer in sample.layers]
+        model = Sequential(*neural_layers)
+
+        x = torch.zeros((neuron_count, 1))
 
         for neuron in sample.neurons:
             if neuron.value is not None:
                 x[neuron.index] = neuron.value
-        for n_layer, layer in zip(self.neura_layers, sample.layers):
-            yy = n_layer((x, layer, len(sample.neurons)))
-            x = yy
 
+        x = model(x)
         return torch.take(x, torch.tensor([sample.neurons[-1].index]))
