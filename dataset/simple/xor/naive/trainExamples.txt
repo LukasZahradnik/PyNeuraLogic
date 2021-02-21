@@ -1,0 +1,4 @@
+0 xor :- 0 a, 0 b.
+1 xor :- 0 a, 1 b.
+1 xor :- 1 a, 0 b.
+0 xor :- 1 a, 1 b.
