@@ -72,10 +72,11 @@ class NeuraLogicLayer(torch.nn.Module):
         ]
 
         self.weights = ParameterList(params)
-        self.reset_params(weights)
+        self.meta_weights = weights
+        self.reset_parameters()
 
-    def reset_params(self, meta_weights: List[Weight]):
-        for weight, meta_weight in zip(self.weights, meta_weights):
+    def reset_parameters(self):
+        for weight, meta_weight in zip(self.weights, self.meta_weights):
             if not meta_weight.fixed:
                 torch.nn.init.uniform_(weight)
 
