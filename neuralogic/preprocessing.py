@@ -15,6 +15,8 @@ class Layer:
         self.v = []
         self.weights = []
         self.targets = []
+
+        self.has_weights = False
         self.activation = -1
 
         for neuron in layer:
@@ -24,9 +26,10 @@ class Layer:
             self.activation = neuron.activation
             self.targets.append(neuron.index)
 
-            weights = neuron.weights
-            if weights is None or len(weights) == 0:
-                weights = unit_weight_generator()
+            weights = unit_weight_generator()
+            if neuron.weights is not None and len(neuron.weights) != 0:
+                weights = neuron.weights
+                self.has_weights = True
 
             for input, weight in zip(neuron.inputs, weights):
                 self.u.append(input)

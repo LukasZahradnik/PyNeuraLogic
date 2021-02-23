@@ -34,7 +34,6 @@ class Neuron:
     def __init__(self, neuron, index):
         self.index = index
         self.name = get_field(neuron, "name")
-
         self.weighted = get_field(neuron, "weighted")
 
         self.activation = get_field(neuron, "activation")
@@ -59,7 +58,7 @@ class Weight(object):
         self.fixed = get_field(weight, "isFixed")
 
         if not isinstance(self.value, list):
-            self.value = [self.value]
+            self.value = self.value
 
         if not self.dimensions:
             self.dimensions = (1,)
