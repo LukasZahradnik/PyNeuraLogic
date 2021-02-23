@@ -18,10 +18,10 @@ def train(neuralogic_path):
 
     import neuralogic.dynet as nldy
 
-    deserializer = nldy.DyNetDeserializer(model)
+    deserializer = nldy.NeuraLogicLayer(model.weights)
 
-    epochs = 10_000
-    trainer = dy.SimpleSGDTrainer(deserializer.model, learning_rate=0.1)
+    epochs = 400
+    trainer = dy.AdamTrainer(deserializer.model, alpha=0.001)
     printouts = 10
     seen_instances = 0
     total_loss = 0
@@ -50,7 +50,8 @@ def train(neuralogic_path):
 
         graph_output = deserializer.build_sample(sample)
         label = dy.scalarInput(sample.target)
-        print(f'label: {label.value()}, output: {graph_output.value()}')
+        print(f"label: {label.value()}, output: {graph_output.value()}")
 
 
 train("./dataset/molecules/mutagenesis")
+# train("./dataset/simple/xor/naive")
