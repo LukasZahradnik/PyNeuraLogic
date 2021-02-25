@@ -18,7 +18,6 @@ class Dataset:
         queries: PathType = None,
     ):
         self.source_dir = source_dir
-        print(self.source_dir)
         self.template = template
         self.examples = examples
         self.queries = queries
@@ -30,10 +29,10 @@ class Dataset:
         self.settings: Optional[Settings] = None
         self.sources: Optional[Sources] = None
 
-    def load(self):
+    def load(self, args: Optional[List] = None):
         self.loaded = True
 
-        args = []
+        args = [] if args is None else args
 
         if self.source_dir is not None:
             args.extend(["-sd", str(self.source_dir)])
@@ -44,7 +43,6 @@ class Dataset:
         if self.examples is not None:
             args.extend(["-e", str(self.examples)])
 
-        print(args)
         settings = Settings()
         sources = Sources.from_args(args, settings)
         weights, samples = Model.from_neuralogic(settings, sources)
