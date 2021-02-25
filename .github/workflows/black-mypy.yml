@@ -19,5 +19,5 @@ jobs:
           pip install black
           pip install mypy
 
-      - run: pipenv run black --check .
-      - run: pipenv run mypy
+      - run: black --check .
+      - run: mypy
