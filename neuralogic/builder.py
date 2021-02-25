@@ -1,13 +1,10 @@
-from . import get_neuralogic
-from .helpers import stream_to_list
-from .settings import Settings
-from .sources import Sources
+from neuralogic import get_neuralogic
+from neuralogic.helpers import stream_to_list
+from neuralogic.settings import Settings
+from neuralogic.sources import Sources
 import json
-from typing import List
+from typing import List, Tuple
 from py4j.java_gateway import get_field
-
-
-OFFSET = 0
 
 
 class Sample:
@@ -65,12 +62,8 @@ class Weight(object):
 
 
 class Model:
-    def __init__(self, weights: List[Weight], samples: List[Sample]):
-        self.weights = weights
-        self.samples = samples
-
     @staticmethod
-    def from_neuralogic(settings: Settings, sources: Sources) -> "Model":
+    def from_neuralogic(settings: Settings, sources: Sources) -> Tuple[List[Weight], List[Sample]]:
         namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.building
         pipes_namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.pipes.specific
 
@@ -93,4 +86,4 @@ class Model:
 
         sample = [Sample(x) for x in stream_to_list(get_field(result, "s"))]
 
-        return Model(weights, sample)
+        return weights, sample
