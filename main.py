@@ -1,9 +1,5 @@
-import os
 from dotenv import load_dotenv
-from neuralogic.settings import Settings
-from neuralogic.sources import Sources
-from neuralogic.builder import Model
-from neuralogic import initialize
+from neuralogic import data
 from neuralogic.pytorch import NeuraLogicLayer
 import torch.nn.functional as F
 import torch
@@ -11,14 +7,8 @@ import torch
 load_dotenv()
 
 
-def train(neuralogic_path):
-    initialize(os.environ["CLASSPATH"])
-
-    settings = Settings()
-
-    sources = Sources.from_dir(neuralogic_path, settings)
-
-    neuralogic_model = Model.from_neuralogic(settings, sources)
+def train():
+    neuralogic_model = data.XOR
 
     model = NeuraLogicLayer(neuralogic_model.weights)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
@@ -54,4 +44,4 @@ def train(neuralogic_path):
         print(f"label: {label}, output: {output}")
 
 
-train("./dataset/molecules/mutagenesis",)
+train()

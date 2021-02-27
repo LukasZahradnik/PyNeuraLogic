@@ -1,10 +1,13 @@
-from neuralogic import get_neuralogic
-from neuralogic.helpers import stream_to_list
+from neuralogic import get_neuralogic, get_gateway
 from neuralogic.settings import Settings
 from neuralogic.sources import Sources
 import json
 from typing import List, Tuple
 from py4j.java_gateway import get_field
+
+
+def stream_to_list(stream) -> List:
+    return list(stream.collect(get_gateway().jvm.java.util.stream.Collectors.toList()))
 
 
 class Sample:
@@ -32,18 +35,21 @@ class Neuron:
         self.index = index
         self.name = get_field(neuron, "name")
         self.weighted = get_field(neuron, "weighted")
-
         self.activation = get_field(neuron, "activation")
-        self.inputs = list(get_field(neuron, "inputs"))
-
-        self.weights = list(get_field(neuron, "weights"))
+        self.inputs = get_field(neuron, "inputs")
+        self.weights = get_field(neuron, "weights")
         self.offset = get_field(neuron, "offset")
-
         self.value = get_field(neuron, "value")
         self.pooling = get_field(neuron, "pooling")
 
         if self.value:
             self.value = float(self.value)
+
+        if self.weights is not None:
+            self.weights = list(self.weights)
+
+        if self.inputs is not None:
+            self.inputs = list(self.inputs)
 
 
 class Weight(object):

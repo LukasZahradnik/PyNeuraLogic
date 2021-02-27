@@ -7,7 +7,7 @@ load_dotenv()
 
 
 def train():
-    model = data.XOR
+    model = data.Mutagenesis
 
     deserializer = nldy.NeuraLogicLayer(model.weights)
 
@@ -24,17 +24,21 @@ def train():
         seen_instances = 0
         total_loss = 0
 
-        for sample in model.samples:
-            dy.renew_cg(immediate_compute=False, check_validity=False)
+        dy.renew_cg(immediate_compute=False, check_validity=False)
 
+        losses = []
+
+        for sample in model.samples:
             label = dy.scalarInput(sample.target)
             graph_output = deserializer.build_sample(sample)
-
             loss = dy.squared_distance(graph_output, label)
-            total_loss += loss.value()
-            loss.backward()
-            trainer.update()
-            seen_instances += 1
+            losses.append(loss)
+
+        loss = dy.esum(losses)
+        total_loss += loss.value()
+        loss.backward()
+        trainer.update()
+        seen_instances += 1
 
     for sample in model.samples:
         dy.renew_cg(immediate_compute=False, check_validity=False)
