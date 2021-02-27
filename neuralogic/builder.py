@@ -34,9 +34,9 @@ class Neuron:
         self.weighted = get_field(neuron, "weighted")
 
         self.activation = get_field(neuron, "activation")
-        self.inputs = get_field(neuron, "inputs")
+        self.inputs = list(get_field(neuron, "inputs"))
 
-        self.weights = get_field(neuron, "weights")
+        self.weights = list(get_field(neuron, "weights"))
         self.offset = get_field(neuron, "offset")
 
         self.value = get_field(neuron, "value")

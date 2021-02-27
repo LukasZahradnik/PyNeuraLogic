@@ -3,6 +3,7 @@ from pathlib import Path
 import os
 from antlr4 import InputStream, CommonTokenStream
 from neuralogic.grammar import NeuralogicLexer, NeuralogicParser
+from neuralogic import neuralogic_jvm
 from neuralogic.builder import Weight, Sample, Model
 from neuralogic.settings import Settings
 from neuralogic.sources import Sources
@@ -51,9 +52,10 @@ class Dataset:
         if self.examples is not None:
             args.extend(["-e", str(self.examples)])
 
-        settings = Settings()
-        sources = Sources.from_args(args, settings)
-        weights, samples = Model.from_neuralogic(settings, sources)
+        with neuralogic_jvm():
+            settings = Settings()
+            sources = Sources.from_args(args, settings)
+            weights, samples = Model.from_neuralogic(settings, sources)
 
         self.__weights = weights
         self.__samples = samples

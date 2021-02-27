@@ -1,22 +1,13 @@
-import os
 from dotenv import load_dotenv
-from neuralogic.settings import Settings
-from neuralogic.sources import Sources
-from neuralogic.builder import Model
-from neuralogic import initialize
 import dynet as dy
+from neuralogic import data
+import neuralogic.dynet as nldy
 
 load_dotenv()
 
 
-def train(neuralogic_path):
-    initialize(os.environ["CLASSPATH"])
-
-    settings = Settings()
-    sources = Sources.from_dir(neuralogic_path, settings)
-    model = Model.from_neuralogic(settings, sources)
-
-    import neuralogic.dynet as nldy
+def train():
+    model = data.XOR
 
     deserializer = nldy.NeuraLogicLayer(model.weights)
 
@@ -53,5 +44,4 @@ def train(neuralogic_path):
         print(f"label: {label.value()}, output: {graph_output.value()}")
 
 
-train("./dataset/molecules/mutagenesis")
-# train("./dataset/simple/xor/naive")
+train()
