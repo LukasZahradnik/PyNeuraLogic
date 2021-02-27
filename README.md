@@ -52,7 +52,25 @@ None of the following backends are included in PyNeuraLogic's installation. You 
 #### With DyNet
 
 ```python
+import dynet as dy
+from neuralogic import data
+from neuralogic.dynet import NeuraLogicLayer
 
+dataset = data.XOR  # Use one of the default datasets in the project in the/datasets/ folder
+
+layer = NeuraLogicLayer(dataset.weights)  # Create an instance of NeuraLogicLayer with weights from the dataset
+trainer = dy.AdamTrainer(layer.model, alpha=0.001)
+
+for sample in dataset.samples:  # Learn on each sample
+    dy.renew_cg(immediate_compute=False, check_validity=False)
+    label = dy.scalarInput(sample.target)
+    
+    graph_output = layer.build_sample(sample)
+    
+    loss = dy.squared_distance(graph_output, label)
+    loss.forward()
+    loss.backward()
+    trainer.update()
 ```
 
 #### With Deep Graph Library
