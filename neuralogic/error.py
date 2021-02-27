@@ -1,8 +1,8 @@
-class InvalidLearningModeException(Exception):
+class InvalidRuleException(Exception):
     pass
 
 
-class InvalidRuleException(Exception):
+class DatasetAlreadyLoadedException(Exception):
     pass
 
 
