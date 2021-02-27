@@ -1,5 +1,6 @@
 from typing import Union, Optional
 from pathlib import Path
+from contextlib import contextmanager
 import sys
 import os
 from py4j.java_gateway import JavaGateway, JVMView
@@ -42,6 +43,11 @@ def initialize(std_out=sys.stdout, std_err=sys.stderr, die_on_exit=True):
     neuralogic = gateway.jvm
 
 
+def shutdown():
+    if gateway is not None:
+        gateway.shutdown()
+
+
 def get_gateway() -> JavaGateway:
     """
     Get the gateway for the Java process
@@ -60,5 +66,13 @@ def get_neuralogic() -> JVMView:
     return neuralogic
 
 
+@contextmanager
+def neuralogic_jvm():
+    if gateway is None:
+        initialize()
+    yield
+    if gateway is not None:
+        shutdown()
+
+
 os.environ["CLASSPATH"] = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "jar", "NeuraLogic.jar")
-initialize()
