@@ -16,6 +16,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd /home/runner/work/PyNeuraLogic/PyNeuraLogic/
           pip install black
           pip install mypy
 
