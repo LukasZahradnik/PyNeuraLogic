@@ -1,0 +1,45 @@
+shape(X, Y) :- {1} shape(X, Y, ellipse).
+shape(X, Y) :- {1} shape(X, Y, rectangle).
+shape(X, Y) :- {1} shape(X, Y, bucket).
+shape(X, Y) :- {1} shape(X, Y, hexagon).
+shape(X, Y) :- {1} shape(X, Y, u_shaped).
+
+length(X, Y) :- {1} length(X, Y, short).
+length(X, Y) :- {1} length(X, Y, long).
+
+sides(X, Y) :- {1} sides(X, Y, not_double).
+sides(X, Y) :- {1} sides(X, Y, double).
+
+roof(X, Y) :- {1} roof(X, Y, jagged).
+roof(X, Y) :- {1} roof(X, Y, arc).
+roof(X, Y) :- {1} roof(X, Y, none).
+roof(X, Y) :- {1} roof(X, Y, flat).
+roof(X, Y) :- {1} roof(X, Y, peaked).
+
+wheels(X, Y) :- {1} wheels(X, Y, 2).
+wheels(X, Y) :- {1} wheels(X, Y, 3).
+
+loadnum(X, Y) :- {1} loadnum(X, Y, 0).
+loadnum(X, Y) :- {1} loadnum(X, Y, 1).
+loadnum(X, Y) :- {1} loadnum(X, Y, 2).
+loadnum(X, Y) :- {1} loadnum(X, Y, 3).
+
+loadshape(X, Y) :- {1} loadshape(X, Y, hexagon).
+loadshape(X, Y) :- {1} loadshape(X, Y, triangle).
+loadshape(X, Y) :- {1} loadshape(X, Y, diamond).
+loadshape(X, Y) :- {1} loadshape(X, Y, rectangle).
+loadshape(X, Y) :- {1} loadshape(X, Y, circle).
+
+vagon(X, Y) :-
+    {1} shape(X, Y),
+    {1} length(X, Y),
+    {1} sides(X, Y),
+    {1} wheels(X, Y),
+    {1} loadnum(X, Y),
+    {1} loadshape(X, Y),
+    {1} roof(X, Y).
+
+direction(X) :- {1} vagon(X, 1), {1} vagon(X, 2), {1} vagon(X, 3), {1} vagon(X, 4).
+direction(X) :- {1} vagon(X, 1), {1} vagon(X, 2), {1} vagon(X, 3).
+direction(X) :- {1} vagon(X, 1), {1} vagon(X, 2).
+direction(X) :- {1} vagon(X, 1).
