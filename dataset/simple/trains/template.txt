@@ -39,5 +39,9 @@ vagon(X, Y) :-
     {1} loadshape(X, Y),
     {1} roof(X, Y).
 
-train(X) :- {1} vagon(X, Y).
+train(X) :- {1} vagon(X, 1).
+train(X) :- {1} vagon(X, 2).
+train(X) :- {1} vagon(X, 3).
+train(X) :- {1} vagon(X, 4).
+
 direction(X) :- {1} train(X).
