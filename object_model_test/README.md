@@ -53,7 +53,7 @@ print(Atom.direction(Var.X) > Atom.train(Var.X)[1])
 # >>  direction(X) :- {1} train(X).
 
 # Difference between:
-rule = [(Atom.direction(Var.X) > Atom.train(i)[1]) for i in [1, 2]]  # Two rules with one body atom
+rule = [Atom.direction(Var.X) > Atom.train(i)[1] for i in [1, 2]]  # Two rules with one body atom
 print([str(r) for r in rule])
 # and
 rule = [Atom.direction(Var.X) > [Atom.train(i)[1] for i in [1, 2]]]  # One rule with two body atoms
