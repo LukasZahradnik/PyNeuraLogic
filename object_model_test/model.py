@@ -38,7 +38,7 @@ class RuleAtom(AtomBase):
         self.weights = item
         return self
 
-    def __gt__(self, other) -> "RuleAtom":
+    def __le__(self, other) -> "RuleAtom":
         if not self.can_have_child:
             raise NotImplementedError
 
