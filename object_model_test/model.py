@@ -88,14 +88,13 @@ class BaseAtom:
         if self.terms:
             raise Exception
 
-        arity = 1
+        terms = list(args)
+        arity = len(terms)
 
-        if isinstance(args, Iterable):
-            terms = list(args)
-            arity = len(terms)
-        else:
-            terms = args
-        return BaseAtom(self.predicate, self.weight, terms, arity, self.negated)
+        name, private, special = self.predicate.name, self.predicate.private, self.predicate.special
+        predicate = AtomFactory.Predicate.get_predicate(name, arity, private, special)
+
+        return BaseAtom(predicate, self.weight, terms, arity, self.negated)
 
     def __getitem__(self, item) -> "WeightedAtom":
         return WeightedAtom(self, item)
@@ -196,12 +195,15 @@ class AtomFactory:
         def private(self) -> "AtomFactory.Predicate":
             return AtomFactory.Predicate(True, self.is_special)
 
-        def __getattr__(self, item):
-            key = f"{item}/0"
+        @staticmethod
+        def get_predicate(name, arity, private, special) -> Predicate:
+            key = f"{name}/{arity}"
             if key not in AtomFactory.Predicate.predicates:
-                AtomFactory.Predicate.predicates[key] = Predicate(item, 0, self.is_private, self.is_special)
-            predicate = AtomFactory.Predicate.predicates[key]
-            return BaseAtom(predicate)
+                AtomFactory.Predicate.predicates[key] = Predicate(name, arity, private, special)
+            return AtomFactory.Predicate.predicates[key]
+
+        def __getattr__(self, item):
+            return BaseAtom(AtomFactory.Predicate.get_predicate(item, 0, self.is_private, self.is_special))
 
     def __init__(self):
         self.instances: Dict[str, Dict[int, BaseAtom]] = {}
@@ -210,11 +212,7 @@ class AtomFactory:
         self.private = AtomFactory.Predicate(private=True)
 
     def __getattr__(self, item) -> BaseAtom:
-        key = f"{item}/0"
-        if key not in AtomFactory.Predicate.predicates:
-            AtomFactory.Predicate.predicates[key] = Predicate(item, 0, False, False)
-        predicate = AtomFactory.Predicate.predicates[key]
-        return BaseAtom(predicate)
+        return BaseAtom(AtomFactory.Predicate.get_predicate(item, 0, False, False))
 
 
 class VariableFactory:
