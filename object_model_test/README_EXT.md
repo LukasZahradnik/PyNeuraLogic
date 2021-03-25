@@ -37,7 +37,7 @@ test_3 = test(Var.Y, Var.Z)
 
 ```python
 print(test_3.predicate == test_2.predicate)  # True
-print(test.predicate == test_2.predicate)  # True
+print(test.predicate == test_2.predicate)  # False
 
 print(test.predicate)  # *@predicate/0
 print(test_2.predicate)  # *@predicate/2
