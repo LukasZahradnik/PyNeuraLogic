@@ -156,8 +156,7 @@ class WeightedAtom:
         return WeightedAtom(self.atom, self.weight, True)
 
     def __invert__(self) -> "WeightedAtom":
-        self.atom = ~self.atom
-        return self
+        return WeightedAtom(~self.atom, self.weight, self.is_fixed)
 
     def __neg__(self) -> "WeightedAtom":
         return self.__invert__()
