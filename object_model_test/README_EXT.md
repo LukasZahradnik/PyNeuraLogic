@@ -84,7 +84,7 @@ fixed_rule = Atom.abc[1].fixed() <= (Atom.xyz[1, 2].fixed(), Atom.efg[[1, 2]].fi
 New change:
 ```python
 dimension = Atom.abc[1,]
-# {1} abc.a
+# {1} abc.
 not_dimension = Atom.abc[1]
 # 1 abc.
 ```
