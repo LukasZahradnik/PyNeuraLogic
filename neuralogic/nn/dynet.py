@@ -1,5 +1,5 @@
 from typing import List, Optional
-from .builder import Sample, Weight, Neuron, Model
+from neuralogic.builder import Sample, Weight, Neuron, Model
 import dynet as dy
 
 
