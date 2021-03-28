@@ -54,6 +54,8 @@ def get_gateway() -> JavaGateway:
 
     :return:
     """
+    if gateway is None:
+        initialize()
     return gateway
 
 
@@ -63,6 +65,8 @@ def get_neuralogic() -> JVMView:
 
     :return:
     """
+    if neuralogic is None:
+        initialize()
     return neuralogic
 
 
