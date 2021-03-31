@@ -117,6 +117,8 @@ def get_java_factory() -> Optional[JavaFactory]:
     return java_factory
 
 
-def init_java_factory(settings: Settings):
+def init_java_factory(settings: Settings) -> JavaFactory:
     global java_factory
     java_factory = JavaFactory(settings)
+
+    return java_factory
