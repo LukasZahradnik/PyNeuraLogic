@@ -1,4 +1,5 @@
-from typing import Iterable, Union, Dict
+from typing import Dict, Iterable, Union, Type
+from neuralogic.model.predicate import Predicate
 
 
 AtomType = Union["BaseAtom", "WeightedAtom"]
@@ -30,33 +31,21 @@ class Rule:
 class BaseAtom:
     """ Atom """
 
-    def __init__(self, predicate: "Predicate", weight=None, terms=None, arity=0, negated=False):
+    def __init__(self, predicate: "Predicate", terms=None, negated=False):
         self.predicate = predicate
-        self.arity = arity
-
         self.negated = negated
         self.terms = terms
-        self.weight = weight
-
-        if self.weight is None:
-            self.weight = []
-        elif not isinstance(self.weight, Iterable):
-            self.weight = [self.weight]
 
         if self.terms is None:
             self.terms = []
         elif not isinstance(self.terms, Iterable):
             self.terms = [self.terms]
 
-        if len(self.terms) != arity:
-            print(arity, len(self.terms), self.terms)
-            raise Exception
-
     def __neg__(self) -> "BaseAtom":
         return self.__invert__()
 
     def __invert__(self) -> "BaseAtom":
-        return BaseAtom(self.predicate, self.weight, self.terms, self.arity, not self.negated)
+        return BaseAtom(self.predicate, self.terms, not self.negated)
 
     def __call__(self, *args) -> "BaseAtom":
         if self.terms:
@@ -68,7 +57,7 @@ class BaseAtom:
         name, private, special = self.predicate.name, self.predicate.private, self.predicate.special
         predicate = AtomFactory.Predicate.get_predicate(name, arity, private, special)
 
-        return BaseAtom(predicate, self.weight, terms, arity, self.negated)
+        return BaseAtom(predicate, terms, self.negated)
 
     def __getitem__(self, item) -> "WeightedAtom":
         return WeightedAtom(self, item)
@@ -89,30 +78,6 @@ class BaseAtom:
         return self.to_str(True)
 
 
-class Predicate:
-    """WeightedPredicate"""
-
-    def __init__(self, name, arity, private, special):
-        self.name = name
-        self.arity = arity
-        self.private = private
-        self.special = special
-
-    def set_arity(self, arity):
-        if self.arity == arity:
-            return self
-
-    def to_str(self):
-        special = "@" if self.special else ""
-        private = "*" if self.private else ""
-        return f"{private}{special}{self.name}"
-
-    def __str__(self):
-        special = "@" if self.special else ""
-        private = "*" if self.private else ""
-        return f"{private}{special}{self.name}/{self.arity}"
-
-
 class WeightedAtom:
     """ValuedFact"""
 
@@ -128,6 +93,18 @@ class WeightedAtom:
         if self.is_fixed:
             raise Exception
         return WeightedAtom(self.atom, self.weight, True)
+
+    @property
+    def negated(self):
+        return self.atom.negated
+
+    @property
+    def predicate(self):
+        return self.atom.predicate
+
+    @property
+    def terms(self):
+        return self.atom.terms
 
     def __invert__(self) -> "WeightedAtom":
         return WeightedAtom(~self.atom, self.weight, self.is_fixed)
