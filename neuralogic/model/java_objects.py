@@ -42,16 +42,20 @@ class JavaFactory:
 
     def get_atom(self, atom, variable_factory):
         predicate = self.get_predicate(atom.predicate)
-        weight = self.get_weight(atom.weight, atom.is_fixed) if isinstance(atom, factories.WeightedAtom) else None
+        weight = self.get_weight(atom.weight, atom.is_fixed) if isinstance(atom, factories.atom.WeightedAtom) else None
         term_list = ListConverter().convert(
             [self.get_term(term, variable_factory) for term in atom.terms], get_gateway()._gateway_client
         )
+
         body_atom = self.namespace.BodyAtom(predicate, term_list, atom.negated, weight)
+        set_field(body_atom, "originalString", atom.to_str())
 
         return body_atom
 
     def get_rule(self, rule):
         java_rule = self.namespace.WeightedRule()
+        java_rule.setOriginalString(str(rule))
+
         variable_factory = self.get_variable_factory()
 
         head_atom = self.get_atom(rule.head, variable_factory)
