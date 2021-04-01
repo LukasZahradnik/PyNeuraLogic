@@ -1,5 +1,6 @@
 from py4j.java_gateway import get_field, set_field
-from typing import Optional
+from typing import Optional, List
+from contextlib import contextmanager
 from py4j.java_collections import ListConverter
 
 from neuralogic import get_neuralogic, get_gateway
@@ -108,8 +109,25 @@ class JavaFactory:
             else:
                 raise NotImplementedError
             initialized = False
+        elif isinstance(weight, List):
+            initialized = True
+            if len(weight) == 0:
+                raise NotImplementedError
+            if isinstance(weight[0], (int, float)):
+                vector = ListConverter().convert([float(w) for w in weight], get_gateway()._gateway_client)
+                value = self.value_namespace.VectorValue(vector)
+            elif isinstance(weight[0], List):
+                matrix = []
+
+                for weights in weight:
+                    values = [float(w) for w in weights]
+                    matrix.append(ListConverter().convert(values, get_gateway()._gateway_client))
+
+                matrix = ListConverter().convert(matrix, get_gateway()._gateway_client)
+                value = self.value_namespace.MatrixValue(matrix)
+            else:
+                raise NotImplementedError
         else:
-            # TODO: Implement matrix/vector
             raise NotImplementedError
         return initialized, value
 
@@ -128,3 +146,12 @@ def init_java_factory(settings: Settings) -> JavaFactory:
     java_factory = JavaFactory(settings)
 
     return java_factory
+
+
+@contextmanager
+def use_java_factory(settings: Settings):
+    init_java_factory(settings)
+    global java_factory
+
+    yield java_factory
+    java_factory = None
