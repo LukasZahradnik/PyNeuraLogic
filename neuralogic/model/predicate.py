@@ -1,3 +1,6 @@
+from neuralogic.model.java_objects import get_java_factory
+
+
 class Predicate:
     """WeightedPredicate"""
 
@@ -6,6 +9,8 @@ class Predicate:
         self.arity = arity
         self.private = private
         self.special = special
+
+        self.java_object = get_java_factory().get_predicate(self)
 
     def set_arity(self, arity):
         if self.arity == arity:

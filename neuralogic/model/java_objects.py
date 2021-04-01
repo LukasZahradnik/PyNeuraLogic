@@ -3,7 +3,7 @@ from typing import Optional
 from py4j.java_collections import ListConverter
 
 from neuralogic import get_neuralogic, get_gateway
-from neuralogic.model.factories import WeightedAtom
+from neuralogic.model import factories
 from neuralogic.settings import Settings
 
 
@@ -42,7 +42,7 @@ class JavaFactory:
 
     def get_atom(self, atom, variable_factory):
         predicate = self.get_predicate(atom.predicate)
-        weight = self.get_weight(atom.weight, atom.is_fixed) if isinstance(atom, WeightedAtom) else None
+        weight = self.get_weight(atom.weight, atom.is_fixed) if isinstance(atom, factories.WeightedAtom) else None
         term_list = ListConverter().convert(
             [self.get_term(term, variable_factory) for term in atom.terms], get_gateway()._gateway_client
         )
@@ -113,7 +113,9 @@ class JavaFactory:
 java_factory: Optional[JavaFactory] = None
 
 
-def get_java_factory() -> Optional[JavaFactory]:
+def get_java_factory() -> JavaFactory:
+    if java_factory is None:
+        raise Exception
     return java_factory
 
 
