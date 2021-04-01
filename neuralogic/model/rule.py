@@ -1,17 +1,9 @@
 from neuralogic.model.java_objects import get_java_factory
-from neuralogic.model import atom
-from typing import Union, Iterable
-
-
-AtomType = Union[atom.BaseAtom, atom.WeightedAtom]
-BodyAtomType = Union[atom.BaseAtom, atom.WeightedAtom]
-
-Head = AtomType
-Body = Union[Iterable[BodyAtomType], BodyAtomType]
+from typing import Iterable
 
 
 class Rule:
-    def __init__(self, head: Head, body: Body):
+    def __init__(self, head, body):
         self.head = head
 
         if not isinstance(body, Iterable):

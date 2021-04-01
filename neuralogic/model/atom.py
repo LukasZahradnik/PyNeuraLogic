@@ -1,7 +1,14 @@
-from typing import Iterable
+from typing import Iterable, Union
 from neuralogic.model.predicate import Predicate
 from neuralogic.model.java_objects import get_java_factory
 from neuralogic.model import rule, factories
+
+
+AtomType = Union["BaseAtom", "WeightedAtom"]
+BodyAtomType = Union["BaseAtom", "WeightedAtom"]
+
+Head = AtomType
+Body = Union[Iterable[BodyAtomType], BodyAtomType]
 
 
 class BaseAtom:
@@ -38,7 +45,7 @@ class BaseAtom:
     def __getitem__(self, item) -> "WeightedAtom":
         return WeightedAtom(self, item)
 
-    def __le__(self, other: rule.Body) -> rule.Rule:
+    def __le__(self, other: Body) -> rule.Rule:
         return rule.Rule(self, other)
 
     def to_str(self, end=False) -> str:
@@ -95,7 +102,7 @@ class WeightedAtom:
     def __neg__(self) -> "WeightedAtom":
         return self.__invert__()
 
-    def __le__(self, other: rule.Body) -> rule.Rule:
+    def __le__(self, other: Body) -> rule.Rule:
         return rule.Rule(self, other)
 
     def to_str(self, end=False):
