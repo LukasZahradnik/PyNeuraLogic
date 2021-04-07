@@ -22,7 +22,7 @@ class BaseAtom:
         elif not isinstance(self.terms, Iterable):
             self.terms = [self.terms]
 
-        self.java_object = get_java_factory().get_atom(self, get_java_factory().get_variable_factory())
+        self.java_object = get_java_factory().get_valued_fact(self, get_java_factory().get_variable_factory())
 
     def __neg__(self) -> "BaseAtom":
         return self.__invert__()
@@ -77,7 +77,7 @@ class WeightedAtom:
         if isinstance(weight, Iterable) and not isinstance(weight, tuple):
             self.weight = list(weight)
 
-        self.java_object = get_java_factory().get_atom(self, get_java_factory().get_variable_factory())
+        self.java_object = get_java_factory().get_valued_fact(self, get_java_factory().get_variable_factory())
 
     def fixed(self) -> "WeightedAtom":
         if self.is_fixed:

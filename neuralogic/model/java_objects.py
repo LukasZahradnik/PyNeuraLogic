@@ -14,6 +14,7 @@ class JavaFactory:
 
         self.namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.components
         self.value_namespace = get_neuralogic().cz.cvut.fel.ida.algebra.values
+        self.example_namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.example
 
         self.builder = namespace.TemplateBuilder(settings.settings)
 
@@ -41,17 +42,23 @@ class JavaFactory:
             return self.constant_factory.construct(str(term))
         raise NotImplementedError
 
-    def get_atom(self, atom, variable_factory):
+    def get_generic_atom(self, atom_class, atom, variable_factory):
         predicate = self.get_predicate(atom.predicate)
         weight = self.get_weight(atom.weight, atom.is_fixed) if isinstance(atom, factories.atom.WeightedAtom) else None
         term_list = ListConverter().convert(
             [self.get_term(term, variable_factory) for term in atom.terms], get_gateway()._gateway_client
         )
 
-        body_atom = self.namespace.BodyAtom(predicate, term_list, atom.negated, weight)
-        set_field(body_atom, "originalString", atom.to_str())
+        java_atom = atom_class(predicate, term_list, atom.negated, weight)
+        set_field(java_atom, "originalString", atom.to_str())
 
-        return body_atom
+        return java_atom
+
+    def get_valued_fact(self, atom, variable_factory):
+        return self.get_generic_atom(self.example_namespace.ValuedFact, atom, variable_factory)
+
+    def get_atom(self, atom, variable_factory):
+        return self.get_generic_atom(self.namespace.BodyAtom, atom, variable_factory)
 
     def get_rule(self, rule):
         java_rule = self.namespace.WeightedRule()
