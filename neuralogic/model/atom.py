@@ -30,6 +30,13 @@ class BaseAtom:
     def __invert__(self) -> "BaseAtom":
         return BaseAtom(self.predicate, self.terms, not self.negated)
 
+    def __truediv__(self, other):
+        if not isinstance(other, int) or self.predicate.arity != 0 or other < 0:
+            raise NotImplementedError
+
+        name, private, special = self.predicate.name, self.predicate.private, self.predicate.special
+        return factories.AtomFactory.Predicate.get_predicate(name, other, private, special)
+
     def __call__(self, *args) -> "BaseAtom":
         if self.terms:
             raise Exception
