@@ -43,7 +43,7 @@ class Neuron:
         self.pooling = get_field(neuron, "pooling")
 
         if self.value:
-            self.value = float(self.value)
+            self.value = json.loads(self.value)
 
         if self.weights is not None:
             self.weights = list(self.weights)
