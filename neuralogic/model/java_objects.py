@@ -81,6 +81,10 @@ class JavaFactory:
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.metadata
         return namespace.RuleMetadata(get_field(self.builder, "settings"), map)
 
+    def get_predicate_metadata_pair(self, predicate_metadata):
+        namespace = get_neuralogic().cz.cvut.fel.ida.utils.generic
+        return namespace.Pair(predicate_metadata.predicate.java_object, self.get_metadata(predicate_metadata.metadata))
+
     def get_valued_fact(self, atom, variable_factory):
         return self.get_generic_atom(self.example_namespace.ValuedFact, atom, variable_factory)
 
