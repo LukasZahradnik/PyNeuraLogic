@@ -127,4 +127,5 @@ class Dataset:
 base_path = os.path.abspath(os.path.dirname(__file__))
 
 XOR = Dataset(source_dir=os.path.join(base_path, "..", "dataset", "simple", "xor", "naive"))
+XOR_Vectorized = Dataset(source_dir=os.path.join(base_path, "..", "dataset", "simple", "xor", "vectorized"))
 Mutagenesis = Dataset(source_dir=os.path.join(base_path, "..", "dataset", "molecules", "mutagenesis"))
