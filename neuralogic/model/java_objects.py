@@ -1,5 +1,5 @@
 from py4j.java_gateway import get_field, set_field
-from typing import Optional, List
+from typing import Optional, List, Iterable
 from contextlib import contextmanager
 from py4j.java_collections import ListConverter
 
@@ -11,6 +11,7 @@ from neuralogic.settings import Settings
 class JavaFactory:
     def __init__(self, settings: Settings):
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.building
+        self.settings = settings
 
         self.namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.components
         self.value_namespace = get_neuralogic().cz.cvut.fel.ida.algebra.values
@@ -80,6 +81,32 @@ class JavaFactory:
 
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.metadata
         return namespace.RuleMetadata(get_field(self.builder, "settings"), map)
+
+    def get_lifted_example(self, example):
+        variable_factory = self.get_variable_factory()
+
+        if not isinstance(example, Iterable):
+            example = [example]
+
+        conjunctions = []
+        rules = []
+
+        for entry in example:
+            if isinstance(entry, Iterable):
+                conjunctions.append(self.get_conjunction(list(entry), variable_factory))
+            else:
+                rules.append(self.get_rule(entry))
+
+        return self.example_namespace.LiftedExample(
+            ListConverter().convert(conjunctions, get_gateway()._gateway_client),
+            ListConverter().convert(rules, get_gateway()._gateway_client),
+        )
+
+    def get_conjunction(self, atoms, variable_factory):
+        namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs
+        valued_facts = [self.get_valued_fact(atom, variable_factory) for atom in atoms]
+
+        return namespace.Conjunction(ListConverter().convert(valued_facts, get_gateway()._gateway_client))
 
     def get_predicate_metadata_pair(self, predicate_metadata):
         namespace = get_neuralogic().cz.cvut.fel.ida.utils.generic
