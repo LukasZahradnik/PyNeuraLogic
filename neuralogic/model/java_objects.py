@@ -54,6 +54,33 @@ class JavaFactory:
 
         return java_atom
 
+    def get_metadata(self, metadata):
+        if metadata is None:
+            return None
+
+        if (
+            metadata.aggregation is None
+            and metadata.activation is None
+            and metadata.offset is None
+            and metadata.learnable is None
+        ):
+            return None
+
+        map = get_gateway().jvm.java.util.LinkedHashMap()
+
+        if metadata.aggregation is not None:
+            map.put("aggregation", self.value_namespace.StringValue(metadata.aggregation.value))
+        if metadata.activation is not None:
+            map.put("activation", self.value_namespace.StringValue(metadata.activation.value))
+        # if metadata.offset is not None:
+        #     _, value = self.get_value(metadata.offset)
+        #     map.put("offset", self.weight_factory.construct(value))
+        if metadata.learnable is not None:
+            map.put("learnable", self.value_namespace.StringValue(str(metadata.learnable).lower()))
+
+        namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.metadata
+        return namespace.RuleMetadata(get_field(self.builder, "settings"), map)
+
     def get_valued_fact(self, atom, variable_factory):
         return self.get_generic_atom(self.example_namespace.ValuedFact, atom, variable_factory)
 
@@ -83,7 +110,7 @@ class JavaFactory:
         offset = None  # TODO: Implement
 
         java_rule.setOffset(offset)
-        java_rule.setMetadata(None)  # TODO: Implement
+        java_rule.setMetadata(self.get_metadata(rule.metadata))
 
         return java_rule
 

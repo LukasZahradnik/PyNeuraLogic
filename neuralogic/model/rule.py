@@ -30,5 +30,6 @@ class Rule:
         if not isinstance(other, Metadata):
             raise NotImplementedError
         self.metadata = other
+        self.java_object.setMetadata(get_java_factory().get_metadata(self.metadata))
 
         return self
