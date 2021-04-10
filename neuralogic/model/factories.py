@@ -35,6 +35,9 @@ class AtomFactory:
         self.special = AtomFactory.Predicate(special=True)
         self.private = AtomFactory.Predicate(private=True)
 
+    def get(self, name: str) -> atom.BaseAtom:
+        return atom.BaseAtom(AtomFactory.Predicate.get_predicate(name, 0, False, False))
+
     def __getattr__(self, item) -> atom.BaseAtom:
         return atom.BaseAtom(AtomFactory.Predicate.get_predicate(item, 0, False, False))
 
