@@ -50,9 +50,24 @@ class Template:
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.example
 
         for query_counter, example in enumerate(self.examples):
-            lifted_example = java_factory.get_lifted_example(example)
-            query_atom = examples_builder.createQueryAtom(str(query_counter), None, lifted_example)
-            logic_samples.append(namespace.LogicSample(None, query_atom))
+            label, lifted_example = java_factory.get_lifted_example(example)
+
+            value = None
+            label_fact = None if label is None else get_field(label, "facts")
+            label_size = 0 if label is None else label_fact.size()
+
+            if label is None or label_size == 0:
+                query_atom = examples_builder.createQueryAtom(str(query_counter), None, lifted_example)
+            elif label_size == 1:
+                if label_fact.get(0).getValue() is None:
+                    literal_string = get_field(label[0], "literal").toString()
+                    query_atom = examples_builder.createQueryAtom(literal_string, label_fact.get(0), lifted_example)
+                else:
+                    value = label_fact.get(0).getValue()
+                    query_atom = examples_builder.createQueryAtom(str(query_counter), label_fact.get(0), lifted_example)
+            else:
+                raise NotImplementedError
+            logic_samples.append(namespace.LogicSample(value, query_atom))
         return logic_samples
 
     def get_parsed_template(self):
@@ -97,17 +112,24 @@ class Template:
         pipeline.execute(None)
         result = serializer_pipe.get()
 
+        dummy_weight = Weight.__new__(Weight)
+        dummy_weight.value = 1.0
+        dummy_weight.fixed = True
+        dummy_weight.dimensions = (1,)
+
         serialized_weights = list(get_field(result, "r"))
-        weights: List = [None] * len(serialized_weights)
+        weights: List = [dummy_weight] * len(serialized_weights)
 
         for x in serialized_weights:
             weight = Weight(x)
 
             if weight.index >= len(weights):
-                weights.extend([None] * (weight.index - len(weights) + 1))
+                weights.extend([dummy_weight] * (weight.index - len(weights) + 1))
             weights[weight.index] = weight
 
         sample = [Sample(x) for x in stream_to_list(get_field(result, "s"))]
+
+        return weights, sample
 
     def __str__(self):
         return "\n".join(str(r) for r in self.template)
