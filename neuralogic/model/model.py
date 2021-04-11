@@ -148,7 +148,7 @@ class Model:
             return logic_samples
 
         if len(examples) != len(queries):
-            raise Exception
+            raise Exception(f"The size of examples {len(examples)} doesn't match the size of queries {len(queries)}")
 
         for query, example in zip(queries, examples):
             example_object = example if get_field(get_field(query, "query"), "evidence") is None else query
@@ -193,5 +193,11 @@ class Model:
         yield self
         set_java_factory(previous_factory)
 
-    def __str__(self):
+    def rules_to_str(self) -> str:
         return "\n".join(str(r) for r in self.template)
+
+    def examples_to_str(self) -> str:
+        return "\n".join(str(r) for r in self.examples)
+
+    def queries_to_str(self) -> str:
+        return "\n".join(str(r) for r in self.queries)
