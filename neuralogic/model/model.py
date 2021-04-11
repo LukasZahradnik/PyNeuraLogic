@@ -4,7 +4,7 @@ from py4j.java_gateway import get_field
 
 from typing import Union, List
 
-from neuralogic.builder import Weight, Sample, Model, Neuron
+from neuralogic.builder import Weight, Sample
 from neuralogic.model.atom import BaseAtom, WeightedAtom
 from neuralogic.model.rule import Rule
 from neuralogic.model.predicate import PredicateMetadata
@@ -18,7 +18,7 @@ def stream_to_list(stream) -> List:
     return list(stream.collect(get_gateway().jvm.java.util.stream.Collectors.toList()))
 
 
-class Template:
+class Model:
     def __init__(self):
         self.java_model = None
 
