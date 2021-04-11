@@ -2,7 +2,7 @@ from neuralogic import get_neuralogic, get_gateway
 from py4j.java_collections import ListConverter
 from py4j.java_gateway import get_field
 
-from typing import Union, List
+from typing import Union, List, Optional
 from contextlib import contextmanager
 
 from neuralogic.builder import Builder
@@ -22,7 +22,10 @@ def stream_to_list(stream) -> List:
 
 
 class Model:
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Optional[Settings] = None):
+        if settings is None:
+            settings = Settings()
+
         self.java_factory = JavaFactory(settings)
 
         self.template: List[TemplateEntries] = []
