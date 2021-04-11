@@ -13,18 +13,17 @@ with Model().context() as model:
     loadshapes = [Term.hexagon, Term.triangle, Term.diamond, Term.rectangle, Term.circle]
     vagon_atoms = [Atom.shape, Atom.length, Atom.sides, Atom.wheels, Atom.loadnum, Atom.loadshape, Atom.roof]
 
-    X = Var.X
     Y = Var.Y
 
     model.add_rules(
         [
-            *[Atom.shape(Y) <= Atom.shape(X, Y, s)[1,] for s in shapes],
-            *[Atom.length(Y) <= Atom.length(X, Y, s)[1,] for s in [Term.short, Term.long]],
-            *[Atom.sides(Y) <= Atom.sides(X, Y, s)[1,] for s in [Term.not_double, Term.double]],
-            *[Atom.roof(Y) <= Atom.roof(X, Y, s)[1,] for s in roofs],
-            *[Atom.wheels(Y) <= Atom.wheels(X, Y, s)[1,] for s in [2, 3]],
-            *[Atom.loadnum(Y) <= Atom.loadnum(X, Y, s)[1,] for s in [0, 1, 2, 3]],
-            *[Atom.loadshape(Y) <= Atom.loadshape(X, Y, s)[1,] for s in loadshapes],
+            *[Atom.shape(Y) <= Atom.shape(Y, s)[1,] for s in shapes],
+            *[Atom.length(Y) <= Atom.length(Y, s)[1,] for s in [Term.short, Term.long]],
+            *[Atom.sides(Y) <= Atom.sides(Y, s)[1,] for s in [Term.not_double, Term.double]],
+            *[Atom.roof(Y) <= Atom.roof(Y, s)[1,] for s in roofs],
+            *[Atom.wheels(Y) <= Atom.wheels(Y, s)[1,] for s in [2, 3]],
+            *[Atom.loadnum(Y) <= Atom.loadnum(Y, s)[1,] for s in [0, 1, 2, 3]],
+            *[Atom.loadshape(Y) <= Atom.loadshape(Y, s)[1,] for s in loadshapes],
             Atom.vagon(Y) <= (atom(Y)[1,] for atom in vagon_atoms),
             *[Atom.train <= Atom.vagon(i)[1,] for i in [1, 2, 3, 4]],
             Atom.direction <= Atom.train[1,],
@@ -37,13 +36,13 @@ with Model().context() as model:
             examples[id - 1] = []
         examples[id - 1].extend(
             [
-                Atom.shape(id, pos, shape),
-                Atom.length(id, pos, length),
-                Atom.sides(id, pos, sides),
-                Atom.roof(id, pos, roof),
-                Atom.wheels(id, pos, wheels),
-                Atom.loadshape(id, pos, load),
-                Atom.loadnum(id, pos, loadnum),
+                Atom.shape(pos, shape),
+                Atom.length(pos, length),
+                Atom.sides(pos, sides),
+                Atom.roof(pos, roof),
+                Atom.wheels(pos, wheels),
+                Atom.loadshape(pos, load),
+                Atom.loadnum(pos, loadnum),
             ]
         )
 
