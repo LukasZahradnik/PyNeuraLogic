@@ -9,6 +9,7 @@ class Settings:
 
         set_field(self.settings, "debugExporting", False)
         set_field(self.settings, "isoValueCompression", False)
+        set_field(self.settings, "exportBlocks", get_gateway().new_array(get_gateway().jvm.java.lang.String, 0))
         # set_field(self.settings, "chainPruning", False)
 
     @property

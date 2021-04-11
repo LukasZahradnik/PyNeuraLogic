@@ -1,5 +1,5 @@
 from typing import List, Optional
-from neuralogic.builder import Sample, Weight, Neuron, Model
+from neuralogic.builder import Sample, Weight, Neuron
 import dynet as dy
 
 
@@ -31,6 +31,9 @@ class NeuraLogicLayer:
         for neuron in sample.neurons:
             dynet_neurons[neuron.index] = self.build_neuron_expr(neuron, dynet_neurons)
         return dynet_neurons[sample.neurons[-1].index]
+
+    def __call__(self, sample: Sample) -> dy.Expression:
+        return self.build_sample(sample)
 
     @staticmethod
     def to_dynet_value(value) -> dy.Expression:

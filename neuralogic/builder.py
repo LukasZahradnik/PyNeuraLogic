@@ -78,34 +78,6 @@ class Weight(object):
         return weight
 
 
-class Model:
-    @staticmethod
-    def from_neuralogic(settings: Settings, sources: Sources) -> Tuple[List[Weight], List[Sample]]:
-        namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.building
-        pipes_namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.pipes.specific
-
-        builder = namespace.End2endTrainigBuilder(settings.settings, sources.sources)
-        nn_builder = builder.getEnd2endNNBuilder()
-
-        pipeline = nn_builder.buildPipeline()
-        serializer_pipe = pipes_namespace.NeuralSerializerPipe()
-
-        pipeline.connectAfter(serializer_pipe)
-        pipeline.execute(sources.sources)
-        result = serializer_pipe.get()
-
-        serialized_weights = list(get_field(result, "r"))
-        weights: List = [None] * len(serialized_weights)
-
-        for x in serialized_weights:
-            weight = Weight(x)
-            weights[weight.index] = weight
-
-        sample = [Sample(x) for x in stream_to_list(get_field(result, "s"))]
-
-        return weights, sample
-
-
 class Builder:
     @staticmethod
     def get_builders(settings: Settings, sources: Optional[Sources]):
