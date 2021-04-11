@@ -2,7 +2,7 @@ from neuralogic import get_neuralogic, get_gateway
 from neuralogic.settings import Settings
 from neuralogic.sources import Sources
 import json
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from py4j.java_gateway import get_field
 
 
@@ -66,6 +66,17 @@ class Weight(object):
         if not self.dimensions:
             self.dimensions = (1,)
 
+    @staticmethod
+    def get_unit_weight() -> "Weight":
+        weight = Weight.__new__(Weight)
+        weight.index = 0
+        weight.name = "unit"
+        weight.dimensions = (1,)
+        weight.value = 1.0
+        weight.fixed = True
+
+        return weight
+
 
 class Model:
     @staticmethod
@@ -88,6 +99,61 @@ class Model:
 
         for x in serialized_weights:
             weight = Weight(x)
+            weights[weight.index] = weight
+
+        sample = [Sample(x) for x in stream_to_list(get_field(result, "s"))]
+
+        return weights, sample
+
+
+class Builder:
+    @staticmethod
+    def get_builders(settings: Settings, sources: Optional[Sources]):
+        namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.building
+        builder = namespace.End2endTrainigBuilder(settings.settings, None if sources is None else sources.sources)
+        nn_builder = builder.getEnd2endNNBuilder()
+
+        return builder, nn_builder
+
+    @staticmethod
+    def build(source_pipeline, sources: Optional[Sources]):
+        pipes_namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.pipes.specific
+        serializer_pipe = pipes_namespace.NeuralSerializerPipe()
+
+        source_pipeline.connectAfter(serializer_pipe)
+        source_pipeline.execute(None if sources is None else sources.sources)
+        return serializer_pipe.get()
+
+    @staticmethod
+    def from_sources(settings: Settings, sources: Sources) -> Tuple[List[Weight], List[Sample]]:
+        builder, nn_builder = Builder.get_builders(settings, sources)
+        result = Builder.build(nn_builder.buildPipeline(), sources)
+
+        serialized_weights = list(get_field(result, "r"))
+        weights: List = [None] * len(serialized_weights)
+
+        for x in serialized_weights:
+            weight = Weight(x)
+            weights[weight.index] = weight
+
+        sample = [Sample(x) for x in stream_to_list(get_field(result, "s"))]
+
+        return weights, sample
+
+    @staticmethod
+    def from_model(parsed_template, logic_samples, settings: Settings) -> Tuple[List[Weight], List[Sample]]:
+        builder, nn_builder = Builder.get_builders(settings, None)
+        result = Builder.build(nn_builder.buildPipelineFromTemplate(parsed_template, logic_samples), None)
+
+        dummy_weight = Weight.get_unit_weight()
+        serialized_weights = list(get_field(result, "r"))
+        weights: List = [dummy_weight] * len(serialized_weights)
+
+        for x in serialized_weights:
+            weight = Weight(x)
+
+            if weight.index >= len(weights):
+                weights.extend([dummy_weight] * (weight.index - len(weights) + 1))
             weights[weight.index] = weight
 
         sample = [Sample(x) for x in stream_to_list(get_field(result, "s"))]

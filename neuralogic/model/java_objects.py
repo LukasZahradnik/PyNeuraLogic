@@ -1,6 +1,5 @@
 from py4j.java_gateway import get_field, set_field
 from typing import Optional, List, Iterable
-from contextlib import contextmanager
 from py4j.java_collections import ListConverter
 
 from neuralogic import get_neuralogic, get_gateway
@@ -205,23 +204,16 @@ class JavaFactory:
 java_factory: Optional[JavaFactory] = None
 
 
+def set_java_factory(factory: Optional[JavaFactory]):
+    global java_factory
+    java_factory = factory
+
+
 def get_java_factory() -> JavaFactory:
     if java_factory is None:
         raise Exception
     return java_factory
 
 
-def init_java_factory(settings: Settings) -> JavaFactory:
-    global java_factory
-    java_factory = JavaFactory(settings)
-
+def get_current_java_factory() -> Optional[JavaFactory]:
     return java_factory
-
-
-@contextmanager
-def use_java_factory(settings: Settings):
-    init_java_factory(settings)
-    global java_factory
-
-    yield java_factory
-    java_factory = None

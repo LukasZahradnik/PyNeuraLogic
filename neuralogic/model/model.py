@@ -3,12 +3,15 @@ from py4j.java_collections import ListConverter
 from py4j.java_gateway import get_field
 
 from typing import Union, List
+from contextlib import contextmanager
 
-from neuralogic.builder import Weight, Sample
+from neuralogic.builder import Builder
 from neuralogic.model.atom import BaseAtom, WeightedAtom
 from neuralogic.model.rule import Rule
 from neuralogic.model.predicate import PredicateMetadata
-from neuralogic.model.java_objects import get_java_factory, init_java_factory
+from neuralogic.model.java_objects import get_current_java_factory, set_java_factory, JavaFactory
+from neuralogic.settings import Settings
+from neuralogic.data import Dataset
 
 
 TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
@@ -19,8 +22,8 @@ def stream_to_list(stream) -> List:
 
 
 class Model:
-    def __init__(self):
-        self.java_model = None
+    def __init__(self, settings: Settings):
+        self.java_factory = JavaFactory(settings)
 
         self.template: List[TemplateEntries] = []
         self.examples: List[TemplateEntries] = []
@@ -45,12 +48,11 @@ class Model:
         self.queries.extend(queries)
 
     def build_examples(self, examples_builder):
-        java_factory = get_java_factory()
         logic_samples = []
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.example
 
         for query_counter, example in enumerate(self.examples):
-            label, lifted_example = java_factory.get_lifted_example(example)
+            label, lifted_example = self.java_factory.get_lifted_example(example)
 
             value = None
             label_fact = None if label is None else get_field(label, "facts")
@@ -90,46 +92,32 @@ class Model:
         template_namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.types
         return template_namespace.ParsedTemplate(weighted_rules, valued_facts)
 
-    def build(self):
-        java_factory = init_java_factory(get_java_factory().settings)
+    def build(self) -> Dataset:
+        previous_factory = get_current_java_factory()
+        set_java_factory(self.java_factory)
+
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.building
-        examples_builder = namespace.ExamplesBuilder(java_factory.settings.settings)
+        examples_builder = namespace.ExamplesBuilder(self.java_factory.settings.settings)
 
         logic_samples = self.build_examples(examples_builder)
         logic_samples = ListConverter().convert(logic_samples, get_gateway()._gateway_client).stream()
         parsed_template = self.get_parsed_template()
 
-        namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.building
-        pipes_namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.pipes.specific
+        set_java_factory(previous_factory)
 
-        builder = namespace.End2endTrainigBuilder(java_factory.settings.settings, None)
-        nn_builder = builder.getEnd2endNNBuilder()
+        dataset = Dataset.__new__(Dataset)
+        dataset.loaded = True
+        weights, samples = Builder.from_model(parsed_template, logic_samples, self.java_factory.settings)
+        dataset._Dataset__weights, dataset._Dataset__samples = weights, samples
 
-        pipeline = nn_builder.buildPipelineFromTemplate(parsed_template, logic_samples)
-        serializer_pipe = pipes_namespace.NeuralSerializerPipe()
+        return dataset
 
-        pipeline.connectAfter(serializer_pipe)
-        pipeline.execute(None)
-        result = serializer_pipe.get()
-
-        dummy_weight = Weight.__new__(Weight)
-        dummy_weight.value = 1.0
-        dummy_weight.fixed = True
-        dummy_weight.dimensions = (1,)
-
-        serialized_weights = list(get_field(result, "r"))
-        weights: List = [dummy_weight] * len(serialized_weights)
-
-        for x in serialized_weights:
-            weight = Weight(x)
-
-            if weight.index >= len(weights):
-                weights.extend([dummy_weight] * (weight.index - len(weights) + 1))
-            weights[weight.index] = weight
-
-        sample = [Sample(x) for x in stream_to_list(get_field(result, "s"))]
-
-        return weights, sample
+    @contextmanager
+    def context(self):
+        previous_factory = get_current_java_factory()
+        set_java_factory(self.java_factory)
+        yield self
+        set_java_factory(previous_factory)
 
     def __str__(self):
         return "\n".join(str(r) for r in self.template)
