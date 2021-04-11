@@ -85,6 +85,15 @@ class JavaFactory:
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.metadata
         return namespace.RuleMetadata(get_field(self.builder, "settings"), map)
 
+    def get_query(self, query):
+        variable_factory = self.get_variable_factory()
+
+        if not isinstance(query, self.rule_type):
+            if not isinstance(query, Iterable):
+                query = [query]
+            return None, self.get_conjunction(query, variable_factory)
+        return query.head.java_object, self.get_conjunction(query.body, variable_factory)
+
     def get_lifted_example(self, example):
         variable_factory = self.get_variable_factory()
         gateway_client = get_gateway()._gateway_client
