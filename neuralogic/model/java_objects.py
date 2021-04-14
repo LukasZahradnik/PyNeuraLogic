@@ -46,9 +46,16 @@ class JavaFactory:
             return self.constant_factory.construct(str(term))
         raise NotImplementedError
 
-    def get_generic_atom(self, atom_class, atom, variable_factory):
+    def get_generic_atom(self, atom_class, atom, variable_factory, new_weight):
         predicate = self.get_predicate(atom.predicate)
-        weight = self.get_weight(atom.weight, atom.is_fixed) if isinstance(atom, factories.atom.WeightedAtom) else None
+
+        weight = None
+        if isinstance(atom, factories.atom.WeightedAtom):
+            if new_weight:
+                weight = self.get_weight(atom.weight, atom.is_fixed)
+            else:
+                weight = get_field(atom.java_object, "weight")
+
         term_list = ListConverter().convert(
             [self.get_term(term, variable_factory) for term in atom.terms], get_gateway()._gateway_client
         )
@@ -126,10 +133,10 @@ class JavaFactory:
         return namespace.Pair(predicate_metadata.predicate.java_object, self.get_metadata(predicate_metadata.metadata))
 
     def get_valued_fact(self, atom, variable_factory):
-        return self.get_generic_atom(self.example_namespace.ValuedFact, atom, variable_factory)
+        return self.get_generic_atom(self.example_namespace.ValuedFact, atom, variable_factory, True)
 
     def get_atom(self, atom, variable_factory):
-        return self.get_generic_atom(self.namespace.BodyAtom, atom, variable_factory)
+        return self.get_generic_atom(self.namespace.BodyAtom, atom, variable_factory, False)
 
     def get_rule(self, rule):
         java_rule = self.namespace.WeightedRule()
