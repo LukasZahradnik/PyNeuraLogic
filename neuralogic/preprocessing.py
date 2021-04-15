@@ -1,6 +1,6 @@
-from typing import List
-from .utils import to_layers
-from .builder import Sample, Neuron
+from typing import List, Iterable, Union, Tuple
+from neuralogic.utils import to_layers
+from neuralogic.builder import Sample, Neuron
 from neuralogic.error import MixedActivationFunctionsInLayerException
 
 
@@ -18,6 +18,7 @@ class Layer:
 
         self.has_weights = False
         self.activation = -1
+        self.value_shape: Union[Tuple[int], Tuple[int, int]] = (1,)
 
         for neuron in layer:
             if self.activation != -1 and neuron.activation != self.activation:
@@ -25,6 +26,15 @@ class Layer:
 
             self.activation = neuron.activation
             self.targets.append(neuron.index)
+
+            if neuron.value:
+                if isinstance(neuron.value, list):
+                    if isinstance(neuron.value[0], list):
+                        self.value_shape = len(neuron.value), len(neuron.value[0])
+                    else:
+                        self.value_shape = (len(neuron.value),)
+                else:
+                    self.value_shape = (1,)
 
             weights = unit_weight_generator()
             if neuron.weights is not None and len(neuron.weights) != 0:

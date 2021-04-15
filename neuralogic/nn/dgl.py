@@ -29,8 +29,8 @@ class NeuraLogicHelperLayer(torch.nn.Module):
         if len(self.layer.u) == 0:
             return x
 
-        old_x = x.clone()
-        old_x[self.layer.targets] = 0
+        # old_x = x.clone()
+        # old_x[self.layer.targets] = 0
 
         g = dgl.graph((self.layer.u, self.layer.v), num_nodes=self.neuron_count)
         message = self.message if self.layer.has_weights else fn.copy_src(src="x", out="m")
@@ -40,9 +40,10 @@ class NeuraLogicHelperLayer(torch.nn.Module):
             g.ndata["x"] = x
             g.update_all(message, reduce)
 
-            if len(old_x.shape) < len(g.ndata["x"]):
-                old_x = old_x.reshape(old_x.shape + tuple(1 for _ in range(len(g.ndata["x"].shape) - len(old_x.shape))))
-            return g.ndata["x"] + old_x
+            # if len(old_x.shape) < len(g.ndata["x"]):
+            #     old_x = old_x.reshape(old_x.shape + tuple(1 for _ in range(len(g.ndata["x"].shape) - len(old_x.shape))))
+
+            return g.ndata["x"]
 
     def reduce_function(self, nodes):
         x = torch.sum(nodes.mailbox["m"], dim=1)
@@ -86,11 +87,11 @@ class NeuraLogicLayer(torch.nn.Module):
         neural_layers = [NeuraLogicHelperLayer(layer, neuron_count, self.weights) for layer in sample.layers]
         model = Sequential(*neural_layers)
 
-        x = torch.zeros((neuron_count, 1))
+        x = torch.zeros((neuron_count, *sample.layers[0].value_shape))
 
         for neuron_index in sample.layers[0].targets:
             neuron = sample.neurons[neuron_index]
-            x[neuron.index] = neuron.value
+            x[neuron.index] = torch.tensor(neuron.value)
 
         x = model(x)
         return torch.take(x, torch.tensor([sample.neurons[-1].index]))
