@@ -1,6 +1,10 @@
 from typing import Optional, Union, List
 from pathlib import Path
 import os
+
+from py4j.java_gateway import get_field
+
+from neuralogic import get_neuralogic
 from neuralogic.builder import Weight, Sample, Builder, Backend
 from neuralogic.settings import Settings
 from neuralogic.sources import Sources
@@ -12,6 +16,7 @@ PathType = Optional[Union[Path, str]]
 class Dataset:
     def __init__(
         self,
+        settings: Settings,
         backend: Backend,
         source_dir: PathType = None,
         template: PathType = None,
@@ -29,8 +34,12 @@ class Dataset:
         self.__weights: List[Weight] = []
         self.__samples: List[Sample] = []
 
-        self.settings: Optional[Settings] = None
+        self.__neural_model = None
+
+        self.settings = settings
         self.sources: Optional[Sources] = None
+
+        self.java_model = None
 
     def load(self, args: Optional[List] = None):
         self.loaded = True
@@ -46,12 +55,26 @@ class Dataset:
         if self.examples is not None:
             args.extend(["-e", str(self.examples)])
 
-        settings = Settings()
-        sources = Sources.from_args(args, settings)
-        weights, samples = Builder.from_sources(settings, self.backend, sources)
+        sources = Sources.from_args(args, self.settings)
+
+        if self.backend == Backend.JAVA:
+            java_model = Builder.from_sources(self.settings, self.backend, sources)
+
+            logic_samples = get_field(java_model, "s")
+            self.__neural_model = get_field(java_model, "r")
+            self.__samples = logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
+            return
+
+        weights, samples = Builder.from_sources(self.settings, self.backend, sources)
 
         self.__weights = weights
         self.__samples = samples
+
+    @property
+    def neural_model(self):
+        if not self.loaded:
+            self.load()
+        return self.__neural_model
 
     @property
     def samples(self) -> List[Sample]:
@@ -66,16 +89,16 @@ class Dataset:
         return self.__weights
 
 
-base_path = os.path.abspath(os.path.dirname(__file__))
+base_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "dataset")
 
 
-def XOR(backend: Backend) -> Dataset:
-    return Dataset(backend, source_dir=os.path.join(base_path, "..", "dataset", "simple", "xor", "naive"))
+def XOR(settings: Settings, backend: Backend) -> Dataset:
+    return Dataset(settings, backend, source_dir=os.path.join(base_path, "simple", "xor", "naive"))
 
 
-def XOR_Vectorized(backend: Backend) -> Dataset:
-    return Dataset(backend, source_dir=os.path.join(base_path, "..", "dataset", "simple", "xor", "vectorized"))
+def XOR_Vectorized(settings: Settings, backend: Backend) -> Dataset:
+    return Dataset(settings, backend, source_dir=os.path.join(base_path, "simple", "xor", "vectorized"))
 
 
-def Mutagenesis(backend: Backend) -> Dataset:
-    return Dataset(backend, source_dir=os.path.join(base_path, "..", "dataset", "molecules", "mutagenesis"))
+def Mutagenesis(settings: Settings, backend: Backend) -> Dataset:
+    return Dataset(settings, backend, source_dir=os.path.join(base_path, "molecules", "mutagenesis"))

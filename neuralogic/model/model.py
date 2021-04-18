@@ -178,10 +178,22 @@ class Model:
         parsed_template = self.get_parsed_template()
 
         set_java_factory(previous_factory)
-        weights, samples = Builder.from_model(parsed_template, logic_samples, backend, self.java_factory.settings)
 
         dataset = Dataset.__new__(Dataset)
         dataset.loaded = True
+        dataset.settings = self.java_factory.settings
+
+        if backend == Backend.JAVA:
+            java_model = Builder.from_model(parsed_template, logic_samples, backend, self.java_factory.settings)
+            logic_samples = get_field(java_model, "s")
+
+            dataset._Dataset__neural_model = get_field(java_model, "r")
+            dataset._Dataset__samples = logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
+
+            return dataset
+
+        weights, samples = Builder.from_model(parsed_template, logic_samples, backend, self.java_factory.settings)
+
         dataset._Dataset__weights, dataset._Dataset__samples = weights, samples
 
         return dataset

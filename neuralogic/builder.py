@@ -110,7 +110,9 @@ class Builder:
         builder, nn_builder = Builder.get_builders(settings, sources)
 
         if backend == Backend.JAVA:
-            return nn_builder.buildPipeline()
+            source_pipeline = nn_builder.buildPipeline()
+            source_pipeline.execute(None if sources is None else sources.sources)
+            return source_pipeline.get()
 
         result = Builder.build(nn_builder.buildPipeline(), sources)
 
@@ -131,7 +133,9 @@ class Builder:
         builder, nn_builder = Builder.get_builders(settings, sources)
 
         if backend == Backend.JAVA:
-            return nn_builder.buildPipelineFromTemplate(parsed_template, logic_samples)
+            source_pipeline = nn_builder.buildPipelineFromTemplate(parsed_template, logic_samples)
+            source_pipeline.execute(None if sources is None else sources.sources)
+            return source_pipeline.get()
 
         result = Builder.build(nn_builder.buildPipelineFromTemplate(parsed_template, logic_samples), sources)
 
