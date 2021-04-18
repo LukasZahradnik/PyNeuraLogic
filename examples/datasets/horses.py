@@ -4,7 +4,7 @@ from neuralogic.settings import Settings, Optimizer
 settings = Settings(optimizer=Optimizer.SGD, epochs=300)
 
 
-with Model().context() as model:
+with Model(settings).context() as model:
     # fmt: off
 
     model.add_rules(

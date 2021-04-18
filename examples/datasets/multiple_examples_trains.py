@@ -1,9 +1,13 @@
-from neuralogic.model import Atom, Model, Var, Term
-from examples.datasets.data.train_example_data import train_example_data
 from typing import List
+from examples.datasets.data.train_example_data import train_example_data
+
+from neuralogic.model import Atom, Model, Var, Term
+from neuralogic.settings import Settings, Optimizer
+
+settings = Settings(optimizer=Optimizer.SGD, epochs=300)
 
 
-with Model().context() as model:
+with Model(settings).context() as model:
     # One example per train
 
     # fmt: off

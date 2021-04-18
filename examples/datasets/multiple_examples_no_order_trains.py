@@ -7,7 +7,7 @@ from neuralogic.settings import Settings, Optimizer
 settings = Settings(optimizer=Optimizer.SGD, epochs=300)
 
 
-with Model().context() as model:
+with Model(settings).context() as model:
     # One example per train, doesn't know order of vagons
 
     # fmt: off
