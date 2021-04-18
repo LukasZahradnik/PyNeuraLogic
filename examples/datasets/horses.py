@@ -1,4 +1,8 @@
 from neuralogic.model import Atom, Model, Var, Term
+from neuralogic.settings import Settings, Optimizer
+
+settings = Settings(optimizer=Optimizer.SGD, epochs=300)
+
 
 with Model().context() as model:
     # fmt: off
@@ -28,5 +32,3 @@ with Model().context() as model:
             Atom.negFoal(Term.star)[0.0],
         ]
     )
-
-    dataset = model.build()  # Build model into dataset (weights and samples)

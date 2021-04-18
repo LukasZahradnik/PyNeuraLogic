@@ -34,22 +34,22 @@ class Model:
 
         self.counter = 0
 
-    def add_rule(self, rule: TemplateEntries):
+    def add_rule(self, rule):
         self.add_rules([rule])
 
-    def add_rules(self, rules: List[TemplateEntries]):
+    def add_rules(self, rules: List):
         self.template.extend(rules)
 
-    def add_example(self, example: TemplateEntries):
+    def add_example(self, example):
         self.add_examples([example])
 
-    def add_examples(self, examples: List[TemplateEntries]):
+    def add_examples(self, examples: List):
         self.examples.extend(examples)
 
-    def add_query(self, query: TemplateEntries):
+    def add_query(self, query):
         self.add_queries([query])
 
-    def add_queries(self, queries: List[TemplateEntries]):
+    def add_queries(self, queries: List):
         self.queries.extend(queries)
 
     def build_queries(self, query_builder):

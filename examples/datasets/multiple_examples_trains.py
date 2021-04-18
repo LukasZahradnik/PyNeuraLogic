@@ -49,5 +49,3 @@ with Model().context() as model:
     model.add_examples(examples)
 
     model.add_queries([*[Atom.direction[1.0] for _ in range(1, 11)], *[Atom.direction[-1.0] for _ in range(11, 21)]])
-
-    dataset = model.build()  # Build model into dataset (weights and samples)

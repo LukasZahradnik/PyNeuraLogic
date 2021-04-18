@@ -1,6 +1,10 @@
-from neuralogic.model import Atom, Model, Var, Term, Metadata, Activation
-from examples.datasets.data.train_example_data import train_example_data
 from typing import List
+from examples.datasets.data.train_example_data import train_example_data
+
+from neuralogic.model import Atom, Model, Var, Term, Metadata, Activation
+from neuralogic.settings import Settings, Optimizer
+
+settings = Settings(optimizer=Optimizer.SGD, epochs=300)
 
 
 with Model().context() as model:
@@ -50,5 +54,3 @@ with Model().context() as model:
     model.add_examples(examples)
 
     model.add_queries([*[Atom.direction[1.0] for _ in range(1, 11)], *[Atom.direction[-1.0] for _ in range(11, 21)]])
-
-    dataset = model.build()  # Build model into dataset (weights and samples)

@@ -1,6 +1,10 @@
 from neuralogic.model import Atom, Model
+from neuralogic.settings import Settings, Optimizer
 
-with Model().context() as model:
+settings = Settings(optimizer=Optimizer.SGD, epochs=300)
+
+
+with Model(settings).context() as model:
     model.add_rule(Atom.xor[1, 8] <= Atom.xy[8, 2])  # Add template rule
 
     model.add_examples(
@@ -11,5 +15,3 @@ with Model().context() as model:
             Atom.xor[0] <= Atom.xy[[1, 1]],
         ]
     )
-
-    dataset = model.build()  # Build model into dataset (weights and samples)

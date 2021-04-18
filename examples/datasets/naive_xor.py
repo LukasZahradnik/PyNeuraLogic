@@ -1,4 +1,7 @@
 from neuralogic.model import Atom, Model
+from neuralogic.settings import Settings, Optimizer
+
+settings = Settings(optimizer=Optimizer.SGD, epochs=300)
 
 
 with Model().context() as model:
@@ -18,5 +21,3 @@ with Model().context() as model:
             Atom.xor[0] <= (Atom.a[1], Atom.b[1]),
         ]
     )
-
-    dataset = model.build()  # Build model into dataset (weights and samples)
