@@ -36,7 +36,7 @@ class JavaFactory:
 
     def get_term(self, term, variable_factory):
         if isinstance(term, str):
-            if term[0].islower():
+            if term[0].islower() or term.isnumeric():
                 return self.constant_factory.construct(term)
             elif term[0].isupper():
                 return variable_factory.construct(term)
@@ -93,16 +93,13 @@ class JavaFactory:
         return namespace.RuleMetadata(get_field(self.builder, "settings"), map)
 
     def get_query(self, query):
-        variable_factory = self.get_variable_factory()
-
         if not isinstance(query, self.rule_type):
             if not isinstance(query, Iterable):
                 query = [query]
-            return None, self.get_conjunction(query, variable_factory)
-        return query.head.java_object, self.get_conjunction(query.body, variable_factory)
+            return None, self.get_conjunction(query)
+        return query.head.java_object, self.get_conjunction(query.body)
 
     def get_lifted_example(self, example):
-        variable_factory = self.get_variable_factory()
         gateway_client = get_gateway()._gateway_client
 
         conjunctions = []
@@ -112,19 +109,19 @@ class JavaFactory:
         if not isinstance(example, self.rule_type):
             if not isinstance(example, Iterable):
                 example = [example]
-            conjunctions.append(self.get_conjunction(example, variable_factory))
+            conjunctions.append(self.get_conjunction(example))
         else:
-            label_conjunction = self.get_conjunction([example.head], variable_factory)
-            conjunctions.append(self.get_conjunction(example.body, variable_factory))
+            label_conjunction = self.get_conjunction([example.head])
+            conjunctions.append(self.get_conjunction(example.body))
 
         lifted_example = self.example_namespace.LiftedExample(
             ListConverter().convert(conjunctions, gateway_client), rules
         )
         return label_conjunction, lifted_example
 
-    def get_conjunction(self, atoms, variable_factory):
+    def get_conjunction(self, atoms):
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs
-        valued_facts = [self.get_valued_fact(atom, variable_factory) for atom in atoms]
+        valued_facts = [atom.java_object for atom in atoms]
 
         return namespace.Conjunction(ListConverter().convert(valued_facts, get_gateway()._gateway_client))
 
