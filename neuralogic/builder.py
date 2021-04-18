@@ -1,13 +1,22 @@
 from neuralogic import get_neuralogic, get_gateway
 from neuralogic.settings import Settings
 from neuralogic.sources import Sources
+
 import json
-from typing import List, Tuple, Optional
+from enum import Enum
+from typing import List, Optional
 from py4j.java_gateway import get_field
 
 
 def stream_to_list(stream) -> List:
     return list(stream.collect(get_gateway().jvm.java.util.stream.Collectors.toList()))
+
+
+class Backend(Enum):
+    DYNET = "dynet"
+    PYG = "pyg"
+    DGL = "dgl"
+    JAVA = "java"
 
 
 class Sample:
@@ -97,8 +106,12 @@ class Builder:
         return serializer_pipe.get()
 
     @staticmethod
-    def from_sources(settings: Settings, sources: Sources) -> Tuple[List[Weight], List[Sample]]:
+    def from_sources(settings: Settings, backend: Backend, sources: Sources):
         builder, nn_builder = Builder.get_builders(settings, sources)
+
+        if backend == Backend.JAVA:
+            return nn_builder.buildPipeline()
+
         result = Builder.build(nn_builder.buildPipeline(), sources)
 
         serialized_weights = list(get_field(result, "r"))
@@ -113,9 +126,14 @@ class Builder:
         return weights, sample
 
     @staticmethod
-    def from_model(parsed_template, logic_samples, settings: Settings) -> Tuple[List[Weight], List[Sample]]:
-        builder, nn_builder = Builder.get_builders(settings, None)
-        result = Builder.build(nn_builder.buildPipelineFromTemplate(parsed_template, logic_samples), None)
+    def from_model(parsed_template, logic_samples, backend: Backend, settings: Settings):
+        sources = Sources.from_settings(settings)
+        builder, nn_builder = Builder.get_builders(settings, sources)
+
+        if backend == Backend.JAVA:
+            return nn_builder.buildPipelineFromTemplate(parsed_template, logic_samples)
+
+        result = Builder.build(nn_builder.buildPipelineFromTemplate(parsed_template, logic_samples), sources)
 
         dummy_weight = Weight.get_unit_weight()
         serialized_weights = list(get_field(result, "r"))

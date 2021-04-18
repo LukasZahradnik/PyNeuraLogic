@@ -2,10 +2,10 @@ from neuralogic import get_neuralogic, get_gateway
 from py4j.java_collections import ListConverter
 from py4j.java_gateway import get_field, set_field
 
-from typing import Union, List, Optional
+from typing import Union, List, Optional, ContextManager, Iterator
 from contextlib import contextmanager
 
-from neuralogic.builder import Builder
+from neuralogic.builder import Builder, Backend
 from neuralogic.model.atom import BaseAtom, WeightedAtom
 from neuralogic.model.rule import Rule
 from neuralogic.model.predicate import PredicateMetadata
@@ -159,7 +159,7 @@ class Model:
             logic_samples.append(query)
         return logic_samples
 
-    def build(self) -> Dataset:
+    def build(self, backend: Backend) -> Dataset:
         self.counter = 0
 
         previous_factory = get_current_java_factory()
@@ -178,16 +178,16 @@ class Model:
         parsed_template = self.get_parsed_template()
 
         set_java_factory(previous_factory)
+        weights, samples = Builder.from_model(parsed_template, logic_samples, backend, self.java_factory.settings)
 
         dataset = Dataset.__new__(Dataset)
         dataset.loaded = True
-        weights, samples = Builder.from_model(parsed_template, logic_samples, self.java_factory.settings)
         dataset._Dataset__weights, dataset._Dataset__samples = weights, samples
 
         return dataset
 
     @contextmanager
-    def context(self):
+    def context(self) -> Iterator["Model"]:
         previous_factory = get_current_java_factory()
         set_java_factory(self.java_factory)
         yield self

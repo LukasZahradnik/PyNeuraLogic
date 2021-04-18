@@ -1,7 +1,7 @@
 from typing import Optional, Union, List
 from pathlib import Path
 import os
-from neuralogic.builder import Weight, Sample, Builder
+from neuralogic.builder import Weight, Sample, Builder, Backend
 from neuralogic.settings import Settings
 from neuralogic.sources import Sources
 
@@ -12,12 +12,14 @@ PathType = Optional[Union[Path, str]]
 class Dataset:
     def __init__(
         self,
+        backend: Backend,
         source_dir: PathType = None,
         template: PathType = None,
         examples: PathType = None,
         queries: PathType = None,
     ):
         self.source_dir = source_dir
+        self.backend = backend
 
         self.template = template
         self.examples = examples
@@ -46,7 +48,7 @@ class Dataset:
 
         settings = Settings()
         sources = Sources.from_args(args, settings)
-        weights, samples = Builder.from_sources(settings, sources)
+        weights, samples = Builder.from_sources(settings, self.backend, sources)
 
         self.__weights = weights
         self.__samples = samples
@@ -66,6 +68,14 @@ class Dataset:
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
-XOR = Dataset(source_dir=os.path.join(base_path, "..", "dataset", "simple", "xor", "naive"))
-XOR_Vectorized = Dataset(source_dir=os.path.join(base_path, "..", "dataset", "simple", "xor", "vectorized"))
-Mutagenesis = Dataset(source_dir=os.path.join(base_path, "..", "dataset", "molecules", "mutagenesis"))
+
+def XOR(backend: Backend) -> Dataset:
+    return Dataset(backend, source_dir=os.path.join(base_path, "..", "dataset", "simple", "xor", "naive"))
+
+
+def XOR_Vectorized(backend: Backend) -> Dataset:
+    return Dataset(backend, source_dir=os.path.join(base_path, "..", "dataset", "simple", "xor", "vectorized"))
+
+
+def Mutagenesis(backend: Backend) -> Dataset:
+    return Dataset(backend, source_dir=os.path.join(base_path, "..", "dataset", "molecules", "mutagenesis"))

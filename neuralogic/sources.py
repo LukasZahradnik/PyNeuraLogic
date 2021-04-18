@@ -5,6 +5,12 @@ from typing import List
 
 class Sources:
     @staticmethod
+    def from_settings(settings: Settings) -> "Sources":
+        neuralogic = get_neuralogic()
+        sources = neuralogic.cz.cvut.fel.ida.setup.Sources(settings.settings)
+        return Sources(sources)
+
+    @staticmethod
     def from_args(args: List[str], settings: Settings) -> "Sources":
         neuralogic = get_neuralogic()
         gateway = get_gateway()
