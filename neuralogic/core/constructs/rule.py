@@ -1,5 +1,5 @@
-from neuralogic.core.java_objects import get_java_factory
-from neuralogic.core.metadata import Metadata
+from neuralogic.core.constructs.java_objects import get_java_factory
+from neuralogic.core.constructs.metadata import Metadata
 from typing import Iterable, Optional
 
 

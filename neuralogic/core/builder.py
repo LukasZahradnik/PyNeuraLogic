@@ -1,6 +1,6 @@
 from neuralogic import get_neuralogic, get_gateway
-from neuralogic.settings import Settings
-from neuralogic.sources import Sources
+from neuralogic.core.settings import Settings
+from neuralogic.core.sources import Sources
 
 import json
 from enum import Enum
@@ -112,7 +112,12 @@ class Builder:
         if backend == Backend.JAVA:
             source_pipeline = nn_builder.buildPipeline()
             source_pipeline.execute(None if sources is None else sources.sources)
-            return source_pipeline.get()
+            java_model = source_pipeline.get()
+
+            logic_samples = get_field(java_model, "s")
+            neural_model = get_field(java_model, "r")
+            samples = logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
+            return neural_model, samples
 
         result = Builder.build(nn_builder.buildPipeline(), sources)
 
@@ -123,21 +128,26 @@ class Builder:
             weight = Weight(x)
             weights[weight.index] = weight
 
-        sample = [Sample(x) for x in stream_to_list(get_field(result, "s"))]
+        samples = [Sample(x) for x in stream_to_list(get_field(result, "s"))]
 
-        return weights, sample
+        return weights, samples
 
     @staticmethod
-    def from_model(parsed_template, logic_samples, backend: Backend, settings: Settings):
-        sources = Sources.from_settings(settings)
-        builder, nn_builder = Builder.get_builders(settings, sources)
+    def from_problem(parsed_template, logic_samples, backend: Backend, settings: Settings):
+        builder, nn_builder = Builder.get_builders(settings, None)
 
         if backend == Backend.JAVA:
             source_pipeline = nn_builder.buildPipelineFromTemplate(parsed_template, logic_samples)
-            source_pipeline.execute(None if sources is None else sources.sources)
-            return source_pipeline.get()
+            source_pipeline.execute(None)
+            java_model = source_pipeline.get()
 
-        result = Builder.build(nn_builder.buildPipelineFromTemplate(parsed_template, logic_samples), sources)
+            logic_samples = get_field(java_model, "s")
+            neural_model = get_field(java_model, "r")
+
+            samples = logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
+            return neural_model, samples
+
+        result = Builder.build(nn_builder.buildPipelineFromTemplate(parsed_template, logic_samples), None)
 
         dummy_weight = Weight.get_unit_weight()
         serialized_weights = list(get_field(result, "r"))
@@ -150,6 +160,6 @@ class Builder:
                 weights.extend([dummy_weight] * (weight.index - len(weights) + 1))
             weights[weight.index] = weight
 
-        sample = [Sample(x) for x in stream_to_list(get_field(result, "s"))]
+        samples = [Sample(x) for x in stream_to_list(get_field(result, "s"))]
 
-        return weights, sample
+        return weights, samples

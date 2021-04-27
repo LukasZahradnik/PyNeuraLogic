@@ -3,14 +3,15 @@ from typing import Optional, List, Iterable
 from py4j.java_collections import ListConverter
 
 from neuralogic import get_neuralogic, get_gateway
-from neuralogic.core import factories
-from neuralogic.settings import Settings
+from neuralogic.core.settings import Settings
 
 
 class JavaFactory:
     def __init__(self, settings: Settings):
-        from neuralogic.core.rule import Rule
+        from neuralogic.core.constructs.rule import Rule
+        from neuralogic.core.constructs.atom import WeightedAtom
 
+        self.weighted_atom_type = WeightedAtom
         self.rule_type = Rule
 
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.building
@@ -50,7 +51,7 @@ class JavaFactory:
         predicate = self.get_predicate(atom.predicate)
 
         weight = None
-        if isinstance(atom, factories.atom.WeightedAtom):
+        if isinstance(atom, self.weighted_atom_type):
             if new_weight:
                 weight = self.get_weight(atom.weight, atom.is_fixed)
             else:

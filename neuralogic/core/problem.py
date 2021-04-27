@@ -2,17 +2,18 @@ from neuralogic import get_neuralogic, get_gateway
 from py4j.java_collections import ListConverter
 from py4j.java_gateway import get_field, set_field
 
-from typing import Union, List, Optional, ContextManager, Iterator
+from typing import Union, List, Optional, Iterator, Tuple
 from contextlib import contextmanager
 
-from neuralogic.builder import Builder, Backend
-from neuralogic.model.atom import BaseAtom, WeightedAtom
-from neuralogic.model.rule import Rule
-from neuralogic.model.predicate import PredicateMetadata
-from neuralogic.model.java_objects import get_current_java_factory, set_java_factory, JavaFactory
-from neuralogic.settings import Settings
-from neuralogic.data import Dataset
-
+from neuralogic.core.builder import Builder, Backend
+from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
+from neuralogic.core.constructs.rule import Rule
+from neuralogic.core.constructs.predicate import PredicateMetadata
+from neuralogic.core.constructs.java_objects import get_current_java_factory, set_java_factory, JavaFactory
+from neuralogic.core.model import Model
+from neuralogic.core.settings import Settings
+from neuralogic.core.sources import Sources
+from neuralogic.utils.data import Dataset
 
 TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
 
@@ -159,7 +160,7 @@ class Problem:
             logic_samples.append(query)
         return logic_samples
 
-    def build(self, backend: Backend) -> Dataset:
+    def build(self, backend: Backend) -> Tuple[Model, Dataset]:
         self.counter = 0
 
         previous_factory = get_current_java_factory()
@@ -178,25 +179,8 @@ class Problem:
         parsed_template = self.get_parsed_template()
 
         set_java_factory(previous_factory)
-
-        dataset = Dataset.__new__(Dataset)
-        dataset.loaded = True
-        dataset.settings = self.java_factory.settings
-
-        if backend == Backend.JAVA:
-            java_model = Builder.from_model(parsed_template, logic_samples, backend, self.java_factory.settings)
-            logic_samples = get_field(java_model, "s")
-
-            dataset._Dataset__neural_model = get_field(java_model, "r")
-            dataset._Dataset__samples = logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
-
-            return dataset
-
-        weights, samples = Builder.from_model(parsed_template, logic_samples, backend, self.java_factory.settings)
-
-        dataset._Dataset__weights, dataset._Dataset__samples = weights, samples
-
-        return dataset
+        weights, samples = Builder.from_problem(parsed_template, logic_samples, backend, self.java_factory.settings)
+        return Model(weights, self.java_factory.settings), Dataset(samples)
 
     @contextmanager
     def context(self) -> Iterator["Problem"]:
@@ -213,3 +197,40 @@ class Problem:
 
     def queries_to_str(self) -> str:
         return "\n".join(str(r) for r in self.queries)
+
+    @staticmethod
+    def build_from_dir(
+        directory: str, backend: Backend, settings: Settings, args: Optional[List] = None
+    ) -> Tuple[Model, Dataset]:
+        args = [] if args is None else args
+
+        args.extend(["-sd", str(directory)])
+        sources = Sources.from_args(args, settings)
+
+        weights, samples = Builder.from_sources(settings, backend, sources)
+
+        return Model(weights, settings), Dataset(samples)
+
+    @staticmethod
+    def build_from_files(
+        rules_file: str,
+        backend: Backend,
+        settings: Settings,
+        example_file: Optional[str] = None,
+        queries_file: Optional[str] = None,
+        args: Optional[List] = None,
+    ) -> Tuple[Model, Dataset]:
+        args = [] if args is None else args
+
+        args.extend(["-t", str(rules_file)])
+
+        if queries_file is not None:
+            args.extend(["-q", str(queries_file)])
+        if example_file is not None:
+            args.extend(["-e", str(example_file)])
+
+        sources = Sources.from_args(args, settings)
+
+        weights, samples = Builder.from_sources(settings, backend, sources)
+
+        return Model(weights, settings), Dataset(samples)

@@ -1,7 +1,7 @@
 from typing import Iterable, Union
-from neuralogic.core.predicate import Predicate
-from neuralogic.core.java_objects import get_java_factory
-from neuralogic.core import rule, factories
+from neuralogic.core.constructs.predicate import Predicate
+from neuralogic.core.constructs.java_objects import get_java_factory
+from neuralogic.core.constructs import rule, factories
 
 
 AtomType = Union["BaseAtom", "WeightedAtom"]
