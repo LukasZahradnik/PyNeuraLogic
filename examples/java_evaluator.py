@@ -1,10 +1,10 @@
-from examples.datasets.vectorized_xor import model
+from examples.datasets.vectorized_xor import problem
 
 from neuralogic.nn import get_evaluator
-from neuralogic.builder import Backend
+from neuralogic.core import Backend
 
 
-neuralogic_evaluator = get_evaluator(Backend.JAVA, model=model)
+neuralogic_evaluator = get_evaluator(Backend.JAVA, problem=problem)
 
 printouts = 10
 

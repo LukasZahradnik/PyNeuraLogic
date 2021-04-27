@@ -1,13 +1,13 @@
-from neuralogic.model import Atom, Model, Var, Term
-from neuralogic.settings import Settings, Optimizer
+from neuralogic.core import Atom, Problem, Var, Term
+from neuralogic.core.settings import Settings, Optimizer
 
 settings = Settings(optimizer=Optimizer.SGD, epochs=300)
 
 
-with Model(settings).context() as model:
+with Problem(settings).context() as problem:
     # fmt: off
 
-    model.add_rules(
+    problem.add_rules(
         [
             Atom.foal(Var.X)[1,] <= (Atom.parent(Var.X, Var.Y), Atom.horse(Var.Y)),
             Atom.foal(Var.X)[1,] <= (Atom.sibling(Var.X, Var.Y), Atom.horse(Var.Y)),
@@ -15,7 +15,7 @@ with Model(settings).context() as model:
         ]
     )
 
-    model.add_example(
+    problem.add_example(
         [
             Atom.horse(Term.aida)[1.0],
             Atom.horse(Term.cheyenne)[1.0],
@@ -26,7 +26,7 @@ with Model(settings).context() as model:
         ]
     )
 
-    model.add_queries(
+    problem.add_queries(
         [
             Atom.foal(Term.star)[1.0],
             Atom.negFoal(Term.star)[0.0],

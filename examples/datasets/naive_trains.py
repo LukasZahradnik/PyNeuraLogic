@@ -1,12 +1,12 @@
 from examples.datasets.data.train_example_data import train_example_data
 
-from neuralogic.model import Atom, Model, Var, Term
-from neuralogic.settings import Settings, Optimizer
+from neuralogic.core import Atom, Problem, Var, Term
+from neuralogic.core.settings import Settings, Optimizer
 
 settings = Settings(optimizer=Optimizer.SGD, epochs=300)
 
 
-with Model(settings).context() as model:
+with Problem(settings).context() as problem:
     # Naive trains - one big example
 
     # fmt: off
@@ -19,7 +19,7 @@ with Model(settings).context() as model:
     X = Var.X
     Y = Var.Y
 
-    model.add_rules(
+    problem.add_rules(
         [
             *[Atom.shape(X, Y) <= Atom.shape(X, Y, s)[1,] for s in shapes],
             *[Atom.length(X, Y) <= Atom.length(X, Y, s)[1,] for s in [Term.short, Term.long]],
@@ -34,7 +34,7 @@ with Model(settings).context() as model:
         ]
     )
 
-    model.add_example(
+    problem.add_example(
         [
             atom
             for _, id, pos, shape, length, sides, roof, wheels, load, loadnum in train_example_data
@@ -50,6 +50,6 @@ with Model(settings).context() as model:
         ]
     )
 
-    model.add_queries(
+    problem.add_queries(
         [*[Atom.direction(i)[1.0] for i in range(1, 11)], *[Atom.direction(i)[-1.0] for i in range(11, 21)]]
     )
