@@ -21,7 +21,7 @@ def stream_to_list(stream) -> List:
     return list(stream.collect(get_gateway().jvm.java.util.stream.Collectors.toList()))
 
 
-class Model:
+class Problem:
     def __init__(self, settings: Optional[Settings] = None):
         if settings is None:
             settings = Settings()
@@ -199,7 +199,7 @@ class Model:
         return dataset
 
     @contextmanager
-    def context(self) -> Iterator["Model"]:
+    def context(self) -> Iterator["Problem"]:
         previous_factory = get_current_java_factory()
         set_java_factory(self.java_factory)
         yield self

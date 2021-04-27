@@ -3,13 +3,13 @@ from typing import Optional, List, Iterable
 from py4j.java_collections import ListConverter
 
 from neuralogic import get_neuralogic, get_gateway
-from neuralogic.model import factories
+from neuralogic.core import factories
 from neuralogic.settings import Settings
 
 
 class JavaFactory:
     def __init__(self, settings: Settings):
-        from neuralogic.model.rule import Rule
+        from neuralogic.core.rule import Rule
 
         self.rule_type = Rule
 

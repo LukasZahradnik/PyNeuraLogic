@@ -1,5 +1,5 @@
 from neuralogic import get_neuralogic, get_gateway
-from neuralogic.settings import Settings
+from neuralogic.core.settings import Settings
 from typing import List
 
 

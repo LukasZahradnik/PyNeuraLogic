@@ -1,6 +1,6 @@
 from typing import Dict
-from neuralogic.model.predicate import Predicate
-from neuralogic.model import atom
+from neuralogic.core.predicate import Predicate
+from neuralogic.core import atom
 
 
 class AtomFactory:
