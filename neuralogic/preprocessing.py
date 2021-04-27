@@ -1,12 +1,37 @@
-from typing import List, Iterable, Union, Tuple
-from neuralogic.utils import to_layers
-from neuralogic.builder import Sample, Neuron
+from typing import List, Union, Tuple
+from neuralogic.core.builder import Sample, Neuron
 from neuralogic.error import MixedActivationFunctionsInLayerException
 
 
 def unit_weight_generator():
     while True:
         yield -1
+
+
+def to_layers(sample: Sample) -> List[List[Neuron]]:
+    neuron_layers = [0] * len(sample.neurons)
+    layers: List[List[Neuron]] = [[]]
+
+    for neuron in sample.neurons:
+        if len(neuron.inputs) == 0:
+            layers[0].append(neuron)
+            continue
+
+        layer = max(neuron_layers[input] for input in neuron.inputs) + 1
+        if len(layers) <= layer:
+            layers.append([neuron])
+            neuron_layers[neuron.index] = len(layers)
+            continue
+
+        for layer in layers[layer:]:
+            if layer[0].activation == neuron.activation:
+                layer.append(neuron)
+                neuron_layers[neuron.index] = neuron_layers[layer[0].index]
+                break
+        else:
+            layers.append([neuron])
+            neuron_layers[neuron.index] = len(layers)
+    return layers
 
 
 class Layer:
