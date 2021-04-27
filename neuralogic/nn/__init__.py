@@ -1,10 +1,11 @@
-from typing import Optional
+from typing import Optional, Tuple
 
-from neuralogic.builder import Backend
-from neuralogic.data import Dataset
+from neuralogic.core.builder import Backend
+from neuralogic.core.model import Model
 from neuralogic.nn.base import AbstractEvaluator
-from neuralogic.model import Model
-from neuralogic.settings import Settings
+from neuralogic.core import Problem
+from neuralogic.core.settings import Settings
+from neuralogic.utils.data import Dataset
 
 
 def get_neuralogic_layer(backend: Backend):
@@ -16,27 +17,40 @@ def get_neuralogic_layer(backend: Backend):
         from neuralogic.nn.dgl import NeuraLogicLayer  # type: ignore
 
         return NeuraLogicLayer
+    if backend == Backend.JAVA:
+        from neuralogic.nn.java import NeuraLogicLayer  # type: ignore
+
+        return NeuraLogicLayer
 
 
-def get_evaluator(backend: Backend, model: Model = None, dataset: Dataset = None, settings: Optional[Settings] = None):
-    if model is None and dataset is None:
+def get_evaluator(
+    backend: Backend,
+    model_and_dataset: Tuple[Model, Dataset] = None,
+    problem: Problem = None,
+    settings: Optional[Settings] = None,
+):
+    model, dataset = None, None
+
+    if problem is None and model_and_dataset is None:
         raise NotImplementedError
-    if model is not None and dataset is not None:
+    if problem is not None and model_and_dataset is not None:
         raise NotImplementedError
 
     if settings is None:
-        if model is not None:
-            settings = model.java_factory.settings
-        elif dataset is not None:
-            settings = dataset.settings
+        if problem is not None:
+            settings = problem.java_factory.settings
+        elif model_and_dataset is not None:
+            model, dataset = model_and_dataset
+
+            settings = model.settings
         else:
             raise Exception
 
     if backend == Backend.DYNET:
         from neuralogic.nn.evaluators.dynet import DynetEvaluator
 
-        return DynetEvaluator(model, dataset, settings)
+        return DynetEvaluator(problem, model, dataset, settings)
     if backend == Backend.JAVA:
         from neuralogic.nn.evaluators.java import JavaEvaluator
 
-        return JavaEvaluator(model, dataset, settings)
+        return JavaEvaluator(problem, model, dataset, settings)

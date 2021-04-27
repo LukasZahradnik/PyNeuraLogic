@@ -1,6 +1,8 @@
 from typing import List, Optional
-from neuralogic.builder import Sample, Weight, Neuron
+from neuralogic.core.builder import Sample, Weight, Neuron
 import dynet as dy
+
+from neuralogic.core.model import Model
 
 
 class NeuraLogicLayer:
@@ -12,9 +14,9 @@ class NeuraLogicLayer:
         "Tanh": dy.tanh,
     }
 
-    def __init__(self, weights: List[Weight]):
+    def __init__(self, model: Model):
         self.model = dy.ParameterCollection()
-        self.weights = self.deserialize_weights(weights)
+        self.weights = self.deserialize_weights(model.model)
 
     def deserialize_weights(self, weights: List[Weight]) -> List[dy.Parameters]:
         return [

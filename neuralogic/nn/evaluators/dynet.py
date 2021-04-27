@@ -2,13 +2,14 @@ from typing import Optional
 
 import dynet as dy
 
-from neuralogic.data import Dataset
+from neuralogic.core.model import Model
 from neuralogic.nn.dynet import NeuraLogicLayer
 from neuralogic.nn.base import AbstractEvaluator
 
-from neuralogic.model import Model
-from neuralogic.settings import Settings, Optimizer
-from neuralogic.builder import Backend
+from neuralogic.core import Problem
+from neuralogic.core.settings import Settings, Optimizer
+from neuralogic.core.builder import Backend
+from neuralogic.utils.data import Dataset
 
 
 class DynetEvaluator(AbstractEvaluator):
@@ -17,14 +18,17 @@ class DynetEvaluator(AbstractEvaluator):
         Optimizer.ADAM: lambda param, rate: dy.AdamTrainer(param, alpha=rate),
     }
 
-    def __init__(self, model: Optional[Model], dataset: Optional[Dataset], settings: Settings):
-        super().__init__(model, dataset, settings)
+    def __init__(
+        self, problem: Optional[Problem], model: Optional[Model], dataset: Optional[Dataset], settings: Settings
+    ):
+        super().__init__(problem, model, dataset, settings)
 
-        if model is not None:
-            self.dataset = model.build(Backend.DYNET)
-        if dataset is not None:
+        if problem is not None:
+            model, dataset = problem.build(Backend.DYNET)
+
             self.dataset = dataset
-        self.neuralogic_layer = NeuraLogicLayer(self.dataset.weights)
+            self.model = model
+        self.neuralogic_layer = NeuraLogicLayer(self.model)
 
     def train(self, generator: bool = True):
         epochs = self.settings.epochs
