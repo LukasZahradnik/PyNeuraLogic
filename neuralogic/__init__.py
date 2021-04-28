@@ -1,15 +1,14 @@
 from typing import Union, Optional
 from pathlib import Path
 from contextlib import contextmanager
-import sys
 import os
 from py4j.java_gateway import JavaGateway, JVMView
 
 neuralogic: Optional[JVMView] = None
 gateway: Optional[JavaGateway] = None
 
-std_out = sys.stdout
-std_err = sys.stderr
+std_out = None
+std_err = None
 
 
 def set_java_home(java_home: Union[Path, str]):
@@ -42,13 +41,17 @@ def initialize(die_on_exit=True):
     global gateway, neuralogic
 
     if gateway is not None:
-        gateway.shutdown()
+        try:
+            gateway.shutdown()
+        except Exception:
+            pass
 
     gateway = JavaGateway.launch_gateway(
         classpath=os.environ["CLASSPATH"],
         redirect_stdout=std_out,
         redirect_stderr=std_err,
         die_on_exit=die_on_exit,
+        daemonize_redirect=True,
     )
 
     neuralogic = gateway.jvm

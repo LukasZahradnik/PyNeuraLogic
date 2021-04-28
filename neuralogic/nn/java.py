@@ -54,20 +54,17 @@ class NeuraLogicLayer:
             self.do_train = train
 
         if samples is None:
-            results = self.strategy.learnSamples(epochs)
-            return sum(get_field(result.errorValue(), "value") for result in results), self.samples_len
+            return self.strategy.learnSamples(epochs), self.samples_len
 
         if not isinstance(samples, Sized):
             if self.do_train:
                 if auto_backprop:
-                    result = self.strategy.learnSample(samples)
-                    return get_field(result.errorValue(), "value"), 1
+                    return self.strategy.learnSample(samples), 1
             result = self.strategy.evaluateSample(samples)
             return Loss(result)
 
         if self.do_train:
-            results = self.strategy.learnSamples(samples, epochs)
-            return sum(get_field(result.errorValue(), "value") for result in results), len(samples)
+            return self.strategy.learnSamples(samples, epochs), len(samples)
 
         results = self.strategy.evaluateSamples(samples)
         return [(get_field(result.getTarget(), "value"), get_field(result.getOutput(), "value")) for result in results]
