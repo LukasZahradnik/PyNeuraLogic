@@ -17,8 +17,8 @@ REQUIRES_PYTHON = ">=3.7.0"
 VERSION = None
 
 REQUIRED = [
-    "py4j",
-    "antlr4-python3-runtime",
+    "py4j >= 0.10.9.1",
+    "antlr4-python3-runtime >= 4.8",
 ]
 
 EXTRAS: Dict = {}
@@ -45,7 +45,7 @@ setup(
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
-    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
+    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*", "examples"]),
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True,
