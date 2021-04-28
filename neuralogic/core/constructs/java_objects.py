@@ -7,9 +7,12 @@ from neuralogic.core.settings import Settings
 
 
 class JavaFactory:
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Optional[Settings] = None):
         from neuralogic.core.constructs.rule import Rule
         from neuralogic.core.constructs.atom import WeightedAtom
+
+        if settings is None:
+            settings = Settings()
 
         self.weighted_atom_type = WeightedAtom
         self.rule_type = Rule
