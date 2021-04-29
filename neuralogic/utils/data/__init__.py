@@ -1,26 +1,10 @@
 import os
 from typing import Tuple
 
+from neuralogic.utils.data.dataset import Dataset
 from neuralogic.core.builder import Backend
 from neuralogic.core.model import Model
 from neuralogic.core.settings import Settings
-
-
-class Dataset:
-    def __init__(self, samples):
-        self.__samples = samples
-        self.__len = len(samples)
-
-    def __len__(self):
-        return self.__len
-
-    def __getitem__(self, item):
-        return self.__samples[item]
-
-    @property
-    def samples(self):
-        return self.__samples
-
 
 base_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "..", "..", "dataset")
 
