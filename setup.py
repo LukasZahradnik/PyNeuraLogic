@@ -19,6 +19,7 @@ VERSION = None
 REQUIRED = [
     "py4j >= 0.10.9.1",
     "antlr4-python3-runtime >= 4.8",
+    "numpy >= 1.19.0",
 ]
 
 EXTRAS: Dict = {}

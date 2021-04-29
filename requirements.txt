@@ -2,3 +2,4 @@ python-dotenv
 antlr4-python3-runtime
 pre-commit
 py4j
+numpy
