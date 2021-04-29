@@ -50,6 +50,10 @@ setup(
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True,
+    package_data={
+        "neuralogic.jar": ["NeuraLogic.jar"],
+        "neuralogic.utils.data": ["datasets/**/*", "datasets/**/**/*", "datasets/**/**/**/**/*", "datasets/**/**/**/*"],
+    },
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
