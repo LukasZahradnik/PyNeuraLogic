@@ -2,7 +2,6 @@ from typing import Optional
 
 import dynet as dy
 
-from neuralogic.core.model import Model
 from neuralogic.nn.dynet import NeuraLogicLayer
 from neuralogic.nn.base import AbstractEvaluator
 
@@ -19,16 +18,18 @@ class DynetEvaluator(AbstractEvaluator):
     }
 
     def __init__(
-        self, problem: Optional[Problem], model: Optional[Model], dataset: Optional[Dataset], settings: Settings
+        self,
+        problem: Optional[Problem],
+        model: Optional[NeuraLogicLayer],
+        dataset: Optional[Dataset],
+        settings: Settings,
     ):
         super().__init__(problem, model, dataset, settings)
 
         if problem is not None:
             model, dataset = problem.build(Backend.DYNET)
-
             self.dataset = dataset
-            self.model = model
-        self.neuralogic_layer = NeuraLogicLayer(self.model)
+        self.neuralogic_layer = model
 
     def train(self, generator: bool = True):
         epochs = self.settings.epochs

@@ -1,7 +1,6 @@
 from typing import Optional, Tuple
 
 from neuralogic.core.builder import Backend
-from neuralogic.core.model import Model
 from neuralogic.nn.base import AbstractEvaluator
 from neuralogic.core import Problem
 from neuralogic.core.settings import Settings
@@ -25,7 +24,7 @@ def get_neuralogic_layer(backend: Backend):
 
 def get_evaluator(
     backend: Backend,
-    model_and_dataset: Tuple[Model, Dataset] = None,
+    model_and_dataset=None,
     problem: Problem = None,
     settings: Optional[Settings] = None,
 ):

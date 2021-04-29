@@ -10,7 +10,6 @@ from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.predicate import PredicateMetadata
 from neuralogic.core.constructs.java_objects import get_current_java_factory, set_java_factory, JavaFactory
-from neuralogic.core.model import Model
 from neuralogic.core.settings import Settings
 from neuralogic.core.sources import Sources
 from neuralogic.utils.data import Dataset
@@ -160,7 +159,9 @@ class Problem:
             logic_samples.append(query)
         return logic_samples
 
-    def build(self, backend: Backend) -> Tuple[Model, Dataset]:
+    def build(self, backend: Backend):
+        from neuralogic.nn import get_neuralogic_layer
+
         self.counter = 0
 
         previous_factory = get_current_java_factory()
@@ -180,7 +181,8 @@ class Problem:
 
         set_java_factory(previous_factory)
         weights, samples = Builder.from_problem(parsed_template, logic_samples, backend, self.java_factory.settings)
-        return Model(weights, self.java_factory.settings), Dataset(samples)
+
+        return get_neuralogic_layer(backend)(weights, self.java_factory.settings), Dataset(samples)
 
     @contextmanager
     def context(self) -> Iterator["Problem"]:
@@ -199,9 +201,9 @@ class Problem:
         return "\n".join(str(r) for r in self.queries)
 
     @staticmethod
-    def build_from_dir(
-        directory: str, backend: Backend, settings: Settings, args: Optional[List] = None
-    ) -> Tuple[Model, Dataset]:
+    def build_from_dir(directory: str, backend: Backend, settings: Settings, args: Optional[List] = None):
+        from neuralogic.nn import get_neuralogic_layer
+
         args = [] if args is None else args
 
         args.extend(["-sd", str(directory)])
@@ -209,7 +211,7 @@ class Problem:
 
         weights, samples = Builder.from_sources(settings, backend, sources)
 
-        return Model(weights, settings), Dataset(samples)
+        return get_neuralogic_layer(backend)(weights, settings), Dataset(samples)
 
     @staticmethod
     def build_from_files(
@@ -219,7 +221,9 @@ class Problem:
         example_file: Optional[str] = None,
         queries_file: Optional[str] = None,
         args: Optional[List] = None,
-    ) -> Tuple[Model, Dataset]:
+    ):
+        from neuralogic.nn import get_neuralogic_layer
+
         args = [] if args is None else args
 
         args.extend(["-t", str(rules_file)])
@@ -233,4 +237,4 @@ class Problem:
 
         weights, samples = Builder.from_sources(settings, backend, sources)
 
-        return Model(weights, settings), Dataset(samples)
+        return get_neuralogic_layer(backend)(weights, settings), Dataset(samples)

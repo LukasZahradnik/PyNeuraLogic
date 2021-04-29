@@ -1,9 +1,10 @@
 from collections import Sized
+from typing import Optional
 
 from neuralogic import get_neuralogic
 from py4j.java_gateway import get_field
 
-from neuralogic.core.model import Model
+from neuralogic.core.settings import Settings
 
 
 class Loss:
@@ -24,16 +25,17 @@ class Loss:
 
 
 class NeuraLogicLayer:
-    def __init__(self, model: Model):
+    def __init__(self, model, settings: Optional[Settings] = None):
         self.namespace = get_neuralogic().cz.cvut.fel.ida.neural.networks.computation.training.strategies
         self.do_train = True
-        self.settings = model.settings
 
-        self.neural_model = model.model
-        self.strategy = self.namespace.PythonTrainingStrategy(model.settings.settings, model.model)
+        if settings is None:
+            settings = Settings()
 
+        self.settings = settings
+        self.neural_model = model
+        self.strategy = self.namespace.PythonTrainingStrategy(settings.settings, model)
         self.samples_len = 0
-
         self.reset_parameters()
 
     def reset_parameters(self):

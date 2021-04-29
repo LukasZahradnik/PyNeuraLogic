@@ -2,7 +2,7 @@ from typing import List, Optional
 from neuralogic.core.builder import Sample, Weight, Neuron
 import dynet as dy
 
-from neuralogic.core.model import Model
+from neuralogic.core.settings import Settings
 
 
 class NeuraLogicLayer:
@@ -14,9 +14,13 @@ class NeuraLogicLayer:
         "Tanh": dy.tanh,
     }
 
-    def __init__(self, model: Model):
+    def __init__(self, model, settings: Optional[Settings] = None):
+        if settings is None:
+            settings = Settings()
+
         self.model = dy.ParameterCollection()
-        self.weights = self.deserialize_weights(model.model)
+        self.weights = self.deserialize_weights(model)
+        self.settings = settings
 
     def deserialize_weights(self, weights: List[Weight]) -> List[dy.Parameters]:
         return [
@@ -24,14 +28,11 @@ class NeuraLogicLayer:
             for weight in weights
         ]
 
-    def build_neuron_expr(self, neuron: Neuron, neuron_expressions: List):
-        return NeuraLogicLayer.to_dynet_expression(neuron, neuron_expressions, self.weights)
-
     def build_sample(self, sample: Sample) -> dy.Expression:
         dynet_neurons: List[Optional[dy.Expression]] = [None] * len(sample.neurons)
 
         for neuron in sample.neurons:
-            dynet_neurons[neuron.index] = self.build_neuron_expr(neuron, dynet_neurons)
+            dynet_neurons[neuron.index] = NeuraLogicLayer.to_dynet_expression(neuron, dynet_neurons, self.weights)
         return dynet_neurons[sample.neurons[-1].index]
 
     def __call__(self, sample: Sample) -> dy.Expression:
