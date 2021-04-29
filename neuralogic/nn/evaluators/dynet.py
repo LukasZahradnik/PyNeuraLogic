@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict
 
 import dynet as dy
 
@@ -81,3 +81,9 @@ class DynetEvaluator(AbstractEvaluator):
         if generator:
             return _test()
         return list(_test())
+
+    def state_dict(self) -> Dict:
+        return self.neuralogic_layer.state_dict()
+
+    def load_state_dict(self, state_dict: Dict):
+        self.neuralogic_layer.load_state_dict(state_dict)

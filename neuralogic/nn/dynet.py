@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 from neuralogic.core.builder import Sample, Weight, Neuron
 import dynet as dy
 
@@ -37,6 +37,12 @@ class NeuraLogicLayer:
 
     def __call__(self, sample: Sample) -> dy.Expression:
         return self.build_sample(sample)
+
+    def state_dict(self) -> Dict:
+        pass
+
+    def load_state_dict(self, state_dict: Dict):
+        pass
 
     @staticmethod
     def to_dynet_value(value) -> dy.Expression:

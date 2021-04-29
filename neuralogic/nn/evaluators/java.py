@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict
 
 from neuralogic.core.builder import Backend
 from neuralogic.core import Problem
@@ -48,3 +48,9 @@ class JavaEvaluator(AbstractEvaluator):
         if generator:
             return _test()
         return self.neuralogic_layer(self.dataset.samples, False)
+
+    def state_dict(self) -> Dict:
+        return self.neuralogic_layer.state_dict()
+
+    def load_state_dict(self, state_dict: Dict):
+        self.neuralogic_layer.load_state_dict(state_dict)
