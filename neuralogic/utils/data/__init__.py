@@ -4,7 +4,7 @@ from neuralogic.utils.data.dataset import Dataset
 from neuralogic.core.builder import Backend
 from neuralogic.core.settings import Settings
 
-base_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "..", "..", "dataset")
+base_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "datasets")
 
 
 def XOR(backend: Backend, settings: Settings):

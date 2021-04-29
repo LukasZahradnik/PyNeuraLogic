@@ -137,7 +137,7 @@ class Builder:
         builder, nn_builder = Builder.get_builders(settings, None)
 
         if backend == Backend.JAVA:
-            source_pipeline = nn_builder.buildPipelineFromTemplate(parsed_template, logic_samples)
+            source_pipeline = nn_builder.buildPipeline(parsed_template, logic_samples)
             source_pipeline.execute(None)
             java_model = source_pipeline.get()
 
@@ -147,7 +147,7 @@ class Builder:
             samples = logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
             return neural_model, samples
 
-        result = Builder.build(nn_builder.buildPipelineFromTemplate(parsed_template, logic_samples), None)
+        result = Builder.build(nn_builder.buildPipeline(parsed_template, logic_samples), None)
 
         dummy_weight = Weight.get_unit_weight()
         serialized_weights = list(get_field(result, "r"))

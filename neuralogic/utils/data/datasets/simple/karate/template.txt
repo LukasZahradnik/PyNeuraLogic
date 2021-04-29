@@ -1,0 +1,3 @@
+group(A) :- {1} connection(A, B).
+
+{1} predict(A) :- group(A).

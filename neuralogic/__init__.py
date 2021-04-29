@@ -93,4 +93,4 @@ def neuralogic_jvm():
         shutdown()
 
 
-os.environ["CLASSPATH"] = os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "jar", "NeuraLogic.jar")
+os.environ["CLASSPATH"] = os.path.join(os.path.abspath(os.path.dirname(__file__)), "jar", "NeuraLogic.jar")
