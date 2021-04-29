@@ -74,20 +74,22 @@ class NeuraLogicLayer:
 
     def state_dict(self) -> Dict:
         weights = self.neural_model.getAllWeights()
-        max_weight_index = get_field(self.neural_model, "maxWeightIndex")
+        weights_dict = {}
 
-        def get_weight_value(weight):
-            value = get_field(weight, "value")
-            size = list(value.size())
-            if size[0] == 0:
-                return get_field(value, "value")
-            if len(size) == 1 or size[0] == 1 or size[1] == 1:
-                return list(get_field(value, "values"))
-            return json.loads(value.toString())
+        for weight in weights:
+            if get_field(weight, "isLearnable"):
+                value = get_field(weight, "value")
 
+                size = list(value.size())
+
+                if len(size) == 0 or size[0] == 0:
+                    weights_dict[get_field(weight, "index")] = get_field(value, "value")
+                elif len(size) == 1 or size[0] == 1 or size[1] == 1:
+                    weights_dict[get_field(weight, "index")] = list(get_field(value, "values"))
+                else:
+                    weights_dict[get_field(weight, "index")] = json.loads(value.toString())
         return {
-            "max_weight_index": max_weight_index,
-            "weights": {str(get_field(weight, "index")): get_weight_value(weight) for weight in weights},
+            "weights": weights_dict,
         }
 
     def load_state_dict(self, state_dict: Dict):
@@ -95,10 +97,12 @@ class NeuraLogicLayer:
         weight_dict = state_dict["weights"]
 
         for weight in weights:
+            if not get_field(weight, "isLearnable"):
+                continue
             weight_value = get_field(weight, "value")
 
             index = get_field(weight, "index")
-            value = weight_dict[str(index)]
+            value = weight_dict[index]
 
             if isinstance(value, (float, int)):
                 weight_value.set(0, float(value))

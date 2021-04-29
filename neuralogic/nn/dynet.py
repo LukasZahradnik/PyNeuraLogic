@@ -43,13 +43,24 @@ class NeuraLogicLayer:
         return self.build_sample(sample)
 
     def state_dict(self) -> Dict:
-        return {"weights": {str(meta.index): weight.value() for meta, weight in zip(self.weights_meta, self.weights)}}
+        weights = {}
+
+        for meta, weight in zip(self.weights_meta, self.weights):
+            if not meta.fixed and meta.index >= 0:
+                weights[meta.index] = weight if isinstance(weight, (int, float)) else weight.value()
+        return {"weights": weights}
 
     def load_state_dict(self, state_dict: Dict):
         weight_dict = state_dict["weights"]
 
-        for meta, weight in zip(self.weights_meta, self.weights):
-            weight.set_value(np.array(weight_dict[str(meta.index)]).reshape(weight.shape()))
+        for i, (meta, weight) in enumerate(zip(self.weights_meta, self.weights)):
+            if meta.index < 0 or meta.fixed:
+                continue
+
+            if isinstance(weight, (int, float)):
+                self.weights[i] = weight_dict[meta.index]
+            else:
+                weight.set_value(np.array(weight_dict[meta.index]).reshape(weight.shape()))
 
     @staticmethod
     def to_dynet_value(value) -> dy.Expression:
