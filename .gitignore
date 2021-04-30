@@ -6,3 +6,5 @@ __pycache__/
 pyneuralogic.egg-info
 dist/
 build/
+
+.ipynb_checkpoints/
