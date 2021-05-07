@@ -1,12 +1,13 @@
 from typing import List, Optional, Dict
-from neuralogic.core.builder import Sample, Weight, Neuron
 import dynet as dy
 import numpy as np
 
+from neuralogic.core.builder import Sample, Weight, Neuron
 from neuralogic.core.settings import Settings
+from neuralogic.nn.base import AbstractNeuraLogic
 
 
-class NeuraLogicLayer:
+class NeuraLogic(AbstractNeuraLogic):
     activations = {
         "Sigmoid": dy.logistic,
         "Average": dy.average,
@@ -15,7 +16,8 @@ class NeuraLogicLayer:
         "Tanh": dy.tanh,
     }
 
-    def __init__(self, model: List[Weight], settings: Optional[Settings] = None):
+    def __init__(self, model: List[Weight], template, settings: Optional[Settings] = None):
+        super().__init__(template)
         if settings is None:
             settings = Settings()
         self.settings = settings
@@ -36,7 +38,7 @@ class NeuraLogicLayer:
         dynet_neurons: List[Optional[dy.Expression]] = [None] * len(sample.neurons)
 
         for neuron in sample.neurons:
-            dynet_neurons[neuron.index] = NeuraLogicLayer.to_dynet_expression(neuron, dynet_neurons, self.weights)
+            dynet_neurons[neuron.index] = NeuraLogic.to_dynet_expression(neuron, dynet_neurons, self.weights)
         return dynet_neurons[sample.neurons[-1].index]
 
     def __call__(self, sample: Sample) -> dy.Expression:
@@ -78,14 +80,14 @@ class NeuraLogicLayer:
     @staticmethod
     def to_dynet_expression(neuron: Neuron, neurons: List[dy.Expression], weights: List):
         if neuron.inputs:
-            out = NeuraLogicLayer.process_neuron_inputs(neuron, neurons, weights)
+            out = NeuraLogic.process_neuron_inputs(neuron, neurons, weights)
         else:
-            out = NeuraLogicLayer.to_dynet_value(neuron.value)
+            out = NeuraLogic.to_dynet_value(neuron.value)
 
         if neuron.activation:
             if neuron.pooling:
                 out = list(out)
-            out = NeuraLogicLayer.activations[neuron.activation](out)
+            out = NeuraLogic.activations[neuron.activation](out)
         return out
 
     @staticmethod

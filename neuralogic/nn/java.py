@@ -1,10 +1,10 @@
 import json
 from collections import Sized
 from typing import Optional, Dict
-
-from neuralogic import get_neuralogic
 from py4j.java_gateway import get_field
 
+from neuralogic import get_neuralogic
+from neuralogic.nn.base import AbstractNeuraLogic
 from neuralogic.core.settings import Settings
 
 
@@ -25,10 +25,12 @@ class Loss:
         return get_field(self.loss.getTarget(), "value")
 
 
-class NeuraLogicLayer:
-    def __init__(self, model, settings: Optional[Settings] = None):
+class NeuraLogic(AbstractNeuraLogic):
+    def __init__(self, model, template, settings: Optional[Settings] = None):
+        super().__init__(template)
         self.namespace = get_neuralogic().cz.cvut.fel.ida.neural.networks.computation.training.strategies
         self.do_train = True
+        self.need_sync = False
 
         if settings is None:
             settings = Settings()
@@ -93,28 +95,4 @@ class NeuraLogicLayer:
         }
 
     def load_state_dict(self, state_dict: Dict):
-        weights = self.neural_model.getAllWeights()
-        weight_dict = state_dict["weights"]
-
-        for weight in weights:
-            if not get_field(weight, "isLearnable"):
-                continue
-            weight_value = get_field(weight, "value")
-
-            index = get_field(weight, "index")
-            value = weight_dict[index]
-
-            if isinstance(value, (float, int)):
-                weight_value.set(0, float(value))
-                continue
-
-            if isinstance(value[0], (float, int)):
-                for i, val in enumerate(value):
-                    weight_value.set(i, float(val))
-                continue
-
-            rows = len(value)
-
-            for i, values in enumerate(value):
-                for j, val in enumerate(values):
-                    weight_value.set(i * rows + j, float(val))
+        self.sync_template(state_dict, self.neural_model.getAllWeights())

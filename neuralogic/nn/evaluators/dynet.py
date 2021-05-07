@@ -2,7 +2,7 @@ from typing import Optional, Dict
 
 import dynet as dy
 
-from neuralogic.nn.dynet import NeuraLogicLayer
+from neuralogic.nn.dynet import NeuraLogic
 from neuralogic.nn.base import AbstractEvaluator
 
 from neuralogic.core import Problem
@@ -19,17 +19,10 @@ class DynetEvaluator(AbstractEvaluator):
 
     def __init__(
         self,
-        problem: Optional[Problem],
-        model: Optional[NeuraLogicLayer],
-        dataset: Optional[Dataset],
+        problem: Problem,
         settings: Settings,
     ):
-        super().__init__(problem, model, dataset, settings)
-
-        if problem is not None:
-            model, dataset = problem.build(Backend.DYNET)
-            self.dataset = dataset
-        self.neuralogic_layer = model
+        super().__init__(Backend.DYNET, problem, settings)
 
     def train(self, generator: bool = True):
         epochs = self.settings.epochs
@@ -38,7 +31,7 @@ class DynetEvaluator(AbstractEvaluator):
         if optimizer not in DynetEvaluator.trainers:
             raise NotImplementedError
 
-        trainer = DynetEvaluator.trainers[optimizer](self.neuralogic_layer.model, self.settings.learning_rate)
+        trainer = DynetEvaluator.trainers[optimizer](self.neuralogic_model.model, self.settings.learning_rate)
 
         def _train():
             for _ in range(epochs):
@@ -49,7 +42,7 @@ class DynetEvaluator(AbstractEvaluator):
 
                 for sample in self.dataset.samples:
                     label = dy.scalarInput(sample.target)
-                    graph_output = self.neuralogic_layer(sample)
+                    graph_output = self.neuralogic_model(sample)
                     loss = dy.squared_distance(graph_output, label)
 
                     total_loss += loss.value()
@@ -72,7 +65,7 @@ class DynetEvaluator(AbstractEvaluator):
             for sample in self.dataset.samples:
                 dy.renew_cg(immediate_compute=False, check_validity=False)
 
-                graph_output = self.neuralogic_layer(sample)
+                graph_output = self.neuralogic_model(sample)
                 label = dy.scalarInput(sample.target)
 
                 results = (label.value(), graph_output.value())
@@ -83,7 +76,7 @@ class DynetEvaluator(AbstractEvaluator):
         return list(_test())
 
     def state_dict(self) -> Dict:
-        return self.neuralogic_layer.state_dict()
+        return self.neuralogic_model.state_dict()
 
     def load_state_dict(self, state_dict: Dict):
-        self.neuralogic_layer.load_state_dict(state_dict)
+        self.neuralogic_model.load_state_dict(state_dict)
