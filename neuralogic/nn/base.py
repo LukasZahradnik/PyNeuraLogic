@@ -3,6 +3,7 @@ from py4j.java_gateway import get_field
 
 from neuralogic.core.settings import Settings
 from neuralogic.core import Problem, Backend
+from neuralogic.utils.data import Dataset
 
 
 class AbstractNeuraLogic:
@@ -52,7 +53,12 @@ class AbstractEvaluator:
     def __init__(self, backend: Backend, problem: Problem, settings: Settings):
         self.settings = settings
         self.problem = problem
-        self.neuralogic_model, self.dataset = problem.build(backend)
+        self.dataset: Optional[Dataset] = None
+        self.neuralogic_model, dataset = problem.build(backend)
+        self.set_dataset(dataset)
+
+    def set_dataset(self, dataset: Dataset):
+        self.dataset = dataset
 
     @property
     def model(self) -> AbstractNeuraLogic:

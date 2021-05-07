@@ -4,6 +4,7 @@ from neuralogic.core.builder import Backend
 from neuralogic.core import Problem
 from neuralogic.nn.base import AbstractEvaluator
 from neuralogic.core.settings import Settings
+from neuralogic.utils.data import Dataset
 
 
 class JavaEvaluator(AbstractEvaluator):
@@ -13,6 +14,9 @@ class JavaEvaluator(AbstractEvaluator):
         settings: Settings,
     ):
         super().__init__(Backend.JAVA, problem, settings)
+
+    def set_dataset(self, dataset: Dataset):
+        self.dataset = dataset
         self.neuralogic_model.set_training_samples(self.dataset.samples)
 
     def train(self, generator: bool = True, epochs: int = None):
