@@ -1,7 +1,6 @@
 from typing import Optional
 
 from neuralogic import get_neuralogic
-from neuralogic.core import Problem
 from neuralogic.core.settings import Settings
 
 from py4j.java_gateway import set_field
@@ -18,11 +17,14 @@ def get_template_drawer():
     return namespace.TemplateDrawer(settings.settings)
 
 
-def draw_problem(problem: Problem, filename: Optional[str] = None, draw_ipython=True, *args, **kwargs):
-    template = problem.get_parsed_template()
+def draw_model(model, filename: Optional[str] = None, draw_ipython=True, *args, **kwargs):
+    if model.need_sync:
+        model.sync_template()
+
+    template = model.template
     template_drawer = get_template_drawer()
 
-    data = template_drawer.drawForPython(template, filename)
+    data: bytes = template_drawer.drawForPython(template, filename)
 
     if filename is None and draw_ipython:
         from IPython.display import Image
