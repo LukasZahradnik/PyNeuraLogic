@@ -88,29 +88,25 @@ class Weight(object):
 
 
 class Builder:
-    @staticmethod
-    def get_builders(settings: Settings, sources: Optional[Sources]):
-        namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.building
-        builder = namespace.End2endTrainigBuilder(settings.settings, None if sources is None else sources.sources)
-        nn_builder = builder.getEnd2endNNBuilder()
+    def __init__(self, settings: Settings):
+        self.builder = Builder.get_builders(settings)
 
-        return builder, nn_builder
+    def get_template_from_file(self, settings: Settings, filename: str):
+        args = [
+            "-t",
+            filename,
+            "-q",
+            filename,
+        ]
 
-    @staticmethod
-    def build(source_pipeline, sources: Optional[Sources]):
-        pipes_namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.pipes.specific
-        serializer_pipe = pipes_namespace.NeuralSerializerPipe()
+        sources = Sources.from_args(args, settings)
+        template = self.builder.buildTemplate(sources.sources)
 
-        source_pipeline.connectAfter(serializer_pipe)
-        source_pipeline.execute(None if sources is None else sources.sources)
-        return serializer_pipe.get()
+        return template
 
-    @staticmethod
-    def from_sources(settings: Settings, backend: Backend, sources: Sources):
-        builder, nn_builder = Builder.get_builders(settings, sources)
-
+    def from_sources(self, parsed_template, sources: Sources, backend: Backend):
         if backend == Backend.JAVA:
-            source_pipeline = nn_builder.buildPipeline()
+            source_pipeline = self.builder.buildPipeline(parsed_template, sources.sources)
             source_pipeline.execute(None if sources is None else sources.sources)
             java_model = source_pipeline.get()
 
@@ -119,7 +115,7 @@ class Builder:
             samples = logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
             return neural_model, samples
 
-        result = Builder.build(nn_builder.buildPipeline(), sources)
+        result = Builder.build(self.builder.buildPipeline(parsed_template, sources.sources), sources)
 
         serialized_weights = list(get_field(result, "r"))
         weights: List = [None] * len(serialized_weights)
@@ -132,12 +128,9 @@ class Builder:
 
         return weights, samples
 
-    @staticmethod
-    def from_problem(parsed_template, logic_samples, backend: Backend, settings: Settings):
-        builder, nn_builder = Builder.get_builders(settings, None)
-
+    def from_problem(self, parsed_template, logic_samples, backend: Backend):
         if backend == Backend.JAVA:
-            source_pipeline = nn_builder.buildPipeline(parsed_template, logic_samples)
+            source_pipeline = self.builder.buildPipeline(parsed_template, logic_samples)
             source_pipeline.execute(None)
             java_model = source_pipeline.get()
 
@@ -147,7 +140,7 @@ class Builder:
             samples = logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
             return neural_model, samples
 
-        result = Builder.build(nn_builder.buildPipeline(parsed_template, logic_samples), None)
+        result = Builder.build(self.builder.buildPipeline(parsed_template, logic_samples), None)
 
         dummy_weight = Weight.get_unit_weight()
         serialized_weights = list(get_field(result, "r"))
@@ -163,3 +156,19 @@ class Builder:
         samples = [Sample(x) for x in stream_to_list(get_field(result, "s"))]
 
         return weights, samples
+
+    @staticmethod
+    def get_builders(settings: Settings):
+        namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.building
+        builder = namespace.PythonBuilder(settings.settings)
+
+        return builder
+
+    @staticmethod
+    def build(source_pipeline, sources: Optional[Sources]):
+        pipes_namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.pipes.specific
+        serializer_pipe = pipes_namespace.NeuralSerializerPipe()
+
+        source_pipeline.connectAfter(serializer_pipe)
+        source_pipeline.execute(None if sources is None else sources.sources)
+        return serializer_pipe.get()

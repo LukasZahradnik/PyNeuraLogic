@@ -2,7 +2,7 @@ from neuralogic import get_neuralogic, get_gateway
 from py4j.java_collections import ListConverter
 from py4j.java_gateway import get_field, set_field
 
-from typing import Union, List, Optional, Iterator, Tuple
+from typing import Union, List, Optional, Iterator
 from contextlib import contextmanager
 
 from neuralogic.core.builder import Builder, Backend
@@ -22,7 +22,14 @@ def stream_to_list(stream) -> List:
 
 
 class Problem:
-    def __init__(self, settings: Optional[Settings] = None):
+    def __init__(
+        self,
+        settings: Optional[Settings] = None,
+        *,
+        template_file: Optional[str] = None,
+        examples_file: Optional[str] = None,
+        queries_file: Optional[str] = None,
+    ):
         if settings is None:
             settings = Settings()
 
@@ -32,12 +39,32 @@ class Problem:
         self.examples: List[TemplateEntries] = []
         self.queries: List[TemplateEntries] = []
 
+        self.builder = Builder(settings)
+        self.parsed_template = None
+
+        if template_file is not None:
+            self.parsed_template = self.builder.get_template_from_file(settings, template_file)
+
+        namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.building
+        self.examples_builder = namespace.ExamplesBuilder(self.java_factory.settings.settings)
+        self.query_builder = namespace.QueriesBuilder(self.java_factory.settings.settings)
+        self.query_builder.setFactoriesFrom(self.examples_builder)
+
+        self.queries_file = queries_file
+        self.examples_file = examples_file
+
         self.counter = 0
 
     def add_rule(self, rule):
+        if self.parsed_template is not None:
+            raise Exception
+
         self.add_rules([rule])
 
     def add_rules(self, rules: List):
+        if self.parsed_template is not None:
+            raise Exception
+
         self.template.extend(rules)
 
     def add_example(self, example):
@@ -46,11 +73,17 @@ class Problem:
     def add_examples(self, examples: List):
         self.examples.extend(examples)
 
+    def set_examples(self, examples: List):
+        self.examples = examples
+
     def add_query(self, query):
         self.add_queries([query])
 
     def add_queries(self, queries: List):
         self.queries.extend(queries)
+
+    def set_queries(self, queries: List):
+        self.queries = queries
 
     def build_queries(self, query_builder):
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.example
@@ -159,30 +192,38 @@ class Problem:
             logic_samples.append(query)
         return logic_samples
 
-    def build(self, backend: Backend):
+    def build(self, backend: Backend, get_model=True):
         from neuralogic.nn import get_neuralogic_layer
-
-        self.counter = 0
 
         previous_factory = get_current_java_factory()
         set_java_factory(self.java_factory)
 
-        namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.building
-        examples_builder = namespace.ExamplesBuilder(self.java_factory.settings.settings)
-        query_builder = namespace.QueriesBuilder(self.java_factory.settings.settings)
-        query_builder.setFactoriesFrom(examples_builder)
+        if self.examples_file is None and self.queries_file is None:
+            examples = self.build_examples(self.examples_builder)
+            queries = self.build_queries(self.query_builder)
+            logic_samples = self.merge_queries_with_examples(queries, examples)
 
-        examples = self.build_examples(examples_builder)
-        queries = self.build_queries(query_builder)
-        logic_samples = self.merge_queries_with_examples(queries, examples)
+            logic_samples = ListConverter().convert(logic_samples, get_gateway()._gateway_client).stream()
 
-        logic_samples = ListConverter().convert(logic_samples, get_gateway()._gateway_client).stream()
-        parsed_template = self.get_parsed_template()
+            if self.parsed_template is None:
+                self.parsed_template = self.get_parsed_template()
+            weights, samples = self.builder.from_problem(self.parsed_template, logic_samples, backend)
+        else:
+            args = ["-t", self.examples_file or self.queries_file]
+            if self.queries_file is not None:
+                args.extend(["-q", self.queries_file])
+            if self.examples_file is not None:
+                args.extend(["-e", self.examples_file])
+            sources = Sources.from_args(args, self.java_factory.settings)
+            weights, samples = self.builder.from_sources(self.parsed_template, sources, backend)
 
         set_java_factory(previous_factory)
-        weights, samples = Builder.from_problem(parsed_template, logic_samples, backend, self.java_factory.settings)
 
-        return get_neuralogic_layer(backend)(weights, self.java_factory.settings), Dataset(samples)
+        if get_model:
+            return get_neuralogic_layer(backend)(weights, self.parsed_template, self.java_factory.settings), Dataset(
+                samples
+            )
+        return Dataset(samples)
 
     @contextmanager
     def context(self) -> Iterator["Problem"]:
@@ -199,42 +240,3 @@ class Problem:
 
     def queries_to_str(self) -> str:
         return "\n".join(str(r) for r in self.queries)
-
-    @staticmethod
-    def build_from_dir(directory: str, backend: Backend, settings: Settings, args: Optional[List] = None):
-        from neuralogic.nn import get_neuralogic_layer
-
-        args = [] if args is None else args
-
-        args.extend(["-sd", str(directory)])
-        sources = Sources.from_args(args, settings)
-
-        weights, samples = Builder.from_sources(settings, backend, sources)
-
-        return get_neuralogic_layer(backend)(weights, settings), Dataset(samples)
-
-    @staticmethod
-    def build_from_files(
-        rules_file: str,
-        backend: Backend,
-        settings: Settings,
-        example_file: Optional[str] = None,
-        queries_file: Optional[str] = None,
-        args: Optional[List] = None,
-    ):
-        from neuralogic.nn import get_neuralogic_layer
-
-        args = [] if args is None else args
-
-        args.extend(["-t", str(rules_file)])
-
-        if queries_file is not None:
-            args.extend(["-q", str(queries_file)])
-        if example_file is not None:
-            args.extend(["-e", str(example_file)])
-
-        sources = Sources.from_args(args, settings)
-
-        weights, samples = Builder.from_sources(settings, backend, sources)
-
-        return get_neuralogic_layer(backend)(weights, settings), Dataset(samples)
