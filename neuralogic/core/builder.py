@@ -1,3 +1,5 @@
+from py4j.java_collections import ListConverter
+
 from neuralogic import get_neuralogic, get_gateway
 from neuralogic.core.settings import Settings
 from neuralogic.core.sources import Sources
@@ -91,7 +93,7 @@ class Builder:
     def __init__(self, settings: Settings):
         self.builder = Builder.get_builders(settings)
 
-    def get_template_from_file(self, settings: Settings, filename: str):
+    def build_template_from_file(self, settings: Settings, filename: str):
         args = [
             "-t",
             filename,
@@ -111,37 +113,35 @@ class Builder:
             java_model = source_pipeline.get()
 
             logic_samples = get_field(java_model, "s")
-            neural_model = get_field(java_model, "r")
-            samples = logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
-            return neural_model, samples
+            return logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
 
         result = Builder.build(self.builder.buildPipeline(parsed_template, sources.sources), sources)
+        return [Sample(x) for x in stream_to_list(get_field(result, "s"))]
 
-        serialized_weights = list(get_field(result, "r"))
-        weights: List = [None] * len(serialized_weights)
-
-        for x in serialized_weights:
-            weight = Weight(x)
-            weights[weight.index] = weight
-
-        samples = [Sample(x) for x in stream_to_list(get_field(result, "s"))]
-
-        return weights, samples
-
-    def from_problem(self, parsed_template, logic_samples, backend: Backend):
+    def from_logic_samples(self, parsed_template, logic_samples, backend: Backend):
         if backend == Backend.JAVA:
             source_pipeline = self.builder.buildPipeline(parsed_template, logic_samples)
             source_pipeline.execute(None)
             java_model = source_pipeline.get()
 
             logic_samples = get_field(java_model, "s")
-            neural_model = get_field(java_model, "r")
-
-            samples = logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
-            return neural_model, samples
+            return logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
 
         result = Builder.build(self.builder.buildPipeline(parsed_template, logic_samples), None)
+        return [Sample(x) for x in stream_to_list(get_field(result, "s"))]
 
+    def build_model(self, parsed_template, backend: Backend):
+        empty_stream = ListConverter().convert([], get_gateway()._gateway_client).stream()
+
+        if backend == Backend.JAVA:
+            source_pipeline = self.builder.buildPipeline(parsed_template, empty_stream)
+            source_pipeline.execute(None)
+            java_model = source_pipeline.get()
+
+            neural_model = get_field(java_model, "r")
+            return neural_model
+
+        result = Builder.build(self.builder.buildPipeline(parsed_template, empty_stream), None)
         dummy_weight = Weight.get_unit_weight()
         serialized_weights = list(get_field(result, "r"))
         weights: List = [dummy_weight] * len(serialized_weights)
@@ -152,10 +152,7 @@ class Builder:
             if weight.index >= len(weights):
                 weights.extend([dummy_weight] * (weight.index - len(weights) + 1))
             weights[weight.index] = weight
-
-        samples = [Sample(x) for x in stream_to_list(get_field(result, "s"))]
-
-        return weights, samples
+        return weights
 
     @staticmethod
     def get_builders(settings: Settings):

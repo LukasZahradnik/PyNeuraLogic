@@ -1,13 +1,15 @@
 from typing import List
 from examples.datasets.data.train_example_data import train_example_data
 
-from neuralogic.core import Atom, Problem, Var, Term
+from neuralogic.core import Atom, Template, Var, Term
 from neuralogic.core.settings import Settings, Optimizer
+from neuralogic.utils.data import Dataset
+
 
 settings = Settings(optimizer=Optimizer.SGD, epochs=300)
+dataset = Dataset()
 
-
-with Problem(settings).context() as problem:
+with Template(settings).context() as template:
     # One example per train, doesn't know order of vagons
 
     # fmt: off
@@ -19,7 +21,7 @@ with Problem(settings).context() as problem:
 
     Y = Var.Y
 
-    problem.add_rules(
+    template.add_rules(
         [
             *[Atom.shape(Y) <= Atom.shape(Y, s)[1,] for s in shapes],
             *[Atom.length(Y) <= Atom.length(Y, s)[1,] for s in [Term.short, Term.long]],
@@ -51,6 +53,5 @@ with Problem(settings).context() as problem:
             ]
         )
 
-    problem.add_examples(examples)
-
-    problem.add_queries([*[Atom.direction[1.0] for _ in range(1, 11)], *[Atom.direction[-1.0] for _ in range(11, 21)]])
+    dataset.add_examples(examples)
+    dataset.add_queries([*[Atom.direction[1.0] for _ in range(1, 11)], *[Atom.direction[-1.0] for _ in range(11, 21)]])
