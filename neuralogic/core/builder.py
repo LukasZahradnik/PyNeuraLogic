@@ -91,6 +91,7 @@ class Weight(object):
 
 class Builder:
     def __init__(self, settings: Settings):
+        self.settings = settings
         self.builder = Builder.get_builders(settings)
 
     def build_template_from_file(self, settings: Settings, filename: str):
@@ -131,17 +132,13 @@ class Builder:
         return [Sample(x) for x in stream_to_list(get_field(result, "s"))]
 
     def build_model(self, parsed_template, backend: Backend):
-        empty_stream = ListConverter().convert([], get_gateway()._gateway_client).stream()
-
         if backend == Backend.JAVA:
-            source_pipeline = self.builder.buildPipeline(parsed_template, empty_stream)
-            source_pipeline.execute(None)
-            java_model = source_pipeline.get()
+            namespace = get_neuralogic().cz.cvut.fel.ida.neural.networks.computation.training
+            return namespace.NeuralModel(parsed_template.getAllWeights(), self.settings.settings)
 
-            neural_model = get_field(java_model, "r")
-            return neural_model
-
+        empty_stream = ListConverter().convert([], get_gateway()._gateway_client).stream()
         result = Builder.build(self.builder.buildPipeline(parsed_template, empty_stream), None)
+
         dummy_weight = Weight.get_unit_weight()
         serialized_weights = list(get_field(result, "r"))
         weights: List = [dummy_weight] * len(serialized_weights)
