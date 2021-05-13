@@ -1,8 +1,8 @@
-from typing import Optional, Tuple
+from typing import Optional
 
 from neuralogic.core.builder import Backend
 from neuralogic.nn.base import AbstractEvaluator
-from neuralogic.core import Problem
+from neuralogic.core import Template
 from neuralogic.core.settings import Settings
 
 
@@ -23,20 +23,20 @@ def get_neuralogic_layer(backend: Backend):
 
 def get_evaluator(
     backend: Backend,
-    problem: Problem,
+    template: Template,
     settings: Optional[Settings] = None,
 ):
     if settings is None:
-        if problem is not None:
-            settings = problem.java_factory.settings
+        if template is not None:
+            settings = template.java_factory.settings
         else:
             settings = Settings()
 
     if backend == Backend.DYNET:
         from neuralogic.nn.evaluators.dynet import DynetEvaluator
 
-        return DynetEvaluator(problem, settings)
+        return DynetEvaluator(template, settings)
     if backend == Backend.JAVA:
         from neuralogic.nn.evaluators.java import JavaEvaluator
 
-        return JavaEvaluator(problem, settings)
+        return JavaEvaluator(template, settings)

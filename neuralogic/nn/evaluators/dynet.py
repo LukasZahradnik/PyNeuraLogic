@@ -1,11 +1,11 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, Union
 
 import dynet as dy
 
 from neuralogic.nn.dynet import NeuraLogic
 from neuralogic.nn.base import AbstractEvaluator
 
-from neuralogic.core import Problem
+from neuralogic.core import Template, BuiltDataset
 from neuralogic.core.settings import Settings, Optimizer
 from neuralogic.core.builder import Backend
 from neuralogic.utils.data import Dataset
@@ -19,12 +19,14 @@ class DynetEvaluator(AbstractEvaluator):
 
     def __init__(
         self,
-        problem: Problem,
+        template: Template,
         settings: Settings,
     ):
-        super().__init__(Backend.DYNET, problem, settings)
+        super().__init__(Backend.DYNET, template, settings)
 
-    def train(self, generator: bool = True):
+    def train(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
+        dataset = self.dataset if dataset is None else self.build_dataset(dataset)
+
         epochs = self.settings.epochs
         optimizer = Optimizer[str(self.settings.optimizer)]
 
@@ -40,7 +42,7 @@ class DynetEvaluator(AbstractEvaluator):
 
                 dy.renew_cg(immediate_compute=False, check_validity=False)
 
-                for sample in self.dataset.samples:
+                for sample in dataset.samples:
                     label = dy.scalarInput(sample.target)
                     graph_output = self.neuralogic_model(sample)
                     loss = dy.squared_distance(graph_output, label)
@@ -60,9 +62,11 @@ class DynetEvaluator(AbstractEvaluator):
             pass
         return stats
 
-    def test(self, generator: bool = True):
+    def test(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
+        dataset = self.dataset if dataset is None else self.build_dataset(dataset)
+
         def _test():
-            for sample in self.dataset.samples:
+            for sample in dataset.samples:
                 dy.renew_cg(immediate_compute=False, check_validity=False)
 
                 graph_output = self.neuralogic_model(sample)

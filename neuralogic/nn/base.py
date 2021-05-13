@@ -1,8 +1,8 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 from py4j.java_gateway import get_field
 
 from neuralogic.core.settings import Settings
-from neuralogic.core import Problem, Backend
+from neuralogic.core import Template, Backend, BuiltDataset
 from neuralogic.utils.data import Dataset
 
 
@@ -50,24 +50,29 @@ class AbstractNeuraLogic:
 
 
 class AbstractEvaluator:
-    def __init__(self, backend: Backend, problem: Problem, settings: Settings):
+    def __init__(self, backend: Backend, template: Template, settings: Settings):
         self.settings = settings
-        self.problem = problem
-        self.dataset: Optional[Dataset] = None
-        self.neuralogic_model, dataset = problem.build(backend)
-        self.set_dataset(dataset)
+        self.template = template
+        self.backend = backend
+        self.dataset: Optional[BuiltDataset] = None
+        self.neuralogic_model = template.build(backend)
 
-    def set_dataset(self, dataset: Dataset):
-        self.dataset = dataset
+    def set_dataset(self, dataset: Union[Dataset, BuiltDataset]):
+        self.dataset = self.build_dataset(dataset)
+
+    def build_dataset(self, dataset: Union[Dataset, BuiltDataset]):
+        if isinstance(dataset, Dataset):
+            dataset = self.template.build_dataset(dataset, self.backend)
+        return dataset
 
     @property
     def model(self) -> AbstractNeuraLogic:
         return self.neuralogic_model
 
-    def train(self, generator: bool = True):
+    def train(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
         pass
 
-    def test(self, generator: bool = True):
+    def test(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
         pass
 
     def state_dict(self) -> Dict:
