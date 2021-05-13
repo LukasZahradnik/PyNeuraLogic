@@ -1,6 +1,6 @@
 import os
 
-from neuralogic.utils.data.dataset import Dataset
+from neuralogic.utils.data.dataset import Dataset, Data
 from neuralogic.core.settings import Settings
 
 base_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "datasets")

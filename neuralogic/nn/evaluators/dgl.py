@@ -4,7 +4,7 @@ import torch
 from neuralogic.nn.dgl import NeuraLogicLayer
 from neuralogic.nn.base import AbstractEvaluator
 
-from neuralogic.core import Problem
+from neuralogic.core import Template
 from neuralogic.core.settings import Settings, Optimizer
 
 
@@ -14,7 +14,7 @@ class DGLEvaluator(AbstractEvaluator):
         Optimizer.ADAM: lambda param, rate: torch.optim.Adam(param, lr=rate),
     }
 
-    def __init__(self, model: Problem, settings: Settings):
+    def __init__(self, model: Template, settings: Settings):
         super().__init__(model, settings)
 
         self.neuralogic_layer = NeuraLogicLayer(None)

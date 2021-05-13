@@ -37,6 +37,7 @@ class Template:
         self,
         settings: Optional[Settings] = None,
         *,
+        template_list: Optional = None,
         template_file: Optional[str] = None,
     ):
         if settings is None:
@@ -55,16 +56,21 @@ class Template:
         self.examples_builder = namespace.ExamplesBuilder(self.java_factory.settings.settings)
         self.query_builder = namespace.QueriesBuilder(self.java_factory.settings.settings)
         self.query_builder.setFactoriesFrom(self.examples_builder)
+
+        self.locked_template = False
         self.counter = 0
+        self.template_list = None
+
+        if template_list is not None and template_file is None:
+            template_list.build(self)
+            self.template_list = template_list
+            self.locked_template = True
 
     def add_rule(self, rule):
-        if self.parsed_template is not None:
-            raise Exception
-
         self.add_rules([rule])
 
     def add_rules(self, rules: List):
-        if self.parsed_template is not None:
+        if self.parsed_template is not None or self.locked_template:
             raise Exception
 
         self.template.extend(rules)
@@ -157,8 +163,23 @@ class Template:
     def build_dataset(self, dataset: Dataset, backend: Backend):
         with self.context():
             if not dataset.file_sources:
-                examples = self.build_examples(dataset.examples, self.examples_builder)
-                queries = self.build_queries(dataset.queries, self.query_builder)
+                examples = dataset.examples
+                queries = dataset.queries
+
+                if dataset.data is not None:
+                    examples = []
+                    queries = []
+
+                    if not self.locked_template:
+                        raise Exception
+
+                    for data in dataset.data:
+                        query, example = self.template_list.to_inputs(self, data.x, data.edge_index, data.y)
+                        queries.append(query)
+                        examples.append(example)
+
+                examples = self.build_examples(examples, self.examples_builder)
+                queries = self.build_queries(queries, self.query_builder)
 
                 logic_samples = Template.merge_queries_with_examples(queries, examples)
                 logic_samples = ListConverter().convert(logic_samples, get_gateway()._gateway_client).stream()
