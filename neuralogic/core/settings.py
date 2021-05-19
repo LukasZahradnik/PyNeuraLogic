@@ -8,8 +8,20 @@ class Optimizer(str, Enum):
     SGD = "SGD"
 
 
+class ErrorFunction(str, Enum):
+    SQUARED_DIFF = "SQUARED_DIFF"
+    # ABS_DIFF = "ABS_DIFF"
+    CROSSENTROPY = "CROSSENTROPY"
+
+
 class Settings:
-    def __init__(self, learning_rate: float = None, optimizer: Optimizer = None, epochs: int = None):
+    def __init__(
+        self,
+        learning_rate: float = None,
+        optimizer: Optimizer = None,
+        epochs: int = None,
+        error_function: ErrorFunction = None,
+    ):
         self.namespace = get_neuralogic().cz.cvut.fel.ida.setup
         self.settings = self.namespace.Settings()
 
@@ -22,10 +34,10 @@ class Settings:
         if epochs is not None:
             self.epochs = epochs
 
+        self.error_function = ErrorFunction.SQUARED_DIFF if error_function is None else error_function
         set_field(self.settings, "debugExporting", False)
         set_field(self.settings, "isoValueCompression", False)
         set_field(self.settings, "exportBlocks", get_gateway().new_array(get_gateway().jvm.java.lang.String, 0))
-
         self.settings.infer()
 
     @property
@@ -57,6 +69,22 @@ class Settings:
         else:
             raise NotImplementedError
         self.settings.setOptimizer(java_optimizer)
+
+    @property
+    def error_function(self):
+        return self.settings.errorFunction
+
+    @error_function.setter
+    def error_function(self, error_function: ErrorFunction):
+        if error_function == ErrorFunction.SQUARED_DIFF:
+            java_error_function = self.namespace.Settings.ErrorFcn.SQUARED_DIFF
+        # elif error_function == ErrorFunction.ABS_DIFF:
+        #     java_error_function = self.namespace.Settings.ErrorFcn.ABS_DIFF
+        elif error_function == ErrorFunction.CROSSENTROPY:
+            java_error_function = self.namespace.Settings.ErrorFcn.CROSSENTROPY
+        else:
+            raise NotImplementedError
+        self.settings.errorFunction = java_error_function
 
     @property
     def epochs(self) -> int:

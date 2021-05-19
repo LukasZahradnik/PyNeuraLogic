@@ -2,11 +2,10 @@ from typing import Optional, Dict, Union
 
 import dynet as dy
 
-from neuralogic.nn.dynet import NeuraLogic
 from neuralogic.nn.base import AbstractEvaluator
 
 from neuralogic.core import Template, BuiltDataset
-from neuralogic.core.settings import Settings, Optimizer
+from neuralogic.core.settings import Settings, Optimizer, ErrorFunction
 from neuralogic.core.builder import Backend
 from neuralogic.utils.data import Dataset
 
@@ -15,6 +14,12 @@ class DynetEvaluator(AbstractEvaluator):
     trainers = {
         Optimizer.SGD: lambda param, rate: dy.SimpleSGDTrainer(param, learning_rate=rate),
         Optimizer.ADAM: lambda param, rate: dy.AdamTrainer(param, alpha=rate),
+    }
+
+    error_functions = {
+        ErrorFunction.SQUARED_DIFF: lambda out, target: dy.squared_distance(out, target),
+        # ErrorFunction.ABS_DIFF: lambda out, target: dy.abs(out - target),
+        # ErrorFunction.CROSSENTROPY: lambda out, target: pass
     }
 
     def __init__(
@@ -28,12 +33,16 @@ class DynetEvaluator(AbstractEvaluator):
         dataset = self.dataset if dataset is None else self.build_dataset(dataset)
 
         epochs = self.settings.epochs
+        error_function = ErrorFunction[str(self.settings.error_function)]
         optimizer = Optimizer[str(self.settings.optimizer)]
 
         if optimizer not in DynetEvaluator.trainers:
             raise NotImplementedError
+        if error_function not in DynetEvaluator.error_functions:
+            raise NotImplementedError
 
         trainer = DynetEvaluator.trainers[optimizer](self.neuralogic_model.model, self.settings.learning_rate)
+        error_function = DynetEvaluator.error_functions[error_function]
 
         def _train():
             for _ in range(epochs):
@@ -45,7 +54,7 @@ class DynetEvaluator(AbstractEvaluator):
                 for sample in dataset.samples:
                     label = dy.scalarInput(sample.target)
                     graph_output = self.neuralogic_model(sample)
-                    loss = dy.squared_distance(graph_output, label)
+                    loss = error_function(graph_output, label)
 
                     total_loss += loss.value()
                     loss.backward()
