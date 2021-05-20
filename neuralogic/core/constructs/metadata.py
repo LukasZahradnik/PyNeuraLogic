@@ -1,22 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass
 
-
-class Activation(Enum):
-    SIGMOID = "sigmoid"
-    TANH = "tanh"
-    SIGNUM = "signum"
-    RELU = "relu"
-    IDENTITY = "identity"
-    LUKASIEWICZ = "lukasiewicz"
-    SOFTMAX = "softmax"
-    SPARSEMAX = "sparsemax"
-
-
-class Aggregation(Enum):
-    SUM = "sum"
-    MAX = "max"
-    AVG = "avg"
+from neuralogic.core.settings import Activation, Aggregation
 
 
 class Metadata:

@@ -14,6 +14,23 @@ class ErrorFunction(str, Enum):
     CROSSENTROPY = "CROSSENTROPY"
 
 
+class Activation(Enum):
+    SIGMOID = "sigmoid"
+    TANH = "tanh"
+    SIGNUM = "signum"
+    RELU = "relu"
+    IDENTITY = "identity"
+    LUKASIEWICZ = "lukasiewicz"
+    SOFTMAX = "softmax"
+    SPARSEMAX = "sparsemax"
+
+
+class Aggregation(Enum):
+    SUM = "sum"
+    MAX = "max"
+    AVG = "avg"
+
+
 class Settings:
     def __init__(
         self,
