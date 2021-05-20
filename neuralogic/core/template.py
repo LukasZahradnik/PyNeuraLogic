@@ -37,7 +37,7 @@ class Template:
         self,
         settings: Optional[Settings] = None,
         *,
-        template_list: Optional = None,
+        module_list: Optional = None,
         template_file: Optional[str] = None,
     ):
         if settings is None:
@@ -59,11 +59,11 @@ class Template:
 
         self.locked_template = False
         self.counter = 0
-        self.template_list = None
+        self.module_list = None
 
-        if template_list is not None and template_file is None:
-            template_list.build(self)
-            self.template_list = template_list
+        if module_list is not None and template_file is None:
+            module_list.build(self)
+            self.module_list = module_list
             self.locked_template = True
 
     def add_rule(self, rule):
@@ -151,8 +151,11 @@ class Template:
         template_namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.types
         return template_namespace.ParsedTemplate(weighted_rules, valued_facts)
 
-    def build(self, backend: Backend):
+    def build(self, backend: Backend, *, native_backend_models=False):
         from neuralogic.nn import get_neuralogic_layer
+
+        if native_backend_models:
+            return get_neuralogic_layer(backend, native_backend_models)(self.module_list)
 
         with self.context():
             if self.parsed_template is None:
@@ -174,7 +177,7 @@ class Template:
                         raise Exception
 
                     for data in dataset.data:
-                        query, example = self.template_list.to_inputs(self, data.x, data.edge_index, data.y)
+                        query, example = self.module_list.to_inputs(self, data.x, data.edge_index, data.y)
                         queries.append(query)
                         examples.append(example)
 

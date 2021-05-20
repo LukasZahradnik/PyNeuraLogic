@@ -6,7 +6,7 @@ from neuralogic.core import Template
 from neuralogic.core.settings import Settings
 
 
-def get_neuralogic_layer(backend: Backend):
+def get_neuralogic_layer(backend: Backend, native_backend_models: bool = False):
     if backend == Backend.DYNET:
         from neuralogic.nn.dynet import NeuraLogic  # type: ignore
 
@@ -19,12 +19,20 @@ def get_neuralogic_layer(backend: Backend):
         from neuralogic.nn.java import NeuraLogic  # type: ignore
 
         return NeuraLogic
+    if backend == Backend.PYG:
+        if native_backend_models:
+            from neuralogic.nn.native.torch import NeuraLogic
+
+            return NeuraLogic
+    raise NotImplementedError
 
 
 def get_evaluator(
     backend: Backend,
     template: Template,
     settings: Optional[Settings] = None,
+    *,
+    native_backend_models=False,
 ):
     if settings is None:
         if template is not None:
