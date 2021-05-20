@@ -3,31 +3,27 @@ from typing import List, Sized, Iterable
 from neuralogic.core import Template, Atom, Var
 from neuralogic.utils.templates.component import AbstractComponent
 
-from neuralogic.utils.templates.gcn import GCN
-from neuralogic.utils.templates.gsage import GraphSAGE
-from neuralogic.utils.templates.gin import GIN
+from neuralogic.utils.templates.gcn import GCNConv
+from neuralogic.utils.templates.gsage import SAGEConv
+from neuralogic.utils.templates.gin import GINConv
+from neuralogic.utils.templates.pooling import Pooling
 
 
 class TemplateList:
-    def __init__(self, components: List[AbstractComponent], out_weight_shape=None, feature_weight_shape=None):
-        self.components = components
-        self.out_weight_shape = out_weight_shape
+    def __init__(self, modules: List[AbstractComponent], num_features=None, feature_weight_shape=None):
+        self.modules = modules
+        self.num_features = num_features
         self.feature_weight_shape = feature_weight_shape
 
     def build(self, template: Template):
         with template.context():
-            previous_name = None
+            previous_names = []
 
             if self.feature_weight_shape is None:
                 template.add_rule(Atom.get(AbstractComponent.features_name)(Var.X) <= Atom.feature(Var.X, Var.Y))
 
-            for i, component in enumerate(self.components):
-                previous_name = component.build(template, i + 1, previous_name)
-
-            if self.out_weight_shape is not None:
-                template.add_rule(Atom.predict[self.out_weight_shape] <= Atom.get(previous_name)(Var.X))
-            else:
-                template.add_rule(Atom.predict <= Atom.get(previous_name)(Var.X))
+            for i, component in enumerate(self.modules):
+                previous_names.append(component.build(template, i + 1, previous_names))
 
     def to_inputs(self, template: Template, x: Iterable, edge_index: Iterable, y: float):
         with template.context():
