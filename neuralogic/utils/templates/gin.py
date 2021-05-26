@@ -22,7 +22,7 @@ class GINConv(AbstractComponent):
             has_edge_attrs=has_edge_attrs,
         )
 
-    def build(self, template: Template, layer_count: int, previous_names: List[str], next_num_channels: int) -> str:
+    def build(self, template: Template, layer_count: int, previous_names: List[str]) -> str:
         name = f"l{layer_count}_gin" if self.name is None else self.name
         embed_name = f"l{layer_count}_gin_embed"
         previous_name = AbstractComponent.features_name if len(previous_names) == 0 else previous_names[-1]
@@ -36,7 +36,7 @@ class GINConv(AbstractComponent):
 
         gin_head = Atom.get(name)
 
-        layer = gin_head(Var.X)[self.in_channels, self.in_channels] <= head_atom[next_num_channels, self.in_channels]
+        layer = gin_head(Var.X)[self.out_channels, self.in_channels] <= head_atom[self.in_channels, self.in_channels]
         template.add_rule(layer | Metadata(activation=self.activation))
         template.add_rule(gin_head / 1 | Metadata(activation=self.activation))
 

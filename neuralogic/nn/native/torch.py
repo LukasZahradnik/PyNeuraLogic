@@ -3,7 +3,7 @@ import torch.nn.functional as F
 import torch_geometric
 
 from neuralogic.core.settings import Activation, Aggregation
-from neuralogic.utils.templates import TemplateList, GINConv, SAGEConv, GCNConv, Pooling
+from neuralogic.utils.templates import TemplateList, GINConv, SAGEConv, GCNConv, GlobalPooling
 
 native_activations = {
     str(Activation.RELU): F.relu,
@@ -28,11 +28,6 @@ class NeuraLogic(torch.nn.Module):
         self.modules = []
         self.evaluations = []
 
-        input_shape = module_list.num_features
-
-        if input_shape is None:
-            raise Exception
-
         for i, module in enumerate(module_list.modules):
             activation = str(module.activation)
             if activation not in native_activations:
@@ -42,23 +37,27 @@ class NeuraLogic(torch.nn.Module):
 
             if isinstance(module, GCNConv):
                 self.modules.append(
-                    torch_geometric.nn.GCNConv(input_shape, out_channels, normalize=False, cached=False, bias=False)
+                    torch_geometric.nn.GCNConv(
+                        module.in_channels, module.out_channels, normalize=False, cached=False, bias=False
+                    )
                 )
             elif isinstance(module, SAGEConv):
-                self.modules.append(torch_geometric.nn.SAGEConv(input_shape, out_channels, normalize=False, bias=False))
+                self.modules.append(
+                    torch_geometric.nn.SAGEConv(module.in_channels, module.out_channels, normalize=False, bias=False)
+                )
             elif isinstance(module, GINConv):
                 mlp = torch.nn.Sequential(
-                    torch.nn.Linear(input_shape, module.in_channels),
+                    torch.nn.Linear(module.in_channels, module.out_channels),
                     torch.nn.ReLU(),
-                    torch.nn.Linear(module.in_channels, out_channels),
+                    torch.nn.Linear(module.out_channels, module.out_channels),
                 )
 
                 self.modules.append(torch_geometric.nn.GINConv(mlp))
-            elif isinstance(module, Pooling):
+            elif isinstance(module, GlobalPooling):
                 pooling_layers = []
 
                 for _ in module.layers:
-                    layer = torch.nn.Linear(input_shape, out_channels, bias=False)
+                    layer = torch.nn.Linear(module.in_channels, module.out_channels, bias=False)
                     pooling_layers.append(layer)
                     self.modules.append(layer)
 
@@ -72,13 +71,10 @@ class NeuraLogic(torch.nn.Module):
                     return native_activations[str(module.activation)](torch.sum(pooling_x, dim=0))
 
                 self.evaluations.append(_pooling)
-                input_shape = module.in_channels
                 continue
             else:
                 raise Exception
-
             self.evaluations.append(lambda x, edge_index, batch, xs: activation_fun(self.modules[i](x, edge_index)))
-            input_shape = module.in_channels
 
     def forward(self, x, edge_index, batch):
         xs = []

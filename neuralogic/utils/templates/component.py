@@ -11,16 +11,18 @@ class AbstractComponent:
         self,
         *,
         in_channels: int,
+        out_channels: int,
         activation: Activation = Activation.IDENTITY,
         aggregation: Aggregation = Aggregation.SUM,
         name=None,
         has_edge_attrs=True,
     ):
         self.in_channels = in_channels
+        self.out_channels = out_channels
         self.has_edge_attrs = has_edge_attrs
         self.aggregation = aggregation
         self.activation = activation
         self.name = name
 
-    def build(self, template: Template, layer_count: int, previous_names: List[str], next_num_channels: int) -> str:
+    def build(self, template: Template, layer_count: int, previous_names: List[str]) -> str:
         pass

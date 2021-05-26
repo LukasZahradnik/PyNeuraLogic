@@ -6,7 +6,7 @@ from neuralogic.utils.templates.component import AbstractComponent
 from neuralogic.utils.templates.gcn import GCNConv
 from neuralogic.utils.templates.gsage import SAGEConv
 from neuralogic.utils.templates.gin import GINConv
-from neuralogic.utils.templates.pooling import Pooling
+from neuralogic.utils.templates.pooling import GlobalPooling
 
 
 class TemplateList:
