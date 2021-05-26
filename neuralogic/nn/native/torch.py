@@ -1,16 +1,15 @@
 import torch
-import torch.nn.functional as F
 import torch_geometric
 
 from neuralogic.core.settings import Activation, Aggregation
 from neuralogic.utils.templates import TemplateList, GINConv, SAGEConv, GCNConv, GlobalPooling, Embedding
 
 native_activations = {
-    str(Activation.RELU): F.relu,
-    str(Activation.TANH): F.tanh,
-    str(Activation.SIGMOID): F.sigmoid,
+    str(Activation.RELU): torch.relu,
+    str(Activation.TANH): torch.tanh,
+    str(Activation.SIGMOID): torch.sigmoid,
     str(Activation.IDENTITY): lambda x: x,
-    str(Activation.SOFTMAX): F.softmax,
+    str(Activation.SOFTMAX): torch.softmax,
     # TODO: Add all activations
 }
 
@@ -25,7 +24,7 @@ class NeuraLogic(torch.nn.Module):
     def __init__(self, module_list: TemplateList):
         super().__init__()
 
-        self.modules = []
+        self.module_list = torch.nn.ModuleList()
         self.evaluations = []
 
         for i, module in enumerate(module_list.modules):
@@ -35,18 +34,18 @@ class NeuraLogic(torch.nn.Module):
             activation_fun = native_activations[activation]
 
             if isinstance(module, Embedding):
-                self.modules.append(torch.nn.Embedding(module.num_embeddings, module.embedding_dim))
-                self.evaluations.append(lambda x, edge_index, batch, xs: self.modules[i](x))
+                self.module_list.append(torch.nn.Embedding(module.num_embeddings, module.embedding_dim))
+                self.evaluations.append(lambda x, edge_index, batch, xs, i=i: self.module_list[i](x))
 
                 continue
             elif isinstance(module, GCNConv):
-                self.modules.append(
+                self.module_list.append(
                     torch_geometric.nn.GCNConv(
                         module.in_channels, module.out_channels, normalize=False, cached=False, bias=False
                     )
                 )
             elif isinstance(module, SAGEConv):
-                self.modules.append(
+                self.module_list.append(
                     torch_geometric.nn.SAGEConv(module.in_channels, module.out_channels, normalize=False, bias=False)
                 )
             elif isinstance(module, GINConv):
@@ -56,18 +55,18 @@ class NeuraLogic(torch.nn.Module):
                     torch.nn.Linear(module.out_channels, module.out_channels),
                 )
 
-                self.modules.append(torch_geometric.nn.GINConv(mlp))
+                self.module_list.append(torch_geometric.nn.GINConv(mlp))
             elif isinstance(module, GlobalPooling):
                 pooling_layers = []
 
                 for _ in module.jumping_knowledge:
                     layer = torch.nn.Linear(module.in_channels, module.out_channels, bias=False)
                     pooling_layers.append(layer)
-                    self.modules.append(layer)
+                    self.module_list.append(layer)
 
-                def _pooling(x, edge_index, batch, xs):
+                def _pooling(x, edge_index, batch, xs, i=i, module=module):
                     pooling_xs = [
-                        self.modules[i + j](native_aggregations[str(module.aggregation)](xs[layer], batch))
+                        self.module_list[i + j](native_aggregations[str(module.aggregation)](xs[layer], batch))
                         for j, layer in enumerate(module.jumping_knowledge)
                     ]
 
@@ -78,12 +77,16 @@ class NeuraLogic(torch.nn.Module):
                 continue
             else:
                 raise Exception
-            self.evaluations.append(lambda x, edge_index, batch, xs: activation_fun(self.modules[i](x, edge_index)))
 
-    def forward(self, x, edge_index, batch):
+            def evaluate(x, edge_index, batch, xs, i=i, activation_fun=activation_fun):
+                return activation_fun(self.module_list[i](x, edge_index))
+
+            self.evaluations.append(evaluate)
+
+    def forward(self, x, edge_index, batch=None):
         xs = []
 
-        for module in self.modules:
-            x = module(x, edge_index, batch, xs)
+        for evaluation in self.evaluations:
+            x = evaluation(x, edge_index, batch, xs)
             xs.append(x)
         return x
