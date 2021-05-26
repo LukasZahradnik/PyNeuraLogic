@@ -9,6 +9,7 @@ class GINConv(AbstractModule):
         self,
         *,
         in_channels: int,
+        out_channels: int,
         activation: Activation = Activation.RELU,
         aggregation: Aggregation = Aggregation.SUM,
         name=None,
@@ -16,6 +17,7 @@ class GINConv(AbstractModule):
     ):
         super().__init__(
             in_channels=in_channels,
+            out_channels=out_channels,
             activation=activation,
             aggregation=aggregation,
             name=name,
@@ -24,7 +26,7 @@ class GINConv(AbstractModule):
 
     def build(self, template: Template, layer_count: int, previous_names: List[str]) -> str:
         name = f"l{layer_count}_gin" if self.name is None else self.name
-        embed_name = f"l{layer_count}_gin_embed"
+        embed_name = f"{name}_embed"
         previous_name = AbstractModule.features_name if len(previous_names) == 0 else previous_names[-1]
 
         head_atom = Atom.get(embed_name)(Var.X)
