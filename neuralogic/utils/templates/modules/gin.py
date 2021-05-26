@@ -1,10 +1,10 @@
 from typing import List
 
 from neuralogic.core import Atom, Template, Var, Metadata, Activation, Aggregation
-from neuralogic.utils.templates.component import AbstractComponent
+from neuralogic.utils.templates.modules import AbstractModule
 
 
-class GINConv(AbstractComponent):
+class GINConv(AbstractModule):
     def __init__(
         self,
         *,
@@ -25,7 +25,7 @@ class GINConv(AbstractComponent):
     def build(self, template: Template, layer_count: int, previous_names: List[str]) -> str:
         name = f"l{layer_count}_gin" if self.name is None else self.name
         embed_name = f"l{layer_count}_gin_embed"
-        previous_name = AbstractComponent.features_name if len(previous_names) == 0 else previous_names[-1]
+        previous_name = AbstractModule.features_name if len(previous_names) == 0 else previous_names[-1]
 
         head_atom = Atom.get(embed_name)(Var.X)
 

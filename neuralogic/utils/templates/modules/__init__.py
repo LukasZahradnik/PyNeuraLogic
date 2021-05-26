@@ -4,7 +4,7 @@ from neuralogic.core import Template
 from neuralogic.core.settings import Aggregation, Activation
 
 
-class AbstractComponent:
+class AbstractModule:
     features_name = "node_features"
 
     def __init__(

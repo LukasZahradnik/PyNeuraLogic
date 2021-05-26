@@ -1,13 +1,13 @@
 from typing import List
 
 from neuralogic.core import Atom, Template, Var, Aggregation, Activation, Metadata
-from neuralogic.utils.templates.component import AbstractComponent
+from neuralogic.utils.templates.modules import AbstractModule
 
 
-class SAGEConv(AbstractComponent):
+class SAGEConv(AbstractModule):
     def build(self, template: Template, layer_count: int, previous_names: List[str]) -> str:
         name = f"l{layer_count}_gsage" if self.name is None else self.name
-        previous_name = AbstractComponent.features_name if len(previous_names) == 0 else previous_names[-1]
+        previous_name = AbstractModule.features_name if len(previous_names) == 0 else previous_names[-1]
 
         head_atom = Atom.get(name)(Var.X)[self.out_channels, self.in_channels]
 

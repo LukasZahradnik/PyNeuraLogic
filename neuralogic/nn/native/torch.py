@@ -3,7 +3,7 @@ import torch.nn.functional as F
 import torch_geometric
 
 from neuralogic.core.settings import Activation, Aggregation
-from neuralogic.utils.templates import TemplateList, GINConv, SAGEConv, GCNConv, GlobalPooling
+from neuralogic.utils.templates import TemplateList, GINConv, SAGEConv, GCNConv, GlobalPooling, Embedding
 
 native_activations = {
     str(Activation.RELU): F.relu,
@@ -33,9 +33,13 @@ class NeuraLogic(torch.nn.Module):
             if activation not in native_activations:
                 raise Exception
             activation_fun = native_activations[activation]
-            out_channels = 1 if i + 1 == len(module_list.modules) else module.in_channels
 
-            if isinstance(module, GCNConv):
+            if isinstance(module, Embedding):
+                self.modules.append(torch.nn.Embedding(module.num_embeddings, module.embedding_dim))
+                self.evaluations.append(lambda x, edge_index, batch, xs: self.modules[i](x))
+
+                continue
+            elif isinstance(module, GCNConv):
                 self.modules.append(
                     torch_geometric.nn.GCNConv(
                         module.in_channels, module.out_channels, normalize=False, cached=False, bias=False
@@ -56,7 +60,7 @@ class NeuraLogic(torch.nn.Module):
             elif isinstance(module, GlobalPooling):
                 pooling_layers = []
 
-                for _ in module.layers:
+                for _ in module.jumping_knowledge:
                     layer = torch.nn.Linear(module.in_channels, module.out_channels, bias=False)
                     pooling_layers.append(layer)
                     self.modules.append(layer)
@@ -64,7 +68,7 @@ class NeuraLogic(torch.nn.Module):
                 def _pooling(x, edge_index, batch, xs):
                     pooling_xs = [
                         self.modules[i + j](native_aggregations[str(module.aggregation)](xs[layer], batch))
-                        for j, layer in enumerate(module.layers)
+                        for j, layer in enumerate(module.jumping_knowledge)
                     ]
 
                     pooling_x = torch.stack(pooling_xs, dim=0)
