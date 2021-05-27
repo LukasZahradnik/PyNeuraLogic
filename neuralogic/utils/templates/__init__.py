@@ -28,12 +28,7 @@ class TemplateList:
         with template.context():
             query = Atom.predict[y]
 
-            example = [Atom.edge(u, v) for u, v in edge_index]
+            example = [Atom.edge(int(u), int(v)) for u, v in zip(edge_index[0], edge_index[1])]
             for i, features in enumerate(x):
-                if isinstance(features, float):
-                    example.append(Atom.feature(i, 0)[features])
-                    continue
-
-                for j, feature in enumerate(features):
-                    example.append(Atom.feature(i, j)[feature])
+                example.append(Atom.feature(i)[features])
         return query, example

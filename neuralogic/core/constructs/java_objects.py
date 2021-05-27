@@ -1,5 +1,5 @@
 from py4j.java_gateway import get_field, set_field
-from typing import Optional, List, Iterable
+from typing import Optional, List, Iterable, Sized
 from py4j.java_collections import ListConverter
 
 from neuralogic import get_neuralogic, get_gateway
@@ -195,22 +195,26 @@ class JavaFactory:
             else:
                 raise NotImplementedError
             initialized = False
-        elif isinstance(weight, List):
+        elif isinstance(weight, Sized) and isinstance(weight, Iterable):
             initialized = True
             if len(weight) == 0:
                 raise NotImplementedError
             if isinstance(weight[0], (int, float)):
                 vector = ListConverter().convert([float(w) for w in weight], get_gateway()._gateway_client)
                 value = self.value_namespace.VectorValue(vector)
-            elif isinstance(weight[0], List):
+            elif isinstance(weight[0], Sized) and isinstance(weight, Iterable):
                 matrix = []
 
-                for weights in weight:
-                    values = [float(w) for w in weights]
-                    matrix.append(ListConverter().convert(values, get_gateway()._gateway_client))
+                try:
+                    for weights in weight:
+                        values = [float(w) for w in weights]
+                        matrix.append(ListConverter().convert(values, get_gateway()._gateway_client))
 
-                matrix = ListConverter().convert(matrix, get_gateway()._gateway_client)
-                value = self.value_namespace.MatrixValue(matrix)
+                    matrix = ListConverter().convert(matrix, get_gateway()._gateway_client)
+                    value = self.value_namespace.MatrixValue(matrix)
+                except TypeError:
+                    vector = ListConverter().convert([float(w) for w in weight], get_gateway()._gateway_client)
+                    value = self.value_namespace.VectorValue(vector)
             else:
                 raise NotImplementedError
         else:
