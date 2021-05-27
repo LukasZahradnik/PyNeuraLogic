@@ -6,6 +6,7 @@ from neuralogic.core.settings import Aggregation, Activation
 
 class AbstractModule:
     features_name = "node_features"
+    edge_name = "edge"
 
     def __init__(
         self,

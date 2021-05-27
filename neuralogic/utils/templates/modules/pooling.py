@@ -28,7 +28,7 @@ class GlobalPooling(AbstractModule):
         name = f"l{layer_count}_pooling" if self.name is None else self.name
 
         if len(previous_names) == 0:
-            previous_names = [AbstractModule.features_name]
+            previous_names = [self.features_name]
 
         head_atom = Atom.get(name)[self.out_channels, self.in_channels]
 
