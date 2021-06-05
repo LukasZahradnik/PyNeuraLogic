@@ -13,15 +13,14 @@ class Data:
         x: Sized = None,
         edge_index: Sized = None,
         edge_attr: Optional[Sized] = None,
+        y_mask: Sized = None,
         y: Sized = None,
     ):
-        if (y is None and edge_index is not None) or (edge_index is None and y is not None):
-            raise Exception
-
         self.x = x
         self.edge_index = edge_index
         self.edge_attr = edge_attr
         self.y = y
+        self.y_mask = y_mask
 
 
 class Dataset:
