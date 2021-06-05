@@ -24,7 +24,7 @@ class Backend(Enum):
 class Sample:
     def __init__(self, sample):
         self.id = get_field(sample, "id")
-        self.target = float(get_field(sample, "target"))
+        self.target = json.loads(get_field(sample, "target"))
         self.output_neuron = get_field(sample, "neuron")
         self.neurons = self.deserialize_network(get_field(sample, "network"))
         self.output_neuron = self.neurons[-1].index
@@ -63,7 +63,7 @@ class Neuron:
             self.inputs = list(self.inputs)
 
 
-class Weight(object):
+class Weight:
     def __init__(self, weight):
         self.index: int = get_field(weight, "index")
         self.name = get_field(weight, "name")

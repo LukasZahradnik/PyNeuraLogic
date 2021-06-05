@@ -173,13 +173,12 @@ class Template:
                     examples = []
                     queries = []
 
-                    if not self.locked_template:
-                        raise Exception
-
                     for data in dataset.data:
-                        query, example = self.module_list.to_inputs(self, data.x, data.edge_index, data.y)
-                        queries.append(query)
+                        from neuralogic.utils.templates import TemplateList
+
+                        query, example = TemplateList.to_inputs(self, data.x, data.edge_index, data.y, data.y_mask)
                         examples.append(example)
+                        queries.extend(query)
 
                 examples = self.build_examples(examples, self.examples_builder)
                 queries = self.build_queries(queries, self.query_builder)
