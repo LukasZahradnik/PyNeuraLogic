@@ -52,8 +52,9 @@ class DynetEvaluator(AbstractEvaluator):
                 dy.renew_cg(immediate_compute=False, check_validity=False)
 
                 for sample in dataset.samples:
-                    label = dy.scalarInput(sample.target)
+                    label = dy.inputTensor(sample.target)
                     graph_output = self.neuralogic_model(sample)
+
                     loss = error_function(graph_output, label)
 
                     total_loss += loss.value()
@@ -79,7 +80,7 @@ class DynetEvaluator(AbstractEvaluator):
                 dy.renew_cg(immediate_compute=False, check_validity=False)
 
                 graph_output = self.neuralogic_model(sample)
-                label = dy.scalarInput(sample.target)
+                label = dy.inputTensor(sample.target)
 
                 results = (label.value(), graph_output.value())
                 yield results
