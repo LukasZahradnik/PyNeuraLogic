@@ -11,6 +11,10 @@ from neuralogic.utils.templates.modules.embedding import Embedding
 
 
 class TemplateList:
+    edge_name = "edge"
+    feature_name = "node_feature"
+    output_name = "predict"
+
     def __init__(self, modules: List[AbstractModule]):
         self.modules = modules
 
@@ -22,13 +26,23 @@ class TemplateList:
             previous_names = []
 
             for i, component in enumerate(self.modules):
-                previous_names.append(component.build(template, i + 1, previous_names))
+                previous_names.append(
+                    component.build(template, i + 1, previous_names, self.feature_name, self.edge_name)
+                )
 
-    def to_inputs(self, template: Template, x: Iterable, edge_index: Iterable, y: float):
+    @staticmethod
+    def to_inputs(template: Template, x: Iterable, edge_index: Iterable, y, y_mask):
         with template.context():
-            query = Atom.predict[y]
-
-            example = [Atom.edge(int(u), int(v)) for u, v in zip(edge_index[0], edge_index[1])]
+            if y is None:
+                queries = [Atom.get(TemplateList.output_name)]
+            else:
+                queries = [
+                    Atom.get(TemplateList.output_name)(*term if isinstance(term, list) else term)[value]
+                    for term, value in zip(y_mask, y)
+                ]
+            example = [
+                Atom.get(TemplateList.edge_name)(int(u), int(v))[1] for u, v in zip(edge_index[0], edge_index[1])
+            ]
             for i, features in enumerate(x):
-                example.append(Atom.feature(i)[features])
-        return query, example
+                example.append(Atom.get(TemplateList.feature_name)(i)[features[0]])
+        return queries, example

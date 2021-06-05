@@ -14,6 +14,7 @@ class GlobalPooling(AbstractModule):
         name=None,
         activation: Activation = Activation.SIGMOID,
         aggregation: Aggregation = Aggregation.AVG,
+        parametrized: bool = False,
     ):
         super().__init__(
             name=name,
@@ -22,19 +23,25 @@ class GlobalPooling(AbstractModule):
             activation=activation,
             aggregation=aggregation,
         )
+        self.parametrized = parametrized
         self.jumping_knowledge = jumping_knowledge
 
-    def build(self, template: Template, layer_count: int, previous_names: List[str]) -> str:
+    def build(
+        self, template: Template, layer_count: int, previous_names: List[str], feature_name: str, edge_name: str
+    ) -> str:
         name = f"l{layer_count}_pooling" if self.name is None else self.name
 
         if len(previous_names) == 0:
-            previous_names = [self.features_name]
+            previous_names = [feature_name]
 
-        head_atom = Atom.get(name)[self.out_channels, self.in_channels]
+        if self.parametrized:
+            head_atom = Atom.get(name)(Var.X)[self.out_channels, self.in_channels]
+        else:
+            head_atom = Atom.get(name)[self.out_channels, self.in_channels]
 
         for layer in self.jumping_knowledge:
             rule = head_atom <= Atom.get(previous_names[layer])(Var.X)
             template.add_rule(rule | Metadata(aggregation=self.aggregation, activation=Activation.IDENTITY))
 
-        template.add_rule(Atom.get(name) / 0 | Metadata(activation=self.activation))
+        template.add_rule(head_atom.predicate | Metadata(activation=self.activation))
         return name
