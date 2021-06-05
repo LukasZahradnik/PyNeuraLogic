@@ -18,6 +18,7 @@ class NeuraLogic(AbstractNeuraLogic):
 
     def __init__(self, model: List[Weight], template, settings: Optional[Settings] = None):
         super().__init__(template)
+
         if settings is None:
             settings = Settings()
         self.settings = settings
@@ -30,7 +31,9 @@ class NeuraLogic(AbstractNeuraLogic):
 
     def reset_parameters(self):
         self.weights = [
-            weight.value if weight.fixed else self.model.add_parameters(weight.dimensions, init="uniform")
+            self.model.add_parameters(weight.dimensions, init=np.array(weight.value))
+            if weight.fixed
+            else self.model.add_parameters(weight.dimensions, init="uniform")
             for weight in self.weights_meta
         ]
 
@@ -38,7 +41,7 @@ class NeuraLogic(AbstractNeuraLogic):
         dynet_neurons: List[Optional[dy.Expression]] = [None] * len(sample.neurons)
 
         for neuron in sample.neurons:
-            dynet_neurons[neuron.index] = NeuraLogic.to_dynet_expression(neuron, dynet_neurons, self.weights)
+            dynet_neurons[neuron.index] = self.to_dynet_expression(neuron, dynet_neurons, self.weights)
         return dynet_neurons[sample.neurons[-1].index]
 
     def __call__(self, sample: Sample) -> dy.Expression:
@@ -77,33 +80,33 @@ class NeuraLogic(AbstractNeuraLogic):
             return res
         return dy.inputTensor(value, dim)
 
-    @staticmethod
-    def to_dynet_expression(neuron: Neuron, neurons: List[dy.Expression], weights: List):
+    def to_dynet_expression(self, neuron: Neuron, neurons: List[dy.Expression], weights: List):
         if neuron.inputs:
-            out = NeuraLogic.process_neuron_inputs(neuron, neurons, weights)
+            out = self.process_neuron_inputs(neuron, neurons, weights)
         else:
-            out = NeuraLogic.to_dynet_value(neuron.value)
+            out = [NeuraLogic.to_dynet_value(neuron.value)]
 
         if neuron.activation:
-            if neuron.pooling:
-                out = list(out)
+            if not neuron.pooling:
+                out = sum(out)
             out = NeuraLogic.activations[neuron.activation](out)
+        else:
+            out = sum(out)
         return out
 
-    @staticmethod
-    def process_neuron_inputs(neuron: Neuron, neurons: List, weights: List[dy.Parameters]) -> dy.Expression:
+    def process_neuron_inputs(self, neuron: Neuron, neurons: List, weights: List[dy.Parameters]) -> List[dy.Expression]:
+        out = []
+
         if neuron.weights:
-            if neurons[neuron.inputs[0]].dim()[0] == (1,) and not isinstance(weights[neuron.weights[0]], int):
-                out = dy.cmult(neurons[neuron.inputs[0]], weights[neuron.weights[0]])
-            else:
-                out = weights[neuron.weights[0]] * neurons[neuron.inputs[0]]
-            for w, i in zip(neuron.weights[1:], neuron.inputs[1:]):
-                if neurons[i].dim()[0] == (1,) and not isinstance(weights[w], int):
-                    out += dy.cmult(weights[w], neurons[i])
+            for w, i in zip(neuron.weights, neuron.inputs):
+                weight = weights[w]
+                if self.weights_meta[w].fixed:
+                    weight = dy.const_parameter(weight)
+                if neurons[i].dim()[0] == (1,) and not isinstance(weight, int):
+                    out.append(dy.cmult(weight, neurons[i]))
                 else:
-                    out += weights[w] * neurons[i]
+                    out.append(weight * neurons[i])
         else:
-            out = neurons[neuron.inputs[0]]
-            for i in neuron.inputs[1:]:
-                out += neurons[i]
+            for i in neuron.inputs:
+                out.append(neurons[i])
         return out
