@@ -1,4 +1,7 @@
 from typing import Iterable, Union
+
+from py4j.java_gateway import set_field, get_field
+
 from neuralogic.core.constructs.predicate import Predicate
 from neuralogic.core.constructs.java_objects import get_java_factory
 from neuralogic.core.constructs import rule, factories
@@ -89,7 +92,9 @@ class WeightedAtom:
     def fixed(self) -> "WeightedAtom":
         if self.is_fixed:
             raise Exception
-        return WeightedAtom(self.atom, self.weight, True)
+
+        set_field(get_field(self.java_object, "weight"), "isFixed", True)
+        return self  # WeightedAtom(self.atom, self.weight, True)
 
     @property
     def negated(self):
