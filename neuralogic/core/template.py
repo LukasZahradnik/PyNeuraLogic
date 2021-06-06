@@ -2,13 +2,13 @@ from neuralogic import get_neuralogic, get_gateway
 from py4j.java_collections import ListConverter
 from py4j.java_gateway import get_field, set_field
 
-from typing import Union, List, Optional, Iterator
+from typing import Union, List, Optional, Iterator, Set, Dict, Any, Callable
 from contextlib import contextmanager
 
 from neuralogic.core.builder import Builder, Backend
 from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
 from neuralogic.core.constructs.rule import Rule
-from neuralogic.core.constructs.predicate import PredicateMetadata
+from neuralogic.core.constructs.predicate import PredicateMetadata, Predicate
 from neuralogic.core.constructs.java_objects import get_current_java_factory, set_java_factory, JavaFactory
 from neuralogic.core.settings import Settings
 from neuralogic.core.sources import Sources
@@ -62,9 +62,27 @@ class Template:
         self.module_list = None
 
         if module_list is not None and template_file is None:
-            module_list.build(self)
             self.module_list = module_list
+            module_list.build(self)
             self.locked_template = True
+
+        self.hooks: Dict[str, Set] = {}
+
+    def add_hook(self, predicate: Union[Predicate, str], callback, aggregation: bool = False):
+        name = f"{'agg' if aggregation else 'none'} {predicate}"
+
+        if name not in self.hooks:
+            self.hooks[name] = {callback}
+        else:
+            self.hooks[name].add(callback)
+
+    def remove_hook(self, predicate: Union[Predicate, str], callback, aggregation: bool = False):
+        name = f"{'agg' if aggregation else 'none'} {predicate}"
+
+        if name not in self.hooks:
+            print("err")
+            return
+        self.hooks[name].discard(callback)
 
     def add_rule(self, rule):
         self.add_rules([rule])

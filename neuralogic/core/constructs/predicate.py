@@ -1,11 +1,11 @@
-from neuralogic.core.constructs.java_objects import get_java_factory
+from neuralogic.core.constructs.java_objects import get_java_factory, get_current_java_factory
 from neuralogic.core.constructs.metadata import Metadata
 
 
 class Predicate:
     """WeightedPredicate"""
 
-    def __init__(self, name, arity, private, special):
+    def __init__(self, name, arity, private=False, special=False):
         self.name = name
         self.arity = arity
         self.private = private

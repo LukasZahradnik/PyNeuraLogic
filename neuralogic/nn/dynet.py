@@ -38,6 +38,8 @@ class NeuraLogic(AbstractNeuraLogic):
         ]
 
     def build_sample(self, sample: Sample) -> dy.Expression:
+        self.hooks_set = len(self.hooks) != 0
+
         dynet_neurons: List[Optional[dy.Expression]] = [None] * len(sample.neurons)
 
         for neuron in sample.neurons:
@@ -92,6 +94,9 @@ class NeuraLogic(AbstractNeuraLogic):
             out = NeuraLogic.activations[neuron.activation](out)
         else:
             out = sum(out)
+
+        if self.hooks_set and neuron.hook_name in self.hooks:
+            self.run_hook(neuron.hook_name, out.value(), neuron.name)
         return out
 
     def process_neuron_inputs(self, neuron: Neuron, neurons: List, weights: List[dy.Parameters]) -> List[dy.Expression]:

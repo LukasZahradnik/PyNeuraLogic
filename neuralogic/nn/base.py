@@ -11,8 +11,19 @@ class AbstractNeuraLogic:
         self.need_sync = True
         self.template = template
 
+        self.hooks_set = False
+        self.hooks = None
+
     def __call__(self, sample):
         raise NotImplementedError
+
+    def set_hooks(self, hooks):
+        self.hooks_set = len(hooks) != 0
+        self.hooks = hooks
+
+    def run_hook(self, hook: str, value, name):
+        for callback in self.hooks[hook]:
+            callback(name, value)
 
     def sync_template(self, state_dict: Optional[Dict] = None, weights=None):
         state_dict = self.state_dict() if state_dict is None else state_dict
@@ -56,6 +67,7 @@ class AbstractEvaluator:
         self.backend = backend
         self.dataset: Optional[BuiltDataset] = None
         self.neuralogic_model = template.build(backend)
+        self.neuralogic_model.set_hooks(template.hooks)
 
     def set_dataset(self, dataset: Union[Dataset, BuiltDataset]):
         self.dataset = self.build_dataset(dataset)

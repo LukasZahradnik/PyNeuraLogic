@@ -52,6 +52,7 @@ class Neuron:
         self.offset = get_field(neuron, "offset")
         self.value = get_field(neuron, "value")
         self.pooling = get_field(neuron, "pooling")
+        self.hook_name = Neuron.parse_hook_name(self.name)
 
         if self.value:
             self.value = json.loads(self.value)
@@ -61,6 +62,30 @@ class Neuron:
 
         if self.inputs is not None:
             self.inputs = list(self.inputs)
+
+    @staticmethod
+    def parse_hook_name(name: str):
+        name = name.split(" ")
+        type = name[0]
+
+        if len(name) == 3 or len(name) == 4:
+            name = name[len(name) - 1]
+        else:
+            for i, val in enumerate(name):
+                if val == ":-":
+                    name = name[i - 1]
+                    break
+            else:
+                name = name[2]
+
+        name = name.split("(")
+        terms = [] if len(name) == 1 else ",".split(name[1])
+
+        if type == "RuleNeuron":
+            return f"rule {name[0]}/{len(terms)}"
+        elif type == "AggregationNeuron":
+            return f"agg {name[0]}/{len(terms)}"
+        return f"none {name[0]}/{len(terms)}"
 
 
 class Weight:
