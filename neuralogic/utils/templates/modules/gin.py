@@ -7,9 +7,9 @@ from neuralogic.utils.templates.modules import AbstractModule
 class GINConv(AbstractModule):
     def __init__(
         self,
-        *,
         in_channels: int,
         out_channels: int,
+        *,
         activation: Activation = Activation.RELU,
         aggregation: Aggregation = Aggregation.SUM,
         name=None,

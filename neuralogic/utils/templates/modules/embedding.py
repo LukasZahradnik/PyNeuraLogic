@@ -7,9 +7,9 @@ from neuralogic.utils.templates.modules import AbstractModule
 class Embedding(AbstractModule):
     def __init__(
         self,
-        *,
         num_embeddings: int,
         embedding_dim: int,
+        *,
         name=None,
     ):
         super().__init__(

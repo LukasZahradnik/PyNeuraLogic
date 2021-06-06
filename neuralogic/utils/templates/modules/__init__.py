@@ -7,9 +7,9 @@ from neuralogic.core.settings import Aggregation, Activation
 class AbstractModule:
     def __init__(
         self,
-        *,
         in_channels: int,
         out_channels: int,
+        *,
         activation: Activation = Activation.IDENTITY,
         aggregation: Aggregation = Aggregation.SUM,
         name=None,

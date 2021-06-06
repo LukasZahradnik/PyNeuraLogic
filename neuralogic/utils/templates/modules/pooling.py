@@ -7,9 +7,9 @@ from neuralogic.utils.templates.modules import AbstractModule
 class GlobalPooling(AbstractModule):
     def __init__(
         self,
-        *,
         in_channels: int,
         out_channels: int,
+        *,
         jumping_knowledge=(-1,),
         name=None,
         activation: Activation = Activation.SIGMOID,
