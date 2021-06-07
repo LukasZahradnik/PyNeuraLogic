@@ -95,8 +95,8 @@ class NeuraLogic(AbstractNeuraLogic):
         else:
             out = sum(out)
 
-        if self.hooks_set and neuron.hook_name in self.hooks:
-            self.run_hook(neuron.hook_name, out.value(), neuron.name)
+        if self.hooks_set and neuron.hook_name is not None and neuron.hook_name in self.hooks:
+            self.run_hook(neuron.hook_name, out.value())
         return out
 
     def process_neuron_inputs(self, neuron: Neuron, neurons: List, weights: List[dy.Parameters]) -> List[dy.Expression]:

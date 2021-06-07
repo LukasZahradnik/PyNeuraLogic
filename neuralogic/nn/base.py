@@ -21,9 +21,9 @@ class AbstractNeuraLogic:
         self.hooks_set = len(hooks) != 0
         self.hooks = hooks
 
-    def run_hook(self, hook: str, value, name):
+    def run_hook(self, hook: str, value):
         for callback in self.hooks[hook]:
-            callback(name, value)
+            callback(value)
 
     def sync_template(self, state_dict: Optional[Dict] = None, weights=None):
         state_dict = self.state_dict() if state_dict is None else state_dict

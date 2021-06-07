@@ -68,19 +68,24 @@ class Template:
 
         self.hooks: Dict[str, Set] = {}
 
-    def add_hook(self, predicate: Union[Predicate, str], callback, aggregation: bool = False):
-        name = f"{'agg' if aggregation else 'none'} {predicate}"
+    def add_hook(self, atom: Union[BaseAtom, str], callback):
+        name = str(atom)
+
+        if isinstance(atom, BaseAtom):
+            name = name[:-1]
 
         if name not in self.hooks:
             self.hooks[name] = {callback}
         else:
             self.hooks[name].add(callback)
 
-    def remove_hook(self, predicate: Union[Predicate, str], callback, aggregation: bool = False):
-        name = f"{'agg' if aggregation else 'none'} {predicate}"
+    def remove_hook(self, atom: Union[BaseAtom, str], callback):
+        name = str(atom)
+
+        if isinstance(atom, BaseAtom):
+            name = name[:-1]
 
         if name not in self.hooks:
-            print("err")
             return
         self.hooks[name].discard(callback)
 
