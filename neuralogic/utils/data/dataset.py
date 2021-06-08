@@ -22,6 +22,20 @@ class Data:
         self.y = y
         self.y_mask = y_mask
 
+    def from_pyg(self, data) -> List["Data"]:
+        data_list = []
+
+        if hasattr(data, "train_mask"):
+            data_list.append(Data(data.x, data.edge_index, data.edge_attr, data.train_mask, data.y))
+        if hasattr(data, "test_mask"):
+            data_list.append(Data(data.x, data.edge_index, data.edge_attr, data.test_mask, data.y))
+        if hasattr(data, "val_mask"):
+            data_list.append(Data(data.x, data.edge_index, data.edge_attr, data.val_mask, data.y))
+        if len(data_list) == 0:
+            data_list.append(Data(data.x, data.edge_index, data.edge_attr, None, data.y))
+
+        return data_list
+
 
 class Dataset:
     def __init__(
