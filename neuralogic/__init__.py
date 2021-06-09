@@ -54,6 +54,8 @@ def initialize(die_on_exit=True):
         daemonize_redirect=True,
     )
 
+    gateway.start_callback_server(gateway.callback_server_parameters)
+
     neuralogic = gateway.jvm
 
 

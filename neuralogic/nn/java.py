@@ -2,8 +2,9 @@ import json
 from collections import Sized
 from typing import Optional, Dict
 from py4j.java_gateway import get_field
+from py4j.java_collections import SetConverter
 
-from neuralogic import get_neuralogic
+from neuralogic import get_neuralogic, get_gateway
 from neuralogic.nn.base import AbstractNeuraLogic
 from neuralogic.core.settings import Settings
 
@@ -26,6 +27,16 @@ class Loss:
 
 
 class NeuraLogic(AbstractNeuraLogic):
+    class HookHandler:
+        def __init__(self, module: "NeuraLogic"):
+            self.module = module
+
+        def handleHook(self, hook, value):
+            self.module.run_hook(hook, json.loads(value))
+
+        class Java:
+            implements = ["cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler"]
+
     def __init__(self, model, template, settings: Optional[Settings] = None):
         super().__init__(template)
         self.namespace = get_neuralogic().cz.cvut.fel.ida.neural.networks.computation.training.strategies
@@ -39,6 +50,8 @@ class NeuraLogic(AbstractNeuraLogic):
         self.neural_model = model
         self.strategy = self.namespace.PythonTrainingStrategy(settings.settings, model)
         self.samples_len = 0
+
+        self.hook_handler = NeuraLogic.HookHandler(self)
         self.reset_parameters()
 
     def reset_parameters(self):
@@ -55,6 +68,13 @@ class NeuraLogic(AbstractNeuraLogic):
         self.strategy.setSamples(samples)
 
     def __call__(self, samples=None, train: bool = None, auto_backprop: bool = False, epochs: int = 1):
+        self.hooks_set = len(self.hooks) != 0
+
+        if self.hooks_set:
+            self.strategy.setHooks(
+                SetConverter().convert(set(self.hooks.keys()), get_gateway()._gateway_client), self.hook_handler
+            )
+
         if train is not None:
             self.do_train = train
 
