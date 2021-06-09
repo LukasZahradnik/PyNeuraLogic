@@ -22,6 +22,31 @@ def get_template_drawer(settings: Settings):
     return namespace.TemplateDrawer(settings.settings)
 
 
+def get_sample_drawer(settings: Settings):
+    namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.debugging.drawing
+
+    return namespace.NeuralNetDrawer(settings.settings)
+
+
+def draw(drawer, obj, filename: Optional[str] = None, draw_ipython=True, *args, **kwargs):
+    if filename is not None:
+        drawer.drawIntoFile(obj, filename)
+
+        return
+
+    data = drawer.drawIntoBytes(obj)
+
+    if draw_ipython:
+        from IPython.display import Image
+
+        return Image(data, *args, **kwargs)
+    return data
+
+
+def to_dot_source(drawer, obj) -> str:
+    return drawer.getGraphSource(obj)
+
+
 def draw_model(model, filename: Optional[str] = None, draw_ipython=True, img_type="png", *args, **kwargs):
     if model.need_sync:
         model.sync_template()
@@ -29,18 +54,13 @@ def draw_model(model, filename: Optional[str] = None, draw_ipython=True, img_typ
     template = model.template
     template_drawer = get_template_drawer(get_drawing_settings(img_type=img_type))
 
-    if filename is not None:
-        template_drawer.drawIntoFile(template, filename)
+    return draw(template_drawer, template, filename, draw_ipython, *args, **kwargs)
 
-        return
 
-    data = template_drawer.drawIntoBytes(template)
+def draw_sample(sample, filename: Optional[str] = None, draw_ipython=True, img_type="png", *args, **kwargs):
+    sample_drawer = get_sample_drawer(get_drawing_settings(img_type=img_type))
 
-    if draw_ipython:
-        from IPython.display import Image
-
-        return Image(data, *args, **kwargs)
-    return data
+    return draw(sample_drawer, sample, filename, draw_ipython, *args, **kwargs)
 
 
 def model_to_dot_source(model) -> str:
@@ -50,4 +70,10 @@ def model_to_dot_source(model) -> str:
     template = model.template
     template_drawer = get_template_drawer(get_drawing_settings())
 
-    return template_drawer.getGraphSource(template)
+    return to_dot_source(template_drawer, template)
+
+
+def sample_to_dot_source(sample) -> str:
+    sample_drawer = get_sample_drawer(get_drawing_settings())
+
+    return to_dot_source(sample_drawer, sample)
