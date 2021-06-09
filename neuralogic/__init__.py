@@ -2,7 +2,8 @@ from typing import Union, Optional
 from pathlib import Path
 from contextlib import contextmanager
 import os
-from py4j.java_gateway import JavaGateway, JVMView
+from py4j.java_gateway import JavaGateway, JVMView, CallbackServerParameters
+from py4j.protocol import unescape_new_line
 
 neuralogic: Optional[JVMView] = None
 gateway: Optional[JavaGateway] = None
@@ -54,7 +55,15 @@ def initialize(die_on_exit=True):
         daemonize_redirect=True,
     )
 
-    gateway.start_callback_server(gateway.callback_server_parameters)
+    raw_token = unescape_new_line(gateway.gateway_parameters.auth_token)
+    params = CallbackServerParameters(
+        eager_load=False,
+        auth_token=raw_token,
+        daemonize_connections=True,
+        daemonize=True,
+    )
+
+    gateway.start_callback_server(params)
 
     neuralogic = gateway.jvm
 
