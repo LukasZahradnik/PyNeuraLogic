@@ -3,3 +3,5 @@ antlr4-python3-runtime
 pre-commit
 py4j
 numpy
+
+# todo gusta: toto neni zdaleka uplne pro spousteni examples, +zamrazit verze (aspon trochu), a vytvorit i yaml pro condu (hojne pouzivana)

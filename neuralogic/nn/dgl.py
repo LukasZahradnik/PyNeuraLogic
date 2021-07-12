@@ -3,7 +3,7 @@ import dgl.function as fn
 import torch
 from typing import List
 from torch.nn import Parameter, ParameterList, Sequential
-from neuralogic.builder import Weight
+from neuralogic.core.builder import Weight   #todo gusta: byl rozbity import...(neuralogic.builder->neuralogic.core.builder)
 from neuralogic.preprocessing import ProcessedSample, Layer
 
 

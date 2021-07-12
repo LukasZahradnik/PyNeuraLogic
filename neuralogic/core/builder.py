@@ -21,7 +21,7 @@ class Backend(Enum):
     JAVA = "java"
 
 
-class Sample:
+class Sample:   #todo gusta: tohle bych mozna trochu refaktoroval/dekomponoval/preusporadal, blbe se to pak hleda...(napr. processedSample mas uplne jinde)
     def __init__(self, sample):
         self.id = get_field(sample, "id")
         self.target = json.loads(get_field(sample, "target"))
@@ -107,7 +107,7 @@ class Builder:
         args = [
             "-t",
             filename,
-            "-q",
+            "-q",   #todo gusta: predavas template jako queries?
             filename,
         ]
 

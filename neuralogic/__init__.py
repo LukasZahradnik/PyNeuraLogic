@@ -61,6 +61,7 @@ def initialize(die_on_exit=True):
         auth_token=raw_token,
         daemonize_connections=True,
         daemonize=True,
+        port=25333 #todo gusta: the port changes were causing me problems when starting multiple sessions...(ale mozna jsem to poustel blbe?)
     )
 
     gateway.start_callback_server(params)

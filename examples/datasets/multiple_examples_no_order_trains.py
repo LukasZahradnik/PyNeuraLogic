@@ -19,7 +19,7 @@ with Template(settings).context() as template:
     loadshapes = [Term.hexagon, Term.triangle, Term.diamond, Term.rectangle, Term.circle]
     vagon_atoms = [Atom.shape, Atom.length, Atom.sides, Atom.wheels, Atom.loadnum, Atom.loadshape, Atom.roof]
 
-    Y = Var.Y
+    Y = Var.Y   #todo gusta: tohle je dobry trik, ten bych pouzival na vic mistech, a podobne pro Atom/Predicate factories udelat zkratky (treba P.)
 
     template.add_rules(
         [

@@ -30,6 +30,11 @@ class Embedding(AbstractModule):
         head_atom = Atom.get(name)(Var.X)
         feature_rule = head_atom[self.num_embeddings, self.embedding_dim] <= Atom.get(previous_name)(Var.X)
 
+        #todo gusta: toto je jenom linearni projekci vrstva, tj. embedding jen pokud maji i vstupy unikatni (one-hot) hodnoty.
+        # Nova verze pro unikatni embeddings je:
+        # @embed...(X,...) :- cokoliv(X,...),...
+        # ..to vytvori skutecne unikatni @embed...(x) Valued Atom za kazdy validni unikatni objekt x
+
         template.add_rule(feature_rule | Metadata(activation=Activation.IDENTITY))
         template.add_rule(Atom.get(name) / 1 | Metadata(activation=Activation.IDENTITY))
 

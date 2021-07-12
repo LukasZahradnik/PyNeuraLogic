@@ -27,6 +27,7 @@ def get_sample_drawer(settings: Settings):
 
     return namespace.NeuralNetDrawer(settings.settings)
 
+#todo gusta: + groundingDrawer, pipelineDrawer...
 
 def draw(drawer, obj, filename: Optional[str] = None, draw_ipython=True, *args, **kwargs):
     if filename is not None:

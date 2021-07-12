@@ -78,7 +78,7 @@ class BaseAtom:
         atom.java_object = self.java_object
 
 
-class WeightedAtom:
+class WeightedAtom: #todo gusta: mozna dedeni namisto kompozice?
     def __init__(self, atom: BaseAtom, weight, fixed=False):
         self.atom = atom
         self.weight = weight
@@ -105,7 +105,7 @@ class WeightedAtom:
         return self.atom.predicate
 
     @property
-    def terms(self):
+    def terms(self):    #todo gusta: ...tim bys usetril toto volani atp.
         return self.atom.terms
 
     def __invert__(self) -> "WeightedAtom":

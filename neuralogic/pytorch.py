@@ -1,4 +1,4 @@
-from neuralogic.builder import Weight
+from neuralogic.core.builder import Weight
 from typing import List
 import torch
 from torch import Tensor

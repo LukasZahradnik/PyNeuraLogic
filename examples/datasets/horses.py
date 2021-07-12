@@ -11,7 +11,7 @@ with Template(settings).context() as template:
 
     template.add_rules(
         [
-            Atom.foal(Var.X)[1,] <= (Atom.parent(Var.X, Var.Y), Atom.horse(Var.Y)),
+            Atom.foal(Var.X)[1,] <= (Atom.parent(Var.X, Var.Y), Atom.horse(Var.Y)), # todo gusta: mozna prejmenovat Atom -> Predicate by odpovidalo skutecnosti prirozeneji?
             Atom.foal(Var.X)[1,] <= (Atom.sibling(Var.X, Var.Y), Atom.horse(Var.Y)),
             Atom.negFoal(Var.X)[1,] <= Atom.foal(Var.X),
         ]

@@ -1,6 +1,6 @@
 from typing import Optional, Dict, Union
 
-import dynet as dy
+import dynet as dy  # todo gusta: I had problems with nameclash of this and the actual dynet
 
 from neuralogic.nn.base import AbstractEvaluator
 
@@ -52,7 +52,7 @@ class DynetEvaluator(AbstractEvaluator):
                 dy.renew_cg(immediate_compute=False, check_validity=False)
 
                 for sample in dataset.samples:
-                    label = dy.inputTensor(sample.target)
+                    label = dy.inputTensor(sample.target)   #todo gusta: pada mi dynet: err: TypeError: Input Tensor should be a numpy.ndarray or a valid list of floats
                     graph_output = self.neuralogic_model(sample)
 
                     loss = error_function(graph_output, label)
