@@ -52,7 +52,10 @@ class DynetEvaluator(AbstractEvaluator):
                 dy.renew_cg(immediate_compute=False, check_validity=False)
 
                 for sample in dataset.samples:
-                    label = dy.inputTensor(sample.target)   #todo gusta: pada mi dynet: err: TypeError: Input Tensor should be a numpy.ndarray or a valid list of floats
+                    if isinstance(sample.target, list):
+                        label = dy.inputTensor(sample.target)
+                    else:
+                        label = dy.scalarInput(sample.target)
                     graph_output = self.neuralogic_model(sample)
 
                     loss = error_function(graph_output, label)
@@ -80,7 +83,10 @@ class DynetEvaluator(AbstractEvaluator):
                 dy.renew_cg(immediate_compute=False, check_validity=False)
 
                 graph_output = self.neuralogic_model(sample)
-                label = dy.inputTensor(sample.target)
+                if isinstance(sample.target, list):
+                    label = dy.inputTensor(sample.target)
+                else:
+                    label = dy.scalarInput(sample.target)
 
                 results = (label.value(), graph_output.value())
                 yield results
