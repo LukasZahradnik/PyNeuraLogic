@@ -91,7 +91,8 @@ class NeuraLogic(AbstractNeuraLogic):
         if neuron.activation:
             if not neuron.pooling:
                 out = sum(out)
-            out = NeuraLogic.activations[neuron.activation](out)
+            if neuron.activation != "Identity":
+                out = NeuraLogic.activations[neuron.activation](out)
         else:
             out = sum(out)
 
