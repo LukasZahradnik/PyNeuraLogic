@@ -31,6 +31,15 @@ class Aggregation(Enum):
     AVG = "avg"
 
 
+class Initializer(Enum):
+    UNIFORM = "uniform"
+    NORMAL = "normal"
+    CONSTANT = "constant"
+    LONGTAIL = "longtail"
+    GLOROT = "glorot"
+    HE = "he"
+
+
 class Settings:
     def __init__(
         self,
@@ -38,6 +47,9 @@ class Settings:
         optimizer: Optimizer = None,
         epochs: int = None,
         error_function: ErrorFunction = None,
+        initializer: Initializer = None,
+        initializer_const: float = None,
+        initializer_uniform_scale: float = None,
     ):
         self.namespace = get_neuralogic().cz.cvut.fel.ida.setup
         self.settings = self.namespace.Settings()
@@ -48,12 +60,23 @@ class Settings:
         if optimizer is not None:
             self.optimizer = optimizer
 
+        if initializer is not None:
+            self.initializer = initializer
+
+        if initializer_const is not None:
+            self.initializer_const = initializer_const
+
+        if initializer_uniform_scale is not None:
+            self.initializer_uniform_scale = initializer_uniform_scale
+
         if epochs is not None:
             self.epochs = epochs
 
         self.error_function = ErrorFunction.SQUARED_DIFF if error_function is None else error_function
         set_field(self.settings, "debugExporting", False)
-        set_field(self.settings, "isoValueCompression", False)  #todo gusta: tohle ja pak obecne zadouci mit zapnute (az na debugging)
+        set_field(
+            self.settings, "isoValueCompression", False
+        )  # todo gusta: tohle ja pak obecne zadouci mit zapnute (az na debugging)
         set_field(self.settings, "exportBlocks", get_gateway().new_array(get_gateway().jvm.java.lang.String, 0))
         self.settings.infer()
 
@@ -88,6 +111,22 @@ class Settings:
         self.settings.setOptimizer(java_optimizer)
 
     @property
+    def initializer_const(self):
+        return get_field(self.settings, "constantInitValue")
+
+    @initializer_const.setter
+    def initializer_const(self, value: float):
+        set_field(self.settings, "constantInitValue", value)
+
+    @property
+    def initializer_uniform_scale(self):
+        return get_field(self.settings, "randomInitScale")
+
+    @initializer_uniform_scale.setter
+    def initializer_uniform_scale(self, value: float):
+        set_field(self.settings, "randomInitScale", value)
+
+    @property
     def error_function(self):
         return self.settings.errorFunction
 
@@ -110,6 +149,36 @@ class Settings:
     @epochs.setter
     def epochs(self, epochs: int):
         set_field(self.settings, "maxCumEpochCount", epochs)
+
+    @property
+    def initializer(self):
+        initializer = get_field(self.settings, "initializer")
+
+        if str(initializer) != "SIMPLE":
+            return initializer
+        return get_field(self.settings, "initDistribution")
+
+    @initializer.setter
+    def initializer(self, initializer: Initializer):
+        if initializer == Initializer.HE:
+            set_field(self.settings, "initializer", self.namespace.Settings.InitSet.HE)
+            return
+        if initializer == Initializer.GLOROT:
+            set_field(self.settings, "initializer", self.namespace.Settings.InitSet.GLOROT)
+            return
+
+        if initializer == Initializer.NORMAL:
+            init_dist = self.namespace.Settings.InitDistribution.NORMAL
+        elif initializer == Initializer.UNIFORM:
+            init_dist = self.namespace.Settings.InitDistribution.UNIFORM
+        elif initializer == Initializer.CONSTANT:
+            init_dist = self.namespace.Settings.InitDistribution.CONSTANT
+        elif initializer == Initializer.LONGTAIL:
+            init_dist = self.namespace.Settings.InitDistribution.LONGTAIL
+        else:
+            raise NotImplementedError
+        set_field(self.settings, "initDistribution", init_dist)
+        set_field(self.settings, "initializer", self.namespace.Settings.InitSet.SIMPLE)
 
     @property
     def debug_exporting(self) -> bool:

@@ -3,8 +3,19 @@ import dynet as dy
 import numpy as np
 
 from neuralogic.core.builder import Sample, Weight, Neuron
-from neuralogic.core.settings import Settings
+from neuralogic.core.settings import Settings, Initializer
 from neuralogic.nn.base import AbstractNeuraLogic
+
+
+def longtail(model, weight: Weight, _: Settings):
+    init = np.random.rand(*weight.dimensions)
+
+    x0, x1, power = 0.0, 10.0, 50.0
+    x0_power = np.power(x0, power + 1)
+
+    init = x1 - np.power((np.power(x1, power + 1) - x0_power) * init + x0_power, 1 / (power + 1))
+
+    return model.add_parameters(weight.dimensions, init=init)
 
 
 class NeuraLogic(AbstractNeuraLogic):
@@ -14,6 +25,19 @@ class NeuraLogic(AbstractNeuraLogic):
         "Maximum": dy.emax,
         "ReLu": dy.rectify,
         "Tanh": dy.tanh,
+    }
+
+    initializers = {
+        Initializer.HE: lambda model, weight, _: model.add_parameters(weight.dimensions, init="he"),
+        Initializer.GLOROT: lambda model, weight, _: model.add_parameters(weight.dimensions, init="glorot"),
+        Initializer.NORMAL: lambda model, weight, _: model.add_parameters(weight.dimensions, init="normal"),
+        Initializer.UNIFORM: lambda model, weight, settings: model.add_parameters(
+            weight.dimensions, init="uniform", scale=settings.initializer_uniform_scale
+        ),
+        Initializer.CONSTANT: lambda model, weight, settings: model.add_parameters(
+            weight.dimensions, init=settings.initializer_const
+        ),
+        Initializer.LONGTAIL: longtail,
     }
 
     def __init__(self, model: List[Weight], template, settings: Optional[Settings] = None):
@@ -30,10 +54,17 @@ class NeuraLogic(AbstractNeuraLogic):
         self.reset_parameters()
 
     def reset_parameters(self):
+        initializer = Initializer[str(self.settings.initializer)]
+
+        if initializer not in NeuraLogic.initializers:
+            raise NotImplementedError
+
+        weight_initializer = NeuraLogic.initializers[initializer]
+
         self.weights = [
             self.model.add_parameters(weight.dimensions, init=np.array(weight.value))
             if weight.fixed
-            else self.model.add_parameters(weight.dimensions, init="uniform")
+            else weight_initializer(self.model, weight, self.settings)
             for weight in self.weights_meta
         ]
 
