@@ -25,6 +25,11 @@ class BaseAtom:
         elif not isinstance(self.terms, Iterable):
             self.terms = [self.terms]
 
+        if self.predicate.special and self.predicate.name == "alldiff":
+            for term in self.terms:
+                if term is Ellipsis:
+                    self.java_object = None
+                    return
         self.java_object = get_java_factory().get_valued_fact(self, get_java_factory().get_variable_factory())
 
     def __neg__(self) -> "BaseAtom":
@@ -53,6 +58,8 @@ class BaseAtom:
         return BaseAtom(predicate, terms, self.negated)
 
     def __getitem__(self, item) -> "WeightedAtom":
+        if self.java_object is None:
+            raise NotImplementedError
         return WeightedAtom(self, item)
 
     def __le__(self, other: Body) -> rule.Rule:
@@ -78,7 +85,7 @@ class BaseAtom:
         atom.java_object = self.java_object
 
 
-class WeightedAtom: #todo gusta: mozna dedeni namisto kompozice?
+class WeightedAtom:  # todo gusta: mozna dedeni namisto kompozice?
     def __init__(self, atom: BaseAtom, weight, fixed=False):
         self.atom = atom
         self.weight = weight
@@ -105,7 +112,7 @@ class WeightedAtom: #todo gusta: mozna dedeni namisto kompozice?
         return self.atom.predicate
 
     @property
-    def terms(self):    #todo gusta: ...tim bys usetril toto volani atp.
+    def terms(self):  # todo gusta: ...tim bys usetril toto volani atp.
         return self.atom.terms
 
     def __invert__(self) -> "WeightedAtom":
