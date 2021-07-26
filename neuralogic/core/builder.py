@@ -1,10 +1,9 @@
-from py4j.java_collections import ListConverter
-
 from neuralogic import get_neuralogic, get_gateway
 from neuralogic.core.settings import Settings
 from neuralogic.core.sources import Sources
 
 import json
+import numpy as np
 from enum import Enum
 from typing import List, Optional
 from py4j.java_gateway import get_field
@@ -21,7 +20,7 @@ class Backend(Enum):
     JAVA = "java"
 
 
-class Sample:   #todo gusta: tohle bych mozna trochu refaktoroval/dekomponoval/preusporadal, blbe se to pak hleda...(napr. processedSample mas uplne jinde)
+class Sample:  # todo gusta: tohle bych mozna trochu refaktoroval/dekomponoval/preusporadal, blbe se to pak hleda...(napr. processedSample mas uplne jinde)
     def __init__(self, sample):
         self.id = get_field(sample, "id")
         self.target = json.loads(get_field(sample, "target"))
@@ -76,8 +75,8 @@ class Weight:
     def __init__(self, weight):
         self.index: int = get_field(weight, "index")
         self.name = get_field(weight, "name")
-        self.dimensions = tuple(get_field(weight, "dimensions"))
-        self.value = json.loads(get_field(weight, "value"))
+        self.dimensions = tuple(get_field(weight, "value").size())
+        self.value = json.loads(get_field(weight, "value").toString())
         self.fixed = get_field(weight, "isFixed")
 
         if not isinstance(self.value, list):
@@ -85,6 +84,9 @@ class Weight:
 
         if not self.dimensions:
             self.dimensions = (1,)
+
+        if self.fixed:
+            self.value = np.array(self.value).reshape(self.dimensions)
 
     @staticmethod
     def get_unit_weight() -> "Weight":
@@ -101,13 +103,14 @@ class Weight:
 class Builder:
     def __init__(self, settings: Settings):
         self.settings = settings
+        self.example_builder = Builder.get_builders(settings)
         self.builder = Builder.get_builders(settings)
 
     def build_template_from_file(self, settings: Settings, filename: str):
         args = [
             "-t",
             filename,
-            "-q",   #todo gusta: predavas template jako queries?
+            "-q",  # todo gusta: predavas template jako queries?
             filename,
         ]
 
@@ -118,41 +121,39 @@ class Builder:
 
     def from_sources(self, parsed_template, sources: Sources, backend: Backend):
         if backend == Backend.JAVA:
-            source_pipeline = self.builder.buildPipeline(parsed_template, sources.sources)
+            source_pipeline = self.example_builder.buildPipeline(parsed_template, sources.sources)
             source_pipeline.execute(None if sources is None else sources.sources)
             java_model = source_pipeline.get()
 
             logic_samples = get_field(java_model, "s")
             return logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
 
-        result = Builder.build(self.builder.buildPipeline(parsed_template, sources.sources), sources)
+        result = Builder.build(self.example_builder.buildPipeline(parsed_template, sources.sources), sources)
         return [Sample(x) for x in stream_to_list(get_field(result, "s"))]
 
     def from_logic_samples(self, parsed_template, logic_samples, backend: Backend):
         if backend == Backend.JAVA:
-            source_pipeline = self.builder.buildPipeline(parsed_template, logic_samples)
+            source_pipeline = self.example_builder.buildPipeline(parsed_template, logic_samples)
             source_pipeline.execute(None)
             java_model = source_pipeline.get()
 
             logic_samples = get_field(java_model, "s")
             return logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
 
-        result = Builder.build(self.builder.buildPipeline(parsed_template, logic_samples), None)
+        result = Builder.build(self.example_builder.buildPipeline(parsed_template, logic_samples), None)
         return [Sample(x) for x in stream_to_list(get_field(result, "s"))]
 
     def build_model(self, parsed_template, backend: Backend):
-        if backend == Backend.JAVA:
-            namespace = get_neuralogic().cz.cvut.fel.ida.neural.networks.computation.training
-            return namespace.NeuralModel(parsed_template.getAllWeights(), self.settings.settings)
+        namespace = get_neuralogic().cz.cvut.fel.ida.neural.networks.computation.training
+        neural_model = namespace.NeuralModel(parsed_template.getAllWeights(), self.settings.settings)
 
-        empty_stream = ListConverter().convert([], get_gateway()._gateway_client).stream()
-        result = Builder.build(self.builder.buildPipeline(parsed_template, empty_stream), None)
+        if backend == Backend.JAVA:
+            return neural_model
 
         dummy_weight = Weight.get_unit_weight()
-        serialized_weights = list(get_field(result, "r"))
-        weights: List = [dummy_weight] * len(serialized_weights)
+        weights: List = [dummy_weight] * len(parsed_template.getAllWeights())
 
-        for x in serialized_weights:
+        for x in parsed_template.getAllWeights():
             weight = Weight(x)
 
             if weight.index >= len(weights):
