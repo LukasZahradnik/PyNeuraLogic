@@ -22,7 +22,8 @@ class Data:
         self.y = y
         self.y_mask = y_mask
 
-    def from_pyg(self, data) -> List["Data"]:
+    @staticmethod
+    def from_pyg(data) -> List["Data"]:
         data_list = []
 
         if hasattr(data, "train_mask"):
