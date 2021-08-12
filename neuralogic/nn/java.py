@@ -35,7 +35,7 @@ class NeuraLogic(AbstractNeuraLogic):
             self.module.run_hook(hook, json.loads(value))
 
         class Java:
-            implements = ["cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler"]    #todo gusta: pak mi udelej merge na stav co mas...zatim je to asi dost rozsypane...
+            implements = ["cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler"]
 
     def __init__(self, model, template, settings: Optional[Settings] = None):
         super().__init__(template)

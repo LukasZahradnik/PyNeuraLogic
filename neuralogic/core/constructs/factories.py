@@ -3,7 +3,7 @@ from neuralogic.core.constructs.predicate import Predicate
 from neuralogic.core.constructs import atom
 
 
-class AtomFactory:  #todo gusta: ...tuto vrsvu by pak slo preskocit a mit rovnou PredicateFactory
+class AtomFactory:
     class Predicate:
         predicates: Dict[str, Predicate] = {}
 
@@ -42,7 +42,7 @@ class AtomFactory:  #todo gusta: ...tuto vrsvu by pak slo preskocit a mit rovnou
         return atom.BaseAtom(AtomFactory.Predicate.get_predicate(item, 0, False, False))
 
 
-class VariableFactory:  #todo gusta: pozor ze promenne v ramci jednoho pravidla se sdili (predikaty a konstanty se pak sdili pres cely template)
+class VariableFactory:
     def __getattr__(self, item) -> str:
         return item.upper()
 

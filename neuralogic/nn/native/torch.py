@@ -10,7 +10,6 @@ native_activations = {
     str(Activation.SIGMOID): torch.sigmoid,
     str(Activation.IDENTITY): lambda x: x,
     str(Activation.SOFTMAX): torch.softmax,
-    # TODO: Add all activations
 }
 
 native_aggregations = {

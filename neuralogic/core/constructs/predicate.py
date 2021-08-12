@@ -1,4 +1,4 @@
-from neuralogic.core.constructs.java_objects import get_java_factory, get_current_java_factory
+from neuralogic.core.constructs.java_objects import get_java_factory
 from neuralogic.core.constructs.metadata import Metadata
 
 

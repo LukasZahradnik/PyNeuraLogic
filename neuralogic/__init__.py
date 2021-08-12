@@ -10,6 +10,7 @@ gateway: Optional[JavaGateway] = None
 
 std_out = None
 std_err = None
+port = os.environ.get("NEURALOGIC_PORT", 25333)
 
 
 def set_java_home(java_home: Union[Path, str]):
@@ -22,6 +23,11 @@ def set_java_home(java_home: Union[Path, str]):
     os.environ["JAVA_HOME"] = str(java_home)
 
 
+def set_gateway_port(gateway_port: int):
+    global port
+    port = gateway_port
+
+
 def set_std_out(out):
     global std_out
     std_out = out
@@ -32,7 +38,7 @@ def set_std_err(out):
     std_err = out
 
 
-def initialize(die_on_exit=True):
+def initialize(gateway_port=port, die_on_exit=True):
     """
     Initialize the gateway for the Java process. Has to be reinitialized if some settings (JAVA_HOME) changes
 
@@ -61,7 +67,7 @@ def initialize(die_on_exit=True):
         auth_token=raw_token,
         daemonize_connections=True,
         daemonize=True,
-        port=25333 #todo gusta: the port changes were causing me problems when starting multiple sessions...(ale mozna jsem to poustel blbe?)
+        port=gateway_port,
     )
 
     gateway.start_callback_server(params)

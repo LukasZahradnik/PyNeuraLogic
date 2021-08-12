@@ -1,6 +1,6 @@
 from typing import Optional, Dict, Union
 
-import dynet as dy  # todo gusta: I had problems with nameclash of this and the actual dynet
+import dynet as dy
 
 from neuralogic.nn.base import AbstractEvaluator
 

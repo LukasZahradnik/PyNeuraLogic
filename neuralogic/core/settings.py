@@ -74,11 +74,17 @@ class Settings:
 
         self.error_function = ErrorFunction.SQUARED_DIFF if error_function is None else error_function
         set_field(self.settings, "debugExporting", False)
-        set_field(
-            self.settings, "isoValueCompression", False
-        )  # todo gusta: tohle ja pak obecne zadouci mit zapnute (az na debugging)
+        set_field(self.settings, "isoValueCompression", True)
         set_field(self.settings, "exportBlocks", get_gateway().new_array(get_gateway().jvm.java.lang.String, 0))
         self.settings.infer()
+
+    @property
+    def iso_value_compression(self) -> bool:
+        return get_field(self.settings, "isoValueCompression")
+
+    @iso_value_compression.setter
+    def iso_value_compression(self, iso_value_compression: bool):
+        set_field(self.settings, "isoValueCompression", iso_value_compression)
 
     @property
     def seed(self) -> int:

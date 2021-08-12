@@ -50,7 +50,7 @@ class TorchEvaluator(AbstractEvaluator):
                     trainer.zero_grad()
 
                     out = self.neuralogic_model(x=data.x, edge_index=data.edge_index)
-                    loss = F.nll_loss(out[data.y_mask], data.y[data.y_mask])
+                    loss = error_function(out[data.y_mask], data.y[data.y_mask])
                     loss.backward()
                     trainer.step()
 
@@ -77,10 +77,6 @@ class TorchEvaluator(AbstractEvaluator):
                 out = self.neuralogic_model(x=data.x, edge_index=data.edge_index)
                 results = (out[data.y_mask], data.y[data.y_mask])
 
-                pred = out[data.y_mask].max(1)[1]
-                acc = pred.eq(data.y[data.y_mask]).sum().item() / data.y_mask.sum().item()
-                # accs.append(acc)
-                print(acc)
                 yield results
 
         if generator:
