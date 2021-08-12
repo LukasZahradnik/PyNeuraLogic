@@ -43,6 +43,7 @@ class TemplateList:
             example = [
                 Atom.get(TemplateList.edge_name)(int(u), int(v))[1] for u, v in zip(edge_index[0], edge_index[1])
             ]
+
             for i, features in enumerate(x):
-                example.append(Atom.get(TemplateList.feature_name)(i)[features[0]])
+                example.append(Atom.get(TemplateList.feature_name)(i)[features])
         return queries, example
