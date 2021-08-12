@@ -19,6 +19,12 @@ a custom declarative language that follows a logicprogramming paradigm
 
 ## Getting started
 
+### Supported backends
+PyNeuraLogic currenty supports following backends (to some extent), which have to be installed separately:
+- [DyNet](https://github.com/clab/dynet)
+- Java
+- [PyTorch Geometric](https://github.com/rusty1s/pytorch_geometric)
+
 ### Prerequisites
 
 To use PyNeuraLogic, you need to have installed the following prerequisites.
