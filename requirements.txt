@@ -1,7 +1,16 @@
-python-dotenv
-antlr4-python3-runtime
-pre-commit
-py4j
-numpy
+antlr4-python3-runtime==4.8
 
-# todo gusta: toto neni zdaleka uplne pro spousteni examples, +zamrazit verze (aspon trochu), a vytvorit i yaml pro condu (hojne pouzivana)
+dyNET @ git+https://github.com/clab/dynet@ef1190de297377a3ba3fb8cfbfd800c6aa263e83
+
+numpy==1.20.3
+
+pre-commit==2.10.1
+py4j==0.10.9.1
+python-dotenv==0.15.0
+
+jupyter==1.0.0
+
+torch==1.7.0+cpu
+torch-geometric==1.7.0
+torch-scatter==2.0.5
+torch-sparse==0.6.8
