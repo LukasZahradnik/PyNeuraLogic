@@ -11,19 +11,18 @@ def get_neuralogic_layer(backend: Backend, native_backend_models: bool = False):
         from neuralogic.nn.dynet import NeuraLogic  # type: ignore
 
         return NeuraLogic
-    if backend == Backend.DGL:
-        from neuralogic.nn.dgl import NeuraLogicLayer  # type: ignore
-
-        return NeuraLogicLayer
+    # if backend == Backend.DGL:
+    #     from neuralogic.nn.dgl import NeuraLogicLayer  # type: ignore
+    #
+    #     return NeuraLogicLayer
     if backend == Backend.JAVA:
         from neuralogic.nn.java import NeuraLogic  # type: ignore
 
         return NeuraLogic
     if backend == Backend.PYG:
-        if native_backend_models:
-            from neuralogic.nn.native.torch import NeuraLogic
+        from neuralogic.nn.native.torch import NeuraLogic
 
-            return NeuraLogic
+        return NeuraLogic
     raise NotImplementedError
 
 
@@ -48,3 +47,7 @@ def get_evaluator(
         from neuralogic.nn.evaluators.java import JavaEvaluator
 
         return JavaEvaluator(template, settings)
+    if backend == Backend.PYG:
+        from neuralogic.nn.evaluators.torch import TorchEvaluator
+
+        return TorchEvaluator(template, settings)

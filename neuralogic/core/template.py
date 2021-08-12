@@ -177,7 +177,7 @@ class Template:
     def build(self, backend: Backend, *, native_backend_models=False):
         from neuralogic.nn import get_neuralogic_layer
 
-        if native_backend_models:
+        if backend == Backend.PYG:
             return get_neuralogic_layer(backend, native_backend_models)(self.module_list)
 
         with self.context():
