@@ -88,8 +88,17 @@ class BaseAtom:
 class WeightedAtom:  # todo gusta: mozna dedeni namisto kompozice?
     def __init__(self, atom: BaseAtom, weight, fixed=False):
         self.atom = atom
+
         self.weight = weight
+        self.weight_name = None
         self.is_fixed = fixed
+
+        if isinstance(weight, slice):
+            self.weight_name = str(weight.start)
+            self.weight = weight.stop
+        elif isinstance(weight, tuple) and isinstance(weight[0], slice):
+            self.weight_name = str(weight[0].start)
+            self.weight = (weight[0].stop, *weight[1:])
 
         if isinstance(weight, Iterable) and not isinstance(weight, tuple):
             self.weight = list(weight)
