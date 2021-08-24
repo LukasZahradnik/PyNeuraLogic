@@ -56,7 +56,7 @@ class JavaFactory:
         weight = None
         if isinstance(atom, self.weighted_atom_type):
             if new_weight:
-                weight = self.get_weight(atom.weight, atom.is_fixed)
+                weight = self.get_weight(atom.weight, atom.weight_name, atom.is_fixed)
             else:
                 weight = get_field(atom.java_object, "weight")
 
@@ -169,9 +169,12 @@ class JavaFactory:
     def get_predicate(self, predicate):
         return self.predicate_factory.construct(predicate.name, predicate.arity, predicate.special, predicate.private)
 
-    def get_weight(self, weight, fixed):
+    def get_weight(self, weight, name, fixed):
         initialized, value = self.get_value(weight)
-        return self.weight_factory.construct(value, fixed, initialized)
+
+        if name is None:
+            return self.weight_factory.construct(value, fixed, initialized)
+        return self.weight_factory.construct(name, value, fixed, initialized)
 
     def get_value(self, weight):
         if isinstance(weight, (int, float)):
