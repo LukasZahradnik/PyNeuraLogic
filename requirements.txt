@@ -10,7 +10,7 @@ python-dotenv==0.15.0
 
 jupyter==1.0.0
 
-torch==1.7.0
-torch-geometric==1.7.0
+torch
+torch-geometric
 torch-scatter
 torch-sparse
