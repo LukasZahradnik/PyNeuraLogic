@@ -1,0 +1,16 @@
+antlr4-python3-runtime==4.8
+
+dyNET @ git+https://github.com/clab/dynet@ef1190de297377a3ba3fb8cfbfd800c6aa263e83
+
+numpy==1.20.3
+
+pre-commit==2.10.1
+py4j==0.10.9.1
+python-dotenv==0.15.0
+
+jupyter==1.0.0
+
+torch
+torch-geometric
+torch-scatter
+torch-sparse
