@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from neuralogic.core.builder import Builder, Backend
 from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
 from neuralogic.core.constructs.rule import Rule
-from neuralogic.core.constructs.predicate import PredicateMetadata, Predicate
+from neuralogic.core.constructs.predicate import PredicateMetadata
 from neuralogic.core.constructs.java_objects import get_current_java_factory, set_java_factory, JavaFactory
 from neuralogic.core.settings import Settings
 from neuralogic.core.sources import Sources
@@ -17,11 +17,8 @@ from neuralogic.utils.data import Dataset
 TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
 
 
-def stream_to_list(stream) -> List:
-    return list(stream.collect(get_gateway().jvm.java.util.stream.Collectors.toList()))
-
-
 class BuiltDataset:
+    """BuiltDataset represents an already built dataset - that is, a dataset that has been grounded and neuralized."""
     def __init__(self, samples):
         self.samples = samples
 
@@ -68,7 +65,14 @@ class Template:
 
         self.hooks: Dict[str, Set] = {}
 
-    def add_hook(self, atom: Union[BaseAtom, str], callback):
+    def add_hook(self, atom: Union[BaseAtom, str], callback: Callable[[Any], None]) -> None:
+        """Hooks the callable to be called with the atom's value as an argument when the value of
+        the atom is being calculated.
+
+        :param atom:
+        :param callback:
+        :return:
+        """
         name = str(atom)
 
         if isinstance(atom, BaseAtom):
@@ -80,6 +84,12 @@ class Template:
             self.hooks[name].add(callback)
 
     def remove_hook(self, atom: Union[BaseAtom, str], callback):
+        """Removes the callable from the atom's hooks
+
+        :param atom:
+        :param callback:
+        :return:
+        """
         name = str(atom)
 
         if isinstance(atom, BaseAtom):
@@ -89,10 +99,20 @@ class Template:
             return
         self.hooks[name].discard(callback)
 
-    def add_rule(self, rule):
+    def add_rule(self, rule) -> None:
+        """Adds one rule to the template
+
+        :param rule:
+        :return:
+        """
         self.add_rules([rule])
 
     def add_rules(self, rules: List):
+        """Adds multiple rules to the template
+
+        :param rules:
+        :return:
+        """
         if self.parsed_template is not None or self.locked_template:
             raise Exception
 
@@ -186,7 +206,13 @@ class Template:
             model = self.builder.build_model(self.parsed_template, backend)
         return get_neuralogic_layer(backend)(model, self.parsed_template, self.java_factory.settings)
 
-    def build_dataset(self, dataset: Dataset, backend: Backend):
+    def build_dataset(self, dataset: Dataset, backend: Backend) -> BuiltDataset:
+        """Builds the dataset (does grounding and neuralization) for this template instance and the backend
+
+        :param dataset:
+        :param backend:
+        :return:
+        """
         with self.context():
             if not dataset.file_sources:
                 examples = dataset.examples

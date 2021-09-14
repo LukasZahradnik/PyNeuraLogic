@@ -11,6 +11,7 @@ from neuralogic.utils.templates.modules.embedding import Embedding
 
 
 class TemplateList:
+    """TemplateList is a collection of pre-defined modules"""
     edge_name = "edge"
     feature_name = "node_feature"
     output_name = "predict"

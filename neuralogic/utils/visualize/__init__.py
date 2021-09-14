@@ -7,7 +7,12 @@ from neuralogic.core.settings import Settings
 from py4j.java_gateway import set_field
 
 
-def get_drawing_settings(img_type="png"):
+def get_drawing_settings(img_type: str = "png") -> Settings:
+    """Returns the default settings instance for drawing with a specified image type.
+
+    :param img_type:
+    :return:
+    """
     settings = Settings()
 
     set_field(settings.settings, "drawing", False)
@@ -52,6 +57,19 @@ def to_dot_source(drawer, obj) -> str:
 
 
 def draw_model(model, filename: Optional[str] = None, draw_ipython=True, img_type="png", *args, **kwargs):
+    """Draws model either as an image of type img_type either into:
+        * a file - if filename is specified),
+        * an IPython Image - if draw_ipython is True
+        * or bytes otherwise
+
+    :param model:
+    :param filename:
+    :param draw_ipython:
+    :param img_type:
+    :param args:
+    :param kwargs:
+    :return:
+    """
     if model.need_sync:
         model.sync_template()
 
@@ -62,12 +80,30 @@ def draw_model(model, filename: Optional[str] = None, draw_ipython=True, img_typ
 
 
 def draw_sample(sample, filename: Optional[str] = None, draw_ipython=True, img_type="png", *args, **kwargs):
+    """Draws sample either as an image of type img_type either into:
+        * a file - if filename is specified),
+        * an IPython Image - if draw_ipython is True
+        * or bytes otherwise
+
+    :param sample:
+    :param filename:
+    :param draw_ipython:
+    :param img_type:
+    :param args:
+    :param kwargs:
+    :return:
+    """
     sample_drawer = get_sample_drawer(get_drawing_settings(img_type=img_type))
 
     return draw(sample_drawer, sample, filename, draw_ipython, *args, **kwargs)
 
 
 def model_to_dot_source(model) -> str:
+    """Renders the model into its dot source representation.
+
+    :param model:
+    :return:
+    """
     if model.need_sync:
         model.sync_template()
 
@@ -78,6 +114,11 @@ def model_to_dot_source(model) -> str:
 
 
 def sample_to_dot_source(sample) -> str:
+    """Renders the sample into its dot source representation.
+
+    :param sample:
+    :return:
+    """
     sample_drawer = get_sample_drawer(get_drawing_settings())
 
     return to_dot_source(sample_drawer, sample)
