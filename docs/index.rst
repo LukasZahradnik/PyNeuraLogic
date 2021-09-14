@@ -1,5 +1,12 @@
 PyNeuraLogic
-~~~~~~~~~~~~
+============
+
+
+.. toctree::
+    installation
+    quick_start
+
+
 
 .. image:: https://badge.fury.io/py/neuralogic.svg
     :target: https://badge.fury.io/py/neuralogic
@@ -12,8 +19,8 @@ PyNeuraLogic
 | PyNeuraLogic, allows users to encodemachine learning problems via parameterized, rule-based constructs. Said constructs are based on a custom declarative language that follows a logicprogramming paradigm
 
 
-Supported backends:
-===================
+Supported backends
+##################
 
 | PyNeuraLogic currenty supports following backends (to some extent), which have to be installed separately:
 
@@ -21,8 +28,8 @@ Supported backends:
 - Java
 - `PyTorch Geometric <https://github.com/rusty1s/pytorch_geometric>`_
 
-Prerequisites:
-==============
+Prerequisites
+#############
 
 | To use PyNeuraLogic, you need to have installed the following prerequisites.
 
@@ -33,7 +40,7 @@ Prerequisites:
 
 
 Installation
-============
+############
 
 | To install PyNeuraLogic's latest release from the PyPI repository, use the following command.
 
@@ -43,7 +50,8 @@ Installation
 
 
 Examples
-========
+########
+
 
 - `XOR Example <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb>`_
 - `Pattern Matching <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/PatternMatching.ipynb>`_
