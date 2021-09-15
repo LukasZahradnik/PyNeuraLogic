@@ -11,6 +11,10 @@ PyNeuraLogic
 .. toctree::
     :caption: Package Reference
 
+    neuralogic.core
+    neuralogic.nn
+    neuralogic.utils
+
 
 
 .. image:: https://badge.fury.io/py/neuralogic.svg
