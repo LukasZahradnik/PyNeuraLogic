@@ -5,6 +5,11 @@ PyNeuraLogic
 .. toctree::
     installation
     quick_start
+    hypergraphs
+
+
+.. toctree::
+    :caption: Package Reference
 
 
 
