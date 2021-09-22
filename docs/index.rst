@@ -28,13 +28,14 @@ PyNeuraLogic
 
 --------
 
-| PyNeuraLogic, allows users to encodemachine learning problems via parameterized, rule-based constructs. Said constructs are based on a custom declarative language that follows a logicprogramming paradigm
+| PyNeuraLogic allows users to encode machine learning problems via parameterized, rule-based constructs.
+Said constructs are based on a custom declarative language that follows a logic programming paradigm.
 
 
 Supported backends
 ##################
 
-| PyNeuraLogic currenty supports following backends (to some extent), which have to be installed separately:
+| PyNeuraLogic currently supports following backends (to some extent), which have to be installed separately:
 
 - `DyNet <https://github.com/clab/dynet>`_
 - Java
@@ -43,7 +44,7 @@ Supported backends
 Prerequisites
 #############
 
-| To use PyNeuraLogic, you need to have installed the following prerequisites.
+| To use PyNeuraLogic, you need to install the following prerequisites:
 
 .. code-block::
 
@@ -54,7 +55,7 @@ Prerequisites
 Installation
 ############
 
-| To install PyNeuraLogic's latest release from the PyPI repository, use the following command.
+| To install PyNeuraLogic's latest release from the PyPI repository, use the following command:
 
 .. code-block::
 

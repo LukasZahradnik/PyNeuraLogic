@@ -11,7 +11,7 @@ Graphs can describe entities (vertices) and their relations (edges) which can be
 used as inputs for models and are contained in the :code:`Dataset` class.
 
 The :code:`Dataset` class containing information about graphs can be used in different ways depending on the data format. The
-next section will showcase how to represent the following graph (triangle) in two formats - tensor and logic format.
+next section will showcase how to represent the following graph (triangle) in two formats - tensor and logic.
 
 .. image:: https://raw.githubusercontent.com/LukasZahradnik/PyNeuraLogic/master/docs/images/simple_graph.png
     :width: 500
@@ -45,10 +45,10 @@ one graph. The :code:`Dataset` instance then holds a list of data instances and 
 .. NOTE::
 
     We omitted a few :code:`Data` class attributes, such as :code:`x` for the nodes' features encoding, :code:`edge_attr` for the edges'
-    features encoding, and :code:`y` and :code:`y_mask` for the target encoding.
+    features encoding, and :code:`y` and :code:`y_mask` for the target labels encoding.
 
 
-The tensor representation offers less verbose graph representation but is limited in its expressiveness than the logic
+The tensor representation offers less verbose graph representation but it is more limited in its expressiveness than the logic
 format introduced in the next section.
 
 Logic Representation

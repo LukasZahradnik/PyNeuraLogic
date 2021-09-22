@@ -11,7 +11,7 @@ Representation of hyperedges
 When we encode input data (graph) in the form of logic data format (i.e., ground atoms),
 we can represent regular edges, for example, as :code:`Atom.edge(1, 2)`.
 
-This form of representation can be simply extended to express hyperedges by adding additional terms for each connected
+This form of representation can be simply extended to express hyperedges by adding terms for each connected
 vertex by the hyperedge. For example, graph :math:`G = (V, E)`, where :math:`V = \{1, 2, 3, 4, 5\}`
 and :math:`E = \{\{1, 2\}, \{3, 4, 5\}, \{1, 2, 3, 4\}\}` can be represented as:
 
