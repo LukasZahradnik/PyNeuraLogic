@@ -7,6 +7,8 @@ PyNeuraLogic
 
     installation
     quick_start
+    language
+    heterogeneous
     hypergraphs
 
 
