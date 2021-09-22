@@ -3,6 +3,8 @@ PyNeuraLogic
 
 
 .. toctree::
+    :hidden:
+
     installation
     quick_start
     hypergraphs
@@ -10,6 +12,7 @@ PyNeuraLogic
 
 .. toctree::
     :caption: Package Reference
+    :hidden:
 
     neuralogic.core
     neuralogic.nn
