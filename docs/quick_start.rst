@@ -23,7 +23,7 @@ Tensor Representation
 *********************
 
 The tensor format is a familiar format used in many other GNN focused frameworks and libraries. The input graph is
-represented in a graph connectivity format, i.g., tensor of shape :code:`[2, num_of_edges]`.
+represented in a graph connectivity format, i.e., tensor of shape :code:`[2, num_of_edges]`.
 
 .. code-block:: Python
 
