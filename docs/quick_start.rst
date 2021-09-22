@@ -13,7 +13,7 @@ used as inputs for models and are contained in the :code:`Dataset` class.
 The :code:`Dataset` class containing information about graphs can be used in different ways depending on the data format. The
 next section will showcase how to represent the following graph (triangle) in two formats - tensor and logic format.
 
-.. image:: docs/images/simple_graph.png
+.. image:: https://raw.githubusercontent.com/LukasZahradnik/PyNeuraLogic/master/docs/images/simple_graph.png
     :width: 500
     :alt: Simple graph
     :align: center
