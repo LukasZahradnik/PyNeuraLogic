@@ -13,17 +13,18 @@ used as inputs for models and are contained in the :code:`Dataset` class.
 The :code:`Dataset` class containing information about graphs can be used in different ways depending on the data format. The
 next section will showcase how to represent the following graph (triangle) in two formats - tensor and logic.
 
-.. image:: https://raw.githubusercontent.com/LukasZahradnik/PyNeuraLogic/master/docs/images/simple_graph.png
-    :width: 500
+.. image:: _static/simple_graph.svg
+    :width: 300
     :alt: Simple graph
     :align: center
 
+|
 
 Tensor Representation
 *********************
 
 The tensor format is a familiar format used in many other GNN focused frameworks and libraries. The input graph is
-represented in a graph connectivity format, i.e., tensor of shape :code:`[2, num_of_edges]`.
+represented in a graph connectivity format, i.e., tensor of shape :code:`[num_of_edges, 2]`. The features are encoded via tensor of shape :code:`[num_of_nodes, num_of_features]`.
 
 .. code-block:: Python
 
@@ -32,7 +33,8 @@ represented in a graph connectivity format, i.e., tensor of shape :code:`[2, num
 
 
     data = Data(
-        edge_index=[[1, 2], [2, 1], [1, 3], [3, 1], [2, 3], [3, 2]]
+        edge_index=[[1, 2], [2, 1], [1, 3], [3, 1], [2, 3], [3, 2]],
+        x=[[0], [1], [-1]],
     )
 
     dataset = Dataset(data=[data])
@@ -44,7 +46,7 @@ one graph. The :code:`Dataset` instance then holds a list of data instances and 
 
 .. NOTE::
 
-    We omitted a few :code:`Data` class attributes, such as :code:`x` for the nodes' features encoding, :code:`edge_attr` for the edges'
+    We omitted a few :code:`Data` class attributes, such as :code:`edge_attr` for the edges'
     features encoding, and :code:`y` and :code:`y_mask` for the target labels encoding.
 
 
@@ -67,18 +69,22 @@ which can be expressed as :code:`Atom.predicate_name(terms)[value]`.
 
     dataset.add_example([
         Atom.edge(1, 2), Atom.edge(2, 1), Atom.edge(1, 3),
-        Atom.edge(3, 1), Atom.edge(2, 3), Atom.edge(3, 2)
+        Atom.edge(3, 1), Atom.edge(2, 3), Atom.edge(3, 2),
+
+        Atom.feature(1)[0],
+        Atom.feature(2)[1],
+        Atom.feature(3)[-1],
     ])
 
 In this example, we represent the same simple graph (triangle) but in the logic format.
 
 .. NOTE::
-    We used the edge as the predicate name (:code:`Atom.edge`) to represent the graph edges. This naming is arbitrary -
+    We used the *edge* as the predicate name (:code:`Atom.edge`) to represent the graph edges and the *feature* (:code:`Atom.feature`) to represent nodes' features. This naming is arbitrary -
     edges and any other input data can have any predicate name. In this documentation, we will stick to *edge* predicate name for
     representing edges and *feature* predicate name for representing features.
 
 .. NOTE::
-    In the example, we encode the graph structure using an *example* (:code:`add_example`), which does not handle target
+    In the example, we encode the graph structure (and its features) using an *example* (:code:`add_example`), which does not handle target
     labels - those are handled by *queries* (:code:`add_query`).
 
 

@@ -11,15 +11,23 @@ Representation of hyperedges
 When we encode input data (graph) in the form of logic data format (i.e., ground atoms),
 we can represent regular edges, for example, as :code:`Atom.edge(1, 2)`.
 
+
+.. image:: _static/hyper_graph.svg
+    :width: 300
+    :alt: Hypergraph
+    :align: center
+
+|
+
 This form of representation can be simply extended to express hyperedges by adding terms for each connected
-vertex by the hyperedge. For example, graph :math:`G = (V, E)`, where :math:`V = \{1, 2, 3, 4, 5\}`
-and :math:`E = \{\{1, 2\}, \{3, 4, 5\}, \{1, 2, 3, 4\}\}` can be represented as:
+vertex by the hyperedge. For example, graph :math:`G = (V, E)`, where :math:`V = \{1, 2, 3, 4, 5, 6\}`
+and :math:`E = \{\{1, 2\}, \{3, 4, 5\}, \{1, 2, 4, 6\}\}` can be represented as:
 
 .. code-block::
 
     Atom.edge(1, 2),
     Atom.edge(3, 4, 5),
-    Atom.edge(1, 2, 3, 4),
+    Atom.edge(1, 2, 4, 6),
 
 
 Propagation on hyperedges

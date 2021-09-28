@@ -6,19 +6,21 @@ Most GNN models do not consider graphs being heterogeneous. Via PyNeuraLogic, we
 graphs with an arbitrary number of node and edge classes.
 
 
-.. image:: https://raw.githubusercontent.com/LukasZahradnik/PyNeuraLogic/master/docs/images/heterograph.png
-    :width: 500
+.. image:: _static/hetero_graph.svg
+    :width: 300
     :alt: Heterogeneous graph
     :align: center
 
+|
 
 .. code-block:: Python
 
-    Atom.type(1, Term.RED),
-    Atom.type(2, Term.RED),
-    Atom.type(3, Term.BLUE),
-    Atom.type(4, Term.BLUE),
 
+    Atom.type(1, Term.BLUE),
+    Atom.type(2, Term.BLUE),
+    Atom.type(3, Term.PINK),
+    Atom.type(4, Term.PINK),
+    Atom.type(5, Term.PINK),
 
 
 .. code-block:: Python
@@ -33,7 +35,7 @@ graphs with an arbitrary number of node and edge classes.
 
 .. code-block:: Python
 
-    Atom.type_feature(Term.RED)[[1, 2, 3]]
+    Atom.type_feature(Term.BLUE)[[1, 2, 3]]
 
 .. code-block:: Python
 

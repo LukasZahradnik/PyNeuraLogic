@@ -15,7 +15,3 @@ PyNeuraLogic can be easily installed from PyPI repository via :code:`pip install
     pip install neuralogic
 
 
-Using Conda
-###########
-
-TODO
