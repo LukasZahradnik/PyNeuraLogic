@@ -3,13 +3,24 @@ PyNeuraLogic
 
 
 .. toctree::
+    :maxdepth: 1
     :hidden:
 
     installation
     quick_start
     language
     heterogeneous
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Beyond GNNs
+    :hidden:
+
     hypergraphs
+    pattern_propagation
+    tree_gnns
+    heterophily
+    tabnet
 
 
 .. toctree::
