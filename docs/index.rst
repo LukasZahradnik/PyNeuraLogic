@@ -50,11 +50,6 @@ PyNeuraLogic allows users to encode various machine learning problems via parame
 Said constructs are based on a custom declarative language that follows a logic programming paradigm.
 
 
-Why PyNeuraLogic
-################
-
-
-
 Supported backends
 ##################
 

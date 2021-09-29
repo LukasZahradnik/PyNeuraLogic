@@ -2,11 +2,21 @@ PyNeuraLogic Language
 =====================
 
 Additionally to predefined modules, PyNeuraLogic allows users to encode machine learning problems via parameterized,
-rule-based constructs. Said constructs are based on a custom declarative language [Neuralogic]_ that follows a logic programming paradigm.
+rule-based constructs. Said constructs are based on a custom declarative language
+(`Neuralogic <https://github.com/GustikS/NeuraLogic>`_) that follows a logic programming paradigm.
 
 
 
-The anatomy of a rule
+The Anatomy of an Atom
+######################
+
+- Predicate (name)
+- Terms
+- Weights (different kinds)
+- Special/Hidden
+
+
+The Anatomy of a Rule
 #####################
 
 In PyNeuraLogic, rules are primitives used for building models and datasets.
@@ -18,11 +28,16 @@ In PyNeuraLogic, rules are primitives used for building models and datasets.
 
     Atom.h(Var.X)[W_0] <= (Atom.feature(Var.Y)[W_1], Atom.edge(Var.X, Var.Y))
 
-The rule consists of a head (:code:`Atom.h`) and a body (:code:`Atom.feature`, :code:`Atom.edge`). Our example can be
-then read as:
+The rule in the example above consists of a head (:code:`Atom.h`) and a body with two atoms
+(:code:`Atom.feature`, :code:`Atom.edge`). Our example can be then read as:
     "Atom h is implied by atom feature and atom edge"
 
 
+Defining Models
+###############
+
+- Template
+- Examples
+- Queries
 
 
-.. [Neuralogic] https://github.com/GustikS/NeuraLogic
