@@ -36,13 +36,23 @@ PyNeuraLogic
 .. image:: https://badge.fury.io/py/neuralogic.svg
     :target: https://badge.fury.io/py/neuralogic
 
+.. image:: https://img.shields.io/pypi/l/neuralogic
+    :target: https://badge.fury.io/py/neuralogic
 
-| PyNeuraLogic is a framework built on top of `NeuraLogic <https://github.com/GustikS/NeuraLogic>`_ which combines relational and deep learning.
+
+PyNeuraLogic is a library that combines relational and deep learning and is built on top of
+`NeuraLogic <https://github.com/GustikS/NeuraLogic>`_. The library's main aim is to enhance Graph Neural Networks
+(GNNs) with more expressiveness and push their boundaries.
 
 --------
 
-| PyNeuraLogic allows users to encode machine learning problems via parameterized, rule-based constructs.
+PyNeuraLogic allows users to encode various machine learning problems via parametrized, rule-based constructs.
 Said constructs are based on a custom declarative language that follows a logic programming paradigm.
+
+
+Why PyNeuraLogic
+################
+
 
 
 Supported backends
