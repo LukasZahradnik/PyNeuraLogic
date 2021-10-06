@@ -1,3 +1,7 @@
 .wy-side-nav-search {
     background-color: #f3f3f3 !important;
 }
+
+.version {
+    display: none;
+}

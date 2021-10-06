@@ -50,7 +50,7 @@ the following rule:
 
 .. seealso::
 
-    TODO: Add special predicate link
+    For more information about the special predicate :code:`alldiff`, see :ref:`special-modifier-label`.
 
 
 3. Combination of Intermediate Representations
