@@ -1,10 +1,16 @@
 PyNeuraLogic Language
 =====================
 
-Additionally to predefined modules, PyNeuraLogic allows users to encode machine learning problems via parameterized,
-rule-based constructs. Said constructs are based on a custom declarative language
-(`NeuraLogic <https://github.com/GustikS/NeuraLogic>`_) that follows a logic programming paradigm.
+The main feature of the PyNeuraLogic library is its custom declarative language
+(based on `NeuraLogic <https://github.com/GustikS/NeuraLogic>`_) for describing problems' architectures and data.
+The language is fully implemented in Python, enabling users to utilize Python's convenient modules and features.
 
+The idea of using a custom language (based on logic programming paradigm) instead of predefined modules as in popular
+frameworks and libraries is to achieve higher expressiveness, reduce the complexity of writing models' architectures and
+unfold models' architectures from black-box representations.
+
+This section introduces users to the language's basic syntax, which is essential for understanding concepts presented
+in other sections and using the library to its full potential.
 
 
 The Anatomy of an Atom
