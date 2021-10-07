@@ -47,7 +47,7 @@ which can be useful for generating atoms.
 Terms
 *****
 
-Terms are an optional list of constants and logical variables.
+Terms are an optional list of constants and logic variables.
 
 - Constants are either numeric values (floats, integers) or string values with a first lower-cased letter. We can also define constant via :code:`neuralogic.core.Term`, which converts the provided value into a valid constant (string) for us.
 
@@ -94,7 +94,7 @@ Atom's weight is optional and defines the atom's learnable parameter. The weight
 
 
 .. NOTE::
-        Matrix and vector values can also be in the form of numpy arrays.
+        Matrix and vector values can also be in the form of `NumPy <https://numpy.org/>`_ arrays.
 
 - The dimension value is represented as a tuple of either one or two elements. Each element represents the size of one dimension; thus, it can represent either vector or matrix. The difference between previous representations is that the dimension value is less verbose and doesn't describe the initialized value of the parameter - the initialization of dimension values is determined by the settings object.
 
@@ -105,7 +105,22 @@ Atom's weight is optional and defines the atom's learnable parameter. The weight
 
 
 .. WARNING::
-    Notice the difference between :code:`Atom.my_atom[2]` and :code:`Atom.my_atom[2,]` as the first one represents the scalar weight and the latter one dimension weight.
+    Notice the difference between :code:`Atom.my_atom[2]` and :code:`Atom.my_atom[2,]` as the first one represents the scalar weight and the latter one dimension (vector of length of two) weight.
+
+Named Weights
+^^^^^^^^^^^^^
+
+In case we want to share one weight for multiple atoms, we can achieve that by labeling the weight with an arbitrary name, such as:
+
+.. code-block:: Python
+
+    # Sharing dimension weight (2x2 matrix weight)
+    Atom.my_atom["shared_weight": 2, 2]
+    Atom.another_atom["shared_weight": 2, 2]
+
+    # Sharing dimension weight (vector weight)
+    Atom.my_atom["my_weight": 2,]
+    Atom.another_atom["my_weight": 2]
 
 
 .. _modifier-label:
@@ -129,7 +144,7 @@ Special Modifier
 The special modifier changes the atom's behavior depending on its predicate name. We can utilize the following special predicates:
 
 - :code:`Atom.special.alldiff`
-    A special atom with the X predicate ensures that its logic variables are substituted for different values - its terms are substituted for unique values. It's also possible to use :code:`...`, which is substituted for all variables declared in the current rule - no variable declared in the rule can be substituted for the same value.
+    A special atom with the :code:`alldiff` predicate ensures that its terms (logic variables) are substituted for different values (unique values). It's also possible to use :code:`...` in place of terms, which is substituted for all variables declared in the current rule - no variable declared in the rule can be substituted for the same value simultaneously.
 
 
 .. code-block:: Python
@@ -143,25 +158,4 @@ The special modifier changes the atom's behavior depending on its predicate name
 The Anatomy of a Rule
 #####################
 
-In PyNeuraLogic, rules are primitives used for building models and datasets.
-
-.. code-block:: Python
-
-    from neuralogic.core import Atom, Var
-
-
-    Atom.h(Var.X)[W_0] <= (Atom.feature(Var.Y)[W_1], Atom.edge(Var.X, Var.Y))
-
-The rule in the example above consists of a head (:code:`Atom.h`) and a body with two atoms
-(:code:`Atom.feature`, :code:`Atom.edge`). Our example can be then read as:
-"Atom h is implied by atom feature and atom edge"
-
-
-Defining Models
-###############
-
-- Template
-- Examples
-- Queries
-
-
+- Rule example
