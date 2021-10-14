@@ -5,6 +5,11 @@ The PyNeuraLogic library requires :code:`Python >= 3.7` and :code:`Java 1.8` to 
 Additionally, if you plan to use one of the supported backends (e.g., `DyNet <http://dynet.io/>`_),
 you have to install it manually.
 
+
+.. note::
+
+    Make sure that you have correctly set the :code:`"JAVA_HOME` environment variable, or set it via :py:data:`~neuralogic.set_java_home` before using any of the library features.
+
 Using PIP
 #########
 

@@ -9,7 +9,10 @@ PyNeuraLogic
     installation
     quick_start
     language
+    custom_model
+    evaluation
     heterogeneous
+    advanced
 
 .. toctree::
     :maxdepth: 1
@@ -27,6 +30,7 @@ PyNeuraLogic
     :caption: Package Reference
     :hidden:
 
+    neuralogic
     neuralogic.core
     neuralogic.nn
     neuralogic.utils

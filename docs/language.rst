@@ -74,6 +74,8 @@ Terms are an optional list of constants and logic variables.
     Atom.my_atom(Var.X)  # Atom with one variable "X"
     Atom.my_atom(Var.x, "Y")  # Atom with two variable terms "X" and "Y"
 
+.. NOTE::
+        We call an atom a ground atom/fact if all of its terms are constants.
 
 Weights
 *******
@@ -99,7 +101,7 @@ Atom's weight is optional and defines the atom's learnable parameter. The weight
     Atom.my_atom[[[1, 0], [0, 1]]]  # Matrix weight initialized to [[1, 0], [0, 1]]
 
 
-.. NOTE::
+.. tip::
         Matrix and vector values can also be in the form of `NumPy <https://numpy.org/>`_ arrays.
 
 - The dimension value is represented as a tuple of either one or two elements. Each element represents the size of one dimension; thus, it can represent either vector or matrix. The difference between previous representations is that the dimension value is less verbose and doesn't describe the initialized value of the parameter - the initialization of dimension values is determined by the settings object.
@@ -129,36 +131,15 @@ In case we want to share one weight for multiple atoms, we can achieve that by l
     Atom.another_atom["my_weight": 2]
 
 
-.. _modifier-label:
 
 Modifiers
 *********
 
-Modifiers are optional and alter an atoms' behavior in some way. Currently, there are two following modifiers, which can be chained together:
+Predicate names with no modifiers are entirely arbitrary, with no particular meaning other than the user-defined one.
+By including modifiers in atoms' definitions, we are modifying the behavior of those atoms, which can depend on the
+predicate name.
 
-Hidden Modifier
-^^^^^^^^^^^^^^^
-
-TODO: Describe
-
-
-.. _special-modifier-label:
-
-Special Modifier
-^^^^^^^^^^^^^^^^
-
-The special modifier changes the atom's behavior depending on its predicate name. We can utilize the following special predicates:
-
-- :code:`Atom.special.alldiff`
-    A special atom with the :code:`alldiff` predicate ensures that its terms (logic variables) are substituted for different values (unique values). It's also possible to use :code:`...` in place of terms, which is substituted for all variables declared in the current rule - no variable declared in the rule can be substituted for the same value simultaneously.
-
-
-.. code-block:: Python
-
-    Atom.special.alldiff(Var.X, Var.Y)  # Var.X cannot equal to Var.Y
-
-    # Var.X != Var.Y != Var.Z
-    Atom.h(Var.X) <= (Atom.b(Var.Y, Var.Z), Atom.special.alldiff(...))
+More about individual modifiers can be read in :ref:`special-modifier-label`.
 
 
 The Anatomy of a Rule

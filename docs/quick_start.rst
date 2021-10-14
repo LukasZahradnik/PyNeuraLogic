@@ -8,9 +8,9 @@ Graph Representation
 ####################
 
 Graphs can describe entities (vertices) and their relations (edges) which can be useful for various tasks. Graphs are
-used as inputs for models and are contained in the :code:`Dataset` class.
+used as inputs for models and are contained in the :py:class:`~neuralogic.utils.data.dataset.Dataset` class.
 
-The :code:`Dataset` class containing information about graphs can be used in different ways depending on the data format. The
+The :py:class:`~neuralogic.utils.data.dataset.Dataset` class containing information about graphs can be used in different ways depending on the data format. The
 next section will showcase how to represent the following graph (triangle) in two formats - tensor and logic.
 
 .. image:: _static/simple_graph.svg
@@ -41,12 +41,12 @@ represented in a graph connectivity format, i.e., tensor of shape :code:`[num_of
 
 
 In this example, we are encoding the simple graph (triangle) in the tensor format. The structure of the graph is
-encoded in :code:`edge_index` property of the Data class instance. Each :code:`Data` class instance holds information about exactly
-one graph. The :code:`Dataset` instance then holds a list of data instances and serves as the input.
+encoded in :code:`edge_index` property of the Data class instance. Each :py:class:`~neuralogic.utils.data.dataset.Data` class instance holds information about exactly
+one graph. The :py:class:`~neuralogic.utils.data.dataset.Dataset` instance then holds a list of data instances and serves as the input.
 
 .. NOTE::
 
-    We omitted a few :code:`Data` class attributes, such as :code:`edge_attr` for the edges'
+    We omitted a few :py:class:`~neuralogic.utils.data.dataset.Data` class attributes, such as :code:`edge_attr` for the edges'
     features encoding, and :code:`y` and :code:`y_mask` for the target labels encoding.
 
 
@@ -84,14 +84,15 @@ In this example, we represent the same simple graph (triangle) but in the logic 
     representing edges and *feature* predicate name for representing features.
 
 .. NOTE::
-    In the example, we encode the graph structure (and its features) using an *example* (:code:`add_example`), which does not handle target
-    labels - those are handled by *queries* (:code:`add_query`).
+    In the example, we encode the graph structure (and its features) using an *example* (:py:meth:`~neuralogic.utils.data.dataset.Dataset.add_example`), which does not handle target
+    labels - those are handled by *queries* (:py:meth:`~neuralogic.utils.data.dataset.Dataset.add_query`).
 
 
 Model Definition
 ################
 
-The model architecture is encoded in the instance of the :code:`Template` class via rules or a list of predefined modules.
+The model architecture is encoded in the instance of the :py:class:`~neuralogic.core.template.Template` class via rules or a list of predefined modules
+(i.e. a :py:class:`~neuralogic.utils.templates.TemplateList` instance populated with modules, for example, with :py:class:`~neuralogic.utils.templates.modules.gcn.GCNConv`)
 
 
 .. code-block:: Python
@@ -138,7 +139,7 @@ Evaluators
 **********
 
 For faster prototyping, we have prepared evaluators, which encapsulate helpers such as training loop and
-evaluation. Evaluators can be customized via various settings encapsulated in the :code:`Settings` class.
+evaluation. Evaluators can be customized via various settings encapsulated in the :py:class:`~neuralogic.core.settings.Settings` class.
 
 .. code-block:: Python
 
@@ -153,6 +154,6 @@ evaluation. Evaluators can be customized via various settings encapsulated in th
 
 
 .. NOTE::
-    In the example for the evaluator, we pass the :code:`Dataset` instance (not built dataset) to the :code:`train` method.
+    In the example for the evaluator, we pass the :py:class:`~neuralogic.utils.data.dataset.Dataset` instance (not built dataset) to the :code:`train` method.
     The evaluator handles the building, but it can be more efficient to pass in an already built dataset
     (evaluator does not store built dataset instances).

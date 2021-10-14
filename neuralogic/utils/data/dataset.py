@@ -8,6 +8,9 @@ DatasetEntries = Union[BaseAtom, WeightedAtom, Rule]
 
 
 class Data:
+    """
+    Stores a learning example in the form of a tensor numeric representation instead of a rule based representation.
+    """
     def __init__(
         self,
         x: Sized = None,
@@ -24,6 +27,14 @@ class Data:
 
     @staticmethod
     def from_pyg(data) -> List["Data"]:
+        """
+        Converts a PyTorch Geometric Data instance into a list of PyNeuraLogic :py:class:`~Data` instances.
+        The conversion supports :code:`train_mask`, :code:`test_mask` and :code:`val_mask` attributes -
+        for each mask the conversion yields a new data instance.
+
+        :param data: The PyTorch Geometric Data instance
+        :return: The list of PyNeuraLogic Data instances
+        """
         data_list = []
 
         if hasattr(data, "train_mask"):
