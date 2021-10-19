@@ -8,7 +8,7 @@ you have to install it manually.
 
 .. note::
 
-    Make sure that you have correctly set the :code:`"JAVA_HOME` environment variable, or set it via :py:data:`~neuralogic.set_java_home` before using any of the library features.
+    Make sure that you have correctly set the :code:`"JAVA_HOME"` environment variable, or set it via :py:data:`~neuralogic.set_java_home` before using any of the library features.
 
 Using PIP
 #########
