@@ -38,41 +38,63 @@ def set_std_err(out):
     std_err = out
 
 
-def initialize(gateway_port=port, die_on_exit=True):
+def initialize(gateway_port: Optional[int] = None, die_on_exit: bool = True):
     """
     Initialize the gateway for the Java process. Has to be reinitialized if some settings (JAVA_HOME) changes
 
+    :param gateway_port:
     :param die_on_exit:
     :return:
     """
     global gateway, neuralogic
 
+    if gateway_port is None:
+        gateway_port = port
+
     if gateway is not None:
         try:
             gateway.shutdown()
+            gateway = None
         except Exception:
             pass
 
-    gateway = JavaGateway.launch_gateway(
-        classpath=os.environ["CLASSPATH"],
-        redirect_stdout=std_out,
-        redirect_stderr=std_err,
-        die_on_exit=die_on_exit,
-        daemonize_redirect=True,
+    for try_port in range(gateway_port, gateway_port + 10):
+        try:
+            gateway = JavaGateway.launch_gateway(
+                classpath=os.environ["CLASSPATH"],
+                redirect_stdout=std_out,
+                redirect_stderr=std_err,
+                die_on_exit=die_on_exit,
+                daemonize_redirect=True,
+            )
+
+            raw_token = unescape_new_line(gateway.gateway_parameters.auth_token)
+
+            params = CallbackServerParameters(
+                eager_load=False,
+                auth_token=raw_token,
+                daemonize_connections=True,
+                daemonize=True,
+                port=try_port,
+            )
+
+            gateway.start_callback_server(params)
+            neuralogic = gateway.jvm
+
+            return
+        except Exception as e:
+            if gateway is not None:
+                gateway.shutdown()
+                gateway = None
+
+    if gateway is not None:
+        gateway.shutdown()
+        gateway = None
+
+    raise Exception(
+        f"Cannot find two free ports in the range <{gateway_port}-{gateway_port + 10 + 1}>.\n"
+        "Please specify different port in env var 'NEURALOGIC_PORT' or via neuralogic.set_gateway_port."
     )
-
-    raw_token = unescape_new_line(gateway.gateway_parameters.auth_token)
-    params = CallbackServerParameters(
-        eager_load=False,
-        auth_token=raw_token,
-        daemonize_connections=True,
-        daemonize=True,
-        port=gateway_port,
-    )
-
-    gateway.start_callback_server(params)
-
-    neuralogic = gateway.jvm
 
 
 def shutdown():
