@@ -17,41 +17,42 @@ PyNeuraLogic lets you use Python to create **Differentiable Logic Programs**
 
 ## About
 
-Logic programming is a declarative coding paradigm in which you declare your logical _variables_ and _relations_ between them. A relation applied to a tuple of variables is then called an _atom_. These can be further composed into so-called _rules_ that drive the computation. Such rule-set is called a _logic program_, and its execution is equivalent to logic inference over the rules.
+Logic programming is a declarative coding paradigm in which you declare your logical _variables_ and _relations_ between them. A relation applied to a tuple of variables is then called an _atom_. These can be further composed into so-called _rules_ that drive the computation. Such a rule set then forms a _logic program_, and its execution is equivalent to performing logic inference with the rules.
 
-PyNeuralogic, with its [NeuraLogic](https://github.com/GustikS/NeuraLogic) backend, then makes this inference process differentiable, which lets you learn numeric parameters that can be associated with it.
+PyNeuralogic, through its [NeuraLogic](https://github.com/GustikS/NeuraLogic) backend, then makes this inference process _differentiable_, which lets you learn numeric parameters that can be associated with the rules.
 
 ### What is this good for?
 
-Many things! For instance, ever heard of [Graph Neural Networks](https://distill.pub/2021/gnn-intro/) (GNNs)? Well, a graph happens to be a special case of a logical relation - a binary one to be exact. Now, at the heart of any GNN model there is a _propagation rule_ for passing 'messages' between the adjacent nodes. Particularly, the representation ('message') of a node `X` is calculated by aggregating the representations of nodes `Y`, such that there is an edge between `X` and `Y`. 
+Many things! For instance - ever heard of [Graph Neural Networks](https://distill.pub/2021/gnn-intro/) (GNNs)? Well, a _graph_ happens to be a special case of a logical relation - a binary one to be more exact. Now, at the heart of any GNN model there is a so-called _propagation rule_ for passing 'messages' between the neighboring nodes. Particularly, the representation ('message') of a node `X` is calculated by aggregating the representations of adjacent nodes `Y`, i.e. those with an `edge` between `X` and `Y`. 
 
-Or, a bit more formally:
+Or, a bit more 'formally':
 
 ``` Atom.node2(Var.X) <= Atom.node1(Var.Y), Atom.edge(Var.X,Var.Y)```
 
-...and that's the actual code! Now for a classic learnable GNN layer, you'll want to add some parameters, such as
+...and that's the actual _code_! Now for a classic learnable GNN layer, you'll want to add some numeric parameters, such as
 
 ``` Atom.node2(Var.X)[5,10] <= Atom.node1(Var.Y)[10,20], Atom.edge(Var.X,Var.Y)```
 
-to project your [1,20] node embeddings through a learnable ``[10,20]`` layer before the aggregation, and also `[5,10]` after the aggregation. The particular aggregation and activation functions, as well as other details, can naturally be [specified further](https://pyneuralogic.readthedocs.io/en/latest/language.html), but you can as well leave it default like we did here with your first, fully functional GNN layer!
+to project your `[1,20]` input node embeddings through a learnable ``[10,20]`` layer before the aggregation, and subsequently a `[5,10]` layer after the aggregation. The particular aggregation and activation functions, as well as other details, can naturally be [specified further](https://pyneuralogic.readthedocs.io/en/latest/language.html), but you can as well leave it default like we did here with your first, fully functional GNN layer!
 
 ### How is it different from other GNN frameworks?
 
-Naturally, PyNeuralogic is by no means limited to GNN models, as the expressiveness of relational logic goes much further than graphs. So nothing stops you from playing directly with:
-- multiple relations and node types
+Naturally, PyNeuralogic is by no means limited to GNN models, as the expressiveness of _relational_ logic goes much further beyond graphs. So nothing stops you from playing directly with:
+- multiple relations and object types
 - hypergraphs, nested graphs, relational databases
 - alternative propagation schemes
 - direct sub-structure (pattern) matching
 - inclusion of logical background knowledge
 - and more...
 
-In [PyNeuraLogic](https://dspace.cvut.cz/bitstream/handle/10467/97065/F3-DP-2021-Zahradnik-Lukas-Extending-Graph-Neural-Networks-with-Relational-Logic.pdf?sequence=-1&isAllowed=y), all these concepts take the same form of simple small logic programs. These are commonly highly transparent and easy to understand, thanks to their declarative nature. Consequently, there is no need to design a new blackbox class name for each new small modification of the GNN rule, since you code directly at the level of the logical principles here.
+In [PyNeuraLogic](https://dspace.cvut.cz/bitstream/handle/10467/97065/F3-DP-2021-Zahradnik-Lukas-Extending-Graph-Neural-Networks-with-Relational-Logic.pdf?sequence=-1&isAllowed=y), all these ideas take the same form of simple small logic programs. These are commonly highly transparent and easy to understand, thanks to their declarative nature. Consequently, there is no need to design a new blackbox class name for each small modification of the GNN rule - you code directly at the level of the logical principles here!
 
-The underlying engine then creates differentiable computation graphs in a fully automated and dynamic fashion, hence you don't have to care about how to align everything into some (static) tensor operations.
-This gives you considerably more expressiveness, and, somewhat surprisingly, sometimes even [performance](https://arxiv.org/abs/2007.06286).
+The backend engine then creates the underlying differentiable computation (inference) graphs in a fully automated and dynamic fashion, hence you don't have to care about aligning everything into some (static) tensor operations.
+This gives you considerably more expressiveness, and, perhaps surprisingly, sometimes even [performance](https://arxiv.org/abs/2007.06286).
 
 
 We hope you'll find the framework useful in designing your own deep **relational** learning ideas beyond the GNNs!
+Please let us know if you need some guidance or would like to cooperate!
 
 [comment]: <> (PyNeuraLogic allows users to encode machine learning problems via parameterized, rule-based constructs. Said constructs are based on a custom declarative language that follows a logic programming paradigm.)
 
