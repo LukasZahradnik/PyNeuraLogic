@@ -35,19 +35,19 @@ Predicate name
 
 Predicate can serve as a descriptor of data that the atom represents. Predicate names are case-sensitive and have to
 start with a lower-case letter. Usually, atoms with specific predicate names are created directly via :code:`Atom` object
-(e.g., :code:`Atom.my_atom` creates an atom with the predicate name :code:`my_atom`).
-For convenience, we can also use the :code:`Atom.get` method (e.g., :code:`Atom.get("my_atom")`),
+(e.g., :code:`Relation.my_atom` creates an atom with the predicate name :code:`my_atom`).
+For convenience, we can also use the :code:`Relation.get` method (e.g., :code:`Relation.get("my_atom")`),
 which can be useful for generating atoms.
 
 .. code-block:: Python
 
     from neuralogic.core import Atom
 
-    Atom.my_atom  # Atom with a predicate name "my_atom"
+    Relation.my_atom  # Atom with a predicate name "my_atom"
 
     for i in range(5):
         # Atoms with a predicate names "my_atom_0", ..., "my_atom_4"
-        Atom.get(f"my_atom_{i}")
+        Relation.get(f"my_atom_{i}")
 
 
 Terms
@@ -61,9 +61,9 @@ Terms are an optional list of constants and logic variables.
 
     from neuralogic.core import Term, Atom
 
-    Atom.my_atom(1.0)  # Atom with one constant term 1.0
-    Atom.my_atom(Term.my_term, "string_term")  # Atom with two constant terms "my_term" and "string_term"
-    Atom.my_atom(1.0, Term.My_Term)   # Atom with two constant terms 1.0 and "my_term"
+    Relation.my_atom(1.0)  # Atom with one constant term 1.0
+    Relation.my_atom(Term.my_term, "string_term")  # Atom with two constant terms "my_term" and "string_term"
+    Relation.my_atom(1.0, Term.My_Term)   # Atom with two constant terms 1.0 and "my_term"
 
 - Variables are capitalized string values. We can, similarly to constants, utilize helper :code:`neuralogic.core.Var`, which converts the provided value into a valid variable (string) for us.
 
@@ -71,8 +71,8 @@ Terms are an optional list of constants and logic variables.
 
     from neuralogic.core import Var, Atom
 
-    Atom.my_atom(Var.X)  # Atom with one variable "X"
-    Atom.my_atom(Var.x, "Y")  # Atom with two variable terms "X" and "Y"
+    Relation.my_atom(Var.X)  # Atom with one variable "X"
+    Relation.my_atom(Var.x, "Y")  # Atom with two variable terms "X" and "Y"
 
 .. NOTE::
         We call an atom a ground atom/fact if all of its terms are constants.
@@ -86,19 +86,19 @@ Atom's weight is optional and defines the atom's learnable parameter. The weight
 
 .. code-block:: Python
 
-    Atom.my_atom[0.5]  # Scalar weight initialized to 0.5
+    Relation.my_atom[0.5]  # Scalar weight initialized to 0.5
 
 - The vector value defines the learnable vector parameter initialized to the specific value.
 
 .. code-block:: Python
 
-    Atom.my_atom[[1.0, 0.0, 1.0]]  # Vector weight initialized to [1.0, 0.0, 1.0]
+    Relation.my_atom[[1.0, 0.0, 1.0]]  # Vector weight initialized to [1.0, 0.0, 1.0]
 
 - The matrix value defines the learnable matrix parameter initialized to the specific value.
 
 .. code-block:: Python
 
-    Atom.my_atom[[[1, 0], [0, 1]]]  # Matrix weight initialized to [[1, 0], [0, 1]]
+    Relation.my_atom[[[1, 0], [0, 1]]]  # Matrix weight initialized to [[1, 0], [0, 1]]
 
 
 .. tip::
@@ -108,12 +108,12 @@ Atom's weight is optional and defines the atom's learnable parameter. The weight
 
 .. code-block:: Python
 
-    Atom.my_atom[2,]  # Dimension weight representing vector of length of 2
-    Atom.my_atom[3, 3]  # Dimension weight representing 3x3 matrix
+    Relation.my_atom[2,]  # Dimension weight representing vector of length of 2
+    Relation.my_atom[3, 3]  # Dimension weight representing 3x3 matrix
 
 
 .. WARNING::
-    Notice the difference between :code:`Atom.my_atom[2]` and :code:`Atom.my_atom[2,]` as the first one represents the scalar weight and the latter one dimension (vector of length of two) weight.
+    Notice the difference between :code:`Relation.my_atom[2]` and :code:`Relation.my_atom[2,]` as the first one represents the scalar weight and the latter one dimension (vector of length of two) weight.
 
 Named Weights
 ^^^^^^^^^^^^^
@@ -123,12 +123,12 @@ In case we want to share one weight for multiple atoms, we can achieve that by l
 .. code-block:: Python
 
     # Sharing dimension weight (2x2 matrix weight)
-    Atom.my_atom["shared_weight": 2, 2]
-    Atom.another_atom["shared_weight": 2, 2]
+    Relation.my_atom["shared_weight": 2, 2]
+    Relation.another_atom["shared_weight": 2, 2]
 
     # Sharing dimension weight (vector weight)
-    Atom.my_atom["my_weight": 2,]
-    Atom.another_atom["my_weight": 2]
+    Relation.my_atom["my_weight": 2,]
+    Relation.another_atom["my_weight": 2]
 
 
 

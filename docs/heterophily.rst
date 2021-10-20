@@ -24,8 +24,8 @@ can be achieved just with two rules, that can be written in the following form:
 
 .. code-block:: Python
 
-    Atom.layer_1(Var.X) <= (Atom.layer_0(Var.Y), Atom.edge(Var.X, Var.Y)),
-    Atom.layer_1(Var.X) <= Atom.layer_0(Var.X)
+    Relation.layer_1(Var.X) <= (Relation.layer_0(Var.Y), Relation.edge(Var.X, Var.Y)),
+    Relation.layer_1(Var.X) <= Relation.layer_0(Var.X)
 
 
 The first rule aggregates all features of neighbors of the central node, and then we combine the aggregated value with
@@ -40,11 +40,11 @@ the following rule:
 
 .. code-block:: Python
 
-    Atom.layer_1(Var.X) <= (
-        Atom.layer_0(Var.Z),
-        Atom.edge(Var.X, Var.Y),
-        Atom.edge(Var.Y, Var.Z),
-        Atom.special.alldiff(...),
+    Relation.layer_1(Var.X) <= (
+        Relation.layer_0(Var.Z),
+        Relation.edge(Var.X, Var.Y),
+        Relation.edge(Var.Y, Var.Z),
+        Relation.special.alldiff(...),
     )
 
 
@@ -62,9 +62,9 @@ layers, such as:
 
 .. code-block:: Python
 
-    Atom.layer_final(Var.X) <= (
-        Atom.layer_0(Var.X),
-        Atom.layer_1(Var.X),
-        Atom.layer_2(Var.X),
-        Atom.layer_n(Var.X),
+    Relation.layer_final(Var.X) <= (
+        Relation.layer_0(Var.X),
+        Relation.layer_1(Var.X),
+        Relation.layer_2(Var.X),
+        Relation.layer_n(Var.X),
     )

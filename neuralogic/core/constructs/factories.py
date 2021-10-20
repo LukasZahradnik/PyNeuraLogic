@@ -53,5 +53,10 @@ class TermFactory:
 
 
 Var = VariableFactory()
-Atom = AtomFactory()
+Relation = AtomFactory()
 Term = TermFactory()
+
+
+V = Var
+T = Term
+R = Relation

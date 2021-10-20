@@ -5,7 +5,7 @@ from typing import Iterable, Optional
 
 class Rule:
     def __init__(self, head, body):
-        from neuralogic.core import Atom
+        from neuralogic.core import Relation
 
         self.head = head
 
@@ -42,7 +42,7 @@ class Rule:
                     else:
                         new_terms.append(term)
                 if found_replacement:
-                    self.body[atom_index] = Atom.special.alldiff(*new_terms)
+                    self.body[atom_index] = Relation.special.alldiff(*new_terms)
         self.java_object = get_java_factory().get_rule(self)
 
     def is_ellipsis_templated(self) -> bool:

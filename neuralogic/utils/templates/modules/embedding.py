@@ -1,6 +1,6 @@
 from typing import List
 
-from neuralogic.core import Atom, Template, Var, Activation, Aggregation, Metadata
+from neuralogic.core import Relation, Template, Var, Activation, Aggregation, Metadata
 from neuralogic.utils.templates.modules import AbstractModule
 
 
@@ -27,8 +27,8 @@ class Embedding(AbstractModule):
         name = f"l{layer_count}_embedding" if self.name is None else self.name
         previous_name = feature_name if len(previous_names) == 0 else previous_names[-1]
 
-        head_atom = Atom.get(name)(Var.X)
-        feature_rule = head_atom[self.num_embeddings, self.embedding_dim] <= Atom.get(previous_name)(Var.X)
+        head_atom = Relation.get(name)(Var.X)
+        feature_rule = head_atom[self.num_embeddings, self.embedding_dim] <= Relation.get(previous_name)(Var.X)
 
         #todo gusta: toto je jenom linearni projekci vrstva, tj. embedding jen pokud maji i vstupy unikatni (one-hot) hodnoty.
         # Nova verze pro unikatni embeddings je:
@@ -36,6 +36,6 @@ class Embedding(AbstractModule):
         # ..to vytvori skutecne unikatni @embed...(x) Valued Atom za kazdy validni unikatni objekt x
 
         template.add_rule(feature_rule | Metadata(activation=Activation.IDENTITY))
-        template.add_rule(Atom.get(name) / 1 | Metadata(activation=Activation.IDENTITY))
+        template.add_rule(Relation.get(name) / 1 | Metadata(activation=Activation.IDENTITY))
 
         return name

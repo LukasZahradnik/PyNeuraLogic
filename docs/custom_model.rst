@@ -45,12 +45,12 @@ For example, a complete graph with three nodes and some features can be encoded 
     dataset = Dataset()
 
     dataset.add_example([
-        Atom.edge(1, 2), Atom.edge(2, 1), Atom.edge(1, 3),
-        Atom.edge(3, 1), Atom.edge(2, 3), Atom.edge(3, 2),
+        Relation.edge(1, 2), Relation.edge(2, 1), Relation.edge(1, 3),
+        Relation.edge(3, 1), Relation.edge(2, 3), Relation.edge(3, 2),
 
-        Atom.feature(1)[0],
-        Atom.feature(2)[1],
-        Atom.feature(3)[-1],
+        Relation.feature(1)[0],
+        Relation.feature(2)[1],
+        Relation.feature(3)[-1],
     ])
 
 
@@ -65,8 +65,8 @@ TODO: Expand
 .. code-block:: Python
 
     dataset.add_queries([
-        Atom.h(1)[0],
-        Atom.h(2)[1],
+        Relation.h(1)[0],
+        Relation.h(2)[1],
     ])
 
 .. tip::

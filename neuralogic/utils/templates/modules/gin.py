@@ -1,6 +1,6 @@
 from typing import List
 
-from neuralogic.core import Atom, Template, Var, Metadata, Activation, Aggregation
+from neuralogic.core import Relation, Template, Var, Metadata, Activation, Aggregation
 from neuralogic.utils.templates.modules import AbstractModule
 
 
@@ -31,14 +31,14 @@ class GINConv(AbstractModule):
         embed_name = f"{name}_embed"
         previous_name = feature_name if len(previous_names) == 0 else previous_names[-1]
 
-        head_atom = Atom.get(embed_name)(Var.X)
+        head_atom = Relation.get(embed_name)(Var.X)
 
-        layer = head_atom <= (Atom.get(previous_name)(Var.Y), Atom.get(edge_name)(Var.X, Var.Y))
+        layer = head_atom <= (Relation.get(previous_name)(Var.Y), Relation.get(edge_name)(Var.X, Var.Y))
         template.add_rule(layer | Metadata(aggregation=Aggregation.SUM, activation=Activation.IDENTITY))
-        template.add_rule((head_atom <= Atom.get(previous_name)(Var.X)) | Metadata(activation=Activation.IDENTITY))
-        template.add_rule(Atom.get(embed_name) / 1 | Metadata(activation=Activation.IDENTITY))
+        template.add_rule((head_atom <= Relation.get(previous_name)(Var.X)) | Metadata(activation=Activation.IDENTITY))
+        template.add_rule(Relation.get(embed_name) / 1 | Metadata(activation=Activation.IDENTITY))
 
-        gin_head = Atom.get(name)
+        gin_head = Relation.get(name)
 
         layer = gin_head(Var.X)[self.out_channels, self.in_channels] <= head_atom[self.in_channels, self.in_channels]
         template.add_rule(layer | Metadata(activation=self.activation))

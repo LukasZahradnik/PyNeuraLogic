@@ -1,4 +1,4 @@
-from neuralogic.core import Atom, Template, Var, Term
+from neuralogic.core import Relation, Template, Var, Term
 from neuralogic.core.settings import Settings, Optimizer
 from neuralogic.utils.data import Dataset
 
@@ -11,26 +11,26 @@ with Template(settings).context() as template:
 
     template.add_rules(
         [
-            Atom.foal(Var.X)[1,] <= (Atom.parent(Var.X, Var.Y), Atom.horse(Var.Y)), # todo gusta: mozna prejmenovat Atom -> Predicate by odpovidalo skutecnosti prirozeneji?
-            Atom.foal(Var.X)[1,] <= (Atom.sibling(Var.X, Var.Y), Atom.horse(Var.Y)),
-            Atom.negFoal(Var.X)[1,] <= Atom.foal(Var.X),
+            Relation.foal(Var.X)[1,] <= (Relation.parent(Var.X, Var.Y), Relation.horse(Var.Y)), # todo gusta: mozna prejmenovat Atom -> Predicate by odpovidalo skutecnosti prirozeneji?
+            Relation.foal(Var.X)[1,] <= (Relation.sibling(Var.X, Var.Y), Relation.horse(Var.Y)),
+            Relation.negFoal(Var.X)[1,] <= Relation.foal(Var.X),
         ]
     )
 
     dataset.add_example(
         [
-            Atom.horse(Term.aida)[1.0],
-            Atom.horse(Term.cheyenne)[1.0],
-            Atom.horse(Term.dakotta)[1.0],
-            Atom.parent(Term.star, Term.cheyenne)[1.0],
-            Atom.parent(Term.star, Term.aida)[1.0],
-            Atom.parent(Term.star, Term.dakotta)[1.0],
+            Relation.horse(Term.aida)[1.0],
+            Relation.horse(Term.cheyenne)[1.0],
+            Relation.horse(Term.dakotta)[1.0],
+            Relation.parent(Term.star, Term.cheyenne)[1.0],
+            Relation.parent(Term.star, Term.aida)[1.0],
+            Relation.parent(Term.star, Term.dakotta)[1.0],
         ]
     )
 
     dataset.add_queries(
         [
-            Atom.foal(Term.star)[1.0],
-            Atom.negFoal(Term.star)[0.0],
+            Relation.foal(Term.star)[1.0],
+            Relation.negFoal(Term.star)[0.0],
         ]
     )

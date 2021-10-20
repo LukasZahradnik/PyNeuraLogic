@@ -20,18 +20,18 @@ We can represent introduced nodes' types in the input examples, for example, as 
 .. code-block:: Python
 
 
-    Atom.type(1, Term.BLUE),
-    Atom.type(2, Term.BLUE),
-    Atom.type(3, Term.PINK),
-    Atom.type(4, Term.PINK),
-    Atom.type(5, Term.PINK),
+    Relation.type(1, Term.BLUE),
+    Relation.type(2, Term.BLUE),
+    Relation.type(3, Term.PINK),
+    Relation.type(4, Term.PINK),
+    Relation.type(5, Term.PINK),
 
 
 .. NOTE::
 
     Note that there are many ways to express the same concept. We could, for example, encode types (for nodes 1 and 3)
-    as :code:`Atom.blue(1), Atom.pink(3)`.  Nodes are also not limited to have only one type; we can assign multiple
-    types to one node, such as :code:`Atom.type(1, Term.BLUE), Atom.type(1, Term.PINK)`.
+    as :code:`Relation.blue(1), Relation.pink(3)`.  Nodes are also not limited to have only one type; we can assign multiple
+    types to one node, such as :code:`Relation.type(1, Term.BLUE), Relation.type(1, Term.PINK)`.
 
 
 .. NOTE::
@@ -44,11 +44,11 @@ rule for the aggregation of neighbor nodes of the central node with the same typ
 
 .. code-block:: Python
 
-    Atom.h(Var.X) <= (
-        Atom.feature(Var.Y),
-        Atom.type(Var.X, Var.Type),
-        Atom.type(Var.Y, Var.Type),
-        Atom.edge(Var.X, Var.Y),
+    Relation.h(Var.X) <= (
+        Relation.feature(Var.Y),
+        Relation.type(Var.X, Var.Type),
+        Relation.type(Var.Y, Var.Type),
+        Relation.edge(Var.X, Var.Y),
     )
 
 
@@ -58,13 +58,13 @@ input examples and then utilize them in the aggregation.
 
 .. code-block:: Python
 
-    Atom.type_feature(Term.BLUE)[[1, 2, 3]]
+    Relation.type_feature(Term.BLUE)[[1, 2, 3]]
 
 .. code-block:: Python
 
-    Atom.h(Var.X) <= (
-        Atom.feature(Var.Y),
-        Atom.type_feature(Var.Type),
-        Atom.type(Var.Y, Var.Type),
-        Atom.edge(Var.X, Var.Y),
+    Relation.h(Var.X) <= (
+        Relation.feature(Var.Y),
+        Relation.type_feature(Var.Type),
+        Relation.type(Var.Y, Var.Type),
+        Relation.edge(Var.X, Var.Y),
     )

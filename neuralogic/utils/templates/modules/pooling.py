@@ -1,6 +1,6 @@
 from typing import List
 
-from neuralogic.core import Atom, Template, Var, Activation, Aggregation, Metadata
+from neuralogic.core import Relation, Template, Var, Activation, Aggregation, Metadata
 from neuralogic.utils.templates.modules import AbstractModule
 
 
@@ -35,12 +35,12 @@ class GlobalPooling(AbstractModule):
             previous_names = [feature_name]
 
         if self.parametrized:
-            head_atom = Atom.get(name)(Var.X)[self.out_channels, self.in_channels]
+            head_atom = Relation.get(name)(Var.X)[self.out_channels, self.in_channels]
         else:
-            head_atom = Atom.get(name)[self.out_channels, self.in_channels]
+            head_atom = Relation.get(name)[self.out_channels, self.in_channels]
 
         for layer in self.jumping_knowledge:
-            rule = head_atom <= Atom.get(previous_names[layer])(Var.X)
+            rule = head_atom <= Relation.get(previous_names[layer])(Var.X)
             template.add_rule(rule | Metadata(aggregation=self.aggregation, activation=Activation.IDENTITY))
 
         template.add_rule(head_atom.predicate | Metadata(activation=self.activation))

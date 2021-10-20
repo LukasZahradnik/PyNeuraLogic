@@ -1,6 +1,6 @@
 from typing import List, Iterable
 
-from neuralogic.core import Template, Atom
+from neuralogic.core import Template, Relation
 from neuralogic.utils.templates.modules import AbstractModule
 
 from neuralogic.utils.templates.modules.gcn import GCNConv
@@ -35,16 +35,16 @@ class TemplateList:
     def to_inputs(template: Template, x: Iterable, edge_index: Iterable, y, y_mask):
         with template.context():
             if y is None:
-                queries = [Atom.get(TemplateList.output_name)]
+                queries = [Relation.get(TemplateList.output_name)]
             else:
                 queries = [
-                    Atom.get(TemplateList.output_name)(*term if isinstance(term, list) else term)[value]
+                    Relation.get(TemplateList.output_name)(*term if isinstance(term, list) else term)[value]
                     for term, value in zip(y_mask, y)
                 ]
             example = [
-                Atom.get(TemplateList.edge_name)(int(u), int(v))[1] for u, v in zip(edge_index[0], edge_index[1])
+                Relation.get(TemplateList.edge_name)(int(u), int(v))[1] for u, v in zip(edge_index[0], edge_index[1])
             ]
 
             for i, features in enumerate(x):
-                example.append(Atom.get(TemplateList.feature_name)(i)[features])
+                example.append(Relation.get(TemplateList.feature_name)(i)[features])
         return queries, example
