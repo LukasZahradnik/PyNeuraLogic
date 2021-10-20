@@ -35,7 +35,7 @@ Or, a bit more formally:
 
 to project your [1,20] node embeddings through a learnable ``[10,20]`` layer before the aggregation, and also `[5,10]` after the aggregation. The particular aggregation and activation functions, as well as other details, can naturally be [specified further](https://pyneuralogic.readthedocs.io/en/latest/language.html), but you can as well leave it default like we did here with your first, fully functional GNN layer!
 
-### What is the difference from other GNN frameworks?
+### How is it different from other GNN frameworks?
 
 Naturally, PyNeuralogic is by no means limited to GNN models, as the expressiveness of relational logic goes much further than graphs. So nothing stops you from playing directly with:
 - multiple relations and node types
@@ -48,7 +48,7 @@ Naturally, PyNeuralogic is by no means limited to GNN models, as the expressiven
 In [PyNeuraLogic](https://dspace.cvut.cz/bitstream/handle/10467/97065/F3-DP-2021-Zahradnik-Lukas-Extending-Graph-Neural-Networks-with-Relational-Logic.pdf?sequence=-1&isAllowed=y), all these concepts take the same form of simple small logic programs. These are commonly highly transparent and easy to understand, thanks to their declarative nature. Consequently, there is no need to design a new blackbox class name for each new small modification of the GNN rule, since you code directly at the level of the logical principles here.
 
 The underlying engine then creates differentiable computation graphs in a fully automated and dynamic fashion, hence you don't have to care about how to align everything into some (static) tensor operations.
-This gives you considerably more expressiveness, and, somewhat surprisingly, sometimes even [performance](https://github.com/GustikS/GNNwLRNNs).
+This gives you considerably more expressiveness, and, somewhat surprisingly, sometimes even [performance](https://arxiv.org/abs/2007.06286).
 
 
 We hope you'll find the framework useful in designing your own deep **relational** learning ideas beyond the GNNs!
