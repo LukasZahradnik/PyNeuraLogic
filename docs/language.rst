@@ -27,8 +27,14 @@ with atom's arity (number of its terms), uniquely identifies an atom.
 
 |
 
-Atoms are created via object :code:`Atom` (instance of :code:`AtomFactory`) that can be imported from
+Atoms are created via object :code:`Relation` (instance of :code:`AtomFactory`) that can be imported from
 :code:`neuralogic.core`.
+
+
+.. tip::
+
+    You can also create atoms via :code:`R` object, which is a shortcut of :code:`Relation`.
+
 
 Predicate name
 **************
