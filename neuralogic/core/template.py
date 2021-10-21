@@ -2,14 +2,13 @@ from neuralogic import get_neuralogic, get_gateway
 from py4j.java_collections import ListConverter
 from py4j.java_gateway import get_field, set_field
 
-from typing import Union, List, Optional, Iterator, Set, Dict, Any, Callable
-from contextlib import contextmanager
+from typing import Union, List, Optional, Set, Dict, Any, Callable
 
 from neuralogic.core.builder import Builder, Backend
 from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.predicate import PredicateMetadata
-from neuralogic.core.constructs.java_objects import get_current_java_factory, set_java_factory, JavaFactory
+from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import Settings
 from neuralogic.core.sources import Sources
 from neuralogic.utils.data import Dataset
@@ -181,11 +180,11 @@ class Template:
 
         for rule in self.template:
             if isinstance(rule, PredicateMetadata):
-                predicate_metadata.append(rule.java_object)
+                predicate_metadata.append(self.java_factory.get_predicate_metadata_pair(rule))
             elif isinstance(rule, Rule):
-                weighted_rules.append(rule.java_object)
+                weighted_rules.append(self.java_factory.get_rule(rule))
             elif isinstance(rule, (WeightedAtom, BaseAtom)):
-                valued_facts.append(rule.java_object)
+                valued_facts.append(self.java_factory.get_valued_fact(rule, self.java_factory.get_variable_factory()))
 
         weighted_rules = ListConverter().convert(weighted_rules, get_gateway()._gateway_client)
         valued_facts = ListConverter().convert(valued_facts, get_gateway()._gateway_client)
@@ -200,10 +199,9 @@ class Template:
         if backend == Backend.PYG:
             return get_neuralogic_layer(backend, native_backend_models)(self.module_list)
 
-        with self.context():
-            if self.parsed_template is None:
-                self.parsed_template = self.get_parsed_template()
-            model = self.builder.build_model(self.parsed_template, backend)
+        if self.parsed_template is None:
+            self.parsed_template = self.get_parsed_template()
+        model = self.builder.build_model(self.parsed_template, backend)
         return get_neuralogic_layer(backend)(model, self.parsed_template, self.java_factory.settings)
 
     def build_dataset(self, dataset: Dataset, backend: Backend) -> BuiltDataset:
@@ -213,39 +211,46 @@ class Template:
         :param backend:
         :return:
         """
-        with self.context():
-            if not dataset.file_sources:
-                examples = dataset.examples
-                queries = dataset.queries
+        if self.parsed_template is None:
+            self.parsed_template = self.get_parsed_template()
 
-                if dataset.data is not None:
-                    examples = []
-                    queries = []
+        weight_factory = self.java_factory.weight_factory
 
-                    for data in dataset.data:
-                        from neuralogic.utils.templates import TemplateList
+        if not dataset.file_sources:
+            examples = dataset.examples
+            queries = dataset.queries
 
-                        query, example = TemplateList.to_inputs(self, data.x, data.edge_index, data.y, data.y_mask)
-                        examples.append(example)
-                        queries.extend(query)
+            if dataset.data is not None:
+                examples = []
+                queries = []
 
-                examples = self.build_examples(examples, self.examples_builder)
-                queries = self.build_queries(queries, self.query_builder)
+                for data in dataset.data:
+                    from neuralogic.utils.templates import TemplateList
 
-                logic_samples = Template.merge_queries_with_examples(queries, examples)
-                logic_samples = ListConverter().convert(logic_samples, get_gateway()._gateway_client).stream()
+                    query, example = TemplateList.to_inputs(self, data.x, data.edge_index, data.y, data.y_mask)
+                    examples.append(example)
+                    queries.extend(query)
 
-                if self.parsed_template is None:
-                    self.parsed_template = self.get_parsed_template()
-                samples = self.builder.from_logic_samples(self.parsed_template, logic_samples, backend)
-            else:
-                args = ["-t", dataset.examples_file or dataset.queries_file]
-                if dataset.queries_file is not None:
-                    args.extend(["-q", dataset.queries_file])
-                if dataset.examples_file is not None:
-                    args.extend(["-e", dataset.examples_file])
-                sources = Sources.from_args(args, self.java_factory.settings)
-                samples = self.builder.from_sources(self.parsed_template, sources, backend)
+            self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
+            examples = self.build_examples(examples, self.examples_builder)
+
+            self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
+            queries = self.build_queries(queries, self.query_builder)
+
+            logic_samples = Template.merge_queries_with_examples(queries, examples)
+            logic_samples = ListConverter().convert(logic_samples, get_gateway()._gateway_client).stream()
+
+            samples = self.builder.from_logic_samples(self.parsed_template, logic_samples, backend)
+        else:
+            args = ["-t", dataset.examples_file or dataset.queries_file]
+            if dataset.queries_file is not None:
+                args.extend(["-q", dataset.queries_file])
+            if dataset.examples_file is not None:
+                args.extend(["-e", dataset.examples_file])
+            sources = Sources.from_args(args, self.java_factory.settings)
+            samples = self.builder.from_sources(self.parsed_template, sources, backend)
+
+        self.java_factory.weight_factory = weight_factory
         return BuiltDataset(samples)
 
     @staticmethod
@@ -279,13 +284,6 @@ class Template:
             set_field(get_field(query_object, "query"), "evidence", example_evidence)
             logic_samples.append(query)
         return logic_samples
-
-    @contextmanager
-    def context(self) -> Iterator["Template"]:
-        previous_factory = get_current_java_factory()
-        set_java_factory(self.java_factory)
-        yield self
-        set_java_factory(previous_factory)
 
     def __str__(self) -> str:
         return "\n".join(str(r) for r in self.template)

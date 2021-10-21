@@ -1,4 +1,3 @@
-from neuralogic.core.constructs.java_objects import get_java_factory
 from neuralogic.core.constructs.metadata import Metadata
 
 
@@ -10,8 +9,6 @@ class Predicate:
         self.arity = arity
         self.private = private
         self.special = special
-
-        self.java_object = get_java_factory().get_predicate(self)
 
     def set_arity(self, arity):
         if self.arity == arity:
@@ -40,8 +37,6 @@ class PredicateMetadata:
 
         self.predicate = predicate
         self.metadata = metadata
-
-        self.java_object = get_java_factory().get_predicate_metadata_pair(self)
 
     def __str__(self):
         return f"{self.predicate} {self.metadata}"

@@ -1,9 +1,6 @@
 from typing import Iterable, Union
 
-from py4j.java_gateway import set_field, get_field
-
 from neuralogic.core.constructs.predicate import Predicate
-from neuralogic.core.constructs.java_objects import get_java_factory
 from neuralogic.core.constructs import rule, factories
 
 
@@ -24,13 +21,6 @@ class BaseAtom:
             self.terms = []
         elif not isinstance(self.terms, Iterable):
             self.terms = [self.terms]
-
-        if self.predicate.special and self.predicate.name == "alldiff":
-            for term in self.terms:
-                if term is Ellipsis:
-                    self.java_object = None
-                    return
-        self.java_object = get_java_factory().get_valued_fact(self, get_java_factory().get_variable_factory())
 
     def __neg__(self) -> "BaseAtom":
         return self.__invert__()
@@ -58,8 +48,8 @@ class BaseAtom:
         return BaseAtom(predicate, terms, self.negated)
 
     def __getitem__(self, item) -> "WeightedAtom":
-        if self.java_object is None:
-            raise NotImplementedError
+        # if self.java_object is None:
+        #     raise NotImplementedError
         return WeightedAtom(self, item)
 
     def __le__(self, other: Body) -> rule.Rule:
@@ -82,7 +72,7 @@ class BaseAtom:
         atom.negated = self.negated
         atom.terms = self.terms
         atom.predicate = self.predicate
-        atom.java_object = self.java_object
+        # atom.java_object = self.java_object
 
 
 class WeightedAtom:  # todo gusta: mozna dedeni namisto kompozice?
@@ -103,14 +93,12 @@ class WeightedAtom:  # todo gusta: mozna dedeni namisto kompozice?
         if isinstance(weight, Iterable) and not isinstance(weight, tuple):
             self.weight = list(weight)
 
-        self.java_object = get_java_factory().get_valued_fact(self, get_java_factory().get_variable_factory())
-
     def fixed(self) -> "WeightedAtom":
         if self.is_fixed:
             raise Exception
 
-        set_field(get_field(self.java_object, "weight"), "isFixed", True)
-        return self  # WeightedAtom(self.atom, self.weight, True)
+        # set_field(get_field(self.java_object, "weight"), "isFixed", True)
+        return WeightedAtom(self.atom, self.weight, True)
 
     @property
     def negated(self):
