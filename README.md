@@ -17,7 +17,7 @@ PyNeuraLogic lets you use Python to create **Differentiable Logic Programs**
 
 ## About
 
-Logic programming is a declarative coding paradigm in which you declare your logical _variables_ and _relations_ between them. A relation applied to a tuple of variables is then called an _atom_. These can be further composed into so-called _rules_ that drive the computation. Such a rule set then forms a _logic program_, and its execution is equivalent to performing logic inference with the rules.
+Logic programming is a declarative coding paradigm in which you declare your logical _variables_ and _relations_ between them. These can be further composed into so-called _rules_ that drive the computation. Such a rule set then forms a _logic program_, and its execution is equivalent to performing logic inference with the rules.
 
 PyNeuralogic, through its [NeuraLogic](https://github.com/GustikS/NeuraLogic) backend, then makes this inference process _differentiable_, which lets you learn numeric parameters that can be associated with the rules.
 
