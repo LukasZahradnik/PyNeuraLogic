@@ -76,7 +76,7 @@ TODO
 Evaluator Training/Testing Interface
 ************************************
 
-The evaluator's basic interface consists of two methods - :code:`train` and :code:`test`. Both methods have the same interface and are implemented in two modes - generator and non-generator.
+The evaluator's basic interface consists of two methods - :code:`train` and :code:`test` for training on a dataset and evaluating a dataset, respectively. Both methods have the same interface and are implemented in two modes - generator and non-generator.
 
 The generator mode (default mode) yields a tuple of two elements (total loss and number of instances/samples) per each epoch. This mode can be useful when we want to, for example, visualize, log or do some other manipulations in real-time during the training (or testing).
 
