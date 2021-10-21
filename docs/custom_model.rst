@@ -25,7 +25,7 @@ The dataset instance holds information about the specific problem instance and i
 
 .. attention::
 
-    In the context of examples and queries, the weights of atoms are, in fact, not learnable parameters but concrete values that serve as inputs (examples) or target labels (queries).
+    In the context of examples and queries, the weights of atoms are, in fact, not learnable parameters but concrete values that serve as feature inputs (examples) or target labels (queries).
 
     This means that it is not possible to use the dimension value for the weight (value) definition as it does not represent concrete value.
 
@@ -40,7 +40,7 @@ For example, a complete graph with three nodes and some features can be encoded 
 .. code-block:: Python
 
     from neuralogic.utils.data.dataset import Dataset
-    from neuralogic.core import Atom
+    from neuralogic.core import Relation
 
     dataset = Dataset()
 
@@ -57,10 +57,10 @@ For example, a complete graph with three nodes and some features can be encoded 
 Queries
 *******
 
-Queries are a set of valued ground atoms (facts) that determine our model's individual outputs and its labeling.
+Queries are a set of valued ground atoms (facts) that determine what outputs of the defined template are.
 
 
-TODO: Expand
+We might, for example, want to learn the output of the :code:`Relation.h` for the entity with index :code:`1` to be :code:`0` and then for the entity with index :code:`2` to be :code:`1`, which might be expressed like this:
 
 .. code-block:: Python
 
@@ -68,6 +68,13 @@ TODO: Expand
         Relation.h(1)[0],
         Relation.h(2)[1],
     ])
+
+Queries are not restricted only to one layer (atom) nor output shape. We can mix queries however we like - for example, we can define query :code:`Relation.a[0]` with scalar label and then query :code:`Relation.b[[1, 0, 1]]` with vector label.
+
+.. note::
+
+    Queries are valued ground atoms, but we don't have to define the value explicitly. If the value is not present, the default value (:code:`1.0`) is used as the label. This can be useful for queries outside of training scenarios - where labels are not needed/known.
+
 
 .. tip::
 

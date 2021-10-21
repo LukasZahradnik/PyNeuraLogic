@@ -62,7 +62,7 @@ which can be expressed as :code:`Relation.predicate_name(terms)[value]`.
 .. code-block:: Python
 
     from neuralogic.utils.data.dataset import Dataset
-    from neuralogic.core import Atom
+    from neuralogic.core import Relation
 
 
     dataset = Dataset()

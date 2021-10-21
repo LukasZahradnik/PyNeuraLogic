@@ -103,37 +103,15 @@ We hope you'll find the framework useful in designing your own deep **relational
 Please let us know if you need some guidance or would like to cooperate!
 
 
-
-
 Supported backends
 ******************
 
-| PyNeuraLogic currently supports following backends (to some extent), which have to be installed separately:
+Models defined in PyNeuraLogic can be built for and evaluated in different backends. Currently, you can pick and use
+the following backends, which, except for the Java backend, have to be additionally installed:
 
 - `DyNet <https://github.com/clab/dynet>`_
 - Java
 - `PyTorch Geometric <https://github.com/rusty1s/pytorch_geometric>`_
-
-
-Prerequisites
-*************
-
-| To use PyNeuraLogic, you need to install the following prerequisites:
-
-.. code-block::
-
-    Python >= 3.7
-    Java 1.8
-
-
-Installation
-************
-
-| To install PyNeuraLogic's latest release from the PyPI repository, use the following command:
-
-.. code-block::
-
-    pip install neuralogic
 
 
 Examples

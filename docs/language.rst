@@ -47,7 +47,7 @@ which can be useful for generating atoms.
 
 .. code-block:: Python
 
-    from neuralogic.core import Atom
+    from neuralogic.core import Relation
 
     Relation.my_atom  # Atom with a predicate name "my_atom"
 
@@ -151,4 +151,23 @@ More about individual modifiers can be read in :ref:`special-modifier-label`.
 The Anatomy of a Rule
 #####################
 
-- Rule example
+
+.. code-block:: Python
+
+    Relation.h <= (Relation.b_one, Relation.b_n)
+
+
+A rule consists of two parts - the head and the body. The head is an arbitrary atom followed by implication (:code:`<=`) and the body that is formed from a tuple of :code:`n` atoms.
+
+When there is only one atom in the body, we can omit the tuple and insert the atom directly.
+
+.. code-block:: Python
+
+    Relation.h <= Relation.b
+
+
+Metadata
+********
+
+
+
