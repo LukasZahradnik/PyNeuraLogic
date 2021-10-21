@@ -65,7 +65,7 @@ Once you have an evaluator, you can evaluate or train the model on a dataset. Th
 
 .. note::
 
-    It is more efficient to pass into evaluator pre-built dataset if it is used passed in more than once (it will prevent redundant dataset building).
+    It is more efficient to pass into evaluator pre-built dataset if it is used more than once (it will prevent redundant dataset building).
 
 
 Settings Instance
