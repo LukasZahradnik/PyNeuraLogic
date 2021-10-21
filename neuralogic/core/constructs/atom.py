@@ -22,13 +22,6 @@ class BaseAtom:
         elif not isinstance(self.terms, Iterable):
             self.terms = [self.terms]
 
-        # if self.predicate.special and self.predicate.name == "alldiff":
-        #     for term in self.terms:
-        #         if term is Ellipsis:
-        #             self.java_object = None
-        #             return
-        # self.java_object = get_java_factory().get_valued_fact(self, get_java_factory().get_variable_factory())
-
     def __neg__(self) -> "BaseAtom":
         return self.__invert__()
 
@@ -99,8 +92,6 @@ class WeightedAtom:  # todo gusta: mozna dedeni namisto kompozice?
 
         if isinstance(weight, Iterable) and not isinstance(weight, tuple):
             self.weight = list(weight)
-
-        # self.java_object = get_java_factory().get_valued_fact(self, get_java_factory().get_variable_factory())
 
     def fixed(self) -> "WeightedAtom":
         if self.is_fixed:
