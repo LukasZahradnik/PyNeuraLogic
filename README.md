@@ -29,11 +29,15 @@ Many things! For instance - ever heard of [Graph Neural Networks](https://distil
 
 Or, a bit more 'formally':
 
-``` Relation.node2(Var.X) <= (Relation.node1(Var.Y), Relation.edge(Var.X,Var.Y))```
+```
+Relation.node2(Var.X) <= (Relation.node1(Var.Y), Relation.edge(Var.X,Var.Y))
+```
 
 ...and that's the actual _code_! Now for a classic learnable GNN layer, you'll want to add some numeric parameters, such as
 
-``` Relation.node2(Var.X)[5,10] <= (Relation.node1(Var.Y)[10,20], Relation.edge(Var.X,Var.Y))```
+```
+Relation.node2(Var.X)[5,10] <= (Relation.node1(Var.Y)[10,20], Relation.edge(Var.X,Var.Y))
+```
 
 to project your `[1,20]` input node embeddings through a learnable ``[10,20]`` layer before the aggregation, and subsequently a `[5,10]` layer after the aggregation. The particular aggregation and activation functions, as well as other details, can naturally be [specified further](https://pyneuralogic.readthedocs.io/en/latest/language.html), but you can as well leave it default like we did here with your first, fully functional GNN layer!
 
