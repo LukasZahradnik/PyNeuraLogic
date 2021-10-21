@@ -1,5 +1,5 @@
 from py4j.java_gateway import get_field, set_field
-from typing import Optional, List, Iterable, Sized
+from typing import Optional, Iterable, Sized
 from py4j.java_collections import ListConverter
 
 from neuralogic import get_neuralogic, get_gateway
@@ -50,15 +50,12 @@ class JavaFactory:
             return self.constant_factory.construct(str(term))
         raise NotImplementedError
 
-    def get_generic_atom(self, atom_class, atom, variable_factory, new_weight):
+    def get_generic_atom(self, atom_class, atom, variable_factory):
         predicate = self.get_predicate(atom.predicate)
 
         weight = None
         if isinstance(atom, self.weighted_atom_type):
-            if new_weight:
-                weight = self.get_weight(atom.weight, atom.weight_name, atom.is_fixed)
-            else:
-                weight = get_field(atom.java_object, "weight")
+            weight = self.get_weight(atom.weight, atom.weight_name, atom.is_fixed)
 
         term_list = ListConverter().convert(
             [self.get_term(term, variable_factory) for term in atom.terms], get_gateway()._gateway_client
@@ -97,11 +94,13 @@ class JavaFactory:
         return namespace.RuleMetadata(get_field(self.builder, "settings"), map)
 
     def get_query(self, query):
+        variable_factory = self.get_variable_factory()
+
         if not isinstance(query, self.rule_type):
             if not isinstance(query, Iterable):
                 query = [query]
-            return None, self.get_conjunction(query)
-        return query.head.java_object, self.get_conjunction(query.body)
+            return None, self.get_conjunction(query, variable_factory)
+        return self.get_atom(query.head, variable_factory), self.get_conjunction(query.body, variable_factory)
 
     def get_lifted_example(self, example):
         gateway_client = get_gateway()._gateway_client
@@ -110,34 +109,36 @@ class JavaFactory:
         rules = ListConverter().convert([], gateway_client)
         label_conjunction = None
 
+        variabel_factory = self.get_variable_factory()
+
         if not isinstance(example, self.rule_type):
             if not isinstance(example, Iterable):
                 example = [example]
-            conjunctions.append(self.get_conjunction(example))
+            conjunctions.append(self.get_conjunction(example, variabel_factory))
         else:
-            label_conjunction = self.get_conjunction([example.head])
-            conjunctions.append(self.get_conjunction(example.body))
+            label_conjunction = self.get_conjunction([example.head], variabel_factory)
+            conjunctions.append(self.get_conjunction(example.body, variabel_factory))
 
         lifted_example = self.example_namespace.LiftedExample(
             ListConverter().convert(conjunctions, gateway_client), rules
         )
         return label_conjunction, lifted_example
 
-    def get_conjunction(self, atoms):
+    def get_conjunction(self, atoms, variable_factory):
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs
-        valued_facts = [atom.java_object for atom in atoms]
+        valued_facts = [self.get_valued_fact(atom, variable_factory) for atom in atoms]
 
         return namespace.Conjunction(ListConverter().convert(valued_facts, get_gateway()._gateway_client))
 
     def get_predicate_metadata_pair(self, predicate_metadata):
         namespace = get_neuralogic().cz.cvut.fel.ida.utils.generic
-        return namespace.Pair(predicate_metadata.predicate.java_object, self.get_metadata(predicate_metadata.metadata))
+        return namespace.Pair(self.get_predicate(predicate_metadata.predicate), self.get_metadata(predicate_metadata.metadata))
 
     def get_valued_fact(self, atom, variable_factory):
-        return self.get_generic_atom(self.example_namespace.ValuedFact, atom, variable_factory, True)
+        return self.get_generic_atom(self.example_namespace.ValuedFact, atom, variable_factory)
 
     def get_atom(self, atom, variable_factory):
-        return self.get_generic_atom(self.namespace.BodyAtom, atom, variable_factory, False)
+        return self.get_generic_atom(self.namespace.BodyAtom, atom, variable_factory)
 
     def get_rule(self, rule):
         java_rule = self.namespace.WeightedRule()
@@ -224,20 +225,7 @@ class JavaFactory:
             raise NotImplementedError
         return initialized, value
 
+    def get_new_weight_factory(self):
+        builder = get_neuralogic().cz.cvut.fel.ida.logic.constructs.building.ExamplesBuilder(self.settings.settings)
 
-java_factory: Optional[JavaFactory] = None
-
-
-def set_java_factory(factory: Optional[JavaFactory]):
-    global java_factory
-    java_factory = factory
-
-
-def get_java_factory() -> JavaFactory:
-    if java_factory is None:
-        raise Exception
-    return java_factory
-
-
-def get_current_java_factory() -> Optional[JavaFactory]:
-    return java_factory
+        return get_field(builder, "weightFactory")

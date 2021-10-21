@@ -1,4 +1,3 @@
-from neuralogic.core.constructs.java_objects import get_java_factory
 from neuralogic.core.constructs.metadata import Metadata
 from typing import Iterable, Optional
 
@@ -43,7 +42,7 @@ class Rule:
                         new_terms.append(term)
                 if found_replacement:
                     self.body[atom_index] = Relation.special.alldiff(*new_terms)
-        self.java_object = get_java_factory().get_rule(self)
+        # self.java_object = get_java_factory().get_rule(self)
 
     def is_ellipsis_templated(self) -> bool:
         for body_atom in self.body:
@@ -69,6 +68,6 @@ class Rule:
         if not isinstance(other, Metadata):
             raise NotImplementedError
         self.metadata = other
-        self.java_object.setMetadata(get_java_factory().get_metadata(self.metadata))
+        # self.java_object.setMetadata(get_java_factory().get_metadata(self.metadata))
 
         return self
