@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from neuralogic.utils.data.dataset import Dataset, Data
 from neuralogic.core.settings import Settings
@@ -6,7 +7,7 @@ from neuralogic.core.settings import Settings
 base_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "datasets")
 
 
-def XOR(settings: Settings):
+def XOR(settings: Optional[Settings] = None):
     from neuralogic.core.template import Template
 
     template = Template(settings, template_file=os.path.join(base_path, "simple", "xor", "naive", "template.txt"))
@@ -15,7 +16,7 @@ def XOR(settings: Settings):
     return template, dataset
 
 
-def Trains(settings: Settings):
+def Trains(settings: Optional[Settings] = None):
     from neuralogic.core.template import Template
 
     template = Template(settings, template_file=os.path.join(base_path, "simple", "trains", "template.txt"))
@@ -27,7 +28,7 @@ def Trains(settings: Settings):
     return template, dataset
 
 
-def XOR_Vectorized(settings: Settings):
+def XOR_Vectorized(settings: Optional[Settings] = None):
     from neuralogic.core.template import Template
 
     template = Template(settings, template_file=os.path.join(base_path, "simple", "xor", "vectorized", "template.txt"))
@@ -36,7 +37,7 @@ def XOR_Vectorized(settings: Settings):
     return template, dataset
 
 
-def Mutagenesis(settings: Settings):
+def Mutagenesis(settings: Optional[Settings] = None):
     from neuralogic.core.template import Template
 
     template = Template(
