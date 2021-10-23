@@ -12,7 +12,7 @@ class AbstractNeuraLogic:
         self.template = template
 
         self.hooks_set = False
-        self.hooks = None
+        self.hooks = {}
 
     def __call__(self, sample):
         raise NotImplementedError
