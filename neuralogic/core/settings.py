@@ -51,9 +51,17 @@ class Settings:
         initializer: Initializer = None,
         initializer_const: float = None,
         initializer_uniform_scale: float = None,
+        rule_neuron_activation: Activation = None,
+        relation_neuron_activation: Activation = None,
     ):
         self.namespace = get_neuralogic().cz.cvut.fel.ida.setup
         self.settings = self.namespace.Settings()
+
+        if rule_neuron_activation is not None:
+            self.rule_neuron_activation = rule_neuron_activation
+
+        if relation_neuron_activation is not None:
+            self.relation_neuron_activation = relation_neuron_activation
 
         if optimizer is not None:
             self.optimizer = optimizer
@@ -76,6 +84,8 @@ class Settings:
         self.error_function = ErrorFunction.SQUARED_DIFF if error_function is None else error_function
         set_field(self.settings, "debugExporting", False)
         set_field(self.settings, "isoValueCompression", True)
+        set_field(self.settings, "squishLastLayer", False)
+        set_field(self.settings, "trainOnlineResultsType", self.namespace.Settings.ResultsType.REGRESSION)
         set_field(self.settings, "exportBlocks", get_gateway().new_array(get_gateway().jvm.java.lang.String, 0))
         self.settings.infer()
 
@@ -135,7 +145,7 @@ class Settings:
 
     @property
     def error_function(self):
-        return self.settings.errorFunction
+        return get_field(self.settings, "errorFunction")
 
     @error_function.setter
     def error_function(self, error_function: ErrorFunction):
@@ -190,6 +200,22 @@ class Settings:
         set_field(self.settings, "initializer", self.namespace.Settings.InitSet.SIMPLE)
 
     @property
+    def relation_neuron_activation(self) -> Activation:
+        return get_field(self.settings, "atomNeuronActivation")
+
+    @relation_neuron_activation.setter
+    def relation_neuron_activation(self, value: Activation):
+        set_field(self.settings, "atomNeuronActivation", self.get_activation_function(value))
+
+    @property
+    def rule_neuron_activation(self) -> Activation:
+        return get_field(self.settings, "ruleNeuronActivation")
+
+    @rule_neuron_activation.setter
+    def rule_neuron_activation(self, value: Activation):
+        set_field(self.settings, "ruleNeuronActivation", self.get_activation_function(value))
+
+    @property
     def debug_exporting(self) -> bool:
         return get_field(self.settings, "debugExporting")
 
@@ -204,6 +230,25 @@ class Settings:
     @default_fact_value.setter
     def default_fact_value(self, value: float):
         set_field(self.settings, "defaultFactValue", value)
+
+    def get_activation_function(self, activation: Activation):
+        if activation == Activation.SIGMOID:
+            return self.namespace.Settings.ActivationFcn.SIGMOID
+        if activation == Activation.TANH:
+            return self.namespace.Settings.ActivationFcn.TANH
+        if activation == Activation.SIGNUM:
+            return self.namespace.Settings.ActivationFcn.SIGNUM
+        if activation == Activation.RELU:
+            return self.namespace.Settings.ActivationFcn.RELU
+        if activation == Activation.IDENTITY:
+            return self.namespace.Settings.ActivationFcn.IDENTITY
+        if activation == Activation.LUKASIEWICZ:
+            return self.namespace.Settings.ActivationFcn.LUKASIEWICZ
+        if activation == Activation.SOFTMAX:
+            return self.namespace.Settings.ActivationFcn.SOFTMAX
+        if activation == Activation.SPARSEMAX:
+            return self.namespace.Settings.ActivationFcn.SPARSEMAX
+        raise NotImplementedError
 
     def to_json(self) -> str:
         return self.settings.exportToJson()
