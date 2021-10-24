@@ -1,13 +1,11 @@
 from examples.datasets.data.train_example_data import train_example_data
 
 from neuralogic.core import Relation, Template, Var, Term
-from neuralogic.core.settings import Settings, Optimizer
 from neuralogic.utils.data import Dataset
 
 
-settings = Settings(optimizer=Optimizer.SGD, epochs=300)
 dataset = Dataset()
-template = Template(settings)
+template = Template()
 
 # Naive trains - one big example
 

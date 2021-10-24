@@ -143,9 +143,10 @@ class Builder:
         result = Builder.build(self.example_builder.buildPipeline(parsed_template, logic_samples), None)
         return [Sample(x) for x in stream_to_list(get_field(result, "s"))]
 
-    def build_model(self, parsed_template, backend: Backend):
+    def build_model(self, parsed_template, backend: Backend, settings: Settings):
         namespace = get_neuralogic().cz.cvut.fel.ida.neural.networks.computation.training
-        neural_model = namespace.NeuralModel(parsed_template.getAllWeights(), self.settings.settings)
+
+        neural_model = namespace.NeuralModel(parsed_template.getAllWeights(), settings.settings)
 
         if backend == Backend.JAVA:
             return neural_model

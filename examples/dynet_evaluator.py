@@ -1,10 +1,11 @@
 from examples.datasets.vectorized_xor import template, dataset
 
 from neuralogic.nn import get_evaluator
-from neuralogic.core import Backend
+from neuralogic.core import Backend, Settings, Optimizer
 
 
-neuralogic_evaluator = get_evaluator(template, Backend.DYNET)
+settings = Settings(optimizer=Optimizer.SGD, epochs=300)
+neuralogic_evaluator = get_evaluator(template, Backend.DYNET, settings)
 
 printouts = 10
 

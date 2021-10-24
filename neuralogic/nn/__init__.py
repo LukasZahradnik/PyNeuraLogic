@@ -30,10 +30,7 @@ def get_evaluator(
     native_backend_models=False,
 ):
     if settings is None:
-        if template is not None:
-            settings = template.java_factory.settings
-        else:
-            settings = Settings()
+        settings = Settings()
 
     if backend == Backend.DYNET:
         from neuralogic.nn.evaluators.dynet import DynetEvaluator

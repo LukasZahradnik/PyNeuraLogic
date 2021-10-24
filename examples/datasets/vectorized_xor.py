@@ -1,13 +1,11 @@
 from neuralogic.core import Relation, Template
-from neuralogic.core.settings import Settings, Optimizer
 from neuralogic.utils.data import Dataset
 
 
-settings = Settings(optimizer=Optimizer.SGD)
 dataset = Dataset()
 
 
-template = Template(settings)
+template = Template()
 
 template.add_rule(Relation.xor[1, 8] <= Relation.xy[8, 2])  # Add template rule
 

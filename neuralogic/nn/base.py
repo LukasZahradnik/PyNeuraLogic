@@ -66,7 +66,7 @@ class AbstractEvaluator:
         self.template = template
         self.backend = backend
         self.dataset: Optional[BuiltDataset] = None
-        self.neuralogic_model = template.build(backend)
+        self.neuralogic_model = template.build(backend, settings)
 
         if backend != Backend.PYG:
             self.neuralogic_model.set_hooks(template.hooks)

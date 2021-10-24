@@ -38,7 +38,7 @@ class Template:
         if settings is None:
             settings = Settings()
 
-        self.java_factory = JavaFactory(settings)
+        self.java_factory = None
 
         self.template: List[TemplateEntries] = []
         self.builder = Builder(settings)
@@ -48,8 +48,8 @@ class Template:
             self.parsed_template = self.builder.build_template_from_file(settings, template_file)
 
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.building
-        self.examples_builder = namespace.ExamplesBuilder(self.java_factory.settings.settings)
-        self.query_builder = namespace.QueriesBuilder(self.java_factory.settings.settings)
+        self.examples_builder = namespace.ExamplesBuilder(settings.settings)
+        self.query_builder = namespace.QueriesBuilder(settings.settings)
         self.query_builder.setFactoriesFrom(self.examples_builder)
 
         self.locked_template = False
@@ -111,8 +111,10 @@ class Template:
         :param rules:
         :return:
         """
-        if self.parsed_template is not None or self.locked_template:
+        if self.locked_template:
             raise Exception
+        if self.parsed_template is not None:
+            self.parsed_template = None
 
         self.template.extend(rules)
 
@@ -173,6 +175,8 @@ class Template:
         return logic_samples
 
     def get_parsed_template(self):
+        self.java_factory = JavaFactory()
+
         predicate_metadata = []
         weighted_rules = []
         valued_facts = []
@@ -192,16 +196,19 @@ class Template:
         template_namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.types
         return template_namespace.ParsedTemplate(weighted_rules, valued_facts)
 
-    def build(self, backend: Backend, *, native_backend_models=False):
+    def build(self, backend: Backend, settings: Settings = None, *, native_backend_models=False):
         from neuralogic.nn import get_neuralogic_layer
 
         if backend == Backend.PYG:
             return get_neuralogic_layer(backend, native_backend_models)(self.module_list)
 
-        if self.parsed_template is None:
-            self.parsed_template = self.get_parsed_template()
-        model = self.builder.build_model(self.parsed_template, backend)
-        return get_neuralogic_layer(backend)(model, self.parsed_template, self.java_factory.settings)
+        if settings is None:
+            settings = Settings()
+
+        self.parsed_template = self.get_parsed_template()
+        model = self.builder.build_model(self.parsed_template, backend, settings)
+
+        return get_neuralogic_layer(backend)(model, self.parsed_template, settings)
 
     def build_dataset(self, dataset, backend: Backend) -> BuiltDataset:
         """Builds the dataset (does grounding and neuralization) for this template instance and the backend
