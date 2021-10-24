@@ -12,6 +12,7 @@ class ErrorFunction(str, Enum):
     SQUARED_DIFF = "SQUARED_DIFF"
     # ABS_DIFF = "ABS_DIFF"
     CROSSENTROPY = "CROSSENTROPY"
+    SOFTENTROPY = "SOFTENTROPY"
 
 
 class Activation(Enum):
@@ -54,11 +55,11 @@ class Settings:
         self.namespace = get_neuralogic().cz.cvut.fel.ida.setup
         self.settings = self.namespace.Settings()
 
-        if learning_rate is not None:
-            self.learning_rate = learning_rate
-
         if optimizer is not None:
             self.optimizer = optimizer
+
+        if learning_rate is not None:
+            self.learning_rate = learning_rate
 
         if initializer is not None:
             self.initializer = initializer
@@ -142,11 +143,13 @@ class Settings:
             java_error_function = self.namespace.Settings.ErrorFcn.SQUARED_DIFF
         # elif error_function == ErrorFunction.ABS_DIFF:
         #     java_error_function = self.namespace.Settings.ErrorFcn.ABS_DIFF
+        elif error_function == ErrorFunction.SOFTENTROPY:
+            java_error_function = self.namespace.Settings.ErrorFcn.SOFTENTROPY
         elif error_function == ErrorFunction.CROSSENTROPY:
             java_error_function = self.namespace.Settings.ErrorFcn.CROSSENTROPY
         else:
             raise NotImplementedError
-        self.settings.errorFunction = java_error_function
+        set_field(self.settings, "errorFunction", java_error_function)
 
     @property
     def epochs(self) -> int:
