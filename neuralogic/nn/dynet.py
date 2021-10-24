@@ -139,7 +139,7 @@ class NeuraLogic(AbstractNeuraLogic):
                 weight = weights[w]
                 if self.weights_meta[w].fixed:
                     weight = dy.const_parameter(weight)
-                if neurons[i].dim()[0] == (1,) and not isinstance(weight, int):
+                if not isinstance(weight, int) and (neurons[i].dim()[0] == (1,) or weight.dim()[0] == (1,)):
                     out.append(dy.cmult(weight, neurons[i]))
                 else:
                     out.append(weight * neurons[i])
