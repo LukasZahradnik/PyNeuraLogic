@@ -31,7 +31,7 @@ template_list = TemplateList(
 template = Template(module_list=template_list)
 
 settings = Settings(epochs=1000, optimizer=Optimizer.ADAM, learning_rate=0.01)
-evaluator = get_evaluator(Backend.PYG, template, settings, native_backend_models=True)
+evaluator = get_evaluator(template, Backend.PYG, settings, native_backend_models=True)
 
 for epoch, (total_loss, seen_instances) in enumerate(evaluator.train(train_dataset)):
     if epoch % 10 == 0:

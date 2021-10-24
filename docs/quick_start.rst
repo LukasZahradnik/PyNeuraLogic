@@ -148,7 +148,7 @@ evaluation. Evaluators can be customized via various settings encapsulated in th
 
 
     settings = Settings(learning_rate=0.01, optimizer=Optimizer.SGD, epochs=100)
-    evaluator = get_evaluator(Backend.JAVA, template, settings)
+    evaluator = get_evaluator(template, Backend.JAVA, settings)
 
     evaluator.train(dataset, generator=False)
 

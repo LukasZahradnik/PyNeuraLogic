@@ -57,7 +57,7 @@ Writing custom training loops and handling different backends can be cumbersome 
     from neuralogic.nn import get_evaluator
 
 
-    evaluator = get_evaluator(Backend.JAVA, template)
+    evaluator = get_evaluator(template, Backend.JAVA)
 
 
 Once you have an evaluator, you can evaluate or train the model on a dataset. The dataset doesn't have to be pre-built, as in the case of classical evaluation - the evaluator handles that for you.

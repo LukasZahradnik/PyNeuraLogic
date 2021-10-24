@@ -23,8 +23,8 @@ def get_neuralogic_layer(backend: Backend, native_backend_models: bool = False):
 
 
 def get_evaluator(
-    backend: Backend,
     template: Template,
+    backend: Backend,
     settings: Optional[Settings] = None,
     *,
     native_backend_models=False,

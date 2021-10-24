@@ -4,7 +4,7 @@ from neuralogic.nn import get_evaluator
 from neuralogic.core import Backend
 
 
-neuralogic_evaluator = get_evaluator(Backend.DYNET, template)
+neuralogic_evaluator = get_evaluator(template, Backend.DYNET)
 
 printouts = 10
 
