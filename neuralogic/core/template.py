@@ -11,7 +11,6 @@ from neuralogic.core.constructs.predicate import PredicateMetadata
 from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import Settings
 from neuralogic.core.sources import Sources
-from neuralogic.utils.data import Dataset
 
 TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
 
@@ -204,7 +203,7 @@ class Template:
         model = self.builder.build_model(self.parsed_template, backend)
         return get_neuralogic_layer(backend)(model, self.parsed_template, self.java_factory.settings)
 
-    def build_dataset(self, dataset: Dataset, backend: Backend) -> BuiltDataset:
+    def build_dataset(self, dataset, backend: Backend) -> BuiltDataset:
         """Builds the dataset (does grounding and neuralization) for this template instance and the backend
 
         :param dataset:
