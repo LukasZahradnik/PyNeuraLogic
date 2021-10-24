@@ -66,7 +66,8 @@ class AbstractEvaluator:
         self.template = template
         self.backend = backend
         self.dataset: Optional[BuiltDataset] = None
-        self.neuralogic_model = template.build(backend, settings)
+
+        self.neuralogic_model = template.build(backend, self.settings)
 
         if backend != Backend.PYG:
             self.neuralogic_model.set_hooks(template.hooks)
@@ -76,7 +77,7 @@ class AbstractEvaluator:
 
     def build_dataset(self, dataset: Union[Dataset, BuiltDataset]):
         if isinstance(dataset, Dataset):
-            dataset = self.template.build_dataset(dataset, self.backend)
+            dataset = self.template.build_dataset(dataset, self.backend, self.settings)
         return dataset
 
     @property

@@ -41,16 +41,10 @@ class Template:
         self.java_factory = None
 
         self.template: List[TemplateEntries] = []
-        self.builder = Builder(settings)
         self.parsed_template = None
 
-        if template_file is not None:
-            self.parsed_template = self.builder.build_template_from_file(settings, template_file)
-
-        namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.building
-        self.examples_builder = namespace.ExamplesBuilder(settings.settings)
-        self.query_builder = namespace.QueriesBuilder(settings.settings)
-        self.query_builder.setFactoriesFrom(self.examples_builder)
+        self.settings = settings
+        self.template_file = template_file
 
         self.locked_template = False
         self.counter = 0
@@ -174,8 +168,11 @@ class Template:
             self.counter += 1
         return logic_samples
 
-    def get_parsed_template(self):
+    def get_parsed_template(self, settings: Settings):
         self.java_factory = JavaFactory()
+
+        if self.template_file is not None:
+            return Builder(settings).build_template_from_file(settings, self.template_file)
 
         predicate_metadata = []
         weighted_rules = []
@@ -196,31 +193,33 @@ class Template:
         template_namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.types
         return template_namespace.ParsedTemplate(weighted_rules, valued_facts)
 
-    def build(self, backend: Backend, settings: Settings = None, *, native_backend_models=False):
+    def build(self, backend: Backend, settings: Settings, *, native_backend_models=False):
         from neuralogic.nn import get_neuralogic_layer
 
         if backend == Backend.PYG:
             return get_neuralogic_layer(backend, native_backend_models)(self.module_list)
 
-        if settings is None:
-            settings = Settings()
-
-        self.parsed_template = self.get_parsed_template()
-        model = self.builder.build_model(self.parsed_template, backend, settings)
+        self.parsed_template = self.get_parsed_template(settings)
+        model = Builder(settings).build_model(self.parsed_template, backend, settings)
 
         return get_neuralogic_layer(backend)(model, self.parsed_template, settings)
 
-    def build_dataset(self, dataset, backend: Backend) -> BuiltDataset:
+    def build_dataset(self, dataset, backend: Backend, settings: Settings) -> BuiltDataset:
         """Builds the dataset (does grounding and neuralization) for this template instance and the backend
 
         :param dataset:
         :param backend:
+        :param settings:
         :return:
         """
         if self.parsed_template is None:
-            self.parsed_template = self.get_parsed_template()
+            self.parsed_template = self.get_parsed_template(settings)
 
         weight_factory = self.java_factory.weight_factory
+        namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.building
+        examples_builder = namespace.ExamplesBuilder(settings.settings)
+        query_builder = namespace.QueriesBuilder(settings.settings)
+        query_builder.setFactoriesFrom(examples_builder)
 
         if not dataset.file_sources:
             examples = dataset.examples
@@ -238,23 +237,23 @@ class Template:
                     queries.extend(query)
 
             self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
-            examples = self.build_examples(examples, self.examples_builder)
+            examples = self.build_examples(examples, examples_builder)
 
             self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
-            queries = self.build_queries(queries, self.query_builder)
+            queries = self.build_queries(queries, query_builder)
 
             logic_samples = Template.merge_queries_with_examples(queries, examples)
             logic_samples = ListConverter().convert(logic_samples, get_gateway()._gateway_client).stream()
 
-            samples = self.builder.from_logic_samples(self.parsed_template, logic_samples, backend)
+            samples = Builder(settings).from_logic_samples(self.parsed_template, logic_samples, backend)
         else:
             args = ["-t", dataset.examples_file or dataset.queries_file]
             if dataset.queries_file is not None:
                 args.extend(["-q", dataset.queries_file])
             if dataset.examples_file is not None:
                 args.extend(["-e", dataset.examples_file])
-            sources = Sources.from_args(args, self.java_factory.settings)
-            samples = self.builder.from_sources(self.parsed_template, sources, backend)
+            sources = Sources.from_args(args, settings)
+            samples = Builder(settings).from_sources(self.parsed_template, sources, backend)
 
         self.java_factory.weight_factory = weight_factory
         return BuiltDataset(samples)
