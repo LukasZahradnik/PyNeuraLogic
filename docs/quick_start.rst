@@ -4,6 +4,10 @@ Quick Start
 The PyNeuraLogic library serves for learning on structured data. For the purpose of the introduction to the library and
 its syntax, we will further discuss use cases on graph structures.
 
+.. Note::
+    Check out one of the runnable :ref:`examples-label` in Google Colab!
+
+
 Graph Representation
 ####################
 

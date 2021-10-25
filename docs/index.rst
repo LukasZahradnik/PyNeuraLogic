@@ -11,8 +11,8 @@ PyNeuraLogic
     language
     custom_model
     evaluation
-    heterogeneous
     advanced
+    examples
 
 .. toctree::
     :maxdepth: 1
@@ -20,9 +20,9 @@ PyNeuraLogic
     :hidden:
 
     hypergraphs
+    heterophily
     pattern_propagation
     tree_gnns
-    heterophily
     tabnet
 
 
@@ -117,8 +117,8 @@ the following backends, which, except for the Java backend, have to be additiona
 Examples
 ********
 
-
-- `XOR Example <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb>`_
-- `Pattern Matching <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/PatternMatching.ipynb>`_
-- `Distinguishing k-regular graphs <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingKRegularGraphs.ipynb>`_
-- `Distinguishing non-regular graphs <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingNonRegularGraphs.ipynb>`_
+- `Mutagenesis <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Mutagenesis.ipynb>`_ [`Open in Colab <https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/Mutagenesis.ipynb>`_]
+- `XOR Example <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb>`_ [`Open in Colab <https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb>`_]
+- `Pattern Matching <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/PatternMatching.ipynb>`_ [`Open in Colab <https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/PatternMatching.ipynb>`_]
+- `Distinguishing k-regular graphs <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingKRegularGraphs.ipynb>`_ [`Open in Colab <https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingKRegularGraphs.ipynb>`_]
+- `Distinguishing non-regular graphs <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingNonRegularGraphs.ipynb>`_ [`Open in Colab <https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingNonRegularGraphs.ipynb>`_]
