@@ -232,7 +232,7 @@ class Template:
                 for data in dataset.data:
                     from neuralogic.utils.templates import TemplateList
 
-                    query, example = TemplateList.to_inputs(self, data.x, data.edge_index, data.y, data.y_mask)
+                    query, example = TemplateList.to_inputs(data.x, data.edge_index, data.y, data.y_mask)
                     examples.append(example)
                     queries.extend(query)
 

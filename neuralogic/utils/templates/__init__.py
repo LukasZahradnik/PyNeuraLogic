@@ -23,28 +23,26 @@ class TemplateList:
         if len(self.modules) == 0:
             return
 
-        with template.context():
-            previous_names = []
+        previous_names = []
 
-            for i, component in enumerate(self.modules):
-                previous_names.append(
-                    component.build(template, i + 1, previous_names, self.feature_name, self.edge_name)
-                )
+        for i, component in enumerate(self.modules):
+            previous_names.append(
+                component.build(template, i + 1, previous_names, self.feature_name, self.edge_name)
+            )
 
     @staticmethod
-    def to_inputs(template: Template, x: Iterable, edge_index: Iterable, y, y_mask):
-        with template.context():
-            if y is None:
-                queries = [Relation.get(TemplateList.output_name)]
-            else:
-                queries = [
-                    Relation.get(TemplateList.output_name)(*term if isinstance(term, list) else term)[value]
-                    for term, value in zip(y_mask, y)
-                ]
-            example = [
-                Relation.get(TemplateList.edge_name)(int(u), int(v))[1] for u, v in zip(edge_index[0], edge_index[1])
+    def to_inputs(x: Iterable, edge_index: Iterable, y, y_mask):
+        if y is None:
+            queries = [Relation.get(TemplateList.output_name)]
+        else:
+            queries = [
+                Relation.get(TemplateList.output_name)(*term if isinstance(term, list) else term)[value]
+                for term, value in zip(y_mask, y)
             ]
+        example = [
+            Relation.get(TemplateList.edge_name)(int(u), int(v))[1] for u, v in zip(edge_index[0], edge_index[1])
+        ]
 
-            for i, features in enumerate(x):
-                example.append(Relation.get(TemplateList.feature_name)(i)[features])
+        for i, features in enumerate(x):
+            example.append(Relation.get(TemplateList.feature_name)(i)[features])
         return queries, example
