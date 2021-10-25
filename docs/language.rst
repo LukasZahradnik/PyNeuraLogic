@@ -157,6 +157,7 @@ The Anatomy of a Rule
     Relation.h <= (Relation.b_one, Relation.b_n)
 
 
+Rules in PyNeuraLogic, serve mainly for describing the model's architecture - the template for computation graphs.
 A rule consists of two parts - the head and the body. The head is an arbitrary atom followed by implication (:code:`<=`) and the body that is formed from a tuple of :code:`n` atoms.
 
 When there is only one atom in the body, we can omit the tuple and insert the atom directly.
@@ -166,8 +167,19 @@ When there is only one atom in the body, we can omit the tuple and insert the at
     Relation.h <= Relation.b
 
 
+Such rule can be then read as *"The relation 'h' is implied by the relation 'b'"*
+
 Metadata
 ********
+Rules have some default properties that influence how they perform, such as activation and aggregation functions.
+Those properties can be modified, per rule, by attaching a :py:class:`~neuralogic.core.constructs.metadata.Metadata` instance to the rule.
+
+.. code-block:: Python
+
+    from neuralogic.core import Metadata, Activation, Aggregation
 
 
+    (Relation.h <= (Relation.b_one, Relation.b_n)) | Metadata(activation=Activation.SIGMOID, aggregation=Aggregation.MAX)
 
+
+For example, with the construct above, we create a new rule with a specified activation function (sigmoid) and aggregation function (max).
