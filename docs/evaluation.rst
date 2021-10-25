@@ -10,10 +10,10 @@ The 'compilation' is done in two steps. Firstly, we retrieve a model instance fo
 
 .. code-block:: Python
 
-    from neuralogic.core import Backend
+    from neuralogic.core import Backend, Settings
 
-
-    model = template.build(Backend.JAVA)
+    settings = Settings()
+    model = template.build(Backend.JAVA, settings)
 
 
 Then we can 'build' the examples and queries (dataset) to input samples, yielding different computation graphs.
@@ -21,13 +21,13 @@ We have to provide yet again for which backend we are building the dataset - tem
 
 .. code-block:: Python
 
-    built_dataset = template.build_dataset(dataset, Backend.JAVA)
+    built_dataset = template.build_dataset(dataset, Backend.JAVA, settings)
 
 
-Evaluation
-##########
+.. Evaluation
+.. ##########
 
-TODO
+.. TODO
 
 
 Saving and Loading Model
@@ -50,14 +50,14 @@ When we want to load a state into our model, we can then simply pass the state i
 Utilizing Evaluators
 ####################
 
-Writing custom training loops and handling different backends can be cumbersome and repetitive. To handle some of those responsibilities, the library offers 'evaluators' that encapsulate the training loop and testing evaluation.
+Writing custom training loops and handling different backends can be cumbersome and repetitive. The library offers ‘evaluators’ that encapsulate the training loop and testing evaluation. Evaluators also handle other responsibilities, such as building datasets.
 
 .. code-block:: Python
 
     from neuralogic.nn import get_evaluator
 
 
-    evaluator = get_evaluator(template, Backend.JAVA)
+    evaluator = get_evaluator(template, Backend.JAVA, settings)
 
 
 Once you have an evaluator, you can evaluate or train the model on a dataset. The dataset doesn't have to be pre-built, as in the case of classical evaluation - the evaluator handles that for you.
@@ -71,7 +71,27 @@ Once you have an evaluator, you can evaluate or train the model on a dataset. Th
 Settings Instance
 *****************
 
-TODO
+The :py:class:`~neuralogic.core.settings.Settings` instance contains settings to customize the behavior of different parts of the library.
+
+Most importantly, it affects the behavior of the model building (e.g., specify default rule/relation activation functions), evaluators (e.g., error function, number of epochs, learning rate, optimizer),
+and the model itself  - how are learnable parameters initialized.
+
+.. code-block:: Python
+
+    from neuralogic.core import Settings, Optimizer, Initializer
+
+
+    Settings(
+        initializer=Initializer.UNIFORM,
+        optimizer=Optimizer.SGD,
+        learning_rate=0.1,
+        epochs=100,
+    )
+
+
+In the example above, we define settings to ensure that initial values of learnable parameters (of the model the settings are used in) are sampled from the uniform distribution.
+We also set properties utilized by evaluators: the number of epochs (:math:`100`) and the optimizer,
+which is set to Stochastic gradient descent (SGD) with a learning rate of :math:`0.1`.
 
 Evaluator Training/Testing Interface
 ************************************
@@ -93,7 +113,3 @@ The non-generator mode, on the other hand, returns only a tuple of metrics of th
     results = neuralogic_evaluator.train(dataset, generator=False)
 
 
-Advanced Model Evaluation (Java Backend)
-########################################
-
-TODO: Java training and testing different modes etc.
