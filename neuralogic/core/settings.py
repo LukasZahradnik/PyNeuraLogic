@@ -1,58 +1,23 @@
+from typing import Any, Set
+import weakref
+
 from neuralogic import get_neuralogic, get_gateway
+from neuralogic.core.enums import Optimizer, Initializer, ErrorFunction, Activation
 from py4j.java_gateway import set_field, get_field
-from enum import Enum
 
 
-class Optimizer(str, Enum):
-    ADAM = "ADAM"
-    SGD = "SGD"
-
-
-class ErrorFunction(str, Enum):
-    SQUARED_DIFF = "SQUARED_DIFF"
-    # ABS_DIFF = "ABS_DIFF"
-    CROSSENTROPY = "CROSSENTROPY"
-    SOFTENTROPY = "SOFTENTROPY"
-
-
-class Activation(Enum):
-    SIGMOID = "sigmoid"
-    TANH = "tanh"
-    SIGNUM = "signum"
-    RELU = "relu"
-    IDENTITY = "identity"
-    LUKASIEWICZ = "lukasiewicz"
-    SOFTMAX = "softmax"
-    SPARSEMAX = "sparsemax"
-
-
-class Aggregation(Enum):
-    SUM = "sum"
-    MAX = "max"
-    AVG = "avg"
-
-
-class Initializer(Enum):
-    UNIFORM = "uniform"
-    NORMAL = "normal"
-    CONSTANT = "constant"
-    LONGTAIL = "longtail"
-    GLOROT = "glorot"
-    HE = "he"
-
-
-class Settings:
+class SettingsProxy:
     def __init__(
-        self,
-        learning_rate: float = None,
-        optimizer: Optimizer = None,
-        epochs: int = None,
-        error_function: ErrorFunction = None,
-        initializer: Initializer = None,
-        initializer_const: float = None,
-        initializer_uniform_scale: float = None,
-        rule_neuron_activation: Activation = None,
-        relation_neuron_activation: Activation = None,
+            self,
+            learning_rate: float = None,
+            optimizer: Optimizer = None,
+            epochs: int = None,
+            error_function: ErrorFunction = None,
+            initializer: Initializer = None,
+            initializer_const: float = None,
+            initializer_uniform_scale: float = None,
+            rule_neuron_activation: Activation = None,
+            relation_neuron_activation: Activation = None,
     ):
         self.namespace = get_neuralogic().cz.cvut.fel.ida.setup
         self.settings = self.namespace.Settings()
@@ -252,3 +217,133 @@ class Settings:
 
     def to_json(self) -> str:
         return self.settings.exportToJson()
+
+
+class Settings:
+    def __init__(
+        self,
+        *,
+        learning_rate: float = None,
+        optimizer: Optimizer = None,
+        epochs: int = None,
+        error_function: ErrorFunction = None,
+        initializer: Initializer = None,
+        initializer_const: float = None,
+        initializer_uniform_scale: float = None,
+        rule_neuron_activation: Activation = None,
+        relation_neuron_activation: Activation = None,
+    ):
+        self.params = locals().copy()
+        self.params.pop("self")
+        self._proxies: Set[weakref.ReferenceType] = set()
+
+    @property
+    def iso_value_compression(self) -> bool:
+        return self.params["iso_value_compression"]
+
+    @iso_value_compression.setter
+    def iso_value_compression(self, iso_value_compression: bool):
+        self._update("iso_value_compression", iso_value_compression)
+
+    @property
+    def seed(self) -> int:
+        return self.params["seed"]
+
+    @seed.setter
+    def seed(self, seed: int):
+        self._update("seed", seed)
+
+    @property
+    def learning_rate(self) -> float:
+        return self.params["learning_rate"]
+
+    @learning_rate.setter
+    def learning_rate(self, learning_rate: float):
+        self._update("learning_rate", learning_rate)
+
+    @property
+    def optimizer(self) -> Optimizer:
+        return self.params["optimizer"]
+
+    @optimizer.setter
+    def optimizer(self, optimizer: Optimizer):
+        self._update("optimizer", optimizer)
+
+    @property
+    def initializer_const(self) -> float:
+        return self.params["initializer_const"]
+
+    @initializer_const.setter
+    def initializer_const(self, value: float):
+        self._update("initializer_const", value)
+
+    @property
+    def initializer_uniform_scale(self) -> float:
+        return self.params["initializer_uniform_scale"]
+
+    @initializer_uniform_scale.setter
+    def initializer_uniform_scale(self, value: float):
+        self._update("initializer_uniform_scale", value)
+
+    @property
+    def error_function(self) -> ErrorFunction:
+        return self.params["error_function"]
+
+    @error_function.setter
+    def error_function(self, error_function: ErrorFunction):
+        self._update("error_function", error_function)
+
+    @property
+    def epochs(self) -> int:
+        return self.params["epochs"]
+
+    @epochs.setter
+    def epochs(self, epochs: int):
+        self._update("epochs", epochs)
+
+    @property
+    def initializer(self) -> Initializer:
+        return self.params["initializer"]
+
+    @initializer.setter
+    def initializer(self, initializer: Initializer):
+        self._update("initializer", initializer)
+
+    @property
+    def relation_neuron_activation(self) -> Activation:
+        return self.params["relation_neuron_activation"]
+
+    @relation_neuron_activation.setter
+    def relation_neuron_activation(self, value: Activation):
+        self._update("relation_neuron_activation", value)
+
+    @property
+    def rule_neuron_activation(self) -> Activation:
+        return self.params["rule_neuron_activation"]
+
+    @rule_neuron_activation.setter
+    def rule_neuron_activation(self, value: Activation):
+        self._update("rule_neuron_activation", value)
+
+    def create_proxy(self) -> SettingsProxy:
+        proxy = SettingsProxy(**self.params)
+        self._proxies.add(weakref.ref(proxy))
+
+        return proxy
+
+    def create_disconnected_proxy(self) -> SettingsProxy:
+        return SettingsProxy(**self.params)
+
+    def _update(self, parameter: str, value: Any) -> None:
+        if parameter not in self.params:
+            raise NotImplementedError
+        self.params[parameter] = value
+
+        for proxy in self._proxies.copy():
+            proxy_object = proxy()
+
+            if proxy_object is None:
+                print("deleting")
+                self._proxies.discard(proxy)
+            else:
+                proxy_object.__setattr__(parameter, value)
