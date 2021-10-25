@@ -6,7 +6,6 @@ Advanced Usage
 
     heterogeneous
     modifiers
-    metadata
     visualization
     hooks
     java_gateway
