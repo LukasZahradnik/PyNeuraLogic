@@ -6,26 +6,27 @@ Modifiers are optional and alter an atoms' behavior in some way. Currently, ther
 Hidden Modifier
 ###############
 
-TODO: Describe
+..
+    TODO: Describe
 
-.. code-block:: Python
+    .. code-block:: Python
 
-    Relation.edge(1, 2),
-    Relation.feature(2)[1.0],
+        Relation.edge(1, 2),
+        Relation.feature(2)[1.0],
 
-.. code-block:: Python
+    .. code-block:: Python
 
-    Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation.edge(Var.X, Var.Y))
-
-
-TODO: Model graph
-
-.. code-block:: Python
-
-    Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation.private.edge(Var.X, Var.Y))
+        Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation.edge(Var.X, Var.Y))
 
 
-TODO: Model graph
+    TODO: Model graph
+
+    .. code-block:: Python
+
+        Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation.private.edge(Var.X, Var.Y))
+
+
+    TODO: Model graph
 
 .. _special-modifier-label:
 
