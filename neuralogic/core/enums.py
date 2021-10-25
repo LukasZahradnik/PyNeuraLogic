@@ -37,3 +37,10 @@ class Initializer(Enum):
     LONGTAIL = "longtail"
     GLOROT = "glorot"
     HE = "he"
+
+
+class Backend(Enum):
+    DYNET = "dynet"
+    PYG = "pyg"
+    DGL = "dgl"
+    JAVA = "java"

@@ -1,12 +1,13 @@
 import json
 from collections import Sized
-from typing import Optional, Dict
+from typing import Dict
 from py4j.java_gateway import get_field
 from py4j.java_collections import SetConverter
 
 from neuralogic import get_neuralogic, get_gateway
 from neuralogic.nn.base import AbstractNeuraLogic
 from neuralogic.core.settings import Settings
+from neuralogic.core.enums import Backend
 
 
 class Loss:
@@ -37,16 +38,13 @@ class NeuraLogic(AbstractNeuraLogic):
         class Java:
             implements = ["cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler"]
 
-    def __init__(self, model, template, settings: Optional[Settings] = None):
-        super().__init__(template)
+    def __init__(self, model, template, settings: Settings):
+        super().__init__(Backend.JAVA, template, settings)
+
         self.namespace = get_neuralogic().cz.cvut.fel.ida.neural.networks.computation.training.strategies
         self.do_train = True
         self.need_sync = False
 
-        if settings is None:
-            settings = Settings()
-
-        self.settings = settings
         self.neural_model = model
         self.strategy = self.namespace.PythonTrainingStrategy(settings.settings, model)
         self.samples_len = 0

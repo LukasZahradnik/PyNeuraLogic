@@ -5,9 +5,7 @@ import torch
 
 from neuralogic.nn.base import AbstractEvaluator
 
-from neuralogic.core import Template, BuiltDataset
-from neuralogic.core.settings import Settings, Optimizer, ErrorFunction
-from neuralogic.core.builder import Backend
+from neuralogic.core import Template, BuiltDataset, Backend, Settings, Optimizer, ErrorFunction
 from neuralogic.utils.data import Dataset
 
 

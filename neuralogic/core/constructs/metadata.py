@@ -1,4 +1,4 @@
-from neuralogic.core.settings import Activation, Aggregation
+from neuralogic.core.enums import Activation, Aggregation
 
 
 class Metadata:

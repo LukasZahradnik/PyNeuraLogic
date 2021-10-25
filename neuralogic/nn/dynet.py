@@ -3,7 +3,8 @@ import dynet as dy
 import numpy as np
 
 from neuralogic.core.builder import Sample, Weight, Neuron
-from neuralogic.core.settings import Settings, Initializer
+from neuralogic.core.settings import Settings
+from neuralogic.core.enums import Initializer, Backend
 from neuralogic.nn.base import AbstractNeuraLogic
 
 
@@ -41,11 +42,7 @@ class NeuraLogic(AbstractNeuraLogic):
     }
 
     def __init__(self, model: List[Weight], template, settings: Optional[Settings] = None):
-        super().__init__(template)
-
-        if settings is None:
-            settings = Settings()
-        self.settings = settings
+        super().__init__(Backend.DYNET, template, settings)
 
         self.model = dy.ParameterCollection()
         self.weights_meta = model

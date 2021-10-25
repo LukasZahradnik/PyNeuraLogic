@@ -2,20 +2,29 @@ from typing import Dict, Optional, Union
 from py4j.java_gateway import get_field
 
 from neuralogic.core.settings import Settings
-from neuralogic.core import Template, Backend, BuiltDataset
+from neuralogic.core.builder import DatasetBuilder
+from neuralogic.core import Template, Backend, BuiltDataset, SettingsProxy
 from neuralogic.utils.data import Dataset
 
 
 class AbstractNeuraLogic:
-    def __init__(self, template):
+    def __init__(self, backend: Backend, dataset_builder: DatasetBuilder, settings: SettingsProxy):
         self.need_sync = True
-        self.template = template
+
+        self.template = dataset_builder.parsed_template
+        self.dataset_builder = dataset_builder
+
+        self.backend = backend
+        self.settings = settings
 
         self.hooks_set = False
         self.hooks = {}
 
     def __call__(self, sample):
         raise NotImplementedError
+
+    def build_dataset(self, dataset: Union[Dataset, BuiltDataset]):
+        return self.dataset_builder.build_dataset(dataset, self.backend, self.settings)
 
     def set_hooks(self, hooks):
         self.hooks_set = len(hooks) != 0
@@ -62,12 +71,11 @@ class AbstractNeuraLogic:
 
 class AbstractEvaluator:
     def __init__(self, backend: Backend, template: Template, settings: Settings):
-        self.settings = settings
-        self.template = template
+        self.settings = settings.create_proxy()
         self.backend = backend
         self.dataset: Optional[BuiltDataset] = None
 
-        self.neuralogic_model = template.build(backend, self.settings)
+        self.neuralogic_model = template.build(backend, settings)
 
         if backend != Backend.PYG:
             self.neuralogic_model.set_hooks(template.hooks)
@@ -77,7 +85,7 @@ class AbstractEvaluator:
 
     def build_dataset(self, dataset: Union[Dataset, BuiltDataset]):
         if isinstance(dataset, Dataset):
-            dataset = self.template.build_dataset(dataset, self.backend, self.settings)
+            return self.neuralogic_model.build_dataset(dataset)
         return dataset
 
     @property

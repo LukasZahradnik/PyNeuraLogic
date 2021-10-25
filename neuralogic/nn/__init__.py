@@ -1,6 +1,6 @@
 from typing import Optional
 
-from neuralogic.core.builder import Backend
+from neuralogic.core.enums import Backend
 from neuralogic.nn.base import AbstractEvaluator
 from neuralogic.core import Template
 from neuralogic.core.settings import Settings
