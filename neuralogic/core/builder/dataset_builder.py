@@ -2,13 +2,13 @@ from neuralogic import get_neuralogic, get_gateway
 from py4j.java_collections import ListConverter
 from py4j.java_gateway import get_field, set_field
 
-from typing import Union, List, Optional, Set, Dict, Any, Callable
+from typing import Union, Set, Dict
 
-from neuralogic.core.builder import Builder, BuiltDataset
+from neuralogic.core.builder.builder import Builder
+from neuralogic.core.builder.components import BuiltDataset
 from neuralogic.core.enums import Backend
 from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
 from neuralogic.core.constructs.rule import Rule
-from neuralogic.core.constructs.predicate import PredicateMetadata
 from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
@@ -19,8 +19,6 @@ TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
 
 class DatasetBuilder:
     def __init__(self, parsed_template, java_factory: JavaFactory):
-        self.template: List[TemplateEntries] = []
-
         self.java_factory = java_factory
         self.parsed_template = parsed_template
 
