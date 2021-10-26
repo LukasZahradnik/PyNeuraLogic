@@ -6,49 +6,32 @@ from py4j.java_gateway import set_field, get_field
 class SettingsProxy:
     def __init__(
             self,
-            learning_rate: float = None,
-            optimizer: Optimizer = None,
-            epochs: int = None,
-            error_function: ErrorFunction = None,
-            initializer: Initializer = None,
-            initializer_const: float = None,
-            initializer_uniform_scale: float = None,
-            rule_neuron_activation: Activation = None,
-            relation_neuron_activation: Activation = None,
+            *,
+            optimizer: Optimizer,
+            learning_rate: float,
+            epochs: int,
+            error_function: ErrorFunction,
+            initializer: Initializer,
+            initializer_const: float,
+            initializer_uniform_scale: float,
+            rule_neuron_activation: Activation,
+            relation_neuron_activation: Activation,
     ):
         self.namespace = get_neuralogic().cz.cvut.fel.ida.setup
         self.settings = self.namespace.Settings()
 
-        if rule_neuron_activation is not None:
-            self.rule_neuron_activation = rule_neuron_activation
+        params = locals().copy()
+        params.pop("self")
 
-        if relation_neuron_activation is not None:
-            self.relation_neuron_activation = relation_neuron_activation
+        for key, value in params.items():
+            self.__setattr__(key, value)
 
-        if optimizer is not None:
-            self.optimizer = optimizer
-
-        if learning_rate is not None:
-            self.learning_rate = learning_rate
-
-        if initializer is not None:
-            self.initializer = initializer
-
-        if initializer_const is not None:
-            self.initializer_const = initializer_const
-
-        if initializer_uniform_scale is not None:
-            self.initializer_uniform_scale = initializer_uniform_scale
-
-        if epochs is not None:
-            self.epochs = epochs
-
-        self.error_function = ErrorFunction.SQUARED_DIFF if error_function is None else error_function
         set_field(self.settings, "debugExporting", False)
         set_field(self.settings, "isoValueCompression", True)
         set_field(self.settings, "squishLastLayer", False)
         set_field(self.settings, "trainOnlineResultsType", self.namespace.Settings.ResultsType.REGRESSION)
         set_field(self.settings, "exportBlocks", get_gateway().new_array(get_gateway().jvm.java.lang.String, 0))
+
         self.settings.infer()
 
     @property

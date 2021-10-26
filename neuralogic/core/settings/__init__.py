@@ -1,4 +1,4 @@
-from typing import Any, Set
+from typing import Any
 import weakref
 
 from neuralogic.core.settings.settings_proxy import SettingsProxy
@@ -9,19 +9,19 @@ class Settings:
     def __init__(
         self,
         *,
-        learning_rate: float = None,
-        optimizer: Optimizer = None,
-        epochs: int = None,
-        error_function: ErrorFunction = None,
-        initializer: Initializer = None,
-        initializer_const: float = None,
-        initializer_uniform_scale: float = None,
-        rule_neuron_activation: Activation = None,
-        relation_neuron_activation: Activation = None,
+        optimizer: Optimizer = Optimizer.ADAM,
+        learning_rate: float = 0.001,
+        epochs: int = 3000,
+        error_function: ErrorFunction = ErrorFunction.SQUARED_DIFF,
+        initializer: Initializer = Initializer.UNIFORM,
+        initializer_const: float = 0.1,
+        initializer_uniform_scale: float = 2.0,
+        rule_neuron_activation: Activation = Activation.TANH,
+        relation_neuron_activation: Activation = Activation.TANH,
     ):
         self.params = locals().copy()
         self.params.pop("self")
-        self._proxies: Set[weakref.ReferenceType] = set()
+        self._proxies = weakref.WeakSet()
 
     @property
     def iso_value_compression(self) -> bool:
@@ -113,7 +113,7 @@ class Settings:
 
     def create_proxy(self) -> SettingsProxy:
         proxy = SettingsProxy(**self.params)
-        self._proxies.add(weakref.ref(proxy))
+        self._proxies.add(proxy)
 
         return proxy
 
@@ -126,10 +126,4 @@ class Settings:
         self.params[parameter] = value
 
         for proxy in self._proxies.copy():
-            proxy_object = proxy()
-
-            if proxy_object is None:
-                print("deleting")
-                self._proxies.discard(proxy)
-            else:
-                proxy_object.__setattr__(parameter, value)
+            proxy.__setattr__(parameter, value)
