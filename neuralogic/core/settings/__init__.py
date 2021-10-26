@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 import weakref
 
 from neuralogic.core.settings.settings_proxy import SettingsProxy
@@ -10,7 +10,7 @@ class Settings:
         self,
         *,
         optimizer: Optimizer = Optimizer.ADAM,
-        learning_rate: float = 0.001,
+        learning_rate: Optional[float] = None,
         epochs: int = 3000,
         error_function: ErrorFunction = ErrorFunction.SQUARED_DIFF,
         initializer: Initializer = Initializer.UNIFORM,

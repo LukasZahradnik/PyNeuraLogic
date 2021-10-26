@@ -4,10 +4,9 @@ import dynet as dy
 
 from neuralogic.nn.base import AbstractEvaluator
 
-from neuralogic.core import Template, BuiltDataset
+from neuralogic.core import Template, BuiltDataset, Dataset
 from neuralogic.core.settings import Settings
 from neuralogic.core.enums import Backend, Optimizer, ErrorFunction
-from neuralogic.utils.data import Dataset
 
 
 class DynetEvaluator(AbstractEvaluator):

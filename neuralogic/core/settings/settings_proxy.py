@@ -1,3 +1,5 @@
+from typing import Optional
+
 from neuralogic import get_neuralogic, get_gateway
 from neuralogic.core.enums import Optimizer, Initializer, ErrorFunction, Activation
 from py4j.java_gateway import set_field, get_field
@@ -9,7 +11,7 @@ class SettingsProxy:
             *,
             optimizer: Optimizer,
             learning_rate: float,
-            epochs: int,
+            epochs: Optional[int],
             error_function: ErrorFunction,
             initializer: Initializer,
             initializer_const: float,
@@ -24,7 +26,8 @@ class SettingsProxy:
         params.pop("self")
 
         for key, value in params.items():
-            self.__setattr__(key, value)
+            if value is not None:
+                self.__setattr__(key, value)
 
         set_field(self.settings, "debugExporting", False)
         set_field(self.settings, "isoValueCompression", True)

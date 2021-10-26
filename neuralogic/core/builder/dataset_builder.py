@@ -12,7 +12,7 @@ from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
-from neuralogic.utils.data import Dataset
+from neuralogic.core.dataset import Dataset
 
 TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
 

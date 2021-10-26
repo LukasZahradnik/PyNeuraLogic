@@ -3,8 +3,7 @@ from py4j.java_gateway import get_field
 
 from neuralogic.core.settings import Settings
 from neuralogic.core.builder import DatasetBuilder
-from neuralogic.core import Template, Backend, BuiltDataset, SettingsProxy
-from neuralogic.utils.data import Dataset
+from neuralogic.core import Template, Backend, BuiltDataset, SettingsProxy, Dataset
 
 
 class AbstractNeuraLogic:
