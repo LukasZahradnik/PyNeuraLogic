@@ -3,7 +3,7 @@ from typing import Optional, Iterable, Sized
 from py4j.java_collections import ListConverter
 
 from neuralogic import get_neuralogic, get_gateway
-from neuralogic.core.settings import SettingsProxy
+from neuralogic.core.settings import SettingsProxy, Settings
 
 
 class JavaFactory:
@@ -12,7 +12,7 @@ class JavaFactory:
         from neuralogic.core.constructs.atom import WeightedAtom
 
         if settings is None:
-            settings = SettingsProxy()
+            settings = Settings().create_proxy()
 
         self.weighted_atom_type = WeightedAtom
         self.rule_type = Rule

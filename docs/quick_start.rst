@@ -131,7 +131,7 @@ performing the forward and backward propagation is straightforward.
 
 .. code-block:: Python
 
-    built_dataset = template.build_dataset(dataset, Backend.JAVA)
+    built_dataset = model.build_dataset(dataset)
 
     model.train()  # or model.test() to change the mode
     loss = model(built_dataset)
