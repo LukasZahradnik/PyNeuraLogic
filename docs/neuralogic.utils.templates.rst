@@ -1,4 +1,4 @@
-neuralogic.utils.templates
+neuralogic.utils.templates package
 ==================================
 
 Subpackages

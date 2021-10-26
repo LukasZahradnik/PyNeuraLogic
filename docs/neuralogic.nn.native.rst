@@ -1,4 +1,4 @@
-neuralogic.nn.native
+neuralogic.nn.native package
 ============================
 
 Submodules

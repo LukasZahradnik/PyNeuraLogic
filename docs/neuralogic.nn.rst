@@ -1,4 +1,4 @@
-neuralogic.nn
+neuralogic.nn package
 =====================
 
 Subpackages

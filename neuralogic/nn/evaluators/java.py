@@ -3,11 +3,10 @@ from typing import Optional, Dict, Union
 from py4j.java_collections import ListConverter
 
 from neuralogic import get_gateway
-from neuralogic.core.builder import Backend
-from neuralogic.core import Template, BuiltDataset
+from neuralogic.core.enums import Backend
+from neuralogic.core import Template, BuiltDataset, Dataset
 from neuralogic.nn.base import AbstractEvaluator
 from neuralogic.core.settings import Settings
-from neuralogic.utils.data import Dataset
 
 
 class JavaEvaluator(AbstractEvaluator):

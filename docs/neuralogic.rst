@@ -1,6 +1,5 @@
-neuralogic
-==========
-
+neuralogic package
+==================
 
 Module contents
 ---------------

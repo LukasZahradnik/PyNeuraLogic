@@ -17,11 +17,10 @@ The 'compilation' is done in two steps. Firstly, we retrieve a model instance fo
 
 
 Then we can 'build' the examples and queries (dataset) to input samples, yielding different computation graphs.
-We have to provide yet again for which backend we are building the dataset - template and dataset can be reused for different backends.
 
 .. code-block:: Python
 
-    built_dataset = template.build_dataset(dataset, Backend.JAVA, settings)
+    built_dataset = model.build_dataset(dataset)
 
 
 .. Evaluation

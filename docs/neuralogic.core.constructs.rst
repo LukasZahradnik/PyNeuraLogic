@@ -1,4 +1,4 @@
-neuralogic.core.constructs
+neuralogic.core.constructs package
 ==================================
 
 Submodules

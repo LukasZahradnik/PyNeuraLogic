@@ -1,6 +1,6 @@
 from typing import List
 
-from neuralogic.core import Relation, Template, Var, Activation, Aggregation, Metadata
+from neuralogic.core import Relation, Template, Var, Activation, Metadata
 from neuralogic.utils.templates.modules import AbstractModule
 
 

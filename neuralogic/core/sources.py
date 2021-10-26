@@ -1,17 +1,17 @@
 from neuralogic import get_neuralogic, get_gateway
-from neuralogic.core.settings import Settings
+from neuralogic.core.settings import SettingsProxy
 from typing import List
 
 
 class Sources:
     @staticmethod
-    def from_settings(settings: Settings) -> "Sources":
+    def from_settings(settings: SettingsProxy) -> "Sources":
         neuralogic = get_neuralogic()
         sources = neuralogic.cz.cvut.fel.ida.setup.Sources(settings.settings)
         return Sources(sources)
 
     @staticmethod
-    def from_args(args: List[str], settings: Settings) -> "Sources":
+    def from_args(args: List[str], settings: SettingsProxy) -> "Sources":
         neuralogic = get_neuralogic()
         gateway = get_gateway()
 

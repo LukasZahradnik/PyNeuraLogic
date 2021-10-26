@@ -39,8 +39,7 @@ For example, a complete graph with three nodes and some features can be encoded 
 
 .. code-block:: Python
 
-    from neuralogic.utils.data.dataset import Dataset
-    from neuralogic.core import Relation
+    from neuralogic.core import Relation, Dataset
 
     dataset = Dataset()
 

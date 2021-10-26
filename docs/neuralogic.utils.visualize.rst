@@ -1,4 +1,4 @@
-neuralogic.utils.visualize
+neuralogic.utils.visualize package
 ==================================
 
 Module contents

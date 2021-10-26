@@ -10,7 +10,7 @@ from neuralogic.utils.data import Data, Dataset
 from neuralogic.nn import get_evaluator
 
 
-path = osp.join("..", "data", "Cora")
+path = osp.join("../..", "data", "Cora")
 dataset = Planetoid(path, "Cora", transform=T.NormalizeFeatures())
 
 [train_data, test_data, _] = Data.from_pyg(dataset[0])

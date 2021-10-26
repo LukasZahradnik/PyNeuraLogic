@@ -1,4 +1,4 @@
-neuralogic.core
+neuralogic.core package
 =======================
 
 Subpackages
@@ -7,23 +7,25 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   neuralogic.core.builder
    neuralogic.core.constructs
+   neuralogic.core.settings
 
 Submodules
 ----------
 
-neuralogic.core.builder module
+neuralogic.core.dataset module
 ------------------------------
 
-.. automodule:: neuralogic.core.builder
+.. automodule:: neuralogic.core.dataset
    :members:
    :undoc-members:
    :show-inheritance:
 
-neuralogic.core.settings module
--------------------------------
+neuralogic.core.enums module
+----------------------------
 
-.. automodule:: neuralogic.core.settings
+.. automodule:: neuralogic.core.enums
    :members:
    :undoc-members:
    :show-inheritance:

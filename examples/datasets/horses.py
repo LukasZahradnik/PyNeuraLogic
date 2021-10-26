@@ -1,5 +1,4 @@
-from neuralogic.core import Relation, Template, Var, Term
-from neuralogic.utils.data import Dataset
+from neuralogic.core import Relation, Template, Var, Term, Dataset
 
 
 dataset = Dataset()

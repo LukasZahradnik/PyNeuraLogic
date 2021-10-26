@@ -1,4 +1,4 @@
-neuralogic.nn.evaluators
+neuralogic.nn.evaluators package
 ================================
 
 Submodules
