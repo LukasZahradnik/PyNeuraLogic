@@ -2,18 +2,18 @@ import os
 from typing import Optional
 
 from neuralogic import get_neuralogic
-from neuralogic.core.settings import Settings
+from neuralogic.core.settings import Settings, SettingsProxy
 
 from py4j.java_gateway import set_field
 
 
-def get_drawing_settings(img_type: str = "png") -> Settings:
+def get_drawing_settings(img_type: str = "png") -> SettingsProxy:
     """Returns the default settings instance for drawing with a specified image type.
 
     :param img_type:
     :return:
     """
-    settings = Settings()
+    settings = Settings().create_proxy()
 
     set_field(settings.settings, "drawing", False)
     set_field(settings.settings, "storeNotShow", True)
@@ -22,13 +22,13 @@ def get_drawing_settings(img_type: str = "png") -> Settings:
     return settings
 
 
-def get_template_drawer(settings: Settings):
+def get_template_drawer(settings: SettingsProxy):
     namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.debugging.drawing
 
     return namespace.TemplateDrawer(settings.settings)
 
 
-def get_sample_drawer(settings: Settings):
+def get_sample_drawer(settings: SettingsProxy):
     namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.debugging.drawing
 
     return namespace.NeuralNetDrawer(settings.settings)

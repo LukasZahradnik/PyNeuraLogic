@@ -1,7 +1,7 @@
 from typing import List
 
 from neuralogic.core import Template
-from neuralogic.core.settings import Aggregation, Activation
+from neuralogic.core.enums import Aggregation, Activation
 
 
 class AbstractModule:

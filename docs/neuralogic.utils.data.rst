@@ -1,16 +1,5 @@
-neuralogic.utils.data
+neuralogic.utils.data package
 =============================
-
-Submodules
-----------
-
-neuralogic.utils.data.dataset module
-------------------------------------
-
-.. automodule:: neuralogic.utils.data.dataset
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 Module contents
 ---------------
