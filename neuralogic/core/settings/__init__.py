@@ -23,6 +23,9 @@ class Settings:
         self.params.pop("self")
         self._proxies = weakref.WeakSet()
 
+        if learning_rate is None:
+            self.params["learning_rate"] = 0.1 if optimizer == Optimizer.SGD else 0.001
+
     @property
     def iso_value_compression(self) -> bool:
         return self.params["iso_value_compression"]

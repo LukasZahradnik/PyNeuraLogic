@@ -13,15 +13,15 @@ class ErrorFunction(str, Enum):
     SOFTENTROPY = "SOFTENTROPY"
 
 
-class Activation(Enum):
-    SIGMOID = "sigmoid"
-    TANH = "tanh"
-    SIGNUM = "signum"
-    RELU = "relu"
-    IDENTITY = "identity"
-    LUKASIEWICZ = "lukasiewicz"
-    SOFTMAX = "softmax"
-    SPARSEMAX = "sparsemax"
+class Activation(str, Enum):
+    SIGMOID = "SIGMOID"
+    TANH = "TANH"
+    SIGNUM = "SIGNUM"
+    RELU = "RELU"
+    IDENTITY = "IDENTITY"
+    LUKASIEWICZ = "LUKASIEWICZ"
+    SOFTMAX = "SOFTMAX"
+    SPARSEMAX = "SPARSEMAX"
 
 
 class Aggregation(Enum):
@@ -30,13 +30,13 @@ class Aggregation(Enum):
     AVG = "avg"
 
 
-class Initializer(Enum):
-    UNIFORM = "uniform"
-    NORMAL = "normal"
-    CONSTANT = "constant"
-    LONGTAIL = "longtail"
-    GLOROT = "glorot"
-    HE = "he"
+class Initializer(str, Enum):
+    UNIFORM = "UNIFORM"
+    NORMAL = "NORMAL"
+    CONSTANT = "CONSTANT"
+    LONGTAIL = "LONGTAIL"
+    GLOROT = "GLOROT"
+    HE = "HE"
 
 
 class Backend(Enum):

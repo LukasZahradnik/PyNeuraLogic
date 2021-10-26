@@ -9,14 +9,14 @@ import pytest
 @pytest.mark.parametrize("parameters", [
     {
         "optimizer": Optimizer.SGD,
-        # "learning_rate": 0.5,
+        "learning_rate": 0.5,
         "epochs": 100,
         "error_function": ErrorFunction.SOFTENTROPY,
-        # "initializer": Initializer.NORMAL,
+        "initializer": Initializer.NORMAL,
         "initializer_const": 1,
         "initializer_uniform_scale": 5.0,
-        # "rule_neuron_activation": Activation.SIGMOID,
-        # "relation_neuron_activation": Activation.RELU,
+        "rule_neuron_activation": Activation.SIGMOID,
+        "relation_neuron_activation": Activation.RELU,
     }
 ])
 def test_settings_proxy_properties_setting(parameters: Dict[str, Any]) -> None:
