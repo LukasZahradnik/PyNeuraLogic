@@ -3,12 +3,12 @@ import dynet as dy
 import numpy as np
 
 from neuralogic.core.builder import Sample, Weight, Neuron
-from neuralogic.core.settings import Settings
+from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.enums import Initializer, Backend
 from neuralogic.nn.base import AbstractNeuraLogic
 
 
-def longtail(model, weight: Weight, _: Settings):
+def longtail(model, weight: Weight, _: SettingsProxy):
     init = np.random.rand(*weight.dimensions)
 
     x0, x1, power = 0.0, 10.0, 50.0
@@ -41,7 +41,7 @@ class NeuraLogic(AbstractNeuraLogic):
         Initializer.LONGTAIL: longtail,
     }
 
-    def __init__(self, model: List[Weight], template, settings: Optional[Settings] = None):
+    def __init__(self, model: List[Weight], template, settings: Optional[SettingsProxy] = None):
         super().__init__(Backend.DYNET, template, settings)
 
         self.model = dy.ParameterCollection()

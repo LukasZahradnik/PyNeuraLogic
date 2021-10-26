@@ -6,7 +6,7 @@ from py4j.java_collections import SetConverter
 
 from neuralogic import get_neuralogic, get_gateway
 from neuralogic.nn.base import AbstractNeuraLogic
-from neuralogic.core.settings import Settings
+from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.enums import Backend
 
 
@@ -38,7 +38,7 @@ class NeuraLogic(AbstractNeuraLogic):
         class Java:
             implements = ["cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler"]
 
-    def __init__(self, model, template, settings: Settings):
+    def __init__(self, model, template, settings: SettingsProxy):
         super().__init__(Backend.JAVA, template, settings)
 
         self.namespace = get_neuralogic().cz.cvut.fel.ida.neural.networks.computation.training.strategies
