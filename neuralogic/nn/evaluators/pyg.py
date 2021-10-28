@@ -8,7 +8,7 @@ from neuralogic.nn.base import AbstractEvaluator
 from neuralogic.core import Template, BuiltDataset, Backend, Settings, Optimizer, ErrorFunction, Dataset
 
 
-class TorchEvaluator(AbstractEvaluator):
+class PyGEvaluator(AbstractEvaluator):
     trainers = {
         Optimizer.SGD: lambda param, rate: torch.optim.SGD(param, lr=rate),
         Optimizer.ADAM: lambda param, rate: torch.optim.Adam(param, lr=rate),
@@ -26,16 +26,16 @@ class TorchEvaluator(AbstractEvaluator):
         error_function = ErrorFunction[str(self.settings.error_function)]
         optimizer = Optimizer[str(self.settings.optimizer)]
 
-        if optimizer not in TorchEvaluator.trainers:
+        if optimizer not in PyGEvaluator.trainers:
             raise NotImplementedError
-        if error_function not in TorchEvaluator.error_functions:
+        if error_function not in PyGEvaluator.error_functions:
             raise NotImplementedError
 
-        trainer = TorchEvaluator.trainers[optimizer](
+        trainer = PyGEvaluator.trainers[optimizer](
             self.neuralogic_model.module_list.parameters(),
             self.settings.learning_rate,
         )
-        error_function = TorchEvaluator.error_functions[error_function]
+        error_function = PyGEvaluator.error_functions[error_function]
 
         def _train():
             for _ in range(epochs):
