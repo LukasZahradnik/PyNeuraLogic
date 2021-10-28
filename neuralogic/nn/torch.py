@@ -93,14 +93,14 @@ class NeuraLogic(AbstractNeuraLogic):
                 continue
 
             if isinstance(weight, (int, float)):
-                weight.data = torch.scalar_tensor(weight_dict[meta.index], dtype=torch.float64)
+                weight.data = torch.tensor([weight_dict[meta.index]], dtype=torch.float64)
             else:
                 weight.data = torch.tensor(weight_dict[meta.index], dtype=torch.float64)
 
     @staticmethod
     def to_tensor_value(value) -> torch.Tensor:
-        if isinstance(value, (float, int)) or len(value) == 1:
-            return torch.scalar_tensor(value, requires_grad=False, dtype=torch.float64)
+        if isinstance(value, (float, int)):
+            return torch.tensor([value], requires_grad=False, dtype=torch.float64)
         return torch.tensor(value, requires_grad=False, dtype=torch.float64)
 
     def to_torch_expression(
@@ -132,7 +132,7 @@ class NeuraLogic(AbstractNeuraLogic):
 
         if neuron.weights:
             for w, i in zip(neuron.weights, neuron.inputs):
-                if not neurons[i].size() or not weights[i].size():
+                if neurons[i].size() == (1,) or weights[i].size() == (1,):
                     out.append(torch.multiply(weights[w], neurons[i]))
                 else:
                     out.append(torch.matmul(weights[w], neurons[i]))

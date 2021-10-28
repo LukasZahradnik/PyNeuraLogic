@@ -47,22 +47,21 @@ class TorchEvaluator(AbstractEvaluator):
             for _ in range(epochs):
                 seen_instances = 0
                 total_loss = 0
-
                 for sample in dataset.samples:
                     trainer.zero_grad()
 
-                    if isinstance(sample.target, list):
-                        label = torch.tensor(sample.target, dtype=torch.float64)
+                    if isinstance(sample.target, (int, float)):
+                        label = torch.tensor([sample.target], dtype=torch.float64, requires_grad=False)
                     else:
-                        label = torch.scalar_tensor(sample.target, dtype=torch.float64)
+                        label = torch.tensor(sample.target, dtype=torch.float64, requires_grad=False)
 
                     graph_output = self.neuralogic_model(sample)
                     loss = error_function(graph_output, label)
 
-                    total_loss += loss.data
-
                     loss.backward()
                     trainer.step()
+
+                    total_loss += loss.item()
                     seen_instances += 1
                 yield total_loss, seen_instances
 
@@ -82,12 +81,7 @@ class TorchEvaluator(AbstractEvaluator):
                 for sample in dataset.samples:
                     graph_output = self.neuralogic_model(sample)
 
-                    if isinstance(sample.target, list):
-                        label = torch.tensor(sample.target)
-                    else:
-                        label = torch.scalar_tensor(sample.target)
-
-                    results = (label.data, graph_output)
+                    results = (sample.target, graph_output.data[0] if graph_output.size() == (1,) else graph_output)
                     yield results
 
         if generator:
