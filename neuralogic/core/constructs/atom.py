@@ -48,8 +48,6 @@ class BaseAtom:
         return BaseAtom(predicate, terms, self.negated)
 
     def __getitem__(self, item) -> "WeightedAtom":
-        # if self.java_object is None:
-        #     raise NotImplementedError
         return WeightedAtom(self, item)
 
     def __le__(self, other: Body) -> rule.Rule:
@@ -72,7 +70,6 @@ class BaseAtom:
         atom.negated = self.negated
         atom.terms = self.terms
         atom.predicate = self.predicate
-        # atom.java_object = self.java_object
 
 
 class WeightedAtom:  # todo gusta: mozna dedeni namisto kompozice?
@@ -139,4 +136,3 @@ class WeightedAtom:  # todo gusta: mozna dedeni namisto kompozice?
         atom.atom = self.atom
         atom.weight = self.weight
         atom.is_fixed = self.is_fixed
-        atom.java_object = self.java_object

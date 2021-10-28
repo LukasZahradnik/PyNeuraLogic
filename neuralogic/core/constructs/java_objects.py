@@ -1,5 +1,6 @@
+import numpy as np
 from py4j.java_gateway import get_field, set_field
-from typing import Optional, Iterable, Sized
+from typing import Optional, Iterable, Sequence
 from py4j.java_collections import ListConverter
 
 from neuralogic import get_neuralogic, get_gateway
@@ -32,7 +33,8 @@ class JavaFactory:
 
         self.unit_weight = get_neuralogic().cz.cvut.fel.ida.algebra.weights.Weight.unitWeight
 
-    def get_variable_factory(self):
+    @staticmethod
+    def get_variable_factory():
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.building.factories
         variable_factory = namespace.VariableFactory()
 
@@ -132,7 +134,9 @@ class JavaFactory:
 
     def get_predicate_metadata_pair(self, predicate_metadata):
         namespace = get_neuralogic().cz.cvut.fel.ida.utils.generic
-        return namespace.Pair(self.get_predicate(predicate_metadata.predicate), self.get_metadata(predicate_metadata.metadata))
+        return namespace.Pair(
+            self.get_predicate(predicate_metadata.predicate), self.get_metadata(predicate_metadata.metadata)
+        )
 
     def get_valued_fact(self, atom, variable_factory):
         return self.get_generic_atom(self.example_namespace.ValuedFact, atom, variable_factory)
@@ -199,14 +203,14 @@ class JavaFactory:
             else:
                 raise NotImplementedError
             initialized = False
-        elif isinstance(weight, Sized) and isinstance(weight, Iterable):
+        elif isinstance(weight, Sequence):
             initialized = True
             if len(weight) == 0:
                 raise NotImplementedError
-            if isinstance(weight[0], (int, float)):
+            if isinstance(weight[0], (int, float, np.number)):
                 vector = ListConverter().convert([float(w) for w in weight], get_gateway()._gateway_client)
                 value = self.value_namespace.VectorValue(vector)
-            elif isinstance(weight[0], Sized) and isinstance(weight, Iterable):
+            elif isinstance(weight[0], Sequence):
                 matrix = []
 
                 try:

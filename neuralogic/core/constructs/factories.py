@@ -56,7 +56,6 @@ Var = VariableFactory()
 Relation = AtomFactory()
 Term = TermFactory()
 
-
 V = Var
 T = Term
 R = Relation
