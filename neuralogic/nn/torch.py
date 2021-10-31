@@ -132,7 +132,10 @@ class NeuraLogic(AbstractNeuraLogic):
 
         if neuron.weights:
             for w, i in zip(neuron.weights, neuron.inputs):
-                if neurons[i].size() == (1,) or weights[i].size() == (1,):
+                neuron_size = neurons[i].size()
+                weight_size = weights[w].size()
+
+                if not neuron_size or not weight_size or neuron_size == (1,) or weight_size == (1,):
                     out.append(torch.multiply(weights[w], neurons[i]))
                 else:
                     out.append(torch.matmul(weights[w], neurons[i]))

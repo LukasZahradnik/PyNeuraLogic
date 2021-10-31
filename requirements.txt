@@ -3,3 +3,4 @@ numpy==1.20.3
 pre-commit==2.10.1
 py4j==0.10.9.1
 pytest
+torch

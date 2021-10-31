@@ -58,7 +58,10 @@ class TorchEvaluator(AbstractEvaluator):
                     graph_output = self.neuralogic_model(sample)
                     loss = error_function(graph_output, label)
 
-                    loss.backward()
+                    try:
+                        loss.backward()
+                    except RuntimeError:
+                        pass
                     trainer.step()
 
                     total_loss += loss.item()
@@ -81,8 +84,12 @@ class TorchEvaluator(AbstractEvaluator):
                 for sample in dataset.samples:
                     graph_output = self.neuralogic_model(sample)
 
-                    results = (sample.target, graph_output.data[0] if graph_output.size() == (1,) else graph_output)
-                    yield results
+                    if graph_output.size() == (1,):
+                        yield sample.target, graph_output[0].item()
+                    elif not graph_output.size():
+                        yield sample.target, graph_output.item()
+                    else:
+                        yield sample.target, graph_output
 
         if generator:
             return _test()
