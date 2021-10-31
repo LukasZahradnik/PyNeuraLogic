@@ -1,11 +1,12 @@
 from typing import Optional, Dict, Union
 
-import torch.nn.functional as F
 import torch
 
 from neuralogic.nn.base import AbstractEvaluator
 
-from neuralogic.core import Template, BuiltDataset, Backend, Settings, Optimizer, ErrorFunction, Dataset
+from neuralogic.core import Template, BuiltDataset, Dataset
+from neuralogic.core.settings import Settings
+from neuralogic.core.enums import Backend, Optimizer, ErrorFunction
 
 
 class TorchEvaluator(AbstractEvaluator):
@@ -14,13 +15,21 @@ class TorchEvaluator(AbstractEvaluator):
         Optimizer.ADAM: lambda param, rate: torch.optim.Adam(param, lr=rate),
     }
 
-    error_functions = {ErrorFunction.SQUARED_DIFF: F.mse_loss, ErrorFunction.CROSSENTROPY: F.cross_entropy}
+    error_functions = {
+        ErrorFunction.SQUARED_DIFF: torch.nn.MSELoss()
+        # ErrorFunction.ABS_DIFF: lambda out, target: dy.abs(out - target),
+        # ErrorFunction.CROSSENTROPY: lambda out, target: pass
+    }
 
-    def __init__(self, template: Template, settings: Settings):
-        super().__init__(Backend.PYG, template, settings)
+    def __init__(
+        self,
+        template: Template,
+        settings: Settings,
+    ):
+        super().__init__(Backend.TORCH, template, settings)
 
     def train(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
-        # dataset = self.dataset if dataset is None else self.build_dataset(dataset)
+        dataset = self.dataset if dataset is None else self.build_dataset(dataset)
 
         epochs = self.settings.epochs
         error_function = ErrorFunction[str(self.settings.error_function)]
@@ -31,28 +40,32 @@ class TorchEvaluator(AbstractEvaluator):
         if error_function not in TorchEvaluator.error_functions:
             raise NotImplementedError
 
-        trainer = TorchEvaluator.trainers[optimizer](
-            self.neuralogic_model.module_list.parameters(),
-            self.settings.learning_rate,
-        )
+        trainer = TorchEvaluator.trainers[optimizer](self.neuralogic_model.model, self.settings.learning_rate)
         error_function = TorchEvaluator.error_functions[error_function]
 
         def _train():
             for _ in range(epochs):
                 seen_instances = 0
                 total_loss = 0
-
-                for data in dataset.data:
-                    self.neuralogic_model.train()
+                for sample in dataset.samples:
                     trainer.zero_grad()
 
-                    out = self.neuralogic_model(x=data.x, edge_index=data.edge_index)
-                    loss = error_function(out[data.y_mask], data.y[data.y_mask])
-                    loss.backward()
+                    if isinstance(sample.target, (int, float)):
+                        label = torch.tensor([sample.target], dtype=torch.float64, requires_grad=False)
+                    else:
+                        label = torch.tensor(sample.target, dtype=torch.float64, requires_grad=False)
+
+                    graph_output = self.neuralogic_model(sample)
+                    loss = error_function(graph_output, label)
+
+                    try:
+                        loss.backward()
+                    except RuntimeError:
+                        pass
                     trainer.step()
 
+                    total_loss += loss.item()
                     seen_instances += 1
-                    total_loss += float(loss)
                 yield total_loss, seen_instances
 
         if generator:
@@ -64,18 +77,26 @@ class TorchEvaluator(AbstractEvaluator):
         return stats
 
     def test(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
-        self.neuralogic_model.train(mode=False)
-
-        # dataset = self.dataset if dataset is None else self.build_dataset(dataset)
+        dataset = self.dataset if dataset is None else self.build_dataset(dataset)
 
         def _test():
-            for data in dataset.data:
-                self.neuralogic_model.train(mode=False)
-                out = self.neuralogic_model(x=data.x, edge_index=data.edge_index)
-                results = (out[data.y_mask], data.y[data.y_mask])
+            with torch.no_grad():
+                for sample in dataset.samples:
+                    graph_output = self.neuralogic_model(sample)
 
-                yield results
+                    if graph_output.size() == (1,):
+                        yield sample.target, graph_output[0].item()
+                    elif not graph_output.size():
+                        yield sample.target, graph_output.item()
+                    else:
+                        yield sample.target, graph_output
 
         if generator:
             return _test()
         return list(_test())
+
+    def state_dict(self) -> Dict:
+        return self.neuralogic_model.state_dict()
+
+    def load_state_dict(self, state_dict: Dict):
+        self.neuralogic_model.load_state_dict(state_dict)

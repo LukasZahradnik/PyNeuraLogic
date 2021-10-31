@@ -44,7 +44,7 @@ class NeuraLogic(AbstractNeuraLogic):
     def __init__(self, model: List[Weight], template, settings: Optional[SettingsProxy] = None):
         super().__init__(Backend.DYNET, template, settings)
 
-        self.model = dy.ParameterCollection()
+        self.model: Optional[dy.ParameterCollection] = None
         self.weights_meta = model
         self.weights: List[dy.Parameters] = []
 
@@ -58,6 +58,7 @@ class NeuraLogic(AbstractNeuraLogic):
 
         weight_initializer = NeuraLogic.initializers[initializer]
 
+        self.model = dy.ParameterCollection()
         self.weights = [
             self.model.add_parameters(weight.dimensions, init=np.array(weight.value))
             if weight.fixed
