@@ -1,13 +1,17 @@
 import json
+from typing import Any, Dict
+
 import numpy as np
 from py4j.java_gateway import get_field
 
 
 class Sample:
     def __init__(self, sample):
-        self.id = get_field(sample, "id")
-        self.target = json.loads(get_field(sample, "target"))
-        self.neurons = self.deserialize_network(get_field(sample, "network"))
+        serialized_sample = json.loads(sample.exportToJson())
+
+        self.id = serialized_sample["id"]
+        self.target = json.loads(serialized_sample["target"])
+        self.neurons = self.deserialize_network(serialized_sample["network"])
         self.output_neuron = self.neurons[-1].index
 
     def deserialize_network(self, network):
@@ -21,16 +25,16 @@ class Sample:
 
 
 class Neuron:
-    def __init__(self, neuron, index):
+    def __init__(self, neuron: Dict[str, Any], index):
         self.index = index
-        self.name = get_field(neuron, "name")
-        self.weighted = get_field(neuron, "weighted")
-        self.activation = get_field(neuron, "activation")
-        self.inputs = get_field(neuron, "inputs")
-        self.weights = get_field(neuron, "weights")
-        self.offset = get_field(neuron, "offset")
-        self.value = get_field(neuron, "value")
-        self.pooling = get_field(neuron, "pooling")
+        self.name = neuron["name"]
+        self.weighted = neuron["weighted"]
+        self.activation = neuron.get("activation", None)
+        self.inputs = neuron["inputs"]
+        self.weights = neuron.get("weights", None)
+        self.offset = neuron["offset"]
+        self.value = neuron.get("value", None)
+        self.pooling = neuron["pooling"]
         self.hook_name = Neuron.parse_hook_name(self.name)
 
         if self.value:
