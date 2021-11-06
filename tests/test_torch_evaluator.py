@@ -2,6 +2,7 @@ from typing import List
 
 from neuralogic.core import Settings, Optimizer, Template, Dataset, Backend
 from neuralogic.nn import get_evaluator
+from neuralogic.utils.data import XOR, XOR_Vectorized, Trains
 
 from examples.datasets import (
     multiple_examples_trains,
@@ -14,6 +15,60 @@ from examples.datasets import (
 
 import torch
 import pytest
+
+
+@pytest.mark.parametrize(
+    "template, dataset, expected_results",
+    [
+        (*XOR(), [0.0, 0.881, 0.883, -0.013]),
+        (*XOR_Vectorized(), [0.0, 0.732, 0.707, -0.068]),
+        (
+            *Trains(),
+            [
+                0.757,
+                0.727,
+                0.758,
+                0.759,
+                0.741,
+                0.757,
+                0.758,
+                0.755,
+                0.73,
+                0.712,
+                -0.7,
+                -0.701,
+                -0.747,
+                0.755,
+                -0.755,
+                -0.702,
+                0.758,
+                -0.756,
+                -0.759,
+                -0.743,
+            ],
+        ),
+    ],
+)
+def test_evaluator_run_on_files(template: Template, dataset: Dataset, expected_results: List[float]) -> None:
+    """Tests for running torch evaluator on files"""
+    torch.manual_seed(1)
+
+    settings = Settings(optimizer=Optimizer.SGD, learning_rate=0.1, epochs=50)
+
+    evaluator = get_evaluator(template, Backend.TORCH, settings)
+
+    built_dataset = evaluator.build_dataset(dataset)
+    evaluator.train(built_dataset, generator=False)
+
+    results = []
+    for _, predicted in evaluator.test(built_dataset):
+        results.append(round(predicted, 3))
+
+    print(results)
+    assert len(results) == len(expected_results)
+
+    for result, expected_result in zip(results, expected_results):
+        assert expected_result == result
 
 
 @pytest.mark.parametrize(
