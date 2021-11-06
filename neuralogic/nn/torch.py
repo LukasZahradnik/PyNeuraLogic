@@ -108,18 +108,21 @@ class NeuraLogic(AbstractNeuraLogic):
     ) -> torch.Tensor:
         if neuron.inputs:
             out = self.process_neuron_inputs(neuron, neurons, weights)
-        else:
-            out = [NeuraLogic.to_tensor_value(neuron.value)]
 
-        if neuron.activation:
-            if not neuron.pooling:
-                out = sum(out)
+            if neuron.activation:
+                if not neuron.pooling:
+                    out = sum(out)
+                else:
+                    out = torch.stack(out)
+                if neuron.activation != "Identity":
+                    out = NeuraLogic.activations[neuron.activation](out)
             else:
-                out = torch.stack(out)
-            if neuron.activation != "Identity":
-                out = NeuraLogic.activations[neuron.activation](out)
+                out = sum(out)
         else:
-            out = sum(out)
+            out = NeuraLogic.to_tensor_value(neuron.value)
+
+            if neuron.activation and neuron.activation != "Identity":
+                out = NeuraLogic.activations[neuron.activation](out)
 
         if self.hooks_set and neuron.hook_name is not None and neuron.hook_name in self.hooks:
             self.run_hook(neuron.hook_name, out.value())
@@ -132,13 +135,16 @@ class NeuraLogic(AbstractNeuraLogic):
 
         if neuron.weights:
             for w, i in zip(neuron.weights, neuron.inputs):
-                neuron_size = neurons[i].size()
-                weight_size = weights[w].size()
+                neuron = neurons[i]
+                weight = weights[w]
+
+                neuron_size = neuron.size()
+                weight_size = weight.size()
 
                 if not neuron_size or not weight_size or neuron_size == (1,) or weight_size == (1,):
-                    out.append(torch.multiply(weights[w], neurons[i]))
+                    out.append(torch.multiply(weight, neuron))
                 else:
-                    out.append(torch.matmul(weights[w], neurons[i]))
+                    out.append(torch.matmul(weight, neuron))
         else:
             for i in neuron.inputs:
                 out.append(neurons[i])
