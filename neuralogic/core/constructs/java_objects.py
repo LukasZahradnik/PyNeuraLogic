@@ -52,12 +52,14 @@ class JavaFactory:
             return self.constant_factory.construct(str(term))
         raise NotImplementedError
 
-    def get_generic_atom(self, atom_class, atom, variable_factory):
+    def get_generic_atom(self, atom_class, atom, variable_factory, default_weight=None):
         predicate = self.get_predicate(atom.predicate)
 
         weight = None
         if isinstance(atom, self.weighted_atom_type):
             weight = self.get_weight(atom.weight, atom.weight_name, atom.is_fixed)
+        elif default_weight is not None:
+            weight = self.get_weight(default_weight, None, True)
 
         term_list = ListConverter().convert(
             [self.get_term(term, variable_factory) for term in atom.terms], get_gateway()._gateway_client
@@ -101,7 +103,7 @@ class JavaFactory:
         if not isinstance(query, self.rule_type):
             if not isinstance(query, Iterable):
                 query = [query]
-            return None, self.get_conjunction(query, variable_factory)
+            return None, self.get_conjunction(query, variable_factory, 1.0)
         return self.get_atom(query.head, variable_factory), self.get_conjunction(query.body, variable_factory)
 
     def get_lifted_example(self, example):
@@ -126,9 +128,9 @@ class JavaFactory:
         )
         return label_conjunction, lifted_example
 
-    def get_conjunction(self, atoms, variable_factory):
+    def get_conjunction(self, atoms, variable_factory, default_weight=None):
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs
-        valued_facts = [self.get_valued_fact(atom, variable_factory) for atom in atoms]
+        valued_facts = [self.get_valued_fact(atom, variable_factory, default_weight) for atom in atoms]
 
         return namespace.Conjunction(ListConverter().convert(valued_facts, get_gateway()._gateway_client))
 
@@ -138,8 +140,8 @@ class JavaFactory:
             self.get_predicate(predicate_metadata.predicate), self.get_metadata(predicate_metadata.metadata)
         )
 
-    def get_valued_fact(self, atom, variable_factory):
-        return self.get_generic_atom(self.example_namespace.ValuedFact, atom, variable_factory)
+    def get_valued_fact(self, atom, variable_factory, default_weight=None):
+        return self.get_generic_atom(self.example_namespace.ValuedFact, atom, variable_factory, default_weight)
 
     def get_atom(self, atom, variable_factory):
         return self.get_generic_atom(self.namespace.BodyAtom, atom, variable_factory)
