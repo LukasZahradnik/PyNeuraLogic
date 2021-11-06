@@ -7,7 +7,6 @@ class Sample:
     def __init__(self, sample):
         self.id = get_field(sample, "id")
         self.target = json.loads(get_field(sample, "target"))
-        self.output_neuron = get_field(sample, "neuron")
         self.neurons = self.deserialize_network(get_field(sample, "network"))
         self.output_neuron = self.neurons[-1].index
 
@@ -18,8 +17,6 @@ class Sample:
             neuron_object = Neuron(neuron, i)
             neurons.append(neuron_object)
 
-            if neuron_object.index == self.output_neuron:
-                break
         return neurons
 
 
@@ -85,6 +82,7 @@ class Weight:
 
 class BuiltDataset:
     """BuiltDataset represents an already built dataset - that is, a dataset that has been grounded and neuralized."""
+
     def __init__(self, samples):
         self.samples = samples
 

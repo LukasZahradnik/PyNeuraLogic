@@ -40,8 +40,7 @@ class Builder:
             logic_samples = get_field(java_model, "s")
             return logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
 
-        result = Builder.build(self.example_builder.buildPipeline(parsed_template, sources.sources), sources)
-        return [Sample(x) for x in stream_to_list(get_field(result, "s"))]
+        return Builder.build(self.example_builder.buildPipeline(parsed_template, sources.sources), sources)
 
     def from_logic_samples(self, parsed_template, logic_samples, backend: Backend):
         if backend == Backend.JAVA:
@@ -52,8 +51,7 @@ class Builder:
             logic_samples = get_field(java_model, "s")
             return logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
 
-        result = Builder.build(self.example_builder.buildPipeline(parsed_template, logic_samples), None)
-        return [Sample(x) for x in stream_to_list(get_field(result, "s"))]
+        return Builder.build(self.example_builder.buildPipeline(parsed_template, logic_samples), None)
 
     def build_model(self, parsed_template, backend: Backend, settings: SettingsProxy):
         namespace = get_neuralogic().cz.cvut.fel.ida.neural.networks.computation.training
@@ -83,9 +81,11 @@ class Builder:
 
     @staticmethod
     def build(source_pipeline, sources: Optional[Sources]):
-        pipes_namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.pipes.specific
-        serializer_pipe = pipes_namespace.NeuralSerializerPipe()
-
-        source_pipeline.connectAfter(serializer_pipe)
         source_pipeline.execute(None if sources is None else sources.sources)
-        return serializer_pipe.get()
+        java_model = source_pipeline.get()
+
+        logic_samples = get_field(java_model, "s")
+        serializer = get_neuralogic().cz.cvut.fel.ida.neural.networks.structure.export.NeuralSerializer()
+        logic_samples = stream_to_list(logic_samples)
+
+        return [Sample(serializer.serialize(x)) for x in logic_samples]
