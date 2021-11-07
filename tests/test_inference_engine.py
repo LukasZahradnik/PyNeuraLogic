@@ -36,13 +36,6 @@ def test_inference_engine_london_reachable() -> None:
 
 
 def test_inference_engine_london() -> None:
-    expected_yield = [
-        {"X": "green_park"},
-        {"X": "bond_street"},
-    ]
-
-    found_already = [False] * len(expected_yield)
-
     template = Template()
 
     knowledge = [
@@ -71,33 +64,20 @@ def test_inference_engine_london() -> None:
 
     # Run query for nearby(X, oxford_circus)
     # Should yield two substitutions for x (green_park and bond_street)
-    for substitutions in engine.q(R.nearby(V.X, T.oxford_circus)):
-        assert "X" in substitutions
-        assert len(substitutions) == 1
+    substitutions = list(engine.q(R.nearby(V.X, T.oxford_circus)))
 
-        for i in range(2):
-            if substitutions["X"] == expected_yield[i]["X"]:
-                assert not found_already[i]
-                found_already[i] = True
-    assert all(found_already)
-
-    expected_yield = [
-        {"X": "piccadilly_circus", "Z": "piccadilly"},
-        {"X": "tottenham_court_road", "Z": "northern"},
-    ]
-
-    found_already = [False] * len(expected_yield)
+    assert substitutions[0]["X"] == "green_park"
+    assert substitutions[1]["X"] == "bond_street"
+    assert len(substitutions) == 2 and len(substitutions[0]) == 1 and len(substitutions[1]) == 1
 
     # Run query for connected(X, leicester_square, Z)
     # Should yield two substitutions:
     # {'X': 'piccadilly_circus', 'Z': 'piccadilly'}, {'X': 'tottenham_court_road', 'Z': 'northern'}
-    for substitutions in engine.q(R.connected(V.X, T.leicester_square, V.Z)):
-        assert "X" in substitutions
-        assert "Z" in substitutions
-        assert len(substitutions) == 2
+    substitutions = list(engine.q(R.connected(V.X, T.leicester_square, V.Z)))
 
-        for i in range(2):
-            if substitutions["X"] == expected_yield[i]["X"] and substitutions["Z"] == expected_yield[i]["Z"]:
-                assert not found_already[i]
-                found_already[i] = True
-    assert all(found_already)
+    assert substitutions[0]["X"] == "piccadilly_circus"
+    assert substitutions[0]["Z"] == "piccadilly"
+
+    assert substitutions[1]["X"] == "tottenham_court_road"
+    assert substitutions[1]["Z"] == "northern"
+    assert len(substitutions) == 2 and len(substitutions[0]) == 2 and len(substitutions[1]) == 2
