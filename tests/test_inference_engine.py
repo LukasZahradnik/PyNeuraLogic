@@ -4,6 +4,10 @@ from neuralogic.core.inference_engine import InferenceEngine
 
 
 def test_inference_engine_london_reachable() -> None:
+    """
+    Test of the inference engine
+    based on https://book.simply-logical.space/part_i.html#a_brief_introduction_to_clausal_logic
+    """
     template = Template()
 
     template.add_rules(
@@ -36,6 +40,10 @@ def test_inference_engine_london_reachable() -> None:
 
 
 def test_inference_engine_london() -> None:
+    """
+    Test of the inference engine
+    based on https://book.simply-logical.space/part_i.html#a_brief_introduction_to_clausal_logic
+    """
     template = Template()
 
     knowledge = [
