@@ -78,6 +78,17 @@ def test_inference_engine_london() -> None:
     assert substitutions[1]["X"] == "bond_street"
     assert len(substitutions) == 2 and len(substitutions[0]) == 1 and len(substitutions[1]) == 1
 
+    # Run query for nearby(X, tottenham_court_road)
+    substitutions = list(engine.q(R.nearby(V.X, T.charing_cross)))
+    print(substitutions)
+    assert substitutions[0]["X"] == "piccadilly_circus"
+    assert substitutions[1]["X"] == "leicester_square"
+    assert substitutions[2]["X"] == "tottenham_court_road"
+    assert substitutions[3]["X"] == "green_park"
+    assert substitutions[4]["X"] == "bond_street"
+    assert substitutions[5]["X"] == "oxford_circus"
+    assert len(substitutions) == 6 and len(substitutions[0]) == 1 and len(substitutions[1]) == 1
+
     # Run query for connected(X, leicester_square, Z)
     # Should yield two substitutions:
     # {'X': 'piccadilly_circus', 'Z': 'piccadilly'}, {'X': 'tottenham_court_road', 'Z': 'northern'}
