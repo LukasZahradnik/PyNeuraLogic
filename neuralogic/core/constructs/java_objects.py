@@ -60,7 +60,8 @@ class JavaFactory:
             [self.get_term(term, self.variable_factory) for term in atom.terms], get_gateway()._gateway_client
         )
 
-        literal = namespace.Literal(atom.predicate.name, atom.negated, terms)
+        predicate_name = f"@{atom.predicate.name}" if atom.predicate.special else atom.predicate.name
+        literal = namespace.Literal(predicate_name, atom.negated, terms)
         return namespace.Clause(ListConverter().convert([literal], get_gateway()._gateway_client))
 
     def get_generic_atom(self, atom_class, atom, variable_factory, default_weight=None):
