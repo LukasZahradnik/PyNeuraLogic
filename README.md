@@ -30,20 +30,20 @@ Many things! For instance - ever heard of [Graph Neural Networks](https://distil
 Or, a bit more 'formally':
 
 ```
-Relation.node2(Var.X) <= (Relation.node1(Var.Y), Relation.edge(Var.X,Var.Y))
+Relation.message2(Var.X) <= (Relation.message1(Var.Y), Relation.edge(Var.X,Var.Y))
 ```
 
 ...and that's the actual _code_! Now for a classic learnable GNN layer, you'll want to add some parameters, such as
 
 ```
-Relation.node2(Var.X)[5,10] <= (Relation.node1(Var.Y)[10,20], Relation.edge(Var.X,Var.Y))
+Relation.message2(Var.X)[5,10] <= (Relation.message1(Var.Y)[10,20], Relation.edge(Var.X,Var.Y))
 ```
 
 to project your `[1,20]` input node embeddings ('messages') through a learnable ``[10,20]`` layer before the aggregation, and subsequently a `[5,10]` layer after the aggregation. The particular aggregation and activation functions, as well as other details, can naturally be [specified further](https://pyneuralogic.readthedocs.io/en/latest/language.html), but you can as well leave them default like we did here with your first, fully functional GNN layer!
 
 ### How is it different from other GNN frameworks?
 
-Naturally, PyNeuralogic is by no means limited to GNN models, as the expressiveness of _relational_ logic goes much further beyond graphs. So nothing stops you from playing directly with:
+Naturally, PyNeuralogic is by no means limited to GNN models, as the expressiveness of _relational_ logic goes much further beyond graphs. Hence, nothing stops you from playing directly with:
 - multiple relations and object types
 - hypergraphs, nested graphs, relational databases
 - alternative propagation schemes
