@@ -32,6 +32,7 @@ class JavaFactory:
         self.weight_factory = get_field(self.builder, "weightFactory")
 
         self.unit_weight = get_neuralogic().cz.cvut.fel.ida.algebra.weights.Weight.unitWeight
+        self.variable_factory = self.get_variable_factory()
 
     @staticmethod
     def get_variable_factory():
@@ -51,6 +52,17 @@ class JavaFactory:
         if isinstance(term, (int, float)):
             return self.constant_factory.construct(str(term))
         raise NotImplementedError
+
+    def atom_to_clause(self, atom):
+        namespace = get_neuralogic().cz.cvut.fel.ida.logic
+
+        terms = ListConverter().convert(
+            [self.get_term(term, self.variable_factory) for term in atom.terms], get_gateway()._gateway_client
+        )
+
+        predicate_name = f"@{atom.predicate.name}" if atom.predicate.special else atom.predicate.name
+        literal = namespace.Literal(predicate_name, atom.negated, terms)
+        return namespace.Clause(ListConverter().convert([literal], get_gateway()._gateway_client))
 
     def get_generic_atom(self, atom_class, atom, variable_factory, default_weight=None):
         predicate = self.get_predicate(atom.predicate)
