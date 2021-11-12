@@ -51,7 +51,7 @@ Naturally, PyNeuralogic is by no means limited to GNN models, as the expressiven
 - inclusion of logical background knowledge
 - and more...
 
-In [PyNeuraLogic](https://dspace.cvut.cz/bitstream/handle/10467/97065/F3-DP-2021-Zahradnik-Lukas-Extending-Graph-Neural-Networks-with-Relational-Logic.pdf?sequence=-1&isAllowed=y), all these ideas take the same form of simple small logic programs. These are commonly highly transparent and easy to understand, thanks to their declarative nature. Consequently, there is no need to design a new blackbox class name for each small modification of the GNN rule - you code directly at the level of the logical principles here!
+In [PyNeuraLogic](https://dspace.cvut.cz/bitstream/handle/10467/97065/F3-DP-2021-Zahradnik-Lukas-Extending-Graph-Neural-Networks-with-Relational-Logic.pdf?sequence=-1&isAllowed=y), all these ideas take the same form of simple small logic programs. These are commonly highly transparent and easy to understand, thanks to their declarative nature. Consequently, there is no need to design a zoo of blackbox class names for each small modification of the GNN rule - you code directly at the level of the logical principles here!
 
 The [backend engine](https://jair.org/index.php/jair/article/view/11203) then creates the underlying differentiable computation (inference) graphs in a fully automated and dynamic fashion, hence you don't have to care about aligning everything into some (static) tensor operations.
 This gives you considerably more expressiveness, and, perhaps surprisingly, sometimes even [performance](https://arxiv.org/abs/2007.06286).
