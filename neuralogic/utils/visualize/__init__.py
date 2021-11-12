@@ -37,7 +37,7 @@ def get_sample_drawer(settings: SettingsProxy):
 # todo gusta: + groundingDrawer, pipelineDrawer...
 
 
-def draw(drawer, obj, filename: Optional[str] = None, draw_ipython=True, *args, **kwargs):
+def draw(drawer, obj, filename: Optional[str] = None, draw_ipython=True, img_type="png", *args, **kwargs):
     if filename is not None:
         drawer.drawIntoFile(obj, os.path.abspath(filename))
 
@@ -46,8 +46,10 @@ def draw(drawer, obj, filename: Optional[str] = None, draw_ipython=True, *args, 
     data = drawer.drawIntoBytes(obj)
 
     if draw_ipython:
-        from IPython.display import Image
+        from IPython.display import Image, SVG
 
+        if img_type == "svg":
+            return SVG(data, *args, **kwargs)
         return Image(data, *args, **kwargs)
     return data
 
@@ -76,7 +78,7 @@ def draw_model(model, filename: Optional[str] = None, draw_ipython=True, img_typ
     template = model.template
     template_drawer = get_template_drawer(get_drawing_settings(img_type=img_type))
 
-    return draw(template_drawer, template, filename, draw_ipython, *args, **kwargs)
+    return draw(template_drawer, template, filename, draw_ipython, img_type, *args, **kwargs)
 
 
 def draw_sample(sample, filename: Optional[str] = None, draw_ipython=True, img_type="png", *args, **kwargs):
