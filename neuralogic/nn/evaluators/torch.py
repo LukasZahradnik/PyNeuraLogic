@@ -48,7 +48,7 @@ class TorchEvaluator(AbstractEvaluator):
                 seen_instances = 0
                 total_loss = 0
                 for sample in dataset.samples:
-                    trainer.zero_grad()
+                    trainer.zero_grad(set_to_none=True)
 
                     if isinstance(sample.target, (int, float)):
                         label = torch.tensor([sample.target], dtype=torch.float64, requires_grad=False)
