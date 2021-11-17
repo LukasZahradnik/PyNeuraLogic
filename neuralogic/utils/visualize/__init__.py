@@ -2,6 +2,7 @@ import os
 from typing import Optional
 
 from neuralogic import get_neuralogic
+from neuralogic.core.builder import Sample
 from neuralogic.core.settings import Settings, SettingsProxy
 
 from py4j.java_gateway import set_field
@@ -95,9 +96,13 @@ def draw_sample(sample, filename: Optional[str] = None, draw_ipython=True, img_t
     :param kwargs:
     :return:
     """
+    draw_object = sample
+    if isinstance(draw_object, Sample):
+        draw_object = draw_object.java_sample
+
     sample_drawer = get_sample_drawer(get_drawing_settings(img_type=img_type))
 
-    return draw(sample_drawer, sample, filename, draw_ipython, *args, **kwargs)
+    return draw(sample_drawer, draw_object, filename, draw_ipython, img_type, *args, **kwargs)
 
 
 def model_to_dot_source(model) -> str:

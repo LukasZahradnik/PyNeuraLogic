@@ -88,4 +88,4 @@ class Builder:
         serializer = get_neuralogic().cz.cvut.fel.ida.neural.networks.structure.export.NeuralSerializer()
         logic_samples = stream_to_list(logic_samples)
 
-        return [Sample(serializer.serialize(x)) for x in logic_samples]
+        return [Sample(serializer.serialize(x), x) for x in logic_samples]

@@ -6,13 +6,14 @@ from py4j.java_gateway import get_field
 
 
 class Sample:
-    def __init__(self, sample):
+    def __init__(self, sample, java_sample):
         serialized_sample = json.loads(sample.exportToJson())
 
         self.id = serialized_sample["id"]
         self.target = json.loads(serialized_sample["target"])
         self.neurons = self.deserialize_network(serialized_sample["network"])
         self.output_neuron = self.neurons[-1].index
+        self.java_sample = java_sample
 
     def deserialize_network(self, network):
         neurons = []
