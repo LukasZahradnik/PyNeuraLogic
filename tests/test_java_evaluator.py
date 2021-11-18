@@ -264,7 +264,7 @@ def test_evaluator_run_on_files(template: Template, dataset: Dataset, expected_r
 @pytest.mark.parametrize(
     "template, dataset, expected_results",
     [
-        (naive_xor.template, naive_xor.dataset, [0.0, 0.878, 0.878, 0.014]),
+        (naive_xor.template, naive_xor.dataset, [0.0, 0.877, 0.875, 0.015]),
         (vectorized_xor.template, vectorized_xor.dataset, [0.0, 0.923, 0.922, 0.004]),
         (horses.template, horses.dataset, [0.929, 0.0]),
         (

@@ -64,12 +64,12 @@ class JavaFactory:
         literal = namespace.Literal(predicate_name, atom.negated, terms)
         return namespace.Clause(ListConverter().convert([literal], get_gateway()._gateway_client))
 
-    def get_generic_atom(self, atom_class, atom, variable_factory, default_weight=None):
+    def get_generic_atom(self, atom_class, atom, variable_factory, default_weight=None, is_example=False):
         predicate = self.get_predicate(atom.predicate)
 
         weight = None
         if isinstance(atom, self.weighted_atom_type):
-            weight = self.get_weight(atom.weight, atom.weight_name, atom.is_fixed)
+            weight = self.get_weight(atom.weight, atom.weight_name, atom.is_fixed or is_example)
         elif default_weight is not None:
             weight = self.get_weight(default_weight, None, True)
 
@@ -115,8 +115,10 @@ class JavaFactory:
         if not isinstance(query, self.rule_type):
             if not isinstance(query, Iterable):
                 query = [query]
-            return None, self.get_conjunction(query, variable_factory, 1.0)
-        return self.get_atom(query.head, variable_factory), self.get_conjunction(query.body, variable_factory)
+            return None, self.get_conjunction(query, variable_factory, 1.0, True)
+        return self.get_atom(query.head, variable_factory, True), self.get_conjunction(
+            query.body, variable_factory, is_example=True
+        )
 
     def get_lifted_example(self, example):
         gateway_client = get_gateway()._gateway_client
@@ -130,19 +132,19 @@ class JavaFactory:
         if not isinstance(example, self.rule_type):
             if not isinstance(example, Iterable):
                 example = [example]
-            conjunctions.append(self.get_conjunction(example, variabel_factory))
+            conjunctions.append(self.get_conjunction(example, variabel_factory, is_example=True))
         else:
-            label_conjunction = self.get_conjunction([example.head], variabel_factory)
-            conjunctions.append(self.get_conjunction(example.body, variabel_factory))
+            label_conjunction = self.get_conjunction([example.head], variabel_factory, is_example=True)
+            conjunctions.append(self.get_conjunction(example.body, variabel_factory, is_example=True))
 
         lifted_example = self.example_namespace.LiftedExample(
             ListConverter().convert(conjunctions, gateway_client), rules
         )
         return label_conjunction, lifted_example
 
-    def get_conjunction(self, atoms, variable_factory, default_weight=None):
+    def get_conjunction(self, atoms, variable_factory, default_weight=None, is_example=False):
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs
-        valued_facts = [self.get_valued_fact(atom, variable_factory, default_weight) for atom in atoms]
+        valued_facts = [self.get_valued_fact(atom, variable_factory, default_weight, is_example) for atom in atoms]
 
         return namespace.Conjunction(ListConverter().convert(valued_facts, get_gateway()._gateway_client))
 
@@ -152,11 +154,17 @@ class JavaFactory:
             self.get_predicate(predicate_metadata.predicate), self.get_metadata(predicate_metadata.metadata)
         )
 
-    def get_valued_fact(self, atom, variable_factory, default_weight=None):
-        return self.get_generic_atom(self.example_namespace.ValuedFact, atom, variable_factory, default_weight)
+    def get_valued_fact(self, atom, variable_factory, default_weight=None, is_example=False):
+        return self.get_generic_atom(
+            self.example_namespace.ValuedFact,
+            atom,
+            variable_factory,
+            default_weight,
+            is_example,
+        )
 
-    def get_atom(self, atom, variable_factory):
-        return self.get_generic_atom(self.namespace.BodyAtom, atom, variable_factory)
+    def get_atom(self, atom, variable_factory, is_example=False):
+        return self.get_generic_atom(self.namespace.BodyAtom, atom, variable_factory, is_example=is_example)
 
     def get_rule(self, rule):
         java_rule = self.namespace.WeightedRule()
