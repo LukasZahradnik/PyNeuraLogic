@@ -5,8 +5,6 @@ from neuralogic.core.constructs import atom
 
 class AtomFactory:
     class Predicate:
-        predicates: Dict[str, Predicate] = {}
-
         def __init__(self, hidden=False, special=False):
             self.is_hidden = hidden
             self.is_special = special
@@ -21,13 +19,10 @@ class AtomFactory:
 
         @staticmethod
         def get_predicate(name, arity, hidden, special) -> Predicate:
-            key = f"{name}/{arity}"
-            if key not in AtomFactory.Predicate.predicates:
-                AtomFactory.Predicate.predicates[key] = Predicate(name, arity, hidden, special)
-            return AtomFactory.Predicate.predicates[key]
+            return Predicate(name, arity, hidden, special)
 
         def __getattr__(self, item):
-            return atom.BaseAtom(AtomFactory.Predicate.get_predicate(item, 0, self.is_hidden, self.is_special))
+            return atom.BaseAtom(Predicate(item, 0, self.is_hidden, self.is_special))
 
     def __init__(self):
         self.instances: Dict[str, Dict[int, atom.BaseAtom]] = {}
@@ -36,10 +31,10 @@ class AtomFactory:
         self.hidden = AtomFactory.Predicate(hidden=True)
 
     def get(self, name: str) -> atom.BaseAtom:
-        return atom.BaseAtom(AtomFactory.Predicate.get_predicate(name, 0, False, False))
+        return atom.BaseAtom(Predicate(name, 0, False, False))
 
     def __getattr__(self, item) -> atom.BaseAtom:
-        return atom.BaseAtom(AtomFactory.Predicate.get_predicate(item, 0, False, False))
+        return atom.BaseAtom(Predicate(item, 0, False, False))
 
 
 class VariableFactory:
