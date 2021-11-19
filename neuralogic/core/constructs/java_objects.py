@@ -1,6 +1,7 @@
+import numpy
 import numpy as np
 from py4j.java_gateway import get_field, set_field
-from typing import Optional, Iterable, Sequence
+from typing import Optional, Iterable, Sequence, List
 from py4j.java_collections import ListConverter
 
 from neuralogic import get_neuralogic, get_gateway
@@ -232,19 +233,24 @@ class JavaFactory:
             if isinstance(weight[0], (int, float, np.number)):
                 vector = ListConverter().convert([float(w) for w in weight], get_gateway()._gateway_client)
                 value = self.value_namespace.VectorValue(vector)
-            elif isinstance(weight[0], Sequence):
+            elif isinstance(weight[0], (Sequence, numpy.ndarray)):
                 matrix = []
 
-                try:
-                    for weights in weight:
-                        values = [float(w) for w in weights]
-                        matrix.append(ListConverter().convert(values, get_gateway()._gateway_client))
-
-                    matrix = ListConverter().convert(matrix, get_gateway()._gateway_client)
-                    value = self.value_namespace.MatrixValue(matrix)
-                except TypeError:
-                    vector = ListConverter().convert([float(w) for w in weight], get_gateway()._gateway_client)
+                if len(weight) == 1:
+                    vector = ListConverter().convert([float(w) for w in weight[0]], get_gateway()._gateway_client)
                     value = self.value_namespace.VectorValue(vector)
+                    set_field(value, "rowOrientation", True)
+                else:
+                    try:
+                        for weights in weight:
+                            values = [float(w) for w in weights]
+                            matrix.append(ListConverter().convert(values, get_gateway()._gateway_client))
+
+                        matrix = ListConverter().convert(matrix, get_gateway()._gateway_client)
+                        value = self.value_namespace.MatrixValue(matrix)
+                    except TypeError:
+                        vector = ListConverter().convert([float(w) for w in weight], get_gateway()._gateway_client)
+                        value = self.value_namespace.VectorValue(vector)
             else:
                 raise NotImplementedError
         else:
