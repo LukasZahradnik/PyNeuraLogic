@@ -23,7 +23,7 @@ Hidden Modifier
 
     .. code-block:: Python
 
-        Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation.private.edge(Var.X, Var.Y))
+        Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation.hidden.edge(Var.X, Var.Y))
 
 
     TODO: Model graph

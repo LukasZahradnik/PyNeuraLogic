@@ -26,12 +26,12 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
 
         # This rule does xor for the last pair
         R.xor(V.X, V.Y)["a":1, 8] <= (
-            R.x(V.X)["b":8, 1], R.x(V.Y)["c":8, 1], R.private.xy(V.X, V.Y), R.private.n(V.Y)
+            R.x(V.X)["b":8, 1], R.x(V.Y)["c":8, 1], R.hidden.xy(V.X, V.Y), R.hidden.n(V.Y)
         ),
 
         # This rule recursively evaluates xor for X and xor(Y, Z)
         R.xor(V.X, V.Y)["a":1, 8] <= (
-            R.x(V.X)["b":8, 1], R.xor(V.Y, V.Z)["c":8, 1], R.private.xy(V.X, V.Y), R.private.xy(V.Y, V.Z)
+            R.x(V.X)["b":8, 1], R.xor(V.Y, V.Z)["c":8, 1], R.hidden.xy(V.X, V.Y), R.hidden.xy(V.Y, V.Z)
         ),
 
         # Helper rule so that queries are just R.xor

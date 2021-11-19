@@ -32,8 +32,8 @@ class BaseAtom:
         if not isinstance(other, int) or self.predicate.arity != 0 or other < 0:
             raise NotImplementedError
 
-        name, private, special = self.predicate.name, self.predicate.private, self.predicate.special
-        return factories.AtomFactory.Predicate.get_predicate(name, other, private, special)
+        name, hidden, special = self.predicate.name, self.predicate.hidden, self.predicate.special
+        return factories.AtomFactory.Predicate.get_predicate(name, other, hidden, special)
 
     def __call__(self, *args) -> "BaseAtom":
         if self.terms:
@@ -42,8 +42,8 @@ class BaseAtom:
         terms = list(args)
         arity = len(terms)
 
-        name, private, special = self.predicate.name, self.predicate.private, self.predicate.special
-        predicate = factories.AtomFactory.Predicate.get_predicate(name, arity, private, special)
+        name, hidden, special = self.predicate.name, self.predicate.hidden, self.predicate.special
+        predicate = factories.AtomFactory.Predicate.get_predicate(name, arity, hidden, special)
 
         return BaseAtom(predicate, terms, self.negated)
 

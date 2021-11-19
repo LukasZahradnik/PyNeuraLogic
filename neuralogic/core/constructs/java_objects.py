@@ -195,7 +195,7 @@ class JavaFactory:
         return java_rule
 
     def get_predicate(self, predicate):
-        return self.predicate_factory.construct(predicate.name, predicate.arity, predicate.special, predicate.private)
+        return self.predicate_factory.construct(predicate.name, predicate.arity, predicate.special, predicate.hidden)
 
     def get_weight(self, weight, name, fixed):
         initialized, value = self.get_value(weight)

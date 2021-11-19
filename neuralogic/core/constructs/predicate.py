@@ -4,10 +4,10 @@ from neuralogic.core.constructs.metadata import Metadata
 class Predicate:
     """WeightedPredicate"""
 
-    def __init__(self, name, arity, private=False, special=False):
+    def __init__(self, name, arity, hidden=False, special=False):
         self.name = name
         self.arity = arity
-        self.private = private
+        self.hidden = hidden
         self.special = special
 
     def set_arity(self, arity):
@@ -16,13 +16,13 @@ class Predicate:
 
     def to_str(self):
         special = "@" if self.special else ""
-        private = "*" if self.private else ""
-        return f"{private}{special}{self.name}"
+        hidden = "*" if self.hidden else ""
+        return f"{hidden}{special}{self.name}"
 
     def __str__(self):
         special = "@" if self.special else ""
-        private = "*" if self.private else ""
-        return f"{private}{special}{self.name}/{self.arity}"
+        hidden = "*" if self.hidden else ""
+        return f"{hidden}{special}{self.name}/{self.arity}"
 
     def __or__(self, other):
         if not isinstance(other, Metadata):

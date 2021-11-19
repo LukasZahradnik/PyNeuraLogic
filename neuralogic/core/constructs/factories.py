@@ -7,33 +7,33 @@ class AtomFactory:
     class Predicate:
         predicates: Dict[str, Predicate] = {}
 
-        def __init__(self, private=False, special=False):
-            self.is_private = private
+        def __init__(self, hidden=False, special=False):
+            self.is_hidden = hidden
             self.is_special = special
 
         @property
         def special(self) -> "AtomFactory.Predicate":
-            return AtomFactory.Predicate(self.is_private, True)
+            return AtomFactory.Predicate(self.is_hidden, True)
 
         @property
-        def private(self) -> "AtomFactory.Predicate":
+        def hidden(self) -> "AtomFactory.Predicate":
             return AtomFactory.Predicate(True, self.is_special)
 
         @staticmethod
-        def get_predicate(name, arity, private, special) -> Predicate:
+        def get_predicate(name, arity, hidden, special) -> Predicate:
             key = f"{name}/{arity}"
             if key not in AtomFactory.Predicate.predicates:
-                AtomFactory.Predicate.predicates[key] = Predicate(name, arity, private, special)
+                AtomFactory.Predicate.predicates[key] = Predicate(name, arity, hidden, special)
             return AtomFactory.Predicate.predicates[key]
 
         def __getattr__(self, item):
-            return atom.BaseAtom(AtomFactory.Predicate.get_predicate(item, 0, self.is_private, self.is_special))
+            return atom.BaseAtom(AtomFactory.Predicate.get_predicate(item, 0, self.is_hidden, self.is_special))
 
     def __init__(self):
         self.instances: Dict[str, Dict[int, atom.BaseAtom]] = {}
 
         self.special = AtomFactory.Predicate(special=True)
-        self.private = AtomFactory.Predicate(private=True)
+        self.hidden = AtomFactory.Predicate(hidden=True)
 
     def get(self, name: str) -> atom.BaseAtom:
         return atom.BaseAtom(AtomFactory.Predicate.get_predicate(name, 0, False, False))
