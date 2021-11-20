@@ -7,7 +7,7 @@
    viewBox="0 0 140 31"
    version="1.1"
    id="svg1322"
-   inkscape:version="1.1 (ce6663b3b7, 2021-05-25)"
+   inkscape:version="1.1.1 (eb90963e84, 2021-10-02)"
    sodipodi:docname="readme_logo.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -26,18 +26,19 @@
      showgrid="false"
      height="50mm"
      inkscape:zoom="1.3416246"
-     inkscape:cx="209.07488"
-     inkscape:cy="91.307211"
-     inkscape:window-width="1976"
-     inkscape:window-height="1216"
+     inkscape:cx="48.448724"
+     inkscape:cy="247.83386"
+     inkscape:window-width="2488"
+     inkscape:window-height="1529"
      inkscape:window-x="72"
-     inkscape:window-y="27"
+     inkscape:window-y="34"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1"
      showguides="true"
      inkscape:guide-bbox="true"
      width="127mm" />
-  <style>
+  <style
+     id="style3">
       path { stroke: #000000 !important; fill: #000000; stroke-width: 0px; }
 
       @media (prefers-color-scheme: dark) {
@@ -178,23 +179,6 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
-    <text
-       xml:space="preserve"
-       transform="matrix(0.20913209,0,0,0.20913209,-89.285827,-141.92177)"
-       id="text20039"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:80.9696px;line-height:1.25;font-family:Z003;-inkscape-font-specification:Z003;white-space:pre;shape-inside:url(#rect20057);fill:#000000;fill-opacity:1;stroke:none"
-       x="500.20865"
-       y="0"><tspan
-         x="475.77355"
-         y="1290.256"
-         id="tspan3565"><tspan
-           style="font-family:AnjaliOldLipi;-inkscape-font-specification:AnjaliOldLipi;text-align:center;text-anchor:middle"
-           id="tspan3563">PyNeuraLogic</tspan></tspan></text>
-    <path
-       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 61.967966,1.4649845 v 0 0"
-       id="path422"
-       sodipodi:nodetypes="ccc" />
     <g
        aria-label="PyNeuraLogic"
        transform="matrix(0.20913209,0,0,0.20913209,-58.949689,-248.1409)"
@@ -245,7 +229,6 @@
          style="font-family:AnjaliOldLipi;-inkscape-font-specification:AnjaliOldLipi;text-align:center;text-anchor:middle"
          id="path26970" />
       <path
-              class=".path"
          d="m 942.1183,1260.9994 q 0.0395,-3.7955 -3.20241,-5.8909 -3.24195,-2.0954 -7.82812,-2.0954 -4.82338,0 -9.09326,4.349 -4.26988,4.3489 -4.26988,12.2166 0,7.8676 3.55823,12.0584 3.55824,4.1909 9.48863,4.1909 5.93039,0 8.65837,-2.5699 2.72798,-2.5698 2.68844,-5.2978 h 5.45596 q -0.0395,4.5071 -3.67684,8.4607 -4.46756,4.8234 -12.80965,4.8234 -13.40268,0 -17.43534,-12.2166 -1.38376,-4.1908 -1.38376,-9.7259 0,-5.535 1.81865,-9.5281 1.81865,-4.0327 4.58617,-6.7211 2.80705,-2.728 6.08853,-4.1118 3.32102,-1.3837 8.22348,-1.3837 4.94199,0 9.76537,3.4791 4.82339,3.4792 4.82339,9.9631 z"
          style="font-family:AnjaliOldLipi;-inkscape-font-specification:AnjaliOldLipi;text-align:center;text-anchor:middle"
          id="path26972" />
