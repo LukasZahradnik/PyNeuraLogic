@@ -37,6 +37,13 @@
      showguides="true"
      inkscape:guide-bbox="true"
      width="127mm" />
+  <style>
+      path { stroke: #000000 !important; fill: #000000; stroke-width: 0px; }
+
+      @media (prefers-color-scheme: dark) {
+          path { stroke: #FFFFFF !important; fill: #FFFFFF; stroke-width: 0px; }
+      }
+  </style>
   <defs
      id="defs1319">
     <rect
@@ -238,6 +245,7 @@
          style="font-family:AnjaliOldLipi;-inkscape-font-specification:AnjaliOldLipi;text-align:center;text-anchor:middle"
          id="path26970" />
       <path
+              class=".path"
          d="m 942.1183,1260.9994 q 0.0395,-3.7955 -3.20241,-5.8909 -3.24195,-2.0954 -7.82812,-2.0954 -4.82338,0 -9.09326,4.349 -4.26988,4.3489 -4.26988,12.2166 0,7.8676 3.55823,12.0584 3.55824,4.1909 9.48863,4.1909 5.93039,0 8.65837,-2.5699 2.72798,-2.5698 2.68844,-5.2978 h 5.45596 q -0.0395,4.5071 -3.67684,8.4607 -4.46756,4.8234 -12.80965,4.8234 -13.40268,0 -17.43534,-12.2166 -1.38376,-4.1908 -1.38376,-9.7259 0,-5.535 1.81865,-9.5281 1.81865,-4.0327 4.58617,-6.7211 2.80705,-2.728 6.08853,-4.1118 3.32102,-1.3837 8.22348,-1.3837 4.94199,0 9.76537,3.4791 4.82339,3.4792 4.82339,9.9631 z"
          style="font-family:AnjaliOldLipi;-inkscape-font-specification:AnjaliOldLipi;text-align:center;text-anchor:middle"
          id="path26972" />
