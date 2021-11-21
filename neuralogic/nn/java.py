@@ -1,6 +1,5 @@
 import json
-from collections import Sized
-from typing import Dict
+from typing import Dict, Sized
 from py4j.java_gateway import get_field
 from py4j.java_collections import SetConverter
 
