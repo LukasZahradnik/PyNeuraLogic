@@ -5,6 +5,10 @@ class Predicate:
     """WeightedPredicate"""
 
     def __init__(self, name, arity, hidden=False, special=False):
+        if name.startswith("_"):
+            name = name[1:]
+            hidden = True
+
         self.name = name
         self.arity = arity
         self.hidden = hidden
