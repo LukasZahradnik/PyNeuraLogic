@@ -1,3 +1,5 @@
+from py4j.java_gateway import set_field
+
 from neuralogic import get_neuralogic, get_gateway
 from py4j.java_collections import ListConverter
 
@@ -105,7 +107,19 @@ class Template:
         predicate_metadata = ListConverter().convert(predicate_metadata, get_gateway()._gateway_client)
 
         template_namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.types
-        return template_namespace.ParsedTemplate(weighted_rules, valued_facts)
+        template = template_namespace.ParsedTemplate(weighted_rules, valued_facts)
+
+        set_field(template, "weightsMetadata", ListConverter().convert([], get_gateway()._gateway_client))
+        set_field(template, "predicatesMetadata", predicate_metadata)
+
+        metadata_processor = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.transforming.MetadataProcessor(
+            settings.settings
+        )
+
+        metadata_processor.processMetadata(template)
+        template.inferTemplateFacts()
+
+        return template
 
     def build(self, backend: Backend, settings: Settings, *, native_backend_models=False):
         from neuralogic.nn import get_neuralogic_layer

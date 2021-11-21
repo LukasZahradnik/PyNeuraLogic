@@ -1,7 +1,7 @@
 import numpy
 import numpy as np
 from py4j.java_gateway import get_field, set_field
-from typing import Optional, Iterable, Sequence, List
+from typing import Optional, Iterable, Sequence
 from py4j.java_collections import ListConverter
 
 from neuralogic import get_neuralogic, get_gateway
@@ -16,15 +16,17 @@ class JavaFactory:
         if settings is None:
             settings = Settings().create_proxy()
 
+        neuralogic_jvm = get_neuralogic()
+
         self.weighted_atom_type = WeightedAtom
         self.rule_type = Rule
 
-        namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.building
+        namespace = neuralogic_jvm.cz.cvut.fel.ida.logic.constructs.building
         self.settings = settings
 
-        self.namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.components
-        self.value_namespace = get_neuralogic().cz.cvut.fel.ida.algebra.values
-        self.example_namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.example
+        self.namespace = neuralogic_jvm.cz.cvut.fel.ida.logic.constructs.template.components
+        self.value_namespace = neuralogic_jvm.cz.cvut.fel.ida.algebra.values
+        self.example_namespace = neuralogic_jvm.cz.cvut.fel.ida.logic.constructs.example
 
         self.builder = namespace.TemplateBuilder(settings.settings)
 
@@ -32,8 +34,13 @@ class JavaFactory:
         self.predicate_factory = get_field(self.builder, "predicateFactory")
         self.weight_factory = get_field(self.builder, "weightFactory")
 
-        self.unit_weight = get_neuralogic().cz.cvut.fel.ida.algebra.weights.Weight.unitWeight
+        self.predicate_metadata = neuralogic_jvm.cz.cvut.fel.ida.logic.constructs.template.metadata.PredicateMetadata
+        self.rule_metadata = neuralogic_jvm.cz.cvut.fel.ida.logic.constructs.template.metadata.RuleMetadata
+
+        self.unit_weight = neuralogic_jvm.cz.cvut.fel.ida.algebra.weights.Weight.unitWeight
         self.variable_factory = self.get_variable_factory()
+
+        self.list_converter = ListConverter()
 
     @staticmethod
     def get_variable_factory():
@@ -57,13 +64,13 @@ class JavaFactory:
     def atom_to_clause(self, atom):
         namespace = get_neuralogic().cz.cvut.fel.ida.logic
 
-        terms = ListConverter().convert(
+        terms = self.list_converter.convert(
             [self.get_term(term, self.variable_factory) for term in atom.terms], get_gateway()._gateway_client
         )
 
         predicate_name = f"@{atom.predicate.name}" if atom.predicate.special else atom.predicate.name
         literal = namespace.Literal(predicate_name, atom.negated, terms)
-        return namespace.Clause(ListConverter().convert([literal], get_gateway()._gateway_client))
+        return namespace.Clause(self.list_converter.convert([literal], get_gateway()._gateway_client))
 
     def get_generic_atom(self, atom_class, atom, variable_factory, default_weight=None, is_example=False):
         predicate = self.get_predicate(atom.predicate)
@@ -74,7 +81,7 @@ class JavaFactory:
         elif default_weight is not None:
             weight = self.get_weight(default_weight, None, True)
 
-        term_list = ListConverter().convert(
+        term_list = self.list_converter.convert(
             [self.get_term(term, variable_factory) for term in atom.terms], get_gateway()._gateway_client
         )
 
@@ -83,7 +90,7 @@ class JavaFactory:
 
         return java_atom
 
-    def get_metadata(self, metadata):
+    def get_metadata(self, metadata, metadata_class):
         if metadata is None:
             return None
 
@@ -107,8 +114,7 @@ class JavaFactory:
         if metadata.learnable is not None:
             map.put("learnable", self.value_namespace.StringValue(str(metadata.learnable).lower()))
 
-        namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.metadata
-        return namespace.RuleMetadata(get_field(self.builder, "settings"), map)
+        return metadata_class(get_field(self.builder, "settings"), map)
 
     def get_query(self, query):
         variable_factory = self.get_variable_factory()
@@ -125,7 +131,7 @@ class JavaFactory:
         gateway_client = get_gateway()._gateway_client
 
         conjunctions = []
-        rules = ListConverter().convert([], gateway_client)
+        rules = self.list_converter.convert([], gateway_client)
         label_conjunction = None
 
         variabel_factory = self.get_variable_factory()
@@ -139,7 +145,7 @@ class JavaFactory:
             conjunctions.append(self.get_conjunction(example.body, variabel_factory, is_example=True))
 
         lifted_example = self.example_namespace.LiftedExample(
-            ListConverter().convert(conjunctions, gateway_client), rules
+            self.list_converter.convert(conjunctions, gateway_client), rules
         )
         return label_conjunction, lifted_example
 
@@ -147,12 +153,14 @@ class JavaFactory:
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs
         valued_facts = [self.get_valued_fact(atom, variable_factory, default_weight, is_example) for atom in atoms]
 
-        return namespace.Conjunction(ListConverter().convert(valued_facts, get_gateway()._gateway_client))
+        return namespace.Conjunction(self.list_converter.convert(valued_facts, get_gateway()._gateway_client))
 
     def get_predicate_metadata_pair(self, predicate_metadata):
         namespace = get_neuralogic().cz.cvut.fel.ida.utils.generic
+
         return namespace.Pair(
-            self.get_predicate(predicate_metadata.predicate), self.get_metadata(predicate_metadata.metadata)
+            self.get_predicate(predicate_metadata.predicate),
+            self.get_metadata(predicate_metadata.metadata, self.predicate_metadata),
         )
 
     def get_valued_fact(self, atom, variable_factory, default_weight=None, is_example=False):
@@ -182,7 +190,7 @@ class JavaFactory:
             java_rule.setWeight(weight)
 
         body_atoms = [self.get_atom(atom, variable_factory) for atom in rule.body]
-        body_atom_list = ListConverter().convert(body_atoms, get_gateway()._gateway_client)
+        body_atom_list = self.list_converter.convert(body_atoms, get_gateway()._gateway_client)
 
         java_rule.setHead(self.namespace.HeadAtom(head_atom))
         java_rule.setBody(body_atom_list)
@@ -190,7 +198,7 @@ class JavaFactory:
         offset = None  # TODO: Implement
 
         java_rule.setOffset(offset)
-        java_rule.setMetadata(self.get_metadata(rule.metadata))
+        java_rule.setMetadata(self.get_metadata(rule.metadata, self.rule_metadata))
 
         return java_rule
 
@@ -231,25 +239,25 @@ class JavaFactory:
             if len(weight) == 0:
                 raise NotImplementedError
             if isinstance(weight[0], (int, float, np.number)):
-                vector = ListConverter().convert([float(w) for w in weight], get_gateway()._gateway_client)
+                vector = self.list_converter.convert([float(w) for w in weight], get_gateway()._gateway_client)
                 value = self.value_namespace.VectorValue(vector)
             elif isinstance(weight[0], (Sequence, numpy.ndarray)):
                 matrix = []
 
                 if len(weight) == 1:
-                    vector = ListConverter().convert([float(w) for w in weight[0]], get_gateway()._gateway_client)
+                    vector = self.list_converter.convert([float(w) for w in weight[0]], get_gateway()._gateway_client)
                     value = self.value_namespace.VectorValue(vector)
                     set_field(value, "rowOrientation", True)
                 else:
                     try:
                         for weights in weight:
                             values = [float(w) for w in weights]
-                            matrix.append(ListConverter().convert(values, get_gateway()._gateway_client))
+                            matrix.append(self.list_converter.convert(values, get_gateway()._gateway_client))
 
-                        matrix = ListConverter().convert(matrix, get_gateway()._gateway_client)
+                        matrix = self.list_converter.convert(matrix, get_gateway()._gateway_client)
                         value = self.value_namespace.MatrixValue(matrix)
                     except TypeError:
-                        vector = ListConverter().convert([float(w) for w in weight], get_gateway()._gateway_client)
+                        vector = self.list_converter.convert([float(w) for w in weight], get_gateway()._gateway_client)
                         value = self.value_namespace.VectorValue(vector)
             else:
                 raise NotImplementedError
