@@ -1,10 +1,58 @@
-from typing import Dict, Any, List
+from typing import List
 import itertools
 
 import pytest
 
 from neuralogic.nn import get_evaluator
-from neuralogic.core import Backend, Settings, Optimizer, Dataset, R, V, Template
+from neuralogic.core import Backend, Settings, Optimizer, Dataset, R, V, Template, Activation
+
+
+@pytest.mark.parametrize(
+    "n,expected",
+    [
+        (2, [0, 1, 1, 0]),  # Number of inputs and expected output
+        (3, [0, 1, 1, 0, 1, 0, 0, 1]),
+        (4, [0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0]),
+        (5, [0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1]),
+    ],
+)
+def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
+    max_number_of_max_vars = 20
+
+    dataset = Dataset()
+    template = Template()
+
+    template += (R._next(a, b) for a, b in zip(range(max_number_of_max_vars - 1), range(1, max_number_of_max_vars)))
+    template += R.xor_at(0) <= R.val_at(0)
+    template += R.xor_at(V.Y)["a":1, 8] <= (R.val_at(V.Y)["b":8, 1], R.xor_at(V.X)["c":8, 1], R._next(V.X, V.Y))
+
+    dataset.add_examples(
+        [
+            R.xor_at(1)[0] <= (R.val_at(0)[0], R.val_at(1)[0]),
+            R.xor_at(1)[1] <= (R.val_at(0)[0], R.val_at(1)[1]),
+            R.xor_at(1)[1] <= (R.val_at(0)[1], R.val_at(1)[0]),
+            R.xor_at(1)[0] <= (R.val_at(0)[1], R.val_at(1)[1]),
+        ]
+    )
+
+    settings = Settings(epochs=3000, rule_neuron_activation=Activation.RELU, relation_neuron_activation=Activation.RELU)
+
+    evaluator = get_evaluator(template, Backend.JAVA, settings)
+    evaluator.train(dataset, generator=False)
+
+    # build the dataset for n inputs
+    products = itertools.product([0, 1], repeat=n)
+    n_dataset = Dataset()
+
+    for example in products:
+        xor = bool(example[0])
+        for x in example[1:]:
+            xor = xor != bool(x)
+
+        n_dataset.add_example(R.xor_at(n - 1)[0] <= (R.val_at(i)[int(val)] for i, val in enumerate(example)))
+
+    for expected_value, (_, predicted) in zip(expected, evaluator.test(n_dataset)):
+        assert expected_value == predicted
 
 
 @pytest.mark.parametrize(
