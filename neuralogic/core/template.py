@@ -3,7 +3,7 @@ from py4j.java_gateway import set_field
 from neuralogic import get_neuralogic, get_gateway
 from py4j.java_collections import ListConverter
 
-from typing import Union, List, Optional, Set, Dict, Any, Callable
+from typing import Union, List, Optional, Set, Dict, Any, Callable, Iterable
 
 from neuralogic.core.builder import Builder, DatasetBuilder
 from neuralogic.core.enums import Backend
@@ -137,3 +137,10 @@ class Template:
 
     def __str__(self) -> str:
         return "\n".join(str(r) for r in self.template)
+
+    def __iadd__(self, other) -> "Template":
+        if isinstance(other, Iterable):
+            self.template.extend(other)
+        else:
+            self.template.append(other)
+        return self
