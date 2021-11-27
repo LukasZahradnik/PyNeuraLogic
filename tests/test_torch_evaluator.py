@@ -20,7 +20,7 @@ import pytest
 @pytest.mark.parametrize(
     "template, dataset, expected_results",
     [
-        (*XOR(), [0.0, 0.881, 0.883, -0.013]),
+        (*XOR(), [0.0, 0.831, 0.833, 0.955]),
         (*XOR_Vectorized(), [0.0, 0.732, 0.707, -0.068]),
         (
             *Trains(),
@@ -64,7 +64,6 @@ def test_evaluator_run_on_files(template: Template, dataset: Dataset, expected_r
     for _, predicted in evaluator.test(built_dataset):
         results.append(round(predicted, 3))
 
-    print(results)
     assert len(results) == len(expected_results)
 
     for result, expected_result in zip(results, expected_results):
@@ -74,7 +73,7 @@ def test_evaluator_run_on_files(template: Template, dataset: Dataset, expected_r
 @pytest.mark.parametrize(
     "template, dataset, expected_results",
     [
-        (naive_xor.template, naive_xor.dataset, [0.0, 0.661, 0.647, 0.711]),
+        (naive_xor.template, naive_xor.dataset, [0.0, 0.677, 0.631, 0.718]),
         (vectorized_xor.template, vectorized_xor.dataset, [0.0, 0.883, 0.881, -0.021]),
         (horses.template, horses.dataset, [0.908, -0.0]),
         (

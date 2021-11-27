@@ -20,7 +20,7 @@ import pytest
 @pytest.mark.parametrize(
     "template, dataset, expected_results",
     [
-        (*XOR(), [0.0, 0.667, 0.648, 0.709]),
+        (*XOR(), [0.0, 0.85, 0.77, 0.923]),
         (*XOR_Vectorized(), [0.0, 0.598, 0.545, 0.4]),
         (
             *Trains(),
