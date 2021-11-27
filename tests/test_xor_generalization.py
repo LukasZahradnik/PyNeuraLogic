@@ -35,7 +35,9 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
         ]
     )
 
-    settings = Settings(epochs=3000, rule_neuron_activation=Activation.RELU, relation_neuron_activation=Activation.RELU)
+    settings = Settings(
+        epochs=3000, rule_neuron_activation=Activation.RELU, relation_neuron_activation=Activation.IDENTITY
+    )
 
     evaluator = get_evaluator(template, Backend.JAVA, settings)
     evaluator.train(dataset, generator=False)
