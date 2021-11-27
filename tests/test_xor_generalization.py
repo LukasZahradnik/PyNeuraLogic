@@ -36,7 +36,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
     )
 
     settings = Settings(
-        epochs=3000, rule_neuron_activation=Activation.RELU, relation_neuron_activation=Activation.IDENTITY
+        epochs=5000, rule_neuron_activation=Activation.TANH, relation_neuron_activation=Activation.IDENTITY
     )
 
     evaluator = get_evaluator(template, Backend.JAVA, settings)
@@ -47,10 +47,6 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
     n_dataset = Dataset()
 
     for example in products:
-        xor = bool(example[0])
-        for x in example[1:]:
-            xor = xor != bool(x)
-
         n_dataset.add_example(R.xor_at(n - 1)[0] <= (R.val_at(i)[int(val)] for i, val in enumerate(example)))
 
     for expected_value, (_, predicted) in zip(expected, evaluator.test(n_dataset)):
