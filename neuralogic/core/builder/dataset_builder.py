@@ -59,10 +59,12 @@ class DatasetBuilder:
         logic_samples = []
         namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.example
 
+        one = get_neuralogic().cz.cvut.fel.ida.algebra.values.ScalarValue(1.0)
+
         for example in examples:
             label, lifted_example = self.java_factory.get_lifted_example(example)
 
-            value = None
+            value = one
             label_fact = None if label is None else get_field(label, "facts")
             label_size = 0 if label is None else label_fact.size()
 
@@ -70,7 +72,7 @@ class DatasetBuilder:
                 query_atom = examples_builder.createQueryAtom(str(self.counter), None, lifted_example)
             elif label_size == 1:
                 if label_fact.get(0).getValue() is None:
-                    literal_string = get_field(label[0], "literal").toString()
+                    literal_string = get_field(label_fact.get(0), "literal").toString()
                     query_atom = examples_builder.createQueryAtom(literal_string, label_fact.get(0), lifted_example)
                 else:
                     value = label_fact.get(0).getValue()
