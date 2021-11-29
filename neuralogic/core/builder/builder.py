@@ -5,7 +5,7 @@ from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
 
 from typing import List, Optional
-from py4j.java_gateway import get_field
+from py4j.java_gateway import get_field, set_field
 
 
 def stream_to_list(stream) -> List:
@@ -32,26 +32,29 @@ class Builder:
         return template
 
     def from_sources(self, parsed_template, sources: Sources, backend: Backend):
+        source_pipeline = self.example_builder.buildPipeline(parsed_template, sources.sources)
+        source_pipeline.execute(None if sources is None else sources.sources)
+        java_model = source_pipeline.get()
+
+        logic_samples = get_field(java_model, "s")
+        logic_samples = logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
+
         if backend == Backend.JAVA:
-            source_pipeline = self.example_builder.buildPipeline(parsed_template, sources.sources)
-            source_pipeline.execute(None if sources is None else sources.sources)
-            java_model = source_pipeline.get()
-
-            logic_samples = get_field(java_model, "s")
-            return logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
-
-        return Builder.build(self.example_builder.buildPipeline(parsed_template, sources.sources), sources)
+            return logic_samples
+        return Builder.build(logic_samples)
 
     def from_logic_samples(self, parsed_template, logic_samples, backend: Backend):
+        source_pipeline = self.example_builder.buildPipeline(parsed_template, logic_samples)
+        source_pipeline.execute(None)
+        java_model = source_pipeline.get()
+
+        logic_samples = get_field(java_model, "s")
+        logic_samples = logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
+
         if backend == Backend.JAVA:
-            source_pipeline = self.example_builder.buildPipeline(parsed_template, logic_samples)
-            source_pipeline.execute(None)
-            java_model = source_pipeline.get()
+            return logic_samples
 
-            logic_samples = get_field(java_model, "s")
-            return logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
-
-        return Builder.build(self.example_builder.buildPipeline(parsed_template, logic_samples), None)
+        return Builder.build(logic_samples)
 
     def build_model(self, parsed_template, backend: Backend, settings: SettingsProxy):
         namespace = get_neuralogic().cz.cvut.fel.ida.neural.networks.computation.training
@@ -80,12 +83,10 @@ class Builder:
         return builder
 
     @staticmethod
-    def build(source_pipeline, sources: Optional[Sources]):
-        source_pipeline.execute(None if sources is None else sources.sources)
-        java_model = source_pipeline.get()
-
-        logic_samples = get_field(java_model, "s")
+    def build(samples):
         serializer = get_neuralogic().cz.cvut.fel.ida.neural.networks.structure.export.NeuralSerializer()
-        logic_samples = stream_to_list(logic_samples)
 
-        return [Sample(serializer.serialize(x), x) for x in logic_samples]
+        super_detailed_format = get_neuralogic().cz.cvut.fel.ida.setup.Settings.superDetailedNumberFormat
+        set_field(serializer, "numberFormat", super_detailed_format)
+
+        return [Sample(serializer.serialize(sample), sample) for sample in samples]
