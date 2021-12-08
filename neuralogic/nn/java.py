@@ -100,7 +100,7 @@ class NeuraLogic(AbstractNeuraLogic):
             return deserialized_results, len(samples)
 
         results = self.strategy.evaluateSamples(samples)
-        return [(json.loads(result[0]), json.loads(result[1])) for result in results]
+        return [(json.loads(result[0]), json.loads(result[1]), json.loads(result[2])) for result in results]
 
     def state_dict(self) -> Dict:
         weights = self.neural_model.getAllWeights()
