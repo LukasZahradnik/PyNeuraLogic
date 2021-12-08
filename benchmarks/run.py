@@ -39,6 +39,8 @@ if __name__ == "__main__":
         from pyg_benchmark import Evaluator
     if framework == "dgl":
         from dgl_benchmark import Evaluator
+    if framework == "pyneuralogic":
+        from pyneuralogic_benchmark import Evaluator
 
     cross = Evaluator.crossvalidate(args.model.lower(), dataset_folds, Path(args.out), num_node_features, steps)
 

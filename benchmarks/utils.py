@@ -47,31 +47,38 @@ class Crossval:
 
 
 class Results:
-    def __init__(self, pred=None, lab=None, loss_fcn=F.binary_cross_entropy):
+    def __init__(self, pred=None, lab=None, loss_fcn=F.binary_cross_entropy, loss=None):
         self.loss = 0
         self.accuracy = 0
 
-        if pred and lab:
+        if loss and lab and pred:
+            self.loss = sum(loss) / len(lab)
+            self.accuracy = self.acc(pred, lab, True)
+        elif pred and lab:
             for p, l in zip(pred, lab):
                 if p.ndim == 1:  # batching changes this
-                    self.loss += loss_fcn(p[0], l.double())
+                    self.loss += loss_fcn(p, l)
                 else:
                     self.loss += loss_fcn(p[0][0], l[0].double())
             self.loss /= len(lab)
             self.loss = float(self.loss)
             self.accuracy = self.acc(pred, lab)
 
-    def acc(self, output, labels):
+    def acc(self, output, labels, native=False):
         correct = 0
         for out, lab in zip(output, labels):
-            if len(out) == 1:
+            if native:
+                out_ = out
+            elif len(out) == 1:
                 out_ = out
             else:
                 out_ = out[0][0]
 
             pred = 1 if out_ > 0.5 else 0
 
-            if lab.ndim == 0:
+            if native:
+                lab_ = lab
+            elif lab.ndim == 0:
                 lab_ = lab
             else:
                 lab_ = lab[0]
