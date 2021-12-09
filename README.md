@@ -63,9 +63,20 @@ Please let us know if you need some guidance or would like to cooperate!
 [comment]: <> (PyNeuraLogic allows users to encode machine learning problems via parameterized, rule-based constructs. Said constructs are based on a custom declarative language that follows a logic programming paradigm.)
 
 
+### How well does it perform?
+
+Running a few experiments shows that PyNeuraLogic can outperform popular GNN frameworks in regards to time performance while achieving nearly the same accuracy. Results for a few experiments can be seen in the chart below.
+
+Note that PyNeuraLogic requires some time to startup (e.g., translate logic programs into neural networks). In the experiments below, the PyNeuraLogic required to startup, on average, _20.9s (+- 0.85s)_ for GCN, _22.5s (+- 0.49s)_ for GraphSAGE, and _58.48s (+- 1.84s)_ for GIN. The startup is done only once before the training and is compensated for in a few epochs due to PyNeuraLogic higher speed performance.
+
+  
 <p align="center">
-<img height="420px" src="https://github.com/LukasZahradnik/PyNeuraLogic/blob/benchmarks/docs/_static/benchmark.svg" alt="Benchmark of PyNeuraLogic" title="Benchmark of PyNeuraLogic"/>
+<img src="https://github.com/LukasZahradnik/PyNeuraLogic/blob/benchmarks/docs/_static/benchmark.svg" alt="Benchmark of PyNeuraLogic" title="Benchmark of PyNeuraLogic"/>
 </p>
+
+<sub>
+  Benchmarks in the plot above were run on the NCI 786_0 dataset on the CPU using scripts that you can find <a href="https://github.com/LukasZahradnik/PyNeuraLogic/tree/master/benchmarks" target="_blank">here</a>. Models were trained in 100 epochs using Adam optimizer with a learning rate of 1.5e-5.
+</sub>
 
 ## Getting started
 
