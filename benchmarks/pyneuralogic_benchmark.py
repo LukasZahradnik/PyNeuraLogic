@@ -3,7 +3,6 @@ import time
 from pathlib import Path
 from typing import Optional
 
-
 from neuralogic.core import Template, Backend, Settings, ErrorFunction, Initializer
 from utils import Results, to_json, export_fold, ResultList, Crossval
 
@@ -121,7 +120,6 @@ class Evaluator:
 
             test = to_json(ResultList(test_results))
             export_fold(test, outpath / "test")
-
         return Crossval(train_results, val_results, test_results, times)
 
     @staticmethod
@@ -130,4 +128,8 @@ class Evaluator:
 
         if string == "gcn":
             return Template(template_file=os.path.join(dirname, "templates", "gcn.txt"))
+        if string == "gsage":
+            return Template(template_file=os.path.join(dirname, "templates", "gsage.txt"))
+        if string == "gin":
+            return Template(template_file=os.path.join(dirname, "templates", "gin.txt"))
         raise NotImplementedError
