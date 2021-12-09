@@ -51,7 +51,7 @@ class JavaEvaluator(AbstractEvaluator):
         if generator:
             return _train()
 
-        results, total_len = self.neuralogic_model(None, True)
+        results, total_len = self.neuralogic_model(None, True, epochs=epochs)
         if dataset is not None:
             self.reset_dataset(old_dataset)
 

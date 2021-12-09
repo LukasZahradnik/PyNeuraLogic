@@ -85,7 +85,7 @@ class NeuraLogic(AbstractNeuraLogic):
             if self.do_train:
                 if auto_backprop:
                     result = self.strategy.learnSample(samples)
-                    return (json.loads(result[0]), json.loads(result[1]), json.loads(result[2])), 1
+                    return json.loads(result), 1
             result = self.strategy.evaluateSample(samples)
             return Loss(result)
 
