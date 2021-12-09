@@ -3,72 +3,96 @@
 
 <svg
    width="210mm"
-   height="297mm"
-   viewBox="0 0 210 297"
+   height="170mm"
+   viewBox="0 0 210 170"
    version="1.1"
    id="svg5"
+   inkscape:version="1.1.1 (eb90963e84, 2021-10-02)"
+   sodipodi:docname="benchmark.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1.3279029"
+     inkscape:cx="278.63483"
+     inkscape:cy="426.61252"
+     inkscape:window-width="2488"
+     inkscape:window-height="1529"
+     inkscape:window-x="72"
+     inkscape:window-y="34"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     height="296mm" />
   <defs
      id="defs2">
     <rect
-       x="-60.044194"
+       x="-60.044193"
        y="-15.860934"
-       width="260.21144"
+       width="260.21143"
        height="105.8008"
        id="rect26071" />
     <rect
-       x="255.10212"
-       y="474.78252"
-       width="328.22895"
+       x="255.10213"
+       y="474.78253"
+       width="328.22894"
        height="126.7137"
        id="rect14449" />
     <style
        type="text/css"
        id="style826">*{stroke-linecap:butt;stroke-linejoin:round;}</style>
     <path
-       d="M 0 0  L 0 3.5  "
+       d="M 0,0 V 3.5"
        id="mff964f95e2"
-       style="stroke:#000000;stroke-width:0.8;" />
+       style="stroke:#000000;stroke-width:0.8" />
     <path
-       d="M 678 2272  L 4684 2272  L 4684 1741  L 678 1741  L 678 2272  z "
+       d="M 678,2272 H 4684 V 1741 H 678 Z"
        id="DejaVuSans-2212"
        transform="scale(0.015625)" />
     <path
-       d="M 2034 4250  Q 1547 4250 1301 3770  Q 1056 3291 1056 2328  Q 1056 1369 1301 889  Q 1547 409 2034 409  Q 2525 409 2770 889  Q 3016 1369 3016 2328  Q 3016 3291 2770 3770  Q 2525 4250 2034 4250  z M 2034 4750  Q 2819 4750 3233 4129  Q 3647 3509 3647 2328  Q 3647 1150 3233 529  Q 2819 -91 2034 -91  Q 1250 -91 836 529  Q 422 1150 422 2328  Q 422 3509 836 4129  Q 1250 4750 2034 4750  z "
+       d="m 2034,4250 q -487,0 -733,-480 -245,-479 -245,-1442 0,-959 245,-1439 246,-480 733,-480 491,0 736,480 246,480 246,1439 0,963 -246,1442 -245,480 -736,480 z m 0,500 q 785,0 1199,-621 414,-620 414,-1801 0,-1178 -414,-1799 -414,-620 -1199,-620 -784,0 -1198,620 -414,621 -414,1799 0,1181 414,1801 414,621 1198,621 z"
        id="DejaVuSans-30"
        transform="scale(0.015625)" />
     <path
-       d="M 684 794  L 1344 794  L 1344 0  L 684 0  L 684 794  z "
+       d="m 684,794 h 660 V 0 H 684 Z"
        id="DejaVuSans-2e"
        transform="scale(0.015625)" />
     <path
-       d="M 2419 4116  L 825 1625  L 2419 1625  L 2419 4116  z M 2253 4666  L 3047 4666  L 3047 1625  L 3713 1625  L 3713 1100  L 3047 1100  L 3047 0  L 2419 0  L 2419 1100  L 313 1100  L 313 1709  L 2253 4666  z "
+       d="M 2419,4116 825,1625 h 1594 z m -166,550 h 794 V 1625 h 666 V 1100 H 3047 V 0 H 2419 V 1100 H 313 v 609 z"
        id="DejaVuSans-34"
        transform="scale(0.015625)" />
     <path
-       d="M 1228 531  L 3431 531  L 3431 0  L 469 0  L 469 531  Q 828 903 1448 1529  Q 2069 2156 2228 2338  Q 2531 2678 2651 2914  Q 2772 3150 2772 3378  Q 2772 3750 2511 3984  Q 2250 4219 1831 4219  Q 1534 4219 1204 4116  Q 875 4013 500 3803  L 500 4441  Q 881 4594 1212 4672  Q 1544 4750 1819 4750  Q 2544 4750 2975 4387  Q 3406 4025 3406 3419  Q 3406 3131 3298 2873  Q 3191 2616 2906 2266  Q 2828 2175 2409 1742  Q 1991 1309 1228 531  z "
+       d="M 1228,531 H 3431 V 0 H 469 v 531 q 359,372 979,998 621,627 780,809 303,340 423,576 121,236 121,464 0,372 -261,606 -261,235 -680,235 -297,0 -627,-103 -329,-103 -704,-313 v 638 q 381,153 712,231 332,78 607,78 725,0 1156,-363 431,-362 431,-968 0,-288 -108,-546 -107,-257 -392,-607 -78,-91 -497,-524 Q 1991,1309 1228,531 Z"
        id="DejaVuSans-32"
        transform="scale(0.015625)" />
     <path
-       d="M 2113 2584  Q 1688 2584 1439 2293  Q 1191 2003 1191 1497  Q 1191 994 1439 701  Q 1688 409 2113 409  Q 2538 409 2786 701  Q 3034 994 3034 1497  Q 3034 2003 2786 2293  Q 2538 2584 2113 2584  z M 3366 4563  L 3366 3988  Q 3128 4100 2886 4159  Q 2644 4219 2406 4219  Q 1781 4219 1451 3797  Q 1122 3375 1075 2522  Q 1259 2794 1537 2939  Q 1816 3084 2150 3084  Q 2853 3084 3261 2657  Q 3669 2231 3669 1497  Q 3669 778 3244 343  Q 2819 -91 2113 -91  Q 1303 -91 875 529  Q 447 1150 447 2328  Q 447 3434 972 4092  Q 1497 4750 2381 4750  Q 2619 4750 2861 4703  Q 3103 4656 3366 4563  z "
+       d="m 2113,2584 q -425,0 -674,-291 -248,-290 -248,-796 0,-503 248,-796 249,-292 674,-292 425,0 673,292 248,293 248,796 0,506 -248,796 -248,291 -673,291 z m 1253,1979 v -575 q -238,112 -480,171 -242,60 -480,60 -625,0 -955,-422 -329,-422 -376,-1275 184,272 462,417 279,145 613,145 703,0 1111,-427 408,-426 408,-1160 0,-719 -425,-1154 -425,-434 -1131,-434 -810,0 -1238,620 -428,621 -428,1799 0,1106 525,1764 525,658 1409,658 238,0 480,-47 242,-47 505,-140 z"
        id="DejaVuSans-36"
        transform="scale(0.015625)" />
     <path
-       d="M 2034 2216  Q 1584 2216 1326 1975  Q 1069 1734 1069 1313  Q 1069 891 1326 650  Q 1584 409 2034 409  Q 2484 409 2743 651  Q 3003 894 3003 1313  Q 3003 1734 2745 1975  Q 2488 2216 2034 2216  z M 1403 2484  Q 997 2584 770 2862  Q 544 3141 544 3541  Q 544 4100 942 4425  Q 1341 4750 2034 4750  Q 2731 4750 3128 4425  Q 3525 4100 3525 3541  Q 3525 3141 3298 2862  Q 3072 2584 2669 2484  Q 3125 2378 3379 2068  Q 3634 1759 3634 1313  Q 3634 634 3220 271  Q 2806 -91 2034 -91  Q 1263 -91 848 271  Q 434 634 434 1313  Q 434 1759 690 2068  Q 947 2378 1403 2484  z M 1172 3481  Q 1172 3119 1398 2916  Q 1625 2713 2034 2713  Q 2441 2713 2670 2916  Q 2900 3119 2900 3481  Q 2900 3844 2670 4047  Q 2441 4250 2034 4250  Q 1625 4250 1398 4047  Q 1172 3844 1172 3481  z "
+       d="m 2034,2216 q -450,0 -708,-241 -257,-241 -257,-662 0,-422 257,-663 258,-241 708,-241 450,0 709,242 260,243 260,662 0,421 -258,662 -257,241 -711,241 z m -631,268 q -406,100 -633,378 -226,279 -226,679 0,559 398,884 399,325 1092,325 697,0 1094,-325 397,-325 397,-884 0,-400 -227,-679 -226,-278 -629,-378 456,-106 710,-416 255,-309 255,-755 Q 3634,634 3220,271 2806,-91 2034,-91 1263,-91 848,271 434,634 434,1313 q 0,446 256,755 257,310 713,416 z m -231,997 q 0,-362 226,-565 227,-203 636,-203 407,0 636,203 230,203 230,565 0,363 -230,566 -229,203 -636,203 -409,0 -636,-203 -226,-203 -226,-566 z"
        id="DejaVuSans-38"
        transform="scale(0.015625)" />
     <path
-       d="M 794 531  L 1825 531  L 1825 4091  L 703 3866  L 703 4441  L 1819 4666  L 2450 4666  L 2450 531  L 3481 531  L 3481 0  L 794 0  L 794 531  z "
+       d="M 794,531 H 1825 V 4091 L 703,3866 v 575 l 1116,225 h 631 V 531 H 3481 V 0 H 794 Z"
        id="DejaVuSans-31"
        transform="scale(0.015625)" />
     <path
-       d="M 0 0  L -3.5 0  "
+       d="M 0,0 H -3.5"
        id="m7d083d858a"
-       style="stroke:#000000;stroke-width:0.8;" />
+       style="stroke:#000000;stroke-width:0.8" />
     <path
-       d="M 691 4666  L 3169 4666  L 3169 4134  L 1269 4134  L 1269 2991  Q 1406 3038 1543 3061  Q 1681 3084 1819 3084  Q 2600 3084 3056 2656  Q 3513 2228 3513 1497  Q 3513 744 3044 326  Q 2575 -91 1722 -91  Q 1428 -91 1123 -41  Q 819 9 494 109  L 494 744  Q 775 591 1075 516  Q 1375 441 1709 441  Q 2250 441 2565 725  Q 2881 1009 2881 1497  Q 2881 1984 2565 2268  Q 2250 2553 1709 2553  Q 1456 2553 1204 2497  Q 953 2441 691 2322  L 691 4666  z "
+       d="M 691,4666 H 3169 V 4134 H 1269 V 2991 q 137,47 274,70 138,23 276,23 781,0 1237,-428 457,-428 457,-1159 Q 3513,744 3044,326 2575,-91 1722,-91 1428,-91 1123,-41 819,9 494,109 v 635 q 281,-153 581,-228 300,-75 634,-75 541,0 856,284 316,284 316,772 0,487 -316,771 -315,285 -856,285 -253,0 -505,-56 -251,-56 -513,-175 z"
        id="DejaVuSans-35"
        transform="scale(0.015625)" />
     <clipPath
@@ -76,71 +100,74 @@
       <rect
          height="266.112"
          width="357.12"
-         x="57.6"
+         x="57.599998"
          y="41.472"
          id="rect1102" />
     </clipPath>
     <rect
-       x="255.10212"
-       y="474.78252"
-       width="328.22895"
+       x="255.10213"
+       y="474.78253"
+       width="328.22894"
        height="126.7137"
        id="rect28584" />
     <rect
-       x="255.10212"
-       y="474.78252"
-       width="328.22895"
+       x="255.10213"
+       y="474.78253"
+       width="328.22894"
        height="126.7137"
        id="rect32386" />
     <rect
-       x="255.10212"
-       y="474.78252"
-       width="328.22895"
+       x="255.10213"
+       y="474.78253"
+       width="328.22894"
        height="126.7137"
        id="rect32400" />
     <rect
-       x="255.10212"
-       y="474.78252"
-       width="328.22895"
+       x="255.10213"
+       y="474.78253"
+       width="328.22894"
        height="126.7137"
        id="rect32402" />
     <rect
-       x="255.10212"
-       y="474.78252"
-       width="328.22895"
+       x="255.10213"
+       y="474.78253"
+       width="328.22894"
        height="126.7137"
        id="rect39977" />
     <rect
-       x="255.10212"
-       y="474.78252"
-       width="328.22895"
+       x="255.10213"
+       y="474.78253"
+       width="328.22894"
        height="126.7137"
        id="rect47314" />
     <rect
-       x="255.10212"
-       y="474.78252"
+       x="255.10213"
+       y="474.78253"
        width="582.8952"
-       height="169.00596"
+       height="169.00597"
        id="rect51877" />
     <rect
-       x="255.10212"
-       y="474.78252"
+       x="255.10213"
+       y="474.78253"
        width="582.8952"
-       height="169.00596"
+       height="169.00597"
        id="rect71096" />
     <rect
-       x="255.10212"
-       y="474.78252"
+       x="255.10213"
+       y="474.78253"
        width="582.8952"
-       height="169.00596"
+       height="169.00597"
        id="rect81845" />
   </defs>
   <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
      id="layer1">
     <path
        id="rect1361"
        style="fill:#ffffff;stroke:#999999;stroke-width:0.7;stroke-linecap:round;stroke-miterlimit:2.5;paint-order:stroke fill markers"
-       d="M 6.8151324,4.7915673 H 204.21525 c 0.86575,0 1.56273,0.6969772 1.56273,1.5627291 V 164.60944 c 0,0.86575 -0.69698,1.56273 -1.56273,1.56273 H 6.8151324 c -0.865752,0 -1.5627291,-0.69698 -1.5627291,-1.56273 V 6.3542964 c 0,-0.8657519 0.6969771,-1.5627291 1.5627291,-1.5627291 z" />
+       d="M 6.8151324,4.7915673 H 204.21525 c 0.86575,0 1.56273,0.6969772 1.56273,1.5627291 V 164.60944 c 0,0.86575 -0.69698,1.56273 -1.56273,1.56273 H 6.8151324 c -0.865752,0 -1.5627291,-0.69698 -1.5627291,-1.56273 V 6.3542964 c 0,-0.8657519 0.6969771,-1.5627291 1.5627291,-1.5627291 z"
+       sodipodi:nodetypes="sssssssss" />
     <g
        id="patch_1"
        transform="matrix(0.35277778,0,0,0.35277778,25.822691,20.393958)">
@@ -153,7 +180,7 @@
        xml:space="preserve"
        transform="scale(0.26458333)"
        id="text26069"
-       style="line-height:1.25;font-family:'CMU Classical Serif';font-size:40px;-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect26071)" />
+       style="font-size:40px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect26071)" />
     <g
        id="patch_2"
        transform="matrix(0.35277778,0,0,0.35277778,24.764358,25.156458)">
@@ -522,9 +549,9 @@
        style="font-size:21.3333px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect14449)"><tspan
          x="255.10156"
          y="494.51651"
-         id="tspan83851"><tspan
+         id="tspan84034"><tspan
            style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-           id="tspan83849">GCN</tspan></tspan></text>
+           id="tspan84032">GCN</tspan></tspan></text>
     <g
        id="g44845"
        transform="translate(-9.1605544,19.02026)">
@@ -541,9 +568,9 @@
          style="font-size:21.3333px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect28584)"><tspan
            x="255.10156"
            y="494.51651"
-           id="tspan83855"><tspan
+           id="tspan84038"><tspan
              style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-             id="tspan83853">PyNeuraLogic</tspan></tspan></text>
+             id="tspan84036">PyNeuraLogic</tspan></tspan></text>
     </g>
     <text
        xml:space="preserve"
@@ -552,9 +579,9 @@
        style="font-size:14.6667px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect47314)"><tspan
          x="255.10156"
          y="488.3499"
-         id="tspan83859"><tspan
+         id="tspan84042"><tspan
            style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-           id="tspan83857">time (s)</tspan></tspan></text>
+           id="tspan84040">time (s)</tspan></tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,-39.084508,-112.14998)"
@@ -564,14 +591,14 @@
        y="0"><tspan
          x="267.19608"
          y="494.51651"
-         id="tspan83863"><tspan
+         id="tspan84046"><tspan
            style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-           id="tspan83861">The average time per epoch of different models and </tspan></tspan><tspan
+           id="tspan84044">The average time per epoch of different models and </tspan></tspan><tspan
          x="417.87813"
          y="522.04147"
-         id="tspan83867"><tspan
+         id="tspan84050"><tspan
            style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-           id="tspan83865">frameworks comparison</tspan></tspan></text>
+           id="tspan84048">frameworks comparison</tspan></tspan></text>
     <g
        id="g83156"
        transform="translate(-4.2333333,-1.0583333)">
@@ -594,9 +621,9 @@
              style="font-size:21.3333px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect39977)"><tspan
                x="255.10156"
                y="494.51651"
-               id="tspan83871"><tspan
+               id="tspan84054"><tspan
                  style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-                 id="tspan83869">DGL</tspan></tspan></text>
+                 id="tspan84052">DGL</tspan></tspan></text>
         </g>
       </g>
       <text
@@ -608,9 +635,9 @@
          y="0"><tspan
            x="255.10156"
            y="485.8832"
-           id="tspan83875"><tspan
+           id="tspan84058"><tspan
              style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-             id="tspan83873">0.6.1</tspan></tspan></text>
+             id="tspan84056">0.6.1</tspan></tspan></text>
     </g>
     <g
        id="g83169"
@@ -631,9 +658,9 @@
            style="font-size:21.3333px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect32402)"><tspan
              x="255.10156"
              y="494.51651"
-             id="tspan83879"><tspan
+             id="tspan84062"><tspan
                style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-               id="tspan83877">PyG</tspan></tspan></text>
+               id="tspan84060">PyG</tspan></tspan></text>
       </g>
       <g
          id="g83160"
@@ -647,9 +674,9 @@
            y="0"><tspan
              x="255.10156"
              y="485.8832"
-             id="tspan83883"><tspan
+             id="tspan84066"><tspan
                style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-               id="tspan83881">2.0.2</tspan></tspan></text>
+               id="tspan84064">2.0.2</tspan></tspan></text>
       </g>
     </g>
     <g
