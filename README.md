@@ -62,6 +62,11 @@ Please let us know if you need some guidance or would like to cooperate!
 
 [comment]: <> (PyNeuraLogic allows users to encode machine learning problems via parameterized, rule-based constructs. Said constructs are based on a custom declarative language that follows a logic programming paradigm.)
 
+
+<p align="center">
+<img height="420px" src="https://raw.githubusercontent.com/LukasZahradnik/PyNeuraLogic/b5ae404aa85737e504e69ca0a13793ebba68a1b7/docs/_static/benchmark.svg" alt="Benchmark of PyNeuraLogic" title="Benchmark of PyNeuraLogic"/>
+</p>
+
 ## Getting started
 
 [comment]: <> (### Supported backends)
