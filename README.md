@@ -64,7 +64,7 @@ Please let us know if you need some guidance or would like to cooperate!
 
 
 <p align="center">
-<img height="420px" src="https://raw.githubusercontent.com/LukasZahradnik/PyNeuraLogic/b5ae404aa85737e504e69ca0a13793ebba68a1b7/docs/_static/benchmark.svg" alt="Benchmark of PyNeuraLogic" title="Benchmark of PyNeuraLogic"/>
+<img height="420px" src="https://github.com/LukasZahradnik/PyNeuraLogic/blob/benchmarks/docs/_static/benchmark.svg" alt="Benchmark of PyNeuraLogic" title="Benchmark of PyNeuraLogic"/>
 </p>
 
 ## Getting started
