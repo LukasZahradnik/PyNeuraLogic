@@ -77,9 +77,7 @@ class NeuraLogic(AbstractNeuraLogic):
 
         if samples is None:
             results = self.strategy.learnSamples(epochs)
-            deserialized_results = [
-                (json.loads(result[0]), json.loads(result[1]), json.loads(result[2])) for result in results
-            ]
+            deserialized_results = json.loads(results)
 
             return deserialized_results, self.samples_len
 
@@ -93,14 +91,12 @@ class NeuraLogic(AbstractNeuraLogic):
 
         if self.do_train:
             results = self.strategy.learnSamples(samples, epochs)
-            deserialized_results = [
-                (json.loads(result[0]), json.loads(result[1]), json.loads(result[2])) for result in results
-            ]
+            deserialized_results = json.loads(results)
 
             return deserialized_results, len(samples)
 
         results = self.strategy.evaluateSamples(samples)
-        return [(json.loads(result[0]), json.loads(result[1]), json.loads(result[2])) for result in results]
+        return json.loads(results)
 
     def state_dict(self) -> Dict:
         weights = self.neural_model.getAllWeights()

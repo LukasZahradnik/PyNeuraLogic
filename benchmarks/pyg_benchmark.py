@@ -37,8 +37,8 @@ class NetGCN(torch.nn.Module):
 class NetGraphSage(torch.nn.Module):
     def __init__(self, num_features: int, dim: int = 10):
         super(NetGraphSage, self).__init__()
-        self.conv1 = SAGEConv(num_features, dim, normalize=False, concat=True, bias=False)
-        self.conv2 = SAGEConv(dim, dim, normalize=False, concat=True, bias=False)
+        self.conv1 = SAGEConv(num_features, dim, normalize=False, bias=False)
+        self.conv2 = SAGEConv(dim, dim, normalize=False, bias=False)
 
         self.fc1 = Linear(dim, 1, bias=False)
 
