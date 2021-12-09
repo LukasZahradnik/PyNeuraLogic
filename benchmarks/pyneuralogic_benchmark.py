@@ -1,8 +1,12 @@
 import os
 import time
+
+import gc
+
 from pathlib import Path
 from typing import Optional
 
+from neuralogic import get_gateway
 from neuralogic.core import Template, Backend, Settings, ErrorFunction, Initializer
 from utils import Results, to_json, export_fold, ResultList, Crossval
 
@@ -92,6 +96,9 @@ class Evaluator:
         times = []
 
         for train_fold, val_fold, test_fold in folds:
+            gc.collect()
+            get_gateway().jvm.System.gc()
+
             template = Evaluator.get_template(model_string)
             settings = Settings(
                 initializer=Initializer.GLOROT,
@@ -120,6 +127,9 @@ class Evaluator:
 
             test = to_json(ResultList(test_results))
             export_fold(test, outpath / "test")
+
+            gc.collect()
+            get_gateway().jvm.System.gc()
         return Crossval(train_results, val_results, test_results, times)
 
     @staticmethod
