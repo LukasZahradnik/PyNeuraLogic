@@ -1,6 +1,9 @@
 [run]
 source=neuralogic
 omit=
+    tests/
+    examples/
+    benchmarks/
     neuralogic/jar/*
     neuralogic/grammar/*
     neuralogic/utils/data/datasets/*
