@@ -5,3 +5,7 @@
 .version {
     display: none;
 }
+
+.empty-title .admonition-title {
+    display: none;
+}
