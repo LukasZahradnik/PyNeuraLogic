@@ -4,8 +4,8 @@
   
 [![PyPI version](https://badge.fury.io/py/neuralogic.svg)](https://badge.fury.io/py/neuralogic)
 [![License](https://img.shields.io/pypi/l/neuralogic)](https://badge.fury.io/py/neuralogic)
+![Tests Status](https://github.com/LukasZahradnik/PyNeuraLogic/actions/workflows/tests.yml/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/pyneuralogic/badge/?version=latest)](https://pyneuralogic.readthedocs.io/en/latest/?badge=latest)
-
 
 
 [Documentation](https://pyneuralogic.readthedocs.io/en/latest/) | [Examples](#Examples) | [Papers](https://github.com/GustikS/NeuraLogic#papers)
