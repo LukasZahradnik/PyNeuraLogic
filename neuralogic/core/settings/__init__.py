@@ -18,6 +18,7 @@ class Settings:
         initializer_uniform_scale: float = 2.0,
         rule_neuron_activation: Activation = Activation.TANH,
         relation_neuron_activation: Activation = Activation.TANH,
+        iso_value_compression: bool = True,
     ):
         self.params = locals().copy()
         self.params.pop("self")

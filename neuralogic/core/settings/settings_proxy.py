@@ -5,17 +5,18 @@ from py4j.java_gateway import set_field, get_field
 
 class SettingsProxy:
     def __init__(
-            self,
-            *,
-            optimizer: Optimizer,
-            learning_rate: float,
-            epochs: int,
-            error_function: ErrorFunction,
-            initializer: Initializer,
-            initializer_const: float,
-            initializer_uniform_scale: float,
-            rule_neuron_activation: Activation,
-            relation_neuron_activation: Activation,
+        self,
+        *,
+        optimizer: Optimizer,
+        learning_rate: float,
+        epochs: int,
+        error_function: ErrorFunction,
+        initializer: Initializer,
+        initializer_const: float,
+        initializer_uniform_scale: float,
+        rule_neuron_activation: Activation,
+        relation_neuron_activation: Activation,
+        iso_value_compression: bool,
     ):
         self.namespace = get_neuralogic().cz.cvut.fel.ida.setup
         self.settings = self.namespace.Settings()
@@ -27,7 +28,6 @@ class SettingsProxy:
             self.__setattr__(key, value)
 
         set_field(self.settings, "debugExporting", False)
-        set_field(self.settings, "isoValueCompression", True)
         set_field(self.settings, "squishLastLayer", False)
         set_field(self.settings, "trainOnlineResultsType", self.namespace.Settings.ResultsType.REGRESSION)
         set_field(self.settings, "exportBlocks", get_gateway().new_array(get_gateway().jvm.java.lang.String, 0))
