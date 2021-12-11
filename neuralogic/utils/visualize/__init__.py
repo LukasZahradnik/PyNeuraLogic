@@ -19,7 +19,7 @@ def get_drawing_settings(img_type: str = "png", value_detail: int = 0) -> Settin
 
     set_field(settings.settings, "drawing", False)
     set_field(settings.settings, "storeNotShow", True)
-    set_field(settings.settings, "imgType", img_type)
+    set_field(settings.settings, "imgType", img_type.lower())
 
     if value_detail not in [0, 1, 2]:
         raise NotImplementedError
@@ -62,7 +62,7 @@ def draw(drawer, obj, filename: Optional[str] = None, draw_ipython=True, img_typ
     if draw_ipython:
         from IPython.display import Image, SVG
 
-        if img_type == "svg":
+        if img_type.lower() == "svg":
             return SVG(data, *args, **kwargs)
         return Image(data, *args, **kwargs)
     return data
