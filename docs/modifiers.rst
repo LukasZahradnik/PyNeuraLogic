@@ -1,3 +1,5 @@
+.. _modifier-label:
+
 Modifiers
 =========
 
@@ -6,29 +8,31 @@ Modifiers are optional and alter an atoms' behavior in some way. Currently, ther
 Hidden Modifier
 ###############
 
-..
-    TODO: Describe
+Sometimes, there are atoms in rules that only define the logic structure and are not beneficial to be included in the
+computation graph. For those cases, there is a hidden modifier that enforces exactly that -
+includes atom for the logic part and excludes atom in the resulting computation graph.
 
-    .. code-block:: Python
+For example, consider the following rule. In some instances, it might be counterproductive to include the :code:`edge` atoms
+in the resulting computation graph (e.g., they might not have any edge features), yet those :code:`edge` atoms
+cannot be removed as they define a critical part of the logic structure of the program.
+Including them in the computation graph will produce a side effect - offsetting the result of atoms :code:`h`.
 
-        Relation.edge(1, 2),
-        Relation.feature(2)[1.0],
+.. code-block:: Python
 
-    .. code-block:: Python
+    Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation.edge(Var.X, Var.Y))
 
-        Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation.edge(Var.X, Var.Y))
-
-
-    TODO: Model graph
-
-    .. code-block:: Python
-
-        Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation.hidden.edge(Var.X, Var.Y))
+This issue can be solved by flagging the predicate :code:`edge` as :code:`hidden`, ensuring that atoms with such a predicate will not be included in the computation graph.
 
 
-    TODO: Model graph
+.. code-block:: Python
 
-.. _special-modifier-label:
+    Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation.hidden.edge(Var.X, Var.Y))
+
+    # can be written also as (prepended _ makes preedicate hidden)
+
+    Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation._edge(Var.X, Var.Y))
+
+
 
 Special Modifier
 ################

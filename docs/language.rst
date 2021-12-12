@@ -58,7 +58,7 @@ which can be useful for generating atoms.
 
 .. note::
 
-    Prepending the predicate name with an underscore (:code:`_`) will make the predicate hidden (e.g., :code:`Relation.hidden.my_atom` is equal to :code:`Relation._my_atom`). Read more about modifiers in the :ref:`special-modifier-label` section.
+    Prepending the predicate name with an underscore (:code:`_`) will make the predicate hidden (e.g., :code:`Relation.hidden.my_atom` is equal to :code:`Relation._my_atom`). Read more about modifiers in the :ref:`modifier-label` section.
 
 
 Terms
@@ -150,7 +150,7 @@ Predicate names with no modifiers are entirely arbitrary, with no particular mea
 By including modifiers in atoms' definitions, we are modifying the behavior of those atoms, which can depend on the
 predicate name.
 
-More about individual modifiers can be read in :ref:`special-modifier-label`.
+More about individual modifiers can be read in :ref:`modifier-label`.
 
 
 The Anatomy of a Rule
