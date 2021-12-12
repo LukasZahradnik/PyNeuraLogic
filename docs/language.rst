@@ -56,6 +56,11 @@ which can be useful for generating atoms.
         Relation.get(f"my_atom_{i}")
 
 
+.. note::
+
+    Prepending the predicate name with an underscore (:code:`_`) will make the predicate hidden (e.g., :code:`Relation.hidden.my_atom` is equal to :code:`Relation._my_atom`). Read more about modifiers in the :ref:`special-modifier-label` section.
+
+
 Terms
 *****
 
