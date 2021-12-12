@@ -4,7 +4,7 @@ Visualization
 .. admonition:: \ \
     :class: empty-title
 
-    You can run this page in Colab |thiscolab|
+    You can run this page in `Jupyter Notebook <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Visualization.ipynb>`_
 
 
 .. |thiscolab| image:: https://colab.research.google.com/assets/colab-badge.svg
