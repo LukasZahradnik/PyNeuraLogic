@@ -61,7 +61,7 @@ Stations are also nearby if exactly one station lays on the path between those t
     template += R.nearby(V.X, V.Y) <= (R.connected(V.X, V.Z, V.L), R.connected(V.Z, V.Y, V.L))
 
 
-Now we can ask the inference engine to get all sorts of different information, such as what stations the Oxford Circus station is nearby.
+Now we can ask the inference engine to get all sorts of different information, such as what stations are nearby the Tottenham Court Road station.
 
 .. code-block:: Python
 
@@ -70,16 +70,16 @@ Now we can ask the inference engine to get all sorts of different information, s
 
     engine = InferenceEngine(template)
 
-    engine.q(R.nearby(V.X, T.oxford_circus))
+    engine.q(R.nearby(T.tottenham_court_road, V.X))
 
 Running the :code:`query` (or :code:`q`) will return a generator of dictionaries with all possible substitutions for all variables in the query.
-In this case, we have only one variable in the query (:code:`V.X`). As you can see, the inference engine found all stations that the Oxford Circus station is nearby (Green Park and Bond Street).
+In this case, we have only one variable in the query (:code:`V.X`). As you can see, the inference engine found all stations that are nearby the Tottenham Court Road station (Leicester Square and Charing Cross).
 
 .. code-block::
 
     [
-        {"X": "green_park"},
-        {"X": "bond_street"},
+        {"X": "leicester_square"},
+        {"X": "charing_cross"},
     ]
 
 We could also ask the inference engine to get all possible nearby stations (:code:`R.nearby(V.X, V.Y)`) and so on.
@@ -88,15 +88,15 @@ We could also ask the inference engine to get all possible nearby stations (:cod
 Finding Path Recursively
 ************************
 
-We can also define another rule to check a generic path from some station :code:`X` to some station :code:`Y`.
-We will call this rule reachable and use recursion in its definition. The reachable rule is satisfactory if two stations are directly connected or station :code:`X` is connected to station :code:`Z` from which you can reach :code:`Y`.
+We can also define another rule to check a generic path from a station :code:`X` to another station :code:`Y`.
+We will call this rule :code:`reachable` and use recursion in its definition. The :code:`reachable` rule is satisfied if two stations are directly connected or station :code:`X` is connected to station :code:`Z` from which you can reach :code:`Y`.
 
 .. code-block:: Python
 
     template += R.reachable(V.X, V.Y) <= R.connected(V.X, V.Y, V.L)
     template += R.reachable(V.X, V.Y) <= (R.connected(V.X, V.Z, V.L), R.reachable(V.Z, V.Y))
 
-Now we can ask the inference engine what stations we can reach from some station or ask more exact queries such as if two specific stations are reachable.
+Now we can ask the inference engine what stations we can reach from a station or ask more exact queries such as if two specific stations are reachable.
 
 
 .. code-block:: Python
@@ -114,13 +114,13 @@ Changing the Knowledge Base
 
 There might be cases where we want to reuse defined rules on the different knowledge bases (e.g., on different cities' underground systems) or extend the knowledge base for some queries (e.g., add additional routes).
 
-We can extend the current knowledge base defined in the template using the :code:`set_knowledge` method.
+We can extend the current knowledge defined in the template using the :code:`set_knowledge` method.
 
 .. code-block:: Python
 
     engine.set_knowledge(additional_knowledge)
 
-We can also set a knowledge base that will extend the knowledge base defined in the template but will ignore the knowledge base set by the :code:`set_knowledge` method.
+We can also set a knowledge that will extend the knowledge base defined in the template but will ignore the knowledge set by the :code:`set_knowledge` method.
 This knowledge base will be considered only for the context of the query.
 
 .. code-block:: Python
