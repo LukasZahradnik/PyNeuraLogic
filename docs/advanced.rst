@@ -5,6 +5,7 @@ Advanced Usage
     :maxdepth: 1
 
     heterogeneous
+    inference_engine
     modifiers
     visualization
     hooks
