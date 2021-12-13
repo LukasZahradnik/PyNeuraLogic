@@ -58,7 +58,7 @@ The [backend engine](https://jair.org/index.php/jair/article/view/11203) then cr
 
 ### How does it perform?
 
-While PyNeuraLogic allows you to easily declare highly expressive models with capabilities far [beyond the common GNNs](https://arxiv.org/abs/2007.06286), it does not come at the cost of performance with the basic GNNs either. On the contrary, for a range of common GNN models and applications, such as learning with molecules, PyNeuraLogic is actually considerably faster than the popular GNN frameworks, as demonstrated with in [benchmarks](https://github.com/LukasZahradnik/PyNeuraLogic/tree/benchmarks/benchmarks).
+While PyNeuraLogic allows you to easily declare highly expressive models with capabilities far [beyond the common GNNs](https://arxiv.org/abs/2007.06286), it does not come at the cost of performance for the basic GNNs either. On the contrary, for a range of common GNN models and applications, such as learning with molecules, PyNeuraLogic is actually considerably faster than the popular GNN frameworks, as demonstrated in our [benchmarks](https://github.com/LukasZahradnik/PyNeuraLogic/tree/benchmarks/benchmarks).
 
 
 <!-- Running a few experiments shows that PyNeuraLogic can outperform popular GNN frameworks in regards to time performance while achieving nearly the same accuracy. Results for a few experiments can be seen in the chart below. -->
@@ -74,7 +74,6 @@ While PyNeuraLogic allows you to easily declare highly expressive models with ca
   Benchmarks in the plot above were run on the NCI 786_0 dataset on the CPU using scripts that you can find <a href="https://github.com/LukasZahradnik/PyNeuraLogic/tree/master/benchmarks" target="_blank">here</a>. Models were trained in 100 epochs using Adam optimizer with a learning rate of 1.5e-5.
 </sub> -->
 
-</br>
 </br>
 
 We hope you'll find the framework useful in designing your own deep **relational** learning ideas beyond the GNNs!
