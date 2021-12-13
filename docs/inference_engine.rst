@@ -107,3 +107,22 @@ Now we can ask the inference engine what stations we can reach from some station
         print("Yes, you can reach Tottenham Court Road from Green Park")
     else:
         print("Those two stations are reachable, so this should never be printed out")
+
+
+Changing the Knowledge Base
+***************************
+
+There might be cases where we want to reuse defined rules on the different knowledge bases (e.g., on different cities' underground systems) or extend the knowledge base for some queries (e.g., add additional routes).
+
+We can extend the current knowledge base defined in the template using the :code:`set_knowledge` method.
+
+.. code-block:: Python
+
+    engine.set_knowledge(additional_knowledge)
+
+We can also set a knowledge base that will extend the knowledge base defined in the template but will ignore the knowledge base set by the :code:`set_knowledge` method.
+This knowledge base will be considered only for the context of the query.
+
+.. code-block:: Python
+
+    engine.query(R.some_query, additional_knowledge)

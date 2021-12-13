@@ -28,7 +28,7 @@ This issue can be solved by flagging the predicate :code:`edge` as :code:`hidden
 
     Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation.hidden.edge(Var.X, Var.Y))
 
-    # can be written also as (prepended _ makes preedicate hidden)
+    # can be written also as (prepended _ makes predicate hidden)
 
     Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation._edge(Var.X, Var.Y))
 
