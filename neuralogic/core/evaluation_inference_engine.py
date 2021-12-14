@@ -1,6 +1,6 @@
 from typing import List, Union, Optional
 
-from py4j.java_gateway import get_field
+from py4j.java_gateway import get_field, set_field
 
 from neuralogic.core import Template, Settings, Backend, Dataset
 from neuralogic.core.constructs.atom import AtomType
@@ -9,11 +9,12 @@ from neuralogic.core.constructs.rule import Rule
 
 class EvaluationInferenceEngine:
     def __init__(self, template: Template):
-        self.settings = Settings()
+        self.settings = Settings(iso_value_compression=False, chain_pruning=False)
         self.model = template.build(Backend.JAVA, self.settings)
 
         self.examples: List[Union[AtomType, Rule]] = []
         self.dataset = Dataset()
+        self.dataset.examples = [[]]
 
     def set_knowledge(self, examples: List[Union[AtomType, Rule]]) -> None:
         self.dataset.examples = [examples]
@@ -50,6 +51,4 @@ class EvaluationInferenceEngine:
                 substitutions = sub_query.split(",")
                 yield (result[1], {label: substitutions[position].strip() for label, position in variables})
 
-        if len(results) == 0:
-            return {}
         return generator()

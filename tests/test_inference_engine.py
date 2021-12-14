@@ -80,7 +80,7 @@ def test_inference_engine_london() -> None:
 
     # Run query for nearby(X, tottenham_court_road)
     substitutions = list(engine.q(R.nearby(V.X, T.charing_cross)))
-    print(substitutions)
+
     assert substitutions[0]["X"] == "piccadilly_circus"
     assert substitutions[1]["X"] == "leicester_square"
     assert substitutions[2]["X"] == "tottenham_court_road"
