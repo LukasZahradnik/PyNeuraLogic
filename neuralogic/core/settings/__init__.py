@@ -19,6 +19,7 @@ class Settings:
         rule_neuron_activation: Activation = Activation.TANH,
         relation_neuron_activation: Activation = Activation.TANH,
         iso_value_compression: bool = True,
+        chain_pruning: bool = True,
     ):
         self.params = locals().copy()
         self.params.pop("self")
@@ -34,6 +35,14 @@ class Settings:
     @iso_value_compression.setter
     def iso_value_compression(self, iso_value_compression: bool):
         self._update("iso_value_compression", iso_value_compression)
+
+    @property
+    def chain_pruning(self) -> bool:
+        return self.params["chain_pruning"]
+
+    @chain_pruning.setter
+    def chain_pruning(self, chain_pruning: bool):
+        self._update("chain_pruning", chain_pruning)
 
     @property
     def seed(self) -> int:

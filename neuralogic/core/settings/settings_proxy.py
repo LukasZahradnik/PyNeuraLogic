@@ -17,6 +17,7 @@ class SettingsProxy:
         rule_neuron_activation: Activation,
         relation_neuron_activation: Activation,
         iso_value_compression: bool,
+        chain_pruning: bool,
     ):
         self.namespace = get_neuralogic().cz.cvut.fel.ida.setup
         self.settings = self.namespace.Settings()
