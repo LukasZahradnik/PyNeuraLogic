@@ -74,15 +74,15 @@ maximum of values of the :code:`shortest` rules.
 
 .. important::
 
-    Why do we even need the :code:`shortest_path` rule, and why :code:`shortest` rule contains the terms :code:`T.first` and :code:`T.second`?
+    Why do we even need the :code:`shortest_path` rule, and why :code:`shortest` rules contain the terms :code:`T.first` and :code:`T.second`?
     The terms are there to distinguish between the two rules and prevent concatenating. If they were not there, the
-    (simplified) computation graph for inputs Bond Street and Oxford Circus would calculate function:
+    (simplified) computation graph for the inputs Bond Street and Oxford Circus would calculate function:
 
     .. code-block::
 
         shortest_path(bond_street, oxford_circus) =
-                        max(connected(bond_street, oxford_circus)) +
-                        max(connected(bond_street, green_park) + connected(green_park, oxford_circus))
+                max(connected(bond_street, oxford_circus)) +
+                max(connected(bond_street, green_park) + connected(green_park, oxford_circus))
 
     Adding different constant terms make heads of rules different, even for the same variable substitutions, ensuring that those rules will not be concatenated.
     This allows taking the maximum from both rules (and not their summation).
