@@ -6,6 +6,7 @@ Advanced Usage
 
     heterogeneous
     inference_engine
+    eval_inference_engine
     modifiers
     visualization
     hooks

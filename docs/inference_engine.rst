@@ -1,3 +1,5 @@
+.. _inference-label:
+
 Utilizing Inference Engine
 ==========================
 
@@ -9,7 +11,7 @@ London Underground Example
 ##########################
 
 The interface for the inference engine is relatively simple. Consider the following example based on `the "Simply Logical: Intelligent Reasoning by Example" book <https://book.simply-logical.space/>`_ by Peter Flach.
-We have a part of the London Underground encoded as a directed graph as visualized in the following image.
+We have a network based on a part of the London Underground encoded as a directed graph as visualized in the following image.
 
 
 |
