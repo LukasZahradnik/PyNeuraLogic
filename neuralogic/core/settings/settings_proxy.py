@@ -44,6 +44,14 @@ class SettingsProxy:
         set_field(self.settings, "isoValueCompression", iso_value_compression)
 
     @property
+    def chain_pruning(self) -> bool:
+        return get_field(self.settings, "chainPruning")
+
+    @chain_pruning.setter
+    def chain_pruning(self, chain_pruning: bool):
+        set_field(self.settings, "chainPruning", chain_pruning)
+
+    @property
     def seed(self) -> int:
         return get_field(self.settings, "seed")
 
