@@ -22,6 +22,8 @@ class DatasetBuilder:
         self.java_factory = java_factory
         self.parsed_template = parsed_template
 
+        self.grounding_mode = get_neuralogic().cz.cvut.fel.ida.setup.Settings.GroundingMode
+
         self.counter = 0
         self.hooks: Dict[str, Set] = {}
 
@@ -99,6 +101,8 @@ class DatasetBuilder:
         query_builder = namespace.QueriesBuilder(settings.settings)
         query_builder.setFactoriesFrom(examples_builder)
 
+        set_field(settings.settings, "groundingMode", self.grounding_mode.INDEPENDENT)
+
         if not dataset.file_sources:
             examples = dataset.examples
             queries = dataset.queries
@@ -113,6 +117,9 @@ class DatasetBuilder:
                     query, example = TemplateList.to_inputs(data.x, data.edge_index, data.y, data.y_mask)
                     examples.append(example)
                     queries.extend(query)
+
+            if len(examples) == 1:
+                set_field(settings.settings, "groundingMode", self.grounding_mode.GLOBAL)
 
             self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
             examples = self.build_examples(examples, examples_builder)

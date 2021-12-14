@@ -9,7 +9,7 @@ from neuralogic.core.constructs.rule import Rule
 
 class EvaluationInferenceEngine:
     def __init__(self, template: Template):
-        self.settings = Settings(iso_value_compression=False, chain_pruning=False)
+        self.settings = Settings()
         self.model = template.build(Backend.JAVA, self.settings)
 
         self.examples: List[Union[AtomType, Rule]] = []
