@@ -57,7 +57,7 @@ Finding the shortest (or the longest) path can be tricky because of the way rule
     template += (R.shortest(V.X, V.Y, T.second) <= (R.connected(V.X, V.Z, V.L), R.shortest(V.Z, V.Y, V.D))) | metadata
 
 We have defined two rules called :code:`shortest`. The first rule aggregates connected stations and takes all connections' maximum value (distance).
-The second rule handles instances when stations are not directly connected - you have to traverse at least one station
+The second rule handles instances when stations are not directly connected - at least one station has to be traversed
 to get to the goal station. The second rule aggregates all possible instances and finds maximum value while "calling" one of the two rules recursively.
 
 .. attention::
@@ -69,18 +69,20 @@ to get to the goal station. The second rule aggregates all possible instances an
     template += (R.shortest_path(V.X, V.Y) <= R.shortest(V.X, V.Y, V.D)) | metadata
 
 The last defined rule, called :code:`shortest_path` serves as a helper rule and takes the
-maximum of all values from the :code:`shortest` rules.
+maximum of values of the :code:`shortest` rules.
 
 
 .. important::
 
-    Why do we even need this rule, and why shortest rule contains the terms :code:`T.first` and :code:`T.second`?
+    Why do we even need the :code:`shortest_path` rule, and why :code:`shortest` rule contains the terms :code:`T.first` and :code:`T.second`?
     The terms are there to distinguish between the two rules and prevent concatenating. If they were not there, the
     (simplified) computation graph for inputs Bond Street and Oxford Circus would calculate function:
 
-    .. math::
+    .. code-block::
 
-        shortest\_path(bond\_street, oxford\_circus) = \boldsymbol{max(}connected(bond\_street, oxford\_circus)\boldsymbol{)} + \\ \boldsymbol{max(}connected(bond\_street, green\_park) + connected(green\_park, oxford\_circus)\boldsymbol{)}
+        shortest_path(bond_street, oxford_circus) =
+                        max(connected(bond_street, oxford_circus)) +
+                        max(connected(bond_street, green_park) + connected(green_park, oxford_circus))
 
     Adding different constant terms make heads of rules different, even for the same variable substitutions, ensuring that those rules will not be concatenated.
     This allows taking the maximum from both rules (and not their summation).
@@ -120,7 +122,7 @@ We can, for example, get the shortest path from the Bond Street station to the C
     ]
 
 
-The query computed the distance to be 30 units (-30), which is the actual shortest distance for this input. But this query does not bring any additional value compared to evaluation via evaluators or directly on the model.
+The query computed the distance to be :code:`30` units (:code:`-30`), which is the actual shortest distance for this input. But this query does not bring any additional value compared to evaluation via evaluators or directly on the model.
 
 To fully utilize the fuzzy relational inference engine, we would also want to get some substitutions. For example, we can get the shortest distances from the Green Park station to all reachable stations.
 
@@ -140,4 +142,4 @@ To fully utilize the fuzzy relational inference engine, we would also want to ge
         (-24.0, {'X': 'tottenham_court_road'})
     ]
 
-This output then tells us that the shortest path to the Charing Cross station from the Green Park station is 19 units long, to the Leicester Square station it is 14 units long, and so on.
+This output then tells us that the shortest path to the Charing Cross station from the Green Park station is :code:`19` units long, to the Leicester Square station it is :code:`14` units long, and so on.
