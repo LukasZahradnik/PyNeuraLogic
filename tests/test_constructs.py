@@ -1,6 +1,5 @@
 from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
-from neuralogic.core.constructs.predicate import PredicateMetadata, Metadata, Predicate
-from neuralogic.core import R
+from neuralogic.core import R, Activation, Aggregation, Metadata
 
 
 def test_predicate_creation() -> None:
@@ -97,3 +96,20 @@ def test_atom_creation() -> None:
 
     neg_relation = ~relation
     assert neg_relation.negated is True
+
+
+def test_rule_metadata():
+    rule = (R.a <= R.b) | [Activation.SIGMOID, Aggregation.AVG]
+
+    assert rule.metadata is not None
+    assert rule.metadata.aggregation == Aggregation.AVG
+    assert rule.metadata.activation == Activation.SIGMOID
+
+    rule = (R.a <= R.b) | Metadata(activation=Activation.IDENTITY, aggregation=Aggregation.MAX)
+
+    assert rule.metadata is not None
+    assert rule.metadata.aggregation == Aggregation.MAX
+    assert rule.metadata.activation == Activation.IDENTITY
+
+    rule = R.a <= R.b
+    assert rule.metadata is None

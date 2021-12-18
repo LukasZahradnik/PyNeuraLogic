@@ -1,3 +1,4 @@
+from neuralogic.core.enums import Activation, Aggregation
 from neuralogic.core.constructs.metadata import Metadata
 from typing import Iterable, Optional
 
@@ -56,15 +57,26 @@ class Rule:
         metadata = "" if self.metadata is None is None else f" {self.metadata}"
         return f"{self.head.to_str()} :- {', '.join(atom.to_str() for atom in self.body)}.{metadata}"
 
-    def __and__(self, other):
+    def __and__(self, other) -> "Rule":
         if isinstance(other, Iterable):
             self.body.extend(list(other))
         else:
             self.body.append(other)
         return self
 
-    def __or__(self, other):
-        if not isinstance(other, Metadata):
+    def __or__(self, other) -> "Rule":
+        if isinstance(other, Iterable):
+            metadata = Metadata()
+
+            for entry in other:
+                if isinstance(entry, Activation):
+                    metadata.activation = entry
+                elif isinstance(entry, Aggregation):
+                    metadata.aggregation = entry
+                else:
+                    raise NotImplementedError
+            other = metadata
+        elif not isinstance(other, Metadata):
             raise NotImplementedError
         self.metadata = other
 
