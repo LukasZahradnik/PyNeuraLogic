@@ -1,4 +1,4 @@
-from typing import Iterable, Union
+from typing import Iterable, Union, Generator, Tuple, List, Collection, Sequence
 
 from neuralogic.core.constructs.predicate import Predicate
 from neuralogic.core.constructs import rule, factories
@@ -39,11 +39,11 @@ class BaseAtom:
         if self.terms:
             raise Exception
 
-        terms = list(args)
-        arity = len(terms)
-
-        if len(args) == 1 and isinstance(args[0], Iterable):
+        if len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], str):
             terms = list(args[0])
+        else:
+            terms = list(args)
+        arity = len(terms)
 
         name, hidden, special = self.predicate.name, self.predicate.hidden, self.predicate.special
         predicate = factories.AtomFactory.Predicate.get_predicate(name, arity, hidden, special)
