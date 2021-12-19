@@ -42,6 +42,9 @@ class BaseAtom:
         terms = list(args)
         arity = len(terms)
 
+        if len(args) == 1 and isinstance(args[0], Iterable):
+            terms = list(args[0])
+
         name, hidden, special = self.predicate.name, self.predicate.hidden, self.predicate.special
         predicate = factories.AtomFactory.Predicate.get_predicate(name, arity, hidden, special)
 
