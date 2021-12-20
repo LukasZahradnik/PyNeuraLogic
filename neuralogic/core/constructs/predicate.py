@@ -1,3 +1,6 @@
+from collections import Iterable
+
+from neuralogic.core.enums import Activation, Aggregation
 from neuralogic.core.constructs.metadata import Metadata
 
 
@@ -28,8 +31,17 @@ class Predicate:
         hidden = "*" if self.hidden else ""
         return f"{hidden}{special}{self.name}/{self.arity}"
 
-    def __or__(self, other):
-        if not isinstance(other, Metadata):
+    def __or__(self, other) -> "PredicateMetadata":
+        if isinstance(other, Iterable):
+            metadata = Metadata()
+
+            for entry in other:
+                if isinstance(entry, Activation):
+                    metadata.activation = entry
+                else:
+                    raise NotImplementedError
+            other = metadata
+        elif not isinstance(other, Metadata):
             raise NotImplementedError
         return PredicateMetadata(self, other)
 

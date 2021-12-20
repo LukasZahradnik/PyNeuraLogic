@@ -1,7 +1,7 @@
 <p align="center">
 <img src="https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/docs/_static/readme_logo.svg" alt="PyNeuraLogic" title="PyNeuraLogic"/>
 </p>
-  
+
 [![PyPI version](https://badge.fury.io/py/neuralogic.svg)](https://badge.fury.io/py/neuralogic)
 [![License](https://img.shields.io/pypi/l/neuralogic)](https://badge.fury.io/py/neuralogic)
 [![Tests Status](https://github.com/LukasZahradnik/PyNeuraLogic/actions/workflows/tests.yml/badge.svg)](https://github.com/LukasZahradnik/PyNeuraLogic/actions/workflows/tests.yml)
@@ -25,7 +25,7 @@ PyNeuralogic, through its [NeuraLogic](https://github.com/GustikS/NeuraLogic) ba
 
 ### What is this good for?
 
-Many things! For instance - ever heard of [Graph Neural Networks](https://distill.pub/2021/gnn-intro/) (GNNs)? Well, a _graph_ happens to be a special case of a logical relation - a binary one to be more exact. Now, at the heart of any GNN model there is a so-called _propagation rule_ for passing 'messages' between the neighboring nodes. Particularly, the representation ('message') of a node `X` is calculated by aggregating the previous representations of adjacent nodes `Y`, i.e. those with an `edge` between `X` and `Y`. 
+Many things! For instance - ever heard of [Graph Neural Networks](https://distill.pub/2021/gnn-intro/) (GNNs)? Well, a _graph_ happens to be a special case of a logical relation - a binary one to be more exact. Now, at the heart of any GNN model there is a so-called _propagation rule_ for passing 'messages' between the neighboring nodes. Particularly, the representation ('message') of a node `X` is calculated by aggregating the previous representations of adjacent nodes `Y`, i.e. those with an `edge` between `X` and `Y`.
 
 Or, a bit more 'formally':
 
@@ -58,14 +58,14 @@ The [backend engine](https://jair.org/index.php/jair/article/view/11203) then cr
 
 ### How does it perform?
 
-While PyNeuraLogic allows you to easily declare highly expressive models with capabilities far [beyond the common GNNs](https://arxiv.org/abs/2007.06286), it does not come at the cost of performance for the basic GNNs either. On the contrary, for a range of common GNN models and applications, such as learning with molecules, PyNeuraLogic is actually considerably faster than the popular GNN frameworks, as demonstrated in our [benchmarks](https://github.com/LukasZahradnik/PyNeuraLogic/tree/benchmarks/benchmarks).
+While PyNeuraLogic allows you to easily declare highly expressive models with capabilities far [beyond the common GNNs](https://arxiv.org/abs/2007.06286), it does not come at the cost of performance for the basic GNNs either. On the contrary, for a range of common GNN models and applications, such as learning with molecules, PyNeuraLogic is actually considerably faster than the popular GNN frameworks, as demonstrated in our [benchmarks](https://github.com/LukasZahradnik/PyNeuraLogic/tree/master/benchmarks).
 
 
 <!-- Running a few experiments shows that PyNeuraLogic can outperform popular GNN frameworks in regards to time performance while achieving nearly the same accuracy. Results for a few experiments can be seen in the chart below. -->
 
 <!-- vsechny ty detaily bych nechal az do nejake podrobnejsi dokumentace : Note that PyNeuraLogic requires some time to startup (e.g., translate logic programs into neural networks). In the experiments below, the PyNeuraLogic required to startup, on average, _20.9s (+- 0.85s)_ for GCN, _22.5s (+- 0.49s)_ for GraphSAGE, and _58.48s (+- 1.84s)_ for GIN. The startup is done only once before the training and is compensated for in a few epochs due to PyNeuraLogic higher speed performance.  -->
 
-  
+
 <p align="center">
 <img src="https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/docs/_static/benchmark.svg" alt="Benchmark of PyNeuraLogic" title="Benchmark of PyNeuraLogic"/>
 </p>
