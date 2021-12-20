@@ -25,8 +25,8 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="0.93896915"
-     inkscape:cx="519.71889"
-     inkscape:cy="433.98657"
+     inkscape:cx="589.47624"
+     inkscape:cy="310.44683"
      inkscape:window-width="2488"
      inkscape:window-height="1529"
      inkscape:window-x="72"
@@ -429,7 +429,7 @@
        style="font-size:40px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect26071)" />
     <g
        id="g44845"
-       transform="translate(-15.510558,14.786924)">
+       transform="translate(-15.510558,7.9077542)">
       <circle
          style="fill:#fb86ad;fill-opacity:1;stroke:#000000;stroke-width:0.352999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:2.5;stroke-dasharray:none;paint-order:markers fill stroke"
          id="path28498"
@@ -443,13 +443,13 @@
          style="font-size:21.3333px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect28584)"><tspan
            x="255.10156"
            y="494.51651"
-           id="tspan71830"><tspan
+           id="tspan5110"><tspan
              style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-             id="tspan71828">PyNeuraLogic</tspan></tspan></text>
+             id="tspan5108">PyNeuraLogic</tspan></tspan></text>
     </g>
     <g
        id="g83156"
-       transform="translate(-10.583334,-5.2916669)">
+       transform="translate(-10.583334,-12.170835)">
       <g
          id="g44835"
          transform="translate(50.618066,12.401315)">
@@ -469,9 +469,9 @@
              style="font-size:21.3333px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect39977)"><tspan
                x="255.10156"
                y="494.51651"
-               id="tspan71834"><tspan
+               id="tspan5114"><tspan
                  style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-                 id="tspan71832">DGL</tspan></tspan></text>
+                 id="tspan5112">DGL</tspan></tspan></text>
         </g>
       </g>
       <text
@@ -483,13 +483,13 @@
          y="0"><tspan
            x="255.10156"
            y="485.8832"
-           id="tspan71838"><tspan
+           id="tspan5118"><tspan
              style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-             id="tspan71836">0.6.1</tspan></tspan></text>
+             id="tspan5116">0.6.1</tspan></tspan></text>
     </g>
     <g
        id="g83169"
-       transform="translate(-6.2136434,-5.2916669)">
+       transform="translate(-6.2136434,-12.170835)">
       <g
          id="g44840"
          transform="translate(55.384565,10.024409)">
@@ -506,9 +506,9 @@
            style="font-size:21.3333px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect32402)"><tspan
              x="255.10156"
              y="494.51651"
-             id="tspan71842"><tspan
+             id="tspan5122"><tspan
                style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-               id="tspan71840">PyG</tspan></tspan></text>
+               id="tspan5120">PyG</tspan></tspan></text>
       </g>
       <g
          id="g83160"
@@ -522,27 +522,27 @@
            y="0"><tspan
              x="255.10156"
              y="485.8832"
-             id="tspan71846"><tspan
+             id="tspan5126"><tspan
                style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-               id="tspan71844">2.0.2</tspan></tspan></text>
+               id="tspan5124">2.0.2</tspan></tspan></text>
       </g>
     </g>
     <text
        xml:space="preserve"
-       transform="matrix(0,-0.26458333,0.26458333,0,-108.89491,161.21694)"
+       transform="matrix(0,-0.26458333,0.26458333,0,-108.89491,154.33773)"
        id="text47310"
        style="font-size:14.6667px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect47314)"><tspan
          x="255.10156"
          y="488.3499"
-         id="tspan71850"><tspan
+         id="tspan5130"><tspan
            style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-           id="tspan71848">time (s)</tspan></tspan></text>
+           id="tspan5128">time (s)</tspan></tspan></text>
     <g
        id="patch_2-6"
        transform="matrix(0.35277778,0,0,0.35277778,68.081348,180.59478)" />
     <g
        id="patch_2-3"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          d="M 57.6,307.584 H 414.72 V 41.472 H 57.6 Z"
          style="fill:#ffffff"
@@ -550,7 +550,7 @@
     </g>
     <g
        id="patch_3-6"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          clip-path="url(#p61de8f65bf)"
          d="M 73.832727,307.584 H 103.34678 V 79.624388 H 73.832727 Z"
@@ -559,7 +559,7 @@
     </g>
     <g
        id="patch_4-7"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          clip-path="url(#p61de8f65bf)"
          d="m 191.88893,307.584 h 29.51404 V 76.521463 h -29.51404 z"
@@ -568,7 +568,7 @@
     </g>
     <g
        id="patch_5-5"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          clip-path="url(#p61de8f65bf)"
          d="m 309.94512,307.584 h 29.51405 V 71.715432 h -29.51405 z"
@@ -577,7 +577,7 @@
     </g>
     <g
        id="patch_6-3"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          clip-path="url(#p61de8f65bf)"
          d="m 103.34678,307.584 h 29.51405 V 83.829272 h -29.51405 z"
@@ -586,7 +586,7 @@
     </g>
     <g
        id="patch_7-56"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          clip-path="url(#p61de8f65bf)"
          d="m 221.40297,307.584 h 29.51405 V 77.821233 h -29.51405 z"
@@ -595,7 +595,7 @@
     </g>
     <g
        id="patch_8-2"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          clip-path="url(#p61de8f65bf)"
          d="m 339.45917,307.584 h 29.51405 V 71.712573 h -29.51405 z"
@@ -604,7 +604,7 @@
     </g>
     <g
        id="patch_9-9"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          clip-path="url(#p61de8f65bf)"
          d="m 132.86083,307.584 h 29.51405 V 81.724543 h -29.51405 z"
@@ -613,7 +613,7 @@
     </g>
     <g
        id="patch_10-1"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          clip-path="url(#p61de8f65bf)"
          d="m 250.91702,307.584 h 29.51405 V 81.82745 h -29.51405 z"
@@ -622,7 +622,7 @@
     </g>
     <g
        id="patch_11-2"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          clip-path="url(#p61de8f65bf)"
          d="m 368.97322,307.584 h 29.51405 V 73.515157 h -29.51405 z"
@@ -631,7 +631,7 @@
     </g>
     <g
        id="matplotlib.axis_2-3"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <g
          id="ytick_1-61">
         <g
@@ -1038,7 +1038,7 @@
     </g>
     <g
        id="LineCollection_1"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          clip-path="url(#p61de8f65bf)"
          d="M 88.589752,97.076059 V 62.172716"
@@ -1057,7 +1057,7 @@
     </g>
     <g
        id="LineCollection_2"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          clip-path="url(#p61de8f65bf)"
          d="M 118.1038,97.752102 V 69.906442"
@@ -1076,7 +1076,7 @@
     </g>
     <g
        id="LineCollection_3"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          clip-path="url(#p61de8f65bf)"
          d="M 147.61785,96.623403 V 66.825683"
@@ -1095,7 +1095,7 @@
     </g>
     <g
        id="line2d_15-9"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <defs
          id="defs2047">
         <path
@@ -1134,7 +1134,7 @@
     </g>
     <g
        id="line2d_16-3"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <g
          clip-path="url(#p61de8f65bf)"
          id="g2064">
@@ -1166,7 +1166,7 @@
     </g>
     <g
        id="line2d_17"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <g
          clip-path="url(#p61de8f65bf)"
          id="g2073">
@@ -1198,7 +1198,7 @@
     </g>
     <g
        id="line2d_18"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <g
          clip-path="url(#p61de8f65bf)"
          id="g2082">
@@ -1230,7 +1230,7 @@
     </g>
     <g
        id="line2d_19"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <g
          clip-path="url(#p61de8f65bf)"
          id="g2091">
@@ -1262,7 +1262,7 @@
     </g>
     <g
        id="line2d_20"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <g
          clip-path="url(#p61de8f65bf)"
          id="g2100">
@@ -1294,7 +1294,7 @@
     </g>
     <g
        id="patch_12-7"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          d="M 57.6,307.584 V 41.472"
          style="fill:none;stroke:#000000;stroke-width:0.8;stroke-linecap:square;stroke-linejoin:miter"
@@ -1302,7 +1302,7 @@
     </g>
     <g
        id="patch_13-4"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          d="M 414.72,307.584 V 41.472"
          style="fill:none;stroke:#000000;stroke-width:0.8;stroke-linecap:square;stroke-linejoin:miter"
@@ -1310,7 +1310,7 @@
     </g>
     <g
        id="patch_14-5"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          d="M 57.6,307.584 H 414.72"
          style="fill:none;stroke:#000000;stroke-width:0.8;stroke-linecap:square;stroke-linejoin:miter"
@@ -1318,7 +1318,7 @@
     </g>
     <g
        id="patch_15-2"
-       transform="matrix(0.35277778,0,0,0.35277778,162.68714,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,162.68714,15.332438)">
       <path
          d="M 57.6,41.472 H 414.72"
          style="fill:none;stroke:#000000;stroke-width:0.8;stroke-linecap:square;stroke-linejoin:miter"
@@ -1326,7 +1326,7 @@
     </g>
     <g
        id="patch_2-4"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <path
          d="M 57.6,307.584 H 414.72 V 41.472 H 57.6 Z"
          style="fill:#ffffff"
@@ -1334,7 +1334,7 @@
     </g>
     <g
        id="patch_3-4"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <path
          clip-path="url(#p41df545797)"
          d="m 73.832727,307.584 h 29.514053 v -7.79618 H 73.832727 Z"
@@ -1343,7 +1343,7 @@
     </g>
     <g
        id="patch_4-3"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <path
          clip-path="url(#p41df545797)"
          d="m 191.88893,307.584 h 29.51404 v -10.39408 h -29.51404 z"
@@ -1352,7 +1352,7 @@
     </g>
     <g
        id="patch_5-0"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <path
          clip-path="url(#p41df545797)"
          d="m 309.94512,307.584 h 29.51405 v -41.91158 h -29.51405 z"
@@ -1361,7 +1361,7 @@
     </g>
     <g
        id="patch_6-78"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <path
          clip-path="url(#p41df545797)"
          d="m 103.34678,307.584 h 29.51405 v -67.07791 h -29.51405 z"
@@ -1370,7 +1370,7 @@
     </g>
     <g
        id="patch_7-6"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <path
          clip-path="url(#p41df545797)"
          d="m 221.40297,307.584 h 29.51405 v -80.49035 h -29.51405 z"
@@ -1379,7 +1379,7 @@
     </g>
     <g
        id="patch_8-8"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <path
          clip-path="url(#p41df545797)"
          d="m 339.45917,307.584 h 29.51405 V 135.55914 h -29.51405 z"
@@ -1388,7 +1388,7 @@
     </g>
     <g
        id="patch_9-8"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <path
          clip-path="url(#p41df545797)"
          d="m 132.86083,307.584 h 29.51405 v -70.5955 h -29.51405 z"
@@ -1397,7 +1397,7 @@
     </g>
     <g
        id="patch_10-4"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <path
          clip-path="url(#p41df545797)"
          d="m 250.91702,307.584 h 29.51405 v -99.26012 h -29.51405 z"
@@ -1406,7 +1406,7 @@
     </g>
     <g
        id="patch_11-3"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <path
          clip-path="url(#p41df545797)"
          d="m 368.97322,307.584 h 29.51405 V 54.144 h -29.51405 z"
@@ -1415,7 +1415,7 @@
     </g>
     <g
        id="matplotlib.axis_2-4"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <g
          id="ytick_1-9">
         <g
@@ -1788,7 +1788,7 @@
     </g>
     <g
        id="patch_12-9"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <path
          d="M 57.6,307.584 V 41.472"
          style="fill:none;stroke:#000000;stroke-width:0.8;stroke-linecap:square;stroke-linejoin:miter"
@@ -1796,7 +1796,7 @@
     </g>
     <g
        id="patch_13-8"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <path
          d="M 414.72,307.584 V 41.472"
          style="fill:none;stroke:#000000;stroke-width:0.8;stroke-linecap:square;stroke-linejoin:miter"
@@ -1804,7 +1804,7 @@
     </g>
     <g
        id="patch_14-4"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <path
          d="M 57.6,307.584 H 414.72"
          style="fill:none;stroke:#000000;stroke-width:0.8;stroke-linecap:square;stroke-linejoin:miter"
@@ -1812,7 +1812,7 @@
     </g>
     <g
        id="patch_15-8"
-       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,22.211609)">
+       transform="matrix(0.35277778,0,0,0.35277778,9.5866953,15.332438)">
       <path
          d="M 57.6,41.472 H 414.72"
          style="fill:none;stroke:#000000;stroke-width:0.8;stroke-linecap:square;stroke-linejoin:miter"
@@ -1820,56 +1820,41 @@
     </g>
     <text
        xml:space="preserve"
-       transform="matrix(0,-0.26458333,0.26458333,0,41.917599,162.61909)"
+       transform="matrix(0,-0.26458333,0.26458333,0,41.917599,155.73988)"
        id="text3541"
        style="font-size:14.6667px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect3543)"><tspan
          x="255.10156"
          y="488.3499"
-         id="tspan71854"><tspan
+         id="tspan5134"><tspan
            style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-           id="tspan71852">accuracy</tspan></tspan></text>
+           id="tspan5132">accuracy</tspan></tspan></text>
     <text
        xml:space="preserve"
-       transform="matrix(0.26458333,0,0,0.26458333,-50.726177,-114.26666)"
+       transform="matrix(0.26458333,0,0,0.26458333,-50.726177,-113.20832)"
        id="text51873"
        style="font-size:21.3333px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';text-align:center;white-space:pre;shape-inside:url(#rect51877);stroke-linecap:butt;stroke-linejoin:round"
        x="279.38498"
        y="0"><tspan
-         x="287.26376"
+         x="395.18025"
          y="494.51651"
-         id="tspan71858"><tspan
+         id="tspan5138"><tspan
            style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-           id="tspan71856">The average time per epoch of different models
-</tspan></tspan><tspan
-         x="394.41984"
-         y="522.04147"
-         id="tspan71864"><tspan
-           style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-           id="tspan71860">and </tspan><tspan
-           style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-           id="tspan71862">frameworks comparison</tspan></tspan></text>
+           id="tspan5136">The average time per epoch</tspan></tspan></text>
     <text
        xml:space="preserve"
-       transform="matrix(0.26458333,0,0,0.26458333,101.7798,-114.26666)"
+       transform="matrix(0.26458333,0,0,0.26458333,101.7798,-113.20832)"
        id="text5653"
        style="font-size:21.3333px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';text-align:center;white-space:pre;shape-inside:url(#rect5655);stroke-linecap:butt;stroke-linejoin:round"
        x="279.38498"
        y="0"><tspan
-         x="320.22204"
+         x="428.13853"
          y="494.51651"
-         id="tspan71868"><tspan
+         id="tspan5142"><tspan
            style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-           id="tspan71866">The average accuracy of different models
-</tspan></tspan><tspan
-         x="394.41984"
-         y="522.04147"
-         id="tspan71874"><tspan
-           style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-           id="tspan71870">and </tspan><tspan
-           style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-           id="tspan71872">frameworks comparison</tspan></tspan></text>
+           id="tspan5140">The average accuracy</tspan></tspan></text>
     <g
-       id="g71268">
+       id="g71268"
+       transform="translate(0,-6.879167)">
       <g
          id="g70741">
         <g
@@ -1918,9 +1903,9 @@
            y="0"><tspan
              x="297.98076"
              y="488.3499"
-             id="tspan71878"><tspan
+             id="tspan5146"><tspan
                style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-               id="tspan71876">GCN</tspan></tspan></text>
+               id="tspan5144">GCN</tspan></tspan></text>
       </g>
       <g
          id="g70751">
@@ -1963,9 +1948,9 @@
            y="0"><tspan
              x="273.45987"
              y="488.3499"
-             id="tspan71882"><tspan
+             id="tspan5150"><tspan
                style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-               id="tspan71880">GraphSage</tspan></tspan></text>
+               id="tspan5148">GraphSage</tspan></tspan></text>
       </g>
       <g
          id="g70761">
@@ -2008,14 +1993,14 @@
            y="0"><tspan
              x="300.93845"
              y="488.3499"
-             id="tspan71886"><tspan
+             id="tspan5154"><tspan
                style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-               id="tspan71884">GIN</tspan></tspan></text>
+               id="tspan5152">GIN</tspan></tspan></text>
       </g>
     </g>
     <g
        id="g71328"
-       transform="translate(153.129)">
+       transform="translate(153.129,-6.879167)">
       <g
          id="g71290">
         <g
@@ -2064,9 +2049,9 @@
            y="0"><tspan
              x="297.98076"
              y="488.3499"
-             id="tspan71890"><tspan
+             id="tspan5158"><tspan
                style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-               id="tspan71888">GCN</tspan></tspan></text>
+               id="tspan5156">GCN</tspan></tspan></text>
       </g>
       <g
          id="g71308">
@@ -2109,9 +2094,9 @@
            y="0"><tspan
              x="273.45987"
              y="488.3499"
-             id="tspan71894"><tspan
+             id="tspan5162"><tspan
                style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-               id="tspan71892">GraphSage</tspan></tspan></text>
+               id="tspan5160">GraphSage</tspan></tspan></text>
       </g>
       <g
          id="g71326">
@@ -2154,9 +2139,9 @@
            y="0"><tspan
              x="300.93845"
              y="488.3499"
-             id="tspan71898"><tspan
+             id="tspan5166"><tspan
                style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-               id="tspan71896">GIN</tspan></tspan></text>
+               id="tspan5164">GIN</tspan></tspan></text>
       </g>
     </g>
   </g>
