@@ -43,19 +43,19 @@ class JavaEvaluator(AbstractEvaluator):
 
         def _train():
             for _ in range(epochs):
-                result = self.neuralogic_model(None, True)
-                yield result
+                results, total_len = self.neuralogic_model(None, True)
+                yield sum(result[2] for result in results), total_len
             if dataset is not None:
                 self.reset_dataset(old_dataset)
 
         if generator:
             return _train()
 
-        results = self.neuralogic_model(None, True, epochs=epochs)
+        results, total_len = self.neuralogic_model(None, True, epochs=epochs)
         if dataset is not None:
             self.reset_dataset(old_dataset)
 
-        return results
+        return sum(result[2] for result in results), total_len
 
     def test(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
         dataset = self.dataset if dataset is None else self.build_dataset(dataset)
@@ -67,7 +67,7 @@ class JavaEvaluator(AbstractEvaluator):
 
         if generator:
             return _test()
-        return self.neuralogic_model(dataset.samples, False)
+        return [(label, output) for label, output, _ in self.neuralogic_model(dataset.samples, False)]
 
     def state_dict(self) -> Dict:
         return self.neuralogic_model.state_dict()

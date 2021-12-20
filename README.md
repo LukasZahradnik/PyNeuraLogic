@@ -54,25 +54,34 @@ Naturally, PyNeuralogic is by no means limited to GNN models, as the expressiven
 In [PyNeuraLogic](https://dspace.cvut.cz/bitstream/handle/10467/97065/F3-DP-2021-Zahradnik-Lukas-Extending-Graph-Neural-Networks-with-Relational-Logic.pdf?sequence=-1&isAllowed=y), all these ideas take the same form of simple small logic programs. These are commonly highly transparent and easy to understand, thanks to their declarative nature. Consequently, there is no need to design a zoo of blackbox class names for each small modification of the GNN rule - you code directly at the level of the logical principles here!
 
 The [backend engine](https://jair.org/index.php/jair/article/view/11203) then creates the underlying differentiable computation (inference) graphs in a fully automated and dynamic fashion, hence you don't have to care about aligning everything into some (static) tensor operations.
-This gives you considerably more expressiveness, and, perhaps surprisingly, sometimes even [performance](https://arxiv.org/abs/2007.06286).
 
+
+### How does it perform?
+
+While PyNeuraLogic allows you to easily declare highly expressive models with capabilities far [beyond the common GNNs](https://arxiv.org/abs/2007.06286), it does not come at the cost of performance for the basic GNNs either. On the contrary, for a range of common GNN models and applications, such as learning with molecules, PyNeuraLogic is actually considerably faster than the popular GNN frameworks, as demonstrated in our [benchmarks](https://github.com/LukasZahradnik/PyNeuraLogic/tree/benchmarks/benchmarks).
+
+
+<!-- Running a few experiments shows that PyNeuraLogic can outperform popular GNN frameworks in regards to time performance while achieving nearly the same accuracy. Results for a few experiments can be seen in the chart below. -->
+
+<!-- vsechny ty detaily bych nechal az do nejake podrobnejsi dokumentace : Note that PyNeuraLogic requires some time to startup (e.g., translate logic programs into neural networks). In the experiments below, the PyNeuraLogic required to startup, on average, _20.9s (+- 0.85s)_ for GCN, _22.5s (+- 0.49s)_ for GraphSAGE, and _58.48s (+- 1.84s)_ for GIN. The startup is done only once before the training and is compensated for in a few epochs due to PyNeuraLogic higher speed performance.  -->
+
+  
+<p align="center">
+<img src="https://github.com/LukasZahradnik/PyNeuraLogic/blob/benchmarks/docs/_static/benchmark.svg" alt="Benchmark of PyNeuraLogic" title="Benchmark of PyNeuraLogic"/>
+</p>
+
+<!-- i ty popisky grafu bych tady zjednodusil: nadpisy jen "average time per epoch" a "average accuracies" - zbytek plyne z kontextu <sub>
+  Benchmarks in the plot above were run on the NCI 786_0 dataset on the CPU using scripts that you can find <a href="https://github.com/LukasZahradnik/PyNeuraLogic/tree/master/benchmarks" target="_blank">here</a>. Models were trained in 100 epochs using Adam optimizer with a learning rate of 1.5e-5.
+</sub> -->
+
+</br>
 
 We hope you'll find the framework useful in designing your own deep **relational** learning ideas beyond the GNNs!
 Please let us know if you need some guidance or would like to cooperate!
 
-[comment]: <> (PyNeuraLogic allows users to encode machine learning problems via parameterized, rule-based constructs. Said constructs are based on a custom declarative language that follows a logic programming paradigm.)
 
 ## Getting started
 
-[comment]: <> (### Supported backends)
-
-[comment]: <> (PyNeuraLogic currently supports following backends &#40;to some extent&#41;, which have to be installed separately:)
-
-[comment]: <> (- [DyNet]&#40;https://github.com/clab/dynet&#41;)
-
-[comment]: <> (- Java)
-
-[comment]: <> (- [PyTorch Geometric]&#40;https://github.com/rusty1s/pytorch_geometric&#41;)
 
 ### Prerequisites
 

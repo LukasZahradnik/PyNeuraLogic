@@ -1,0 +1,45 @@
+{10,51} atom_embed(A) :- a_feats(A). [activation=identity]
+atom_embed/1 [activation=identity]
+
+l1_embed(X) :- atom_embed(Y), *bond(X,Y,B). [aggregation=sum, activation=identity]
+l1_embed(X) :- atom_embed(X). [activation=identity]
+l1_embed [activation=identity]
+
+{10,10} l1_mlp_embed(X) :- {10,10} l1_embed(X). [activation=relu]
+l1_mlp_embed/1 [activation=relu]
+
+l2_embed(X) :- l1_mlp_embed(Y), *bond(X,Y,B). [aggregation=sum, activation=identity]
+l2_embed(X) :- l1_mlp_embed(X). [activation=identity]
+l2_embed [activation=identity]
+
+{10,10} l2_mlp_embed(X) :- {10,10} l2_embed(X). [activation=relu]
+l2_mlp_embed/1 [activation=relu]
+
+l3_embed(X) :- l2_mlp_embed(Y), *bond(X,Y,B). [aggregation=sum, activation=identity]
+l3_embed(X) :- l2_mlp_embed(X). [activation=identity]
+l3_embed [activation=identity]
+
+{10,10} l3_mlp_embed(X) :- {10,10} l3_embed(X). [activation=relu]
+l3_mlp_embed/1 [activation=relu]
+
+l4_embed(X) :- l3_mlp_embed(Y), *bond(X,Y,B). [aggregation=sum, activation=identity]
+l4_embed(X) :- l3_mlp_embed(X). [activation=identity]
+l4_embed [activation=identity]
+
+{10,10} l4_mlp_embed(X) :- {10,10} l4_embed(X). [activation=relu]
+l4_mlp_embed/1 [activation=relu]
+
+l5_embed(X) :- l4_mlp_embed(Y), *bond(X,Y,B). [aggregation=sum, activation=identity]
+l5_embed(X) :- l4_mlp_embed(X). [activation=identity]
+l5_embed [activation=identity]
+
+{10,10} l5_mlp_embed(X) :- {10,10} l5_embed(X). [activation=relu]
+l5_mlp_embed/1 [activation=relu]
+
+{1,10} predict :- l1_mlp_embed(X). [aggregation=avg, activation=identity]
+{1,10} predict :- l2_mlp_embed(X). [aggregation=avg, activation=identity]
+{1,10} predict :- l3_mlp_embed(X). [aggregation=avg, activation=identity]
+{1,10} predict :- l4_mlp_embed(X). [aggregation=avg, activation=identity]
+{1,10} predict :- l5_mlp_embed(X). [aggregation=avg, activation=identity]
+
+predict/0 [activation=sigmoid]
