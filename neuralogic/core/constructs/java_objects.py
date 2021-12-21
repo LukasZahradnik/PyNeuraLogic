@@ -107,7 +107,8 @@ class JavaFactory:
         if metadata.aggregation is not None:
             map.put("aggregation", self.value_namespace.StringValue(metadata.aggregation.value.lower()))
         if metadata.activation is not None:
-            map.put("activation", self.value_namespace.StringValue(metadata.activation.value.lower()))
+            value = metadata.activation if isinstance(metadata.activation, str) else metadata.activation.value
+            map.put("activation", self.value_namespace.StringValue(value.lower()))
         # if metadata.offset is not None:
         #     _, value = self.get_value(metadata.offset)
         #     map.put("offset", self.weight_factory.construct(value))

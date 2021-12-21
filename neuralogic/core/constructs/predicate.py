@@ -38,11 +38,20 @@ class Predicate:
             for entry in other:
                 if isinstance(entry, Activation):
                     metadata.activation = entry
+                elif isinstance(entry, Aggregation):
+                    metadata.aggregation = entry
                 else:
                     raise NotImplementedError
             other = metadata
         elif not isinstance(other, Metadata):
             raise NotImplementedError
+
+        if other.aggregation is not None:
+            if other.aggregation not in (Aggregation.MAX, Aggregation.MIN):
+                raise NotImplementedError
+            activation = Activation.IDENTITY.value if other.activation is None else other.activation.value
+            other = Metadata(activation=f"{other.aggregation.value}-{activation.lower()}")
+
         return PredicateMetadata(self, other)
 
 

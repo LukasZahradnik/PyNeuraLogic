@@ -1,9 +1,15 @@
+from typing import Union
+
 from neuralogic.core.enums import Activation, Aggregation
 
 
 class Metadata:
     def __init__(
-        self, offset=None, learnable: bool = None, activation: Activation = None, aggregation: Aggregation = None
+        self,
+        offset=None,
+        learnable: bool = None,
+        activation: Union[str, Activation] = None,
+        aggregation: Aggregation = None,
     ):
         self.offset = offset
         self.learnable = learnable
@@ -17,7 +23,9 @@ class Metadata:
         if self.learnable is not None:
             metadata_list.append(f"learnable={str(self.learnable).lower()}")
         if self.activation is not None:
-            metadata_list.append(f"activation={self.activation.value}")
+            metadata_list.append(
+                f"activation={self.activation if isinstance(self.activation, str) else self.activation.value}"
+            )
         if self.aggregation is not None:
             metadata_list.append(f"aggregation={self.aggregation.value}")
         return f"[{', '.join(metadata_list)}]"

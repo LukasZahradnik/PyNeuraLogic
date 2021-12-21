@@ -28,6 +28,7 @@ class Aggregation(Enum):
     SUM = "sum"
     MAX = "max"
     AVG = "avg"
+    MIN = "min"
 
 
 class Initializer(str, Enum):
