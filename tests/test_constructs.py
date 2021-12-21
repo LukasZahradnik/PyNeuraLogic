@@ -65,6 +65,26 @@ def test_predicate_creation() -> None:
     assert predicate.special is False
     assert predicate.name == "hidden_test"
 
+    predicate_metadata = R.shortest / 2 | [Activation.SIGMOID]
+    assert predicate_metadata.metadata is not None
+    assert predicate_metadata.metadata.aggregation is None
+    assert predicate_metadata.metadata.activation == Activation.SIGMOID
+
+    predicate_metadata = R.shortest / 2 | [Activation.SIGMOID, Aggregation.MAX]
+    assert predicate_metadata.metadata is not None
+    assert predicate_metadata.metadata.aggregation is None
+    assert predicate_metadata.metadata.activation == "max-sigmoid"
+
+    predicate_metadata = R.shortest / 2 | [Aggregation.MIN]
+    assert predicate_metadata.metadata is not None
+    assert predicate_metadata.metadata.aggregation is None
+    assert predicate_metadata.metadata.activation == "min-identity"
+
+    predicate_metadata = R.shortest / 2 | Metadata(activation=Activation.TANH, aggregation=Aggregation.MIN)
+    assert predicate_metadata.metadata is not None
+    assert predicate_metadata.metadata.aggregation is None
+    assert predicate_metadata.metadata.activation == "min-tanh"
+
 
 def test_atom_creation() -> None:
     """Test atom creation related operations and properties"""
