@@ -1,4 +1,4 @@
-from neuralogic.core.enums import Activation, Aggregation
+from neuralogic.core.enums import Activation, Aggregation, ActivationAgg, ActivationAggregation
 from neuralogic.core.constructs.metadata import Metadata
 from typing import Iterable, Optional
 
@@ -69,7 +69,7 @@ class Rule:
             metadata = Metadata()
 
             for entry in other:
-                if isinstance(entry, Activation):
+                if isinstance(entry, (Activation, ActivationAgg, ActivationAggregation)):
                     metadata.activation = entry
                 elif isinstance(entry, Aggregation):
                     metadata.aggregation = entry

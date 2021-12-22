@@ -23,6 +23,14 @@ class Activation(str, Enum):
     SOFTMAX = "SOFTMAX"
     SPARSEMAX = "SPARSEMAX"
 
+    def __add__(self, other: "ActivationAgg"):
+        if not isinstance(other, ActivationAgg):
+            raise NotImplementedError
+        return ActivationAggregation(other, self)
+
+    def __str__(self):
+        return self.value.lower()
+
 
 class ActivationAgg(str, Enum):
     MAX = "max"
@@ -32,6 +40,9 @@ class ActivationAgg(str, Enum):
         if not isinstance(other, Activation):
             raise NotImplementedError
         return ActivationAggregation(self, other)
+
+    def __str__(self):
+        return f"{self.value}-identity"
 
 
 class Aggregation(str, Enum):

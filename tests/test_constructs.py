@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
-from neuralogic.core import R, Activation, Aggregation, Metadata
+from neuralogic.core import R, Activation, Aggregation, Metadata, ActivationAgg
 
 
 def test_predicate_creation() -> None:
@@ -70,20 +70,20 @@ def test_predicate_creation() -> None:
     assert predicate_metadata.metadata.aggregation is None
     assert predicate_metadata.metadata.activation == Activation.SIGMOID
 
-    predicate_metadata = R.shortest / 2 | [Activation.SIGMOID, Aggregation.MAX]
+    predicate_metadata = R.shortest / 2 | [Activation.SIGMOID + ActivationAgg.MAX]
     assert predicate_metadata.metadata is not None
     assert predicate_metadata.metadata.aggregation is None
-    assert predicate_metadata.metadata.activation == "max-sigmoid"
+    assert str(predicate_metadata.metadata.activation) == "max-sigmoid"
 
-    predicate_metadata = R.shortest / 2 | [Aggregation.MIN]
+    predicate_metadata = R.shortest / 2 | [ActivationAgg.MIN]
     assert predicate_metadata.metadata is not None
     assert predicate_metadata.metadata.aggregation is None
-    assert predicate_metadata.metadata.activation == "min-identity"
+    assert str(predicate_metadata.metadata.activation) == "min-identity"
 
-    predicate_metadata = R.shortest / 2 | Metadata(activation=Activation.TANH, aggregation=Aggregation.MIN)
+    predicate_metadata = R.shortest / 2 | Metadata(activation=ActivationAgg.MAX + Activation.TANH)
     assert predicate_metadata.metadata is not None
-    assert predicate_metadata.metadata.aggregation is None
-    assert predicate_metadata.metadata.activation == "min-tanh"
+    assert predicate_metadata.metadata.aggregation == None
+    assert str(predicate_metadata.metadata.activation) == "max-tanh"
 
 
 def test_atom_creation() -> None:
@@ -133,3 +133,9 @@ def test_rule_metadata():
 
     rule = R.a <= R.b
     assert rule.metadata is None
+
+    rule = (R.a <= R.b) | [ActivationAgg.MAX + Activation.SIGMOID, Aggregation.AVG]
+
+    assert rule.metadata is not None
+    assert rule.metadata.aggregation == Aggregation.AVG
+    assert str(rule.metadata.activation) == "max-sigmoid"

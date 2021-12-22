@@ -1,6 +1,6 @@
 from collections import Iterable
 
-from neuralogic.core.enums import Activation, Aggregation
+from neuralogic.core.enums import Activation, Aggregation, ActivationAggregation, ActivationAgg
 from neuralogic.core.constructs.metadata import Metadata
 
 
@@ -36,7 +36,7 @@ class Predicate:
             metadata = Metadata()
 
             for entry in other:
-                if isinstance(entry, Activation):
+                if isinstance(entry, (Activation, ActivationAgg, ActivationAggregation)):
                     metadata.activation = entry
                 elif isinstance(entry, Aggregation):
                     metadata.aggregation = entry
@@ -45,13 +45,6 @@ class Predicate:
             other = metadata
         elif not isinstance(other, Metadata):
             raise NotImplementedError
-
-        if other.aggregation is not None:
-            if other.aggregation not in (Aggregation.MAX, Aggregation.MIN):
-                raise NotImplementedError
-            activation = Activation.IDENTITY.value if other.activation is None else other.activation.value
-            other = Metadata(activation=f"{other.aggregation.value}-{activation.lower()}")
-
         return PredicateMetadata(self, other)
 
 
