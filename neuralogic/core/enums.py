@@ -24,7 +24,17 @@ class Activation(str, Enum):
     SPARSEMAX = "SPARSEMAX"
 
 
-class Aggregation(Enum):
+class ActivationAgg(str, Enum):
+    MAX = "max"
+    MIN = "min"
+
+    def __add__(self, other: Activation):
+        if not isinstance(other, Activation):
+            raise NotImplementedError
+        return ActivationAggregation(self, other)
+
+
+class Aggregation(str, Enum):
     SUM = "sum"
     MAX = "max"
     AVG = "avg"
@@ -45,3 +55,12 @@ class Backend(Enum):
     JAVA = "java"
     PYG = "pyg"
     TORCH = "torch"
+
+
+class ActivationAggregation:
+    def __init__(self, aggregation: ActivationAgg, activation: Activation):
+        self.aggregation = aggregation
+        self.activation = activation
+
+    def __str__(self):
+        return f"{self.aggregation.value}-{self.activation.value.lower()}"
