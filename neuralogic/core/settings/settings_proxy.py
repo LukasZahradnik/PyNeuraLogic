@@ -1,6 +1,5 @@
-from neuralogic import get_neuralogic, get_gateway
 from neuralogic.core.enums import Optimizer, Initializer, ErrorFunction, Activation
-from py4j.java_gateway import set_field, get_field
+import jpype
 
 
 class SettingsProxy:
@@ -19,8 +18,8 @@ class SettingsProxy:
         iso_value_compression: bool,
         chain_pruning: bool,
     ):
-        self.namespace = get_neuralogic().cz.cvut.fel.ida.setup
-        self.settings = self.namespace.Settings()
+        self.settings_class = jpype.JClass("cz.cvut.fel.ida.setup.Settings")
+        self.settings = self.settings_class()
 
         params = locals().copy()
         params.pop("self")
@@ -28,44 +27,44 @@ class SettingsProxy:
         for key, value in params.items():
             self.__setattr__(key, value)
 
-        set_field(self.settings, "debugExporting", False)
-        set_field(self.settings, "squishLastLayer", False)
-        set_field(self.settings, "trainOnlineResultsType", self.namespace.Settings.ResultsType.REGRESSION)
-        set_field(self.settings, "exportBlocks", get_gateway().new_array(get_gateway().jvm.java.lang.String, 0))
+        self.settings.debugExporting = False
+        self.settings.squishLastLayer = False
+        self.settings.trainOnlineResultsType = self.settings_class.ResultsType.REGRESSION
+        self.settings.exportBlocks = []
 
         self.settings.infer()
 
     @property
     def iso_value_compression(self) -> bool:
-        return get_field(self.settings, "isoValueCompression")
+        return self.settings.isoValueCompression
 
     @iso_value_compression.setter
     def iso_value_compression(self, iso_value_compression: bool):
-        set_field(self.settings, "isoValueCompression", iso_value_compression)
+        self.settings.isoValueCompression = iso_value_compression
 
     @property
     def chain_pruning(self) -> bool:
-        return get_field(self.settings, "chainPruning")
+        return self.settings.chainPruning
 
     @chain_pruning.setter
     def chain_pruning(self, chain_pruning: bool):
-        set_field(self.settings, "chainPruning", chain_pruning)
+        self.settings.chainPruning = chain_pruning
 
     @property
     def seed(self) -> int:
-        return get_field(self.settings, "seed")
+        return self.settings.seed
 
     @seed.setter
     def seed(self, seed: int):
-        set_field(self.settings, "seed", seed)
+        self.settings.seed = seed
 
     @property
     def learning_rate(self) -> float:
-        return get_field(self.settings, "initLearningRate")
+        return self.settings.initLearningRate
 
     @learning_rate.setter
     def learning_rate(self, learning_rate: float):
-        set_field(self.settings, "initLearningRate", learning_rate)
+        self.settings.initLearningRate = learning_rate
 
     @property
     def optimizer(self):
@@ -74,134 +73,134 @@ class SettingsProxy:
     @optimizer.setter
     def optimizer(self, optimizer: Optimizer):
         if optimizer == Optimizer.SGD:
-            java_optimizer = self.namespace.Settings.OptimizerSet.SGD
+            java_optimizer = self.settings_class.OptimizerSet.SGD
         elif optimizer == Optimizer.ADAM:
-            java_optimizer = self.namespace.Settings.OptimizerSet.ADAM
+            java_optimizer = self.settings_class.OptimizerSet.ADAM
         else:
             raise NotImplementedError
         self.settings.setOptimizer(java_optimizer)
 
     @property
     def initializer_const(self):
-        return get_field(self.settings, "constantInitValue")
+        return self.settings.constantInitValue
 
     @initializer_const.setter
     def initializer_const(self, value: float):
-        set_field(self.settings, "constantInitValue", value)
+        self.settings.constantInitValue = value
 
     @property
     def initializer_uniform_scale(self):
-        return get_field(self.settings, "randomInitScale")
+        return self.settings.randomInitScale
 
     @initializer_uniform_scale.setter
     def initializer_uniform_scale(self, value: float):
-        set_field(self.settings, "randomInitScale", value)
+        self.settings.randomInitScale = value
 
     @property
     def error_function(self):
-        return get_field(self.settings, "errorFunction")
+        return self.settings.errorFunction
 
     @error_function.setter
     def error_function(self, error_function: ErrorFunction):
         if error_function == ErrorFunction.SQUARED_DIFF:
-            java_error_function = self.namespace.Settings.ErrorFcn.SQUARED_DIFF
+            java_error_function = self.settings_class.ErrorFcn.SQUARED_DIFF
         # elif error_function == ErrorFunction.ABS_DIFF:
         #     java_error_function = self.namespace.Settings.ErrorFcn.ABS_DIFF
         elif error_function == ErrorFunction.SOFTENTROPY:
-            java_error_function = self.namespace.Settings.ErrorFcn.SOFTENTROPY
+            java_error_function = self.settings_class.ErrorFcn.SOFTENTROPY
         elif error_function == ErrorFunction.CROSSENTROPY:
-            java_error_function = self.namespace.Settings.ErrorFcn.CROSSENTROPY
+            java_error_function = self.settings_class.ErrorFcn.CROSSENTROPY
         else:
             raise NotImplementedError
-        set_field(self.settings, "errorFunction", java_error_function)
+        self.settings.errorFunction = java_error_function
 
     @property
     def epochs(self) -> int:
-        return get_field(self.settings, "maxCumEpochCount")
+        return self.settings.maxCumEpochCount
 
     @epochs.setter
     def epochs(self, epochs: int):
-        set_field(self.settings, "maxCumEpochCount", epochs)
+        self.settings.maxCumEpochCount = epochs
 
     @property
     def initializer(self):
-        initializer = get_field(self.settings, "initializer")
+        initializer = self.settings.initializer
 
         if str(initializer) != "SIMPLE":
             return initializer
-        return get_field(self.settings, "initDistribution")
+        return self.settings.initDistribution
 
     @initializer.setter
     def initializer(self, initializer: Initializer):
         if initializer == Initializer.HE:
-            set_field(self.settings, "initializer", self.namespace.Settings.InitSet.HE)
+            self.settings.initializer = self.settings_class.InitSet.HE
             return
         if initializer == Initializer.GLOROT:
-            set_field(self.settings, "initializer", self.namespace.Settings.InitSet.GLOROT)
+            self.settings.initializer = self.settings_class.InitSet.GLOROT
             return
 
         if initializer == Initializer.NORMAL:
-            init_dist = self.namespace.Settings.InitDistribution.NORMAL
+            init_dist = self.settings_class.InitDistribution.NORMAL
         elif initializer == Initializer.UNIFORM:
-            init_dist = self.namespace.Settings.InitDistribution.UNIFORM
+            init_dist = self.settings_class.InitDistribution.UNIFORM
         elif initializer == Initializer.CONSTANT:
-            init_dist = self.namespace.Settings.InitDistribution.CONSTANT
+            init_dist = self.settings_class.InitDistribution.CONSTANT
         elif initializer == Initializer.LONGTAIL:
-            init_dist = self.namespace.Settings.InitDistribution.LONGTAIL
+            init_dist = self.settings_class.InitDistribution.LONGTAIL
         else:
             raise NotImplementedError
-        set_field(self.settings, "initDistribution", init_dist)
-        set_field(self.settings, "initializer", self.namespace.Settings.InitSet.SIMPLE)
+        self.settings.initDistribution = init_dist
+        self.settings.initializer = self.settings_class.InitSet.SIMPLE
 
     @property
     def relation_neuron_activation(self) -> Activation:
-        return get_field(self.settings, "atomNeuronActivation")
+        return self.settings.atomNeuronActivation
 
     @relation_neuron_activation.setter
     def relation_neuron_activation(self, value: Activation):
-        set_field(self.settings, "atomNeuronActivation", self.get_activation_function(value))
+        self.settings.atomNeuronActivation = self.get_activation_function(value)
 
     @property
     def rule_neuron_activation(self) -> Activation:
-        return get_field(self.settings, "ruleNeuronActivation")
+        return self.settings.ruleNeuronActivation
 
     @rule_neuron_activation.setter
     def rule_neuron_activation(self, value: Activation):
-        set_field(self.settings, "ruleNeuronActivation", self.get_activation_function(value))
+        self.settings.ruleNeuronActivation = self.get_activation_function(value)
 
     @property
     def debug_exporting(self) -> bool:
-        return get_field(self.settings, "debugExporting")
+        return self.settings.debugExporting
 
     @debug_exporting.setter
     def debug_exporting(self, debug_export: bool):
-        set_field(self.settings, "debugExporting", debug_export)
+        self.settings.debugExporting = debug_export
 
     @property
     def default_fact_value(self) -> float:
-        return get_field(self.settings, "defaultFactValue")
+        return self.settings.defaultFactValue
 
     @default_fact_value.setter
     def default_fact_value(self, value: float):
-        set_field(self.settings, "defaultFactValue", value)
+        self.settings.defaultFactValue = value
 
     def get_activation_function(self, activation: Activation):
         if activation == Activation.SIGMOID:
-            return self.namespace.Settings.ActivationFcn.SIGMOID
+            return self.settings_class.ActivationFcn.SIGMOID
         if activation == Activation.TANH:
-            return self.namespace.Settings.ActivationFcn.TANH
+            return self.settings_class.ActivationFcn.TANH
         if activation == Activation.SIGNUM:
-            return self.namespace.Settings.ActivationFcn.SIGNUM
+            return self.settings_class.ActivationFcn.SIGNUM
         if activation == Activation.RELU:
-            return self.namespace.Settings.ActivationFcn.RELU
+            return self.settings_class.ActivationFcn.RELU
         if activation == Activation.IDENTITY:
-            return self.namespace.Settings.ActivationFcn.IDENTITY
+            return self.settings_class.ActivationFcn.IDENTITY
         if activation == Activation.LUKASIEWICZ:
-            return self.namespace.Settings.ActivationFcn.LUKASIEWICZ
+            return self.settings_class.ActivationFcn.LUKASIEWICZ
         if activation == Activation.SOFTMAX:
-            return self.namespace.Settings.ActivationFcn.SOFTMAX
+            return self.settings_class.ActivationFcn.SOFTMAX
         if activation == Activation.SPARSEMAX:
-            return self.namespace.Settings.ActivationFcn.SPARSEMAX
+            return self.settings_class.ActivationFcn.SPARSEMAX
         raise NotImplementedError
 
     def to_json(self) -> str:

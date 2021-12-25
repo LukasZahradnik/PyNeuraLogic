@@ -1,9 +1,9 @@
 import json
 from typing import Dict, Sized
-from py4j.java_gateway import get_field
-from py4j.java_collections import SetConverter
 
-from neuralogic import get_neuralogic, get_gateway
+import jpype
+
+from neuralogic.core.helpers import to_java_list
 from neuralogic.nn.base import AbstractNeuraLogic
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.enums import Backend
@@ -17,13 +17,13 @@ class Loss:
         self.loss.backward()
 
     def value(self) -> float:
-        return get_field(self.loss.getError(), "value")
+        return self.loss.getError().value
 
     def output(self) -> float:
-        return get_field(self.loss.getOutput(), "value")
+        return self.loss.getOutput().value
 
     def target(self) -> float:
-        return get_field(self.loss.getTarget(), "value")
+        return self.loss.getTarget().value
 
 
 class NeuraLogic(AbstractNeuraLogic):
@@ -40,12 +40,15 @@ class NeuraLogic(AbstractNeuraLogic):
     def __init__(self, model, template, settings: SettingsProxy):
         super().__init__(Backend.JAVA, template, settings)
 
-        self.namespace = get_neuralogic().cz.cvut.fel.ida.neural.networks.computation.training.strategies
+        python_strategy = jpype.JClass(
+            "cz.cvut.fel.ida.neural.networks.computation.training.strategies.PythonTrainingStrategy"
+        )
+
         self.do_train = True
         self.need_sync = False
 
         self.neural_model = model
-        self.strategy = self.namespace.PythonTrainingStrategy(settings.settings, model)
+        self.strategy = python_strategy(settings.settings, model)
         self.samples_len = 0
 
         self.hook_handler = NeuraLogic.HookHandler(self)
@@ -62,22 +65,20 @@ class NeuraLogic(AbstractNeuraLogic):
 
     def set_training_samples(self, samples):
         self.samples_len = len(samples)
-        self.strategy.setSamples(samples)
+        self.strategy.setSamples(to_java_list(samples))
 
     def __call__(self, samples=None, train: bool = None, auto_backprop: bool = False, epochs: int = 1):
         self.hooks_set = len(self.hooks) != 0
 
         if self.hooks_set:
-            self.strategy.setHooks(
-                SetConverter().convert(set(self.hooks.keys()), get_gateway()._gateway_client), self.hook_handler
-            )
+            self.strategy.setHooks(set(self.hooks.keys()), self.hook_handler)
 
         if train is not None:
             self.do_train = train
 
         if samples is None:
             results = self.strategy.learnSamples(epochs)
-            deserialized_results = json.loads(results)
+            deserialized_results = json.loads(str(results))
 
             return deserialized_results, self.samples_len
 
@@ -85,7 +86,7 @@ class NeuraLogic(AbstractNeuraLogic):
             if self.do_train:
                 if auto_backprop:
                     result = self.strategy.learnSample(samples)
-                    return json.loads(result), 1
+                    return json.loads(str(result)), 1
             result = self.strategy.evaluateSample(samples)
             return Loss(result)
 
@@ -96,24 +97,24 @@ class NeuraLogic(AbstractNeuraLogic):
             return deserialized_results, len(samples)
 
         results = self.strategy.evaluateSamples(samples)
-        return json.loads(results)
+        return json.loads(str(results))
 
     def state_dict(self) -> Dict:
         weights = self.neural_model.getAllWeights()
         weights_dict = {}
 
         for weight in weights:
-            if get_field(weight, "isLearnable"):
-                value = get_field(weight, "value")
+            if weight.isLearnable:
+                value = weight.value
 
                 size = list(value.size())
 
                 if len(size) == 0 or size[0] == 0:
-                    weights_dict[get_field(weight, "index")] = get_field(value, "value")
+                    weights_dict[weight.index] = value.value
                 elif len(size) == 1 or size[0] == 1 or size[1] == 1:
-                    weights_dict[get_field(weight, "index")] = list(get_field(value, "values"))
+                    weights_dict[weight.index] = list(value.values)
                 else:
-                    weights_dict[get_field(weight, "index")] = json.loads(value.toString())
+                    weights_dict[weight.index] = json.loads(value.toString())
         return {
             "weights": weights_dict,
         }
