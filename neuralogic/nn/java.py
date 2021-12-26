@@ -3,6 +3,7 @@ from typing import Dict, Sized
 
 import jpype
 
+from neuralogic.core.functions import ErrorFunc
 from neuralogic.core.helpers import to_java_list
 from neuralogic.nn.base import AbstractNeuraLogic
 from neuralogic.core.settings import SettingsProxy
@@ -49,6 +50,23 @@ class NeuraLogic(AbstractNeuraLogic):
 
         self.neural_model = model
         self.strategy = python_strategy(settings.settings, model)
+
+        if isinstance(self.settings.error_function, ErrorFunc):
+            field = self.strategy.getClass().getDeclaredField("evaluation")
+            field.setAccessible(True)
+
+            evaluation = field.get(self.strategy)
+            evaluation_class = jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.iteration.actions.Evaluation")
+
+            field = evaluation_class.class_.getDeclaredField("resultFactory")
+            field.setAccessible(True)
+
+            result_factory = field.get(evaluation)
+            field = result_factory.getClass().getDeclaredField("errorFcn")
+            field.setAccessible(True)
+
+            field.set(result_factory, self.settings.error_function)
+
         self.samples_len = 0
 
         self.hook_handler = NeuraLogic.HookHandler(self)

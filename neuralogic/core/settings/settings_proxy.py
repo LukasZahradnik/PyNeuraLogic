@@ -1,5 +1,9 @@
+from typing import Union
+
 from neuralogic.core.enums import Optimizer, Initializer, ErrorFunction, Activation
 import jpype
+
+from neuralogic.core.functions import ErrorFunc
 
 
 class SettingsProxy:
@@ -9,7 +13,7 @@ class SettingsProxy:
         optimizer: Optimizer,
         learning_rate: float,
         epochs: int,
-        error_function: ErrorFunction,
+        error_function: Union[ErrorFunction, ErrorFunc],
         initializer: Initializer,
         initializer_const: float,
         initializer_uniform_scale: float,
@@ -23,6 +27,11 @@ class SettingsProxy:
 
         params = locals().copy()
         params.pop("self")
+
+        self.custom_error_function = None
+        if isinstance(error_function, ErrorFunc):
+            self.custom_error_function = error_function
+            params.pop("error_function")
 
         for key, value in params.items():
             self.__setattr__(key, value)
@@ -98,10 +107,17 @@ class SettingsProxy:
 
     @property
     def error_function(self):
+        if self.custom_error_function is not None:
+            return self.custom_error_function
         return self.settings.errorFunction
 
     @error_function.setter
-    def error_function(self, error_function: ErrorFunction):
+    def error_function(self, error_function: Union[ErrorFunction, ErrorFunc]):
+        self.custom_error_function = None
+        if isinstance(error_function, ErrorFunc):
+            self.custom_error_function = error_function
+            return
+
         if error_function == ErrorFunction.SQUARED_DIFF:
             java_error_function = self.settings_class.ErrorFcn.SQUARED_DIFF
         # elif error_function == ErrorFunction.ABS_DIFF:

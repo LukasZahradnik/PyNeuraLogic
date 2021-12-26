@@ -11,6 +11,7 @@ class ErrorFunction(str, Enum):
     # ABS_DIFF = "ABS_DIFF"
     CROSSENTROPY = "CROSSENTROPY"
     SOFTENTROPY = "SOFTENTROPY"
+    CUSTOM = "CUSTOM"
 
 
 class Activation(str, Enum):
