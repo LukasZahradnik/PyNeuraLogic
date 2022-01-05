@@ -13,11 +13,6 @@ class Sources:
 
     @staticmethod
     def from_args(args: List[str], settings: SettingsProxy) -> "Sources":
-        # jargs = gateway.new_array(gateway.jvm.java.lang.String, len(args))
-        #
-        # for i, item in enumerate(args):
-        #     jargs[i] = item
-
         runner = jpype.JClass("cz.cvut.fel.ida.neuralogic.cli.utils.Runner")
         sources = runner.getSources(args, settings.settings)
         return Sources(sources)

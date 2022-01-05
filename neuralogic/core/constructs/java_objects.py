@@ -74,7 +74,10 @@ class JavaFactory:
 
         predicate_name = f"@{atom.predicate.name}" if atom.predicate.special else atom.predicate.name
         literal = self.literal(predicate_name, atom.negated, terms)
-        return self.clause([literal])
+        literal_array = self.literal[1]
+        literal_array[0] = literal
+
+        return self.clause(literal_array)
 
     def get_generic_atom(self, atom_class, atom, variable_factory, default_weight=None, is_example=False):
         predicate = self.get_predicate(atom.predicate)
@@ -108,7 +111,7 @@ class JavaFactory:
         ):
             return None
 
-        map = jpype.JClass("jvm.java.util.LinkedHashMap")()
+        map = jpype.JClass("java.util.LinkedHashMap")()
 
         if metadata.aggregation is not None:
             map.put("aggregation", self.string_value(metadata.aggregation.value.lower()))

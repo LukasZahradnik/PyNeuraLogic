@@ -1,5 +1,4 @@
 from typing import Dict, Optional, Union
-from py4j.java_gateway import get_field
 
 from neuralogic.core.settings import Settings
 from neuralogic.core.builder import DatasetBuilder
@@ -39,11 +38,11 @@ class AbstractNeuraLogic:
         weight_dict = state_dict["weights"]
 
         for weight in weights:
-            if not get_field(weight, "isLearnable"):
+            if not weight.isLearnable:
                 continue
-            weight_value = get_field(weight, "value")
+            weight_value = weight.value
 
-            index = get_field(weight, "index")
+            index = weight.index
             value = weight_dict[index]
 
             if isinstance(value, (float, int)):
