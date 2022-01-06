@@ -38,12 +38,23 @@ def set_std_err(out):
     std_err = out
 
 
-def initialize(gateway_port: Optional[int] = None, die_on_exit: bool = True):
+def initialize(
+    gateway_port: Optional[int] = None,
+    die_on_exit: bool = True,
+    debug_mode: bool = False,
+    debug_port: int = 12999,
+    is_debug_server: bool = True,
+    debug_suspend: bool = False,
+):
     """
     Initialize the gateway for the Java process. Has to be reinitialized if some settings (JAVA_HOME) changes
 
     :param gateway_port:
     :param die_on_exit:
+    :param debug_mode:
+    :param debug_port:
+    :param is_debug_server:
+    :param debug_suspend:
     :return:
     """
     global gateway, neuralogic
@@ -58,6 +69,20 @@ def initialize(gateway_port: Optional[int] = None, die_on_exit: bool = True):
         except Exception:
             pass
 
+    java_opts = []
+
+    if debug_mode:
+        debug_port = int(debug_port)
+        server = "y" if is_debug_server else "n"
+        suspend = "y" if debug_suspend else "n"
+
+        java_opts = [
+            "-Xint",
+            "-Xdebug",
+            "-Xnoagent",
+            f"-Xrunjdwp:transport=dt_socket,server={server},address={debug_port},suspend={suspend},quiet=y",
+        ]
+
     for try_port in range(gateway_port, gateway_port + 10):
         try:
             gateway = JavaGateway.launch_gateway(
@@ -66,6 +91,7 @@ def initialize(gateway_port: Optional[int] = None, die_on_exit: bool = True):
                 redirect_stderr=std_err,
                 die_on_exit=die_on_exit,
                 daemonize_redirect=True,
+                javaopts=java_opts,
             )
 
             raw_token = unescape_new_line(gateway.gateway_parameters.auth_token)
