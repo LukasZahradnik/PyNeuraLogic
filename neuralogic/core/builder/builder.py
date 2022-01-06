@@ -2,6 +2,7 @@ from typing import List
 
 import jpype
 
+from neuralogic import is_initialized, initialize
 from neuralogic.core.builder.components import Weight, Sample
 from neuralogic.core.enums import Backend
 from neuralogic.core.settings import SettingsProxy
@@ -14,6 +15,9 @@ def stream_to_list(stream) -> List:
 
 class Builder:
     def __init__(self, settings: SettingsProxy):
+        if not is_initialized():
+            initialize()
+
         self.settings = settings
         self.example_builder = Builder.get_builders(settings)
         self.builder = Builder.get_builders(settings)

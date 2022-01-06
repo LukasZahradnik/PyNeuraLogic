@@ -2,6 +2,7 @@ from typing import List, Union, Optional
 
 import jpype
 
+from neuralogic import is_initialized, initialize
 from neuralogic.core import Template, JavaFactory, Settings
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core.constructs.atom import AtomType
@@ -11,6 +12,9 @@ from neuralogic.core.helpers import to_java_list
 
 class InferenceEngine:
     def __init__(self, template: Template):
+        if not is_initialized():
+            initialize()
+
         self.settings = Settings().create_disconnected_proxy()
         self.java_factory = JavaFactory()
 

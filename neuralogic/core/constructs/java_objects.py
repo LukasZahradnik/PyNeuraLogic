@@ -3,6 +3,7 @@ from typing import Optional, Iterable, Sequence
 import numpy as np
 import jpype
 
+from neuralogic import is_initialized, initialize
 from neuralogic.core.helpers import to_java_list
 from neuralogic.core.settings import SettingsProxy, Settings
 
@@ -11,6 +12,9 @@ class JavaFactory:
     def __init__(self, settings: Optional[SettingsProxy] = None):
         from neuralogic.core.constructs.rule import Rule
         from neuralogic.core.constructs.atom import WeightedAtom
+
+        if not is_initialized():
+            initialize()
 
         if settings is None:
             settings = Settings().create_proxy()

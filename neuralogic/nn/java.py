@@ -3,6 +3,7 @@ from typing import Dict, Sized
 
 import jpype
 
+from neuralogic import is_initialized, initialize
 from neuralogic.core.helpers import to_java_list
 from neuralogic.nn.base import AbstractNeuraLogic
 from neuralogic.core.settings import SettingsProxy
@@ -27,18 +28,20 @@ class Loss:
 
 
 class NeuraLogic(AbstractNeuraLogic):
+    @jpype.JImplements(jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler"))
     class HookHandler:
         def __init__(self, module: "NeuraLogic"):
             self.module = module
 
+        @jpype.JOverride
         def handleHook(self, hook, value):
             self.module.run_hook(hook, json.loads(value))
 
-        class Java:
-            implements = ["cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler"]
-
     def __init__(self, model, template, settings: SettingsProxy):
         super().__init__(Backend.JAVA, template, settings)
+
+        if not is_initialized():
+            initialize()
 
         python_strategy = jpype.JClass(
             "cz.cvut.fel.ida.neural.networks.computation.training.strategies.PythonTrainingStrategy"

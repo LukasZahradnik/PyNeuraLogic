@@ -2,6 +2,7 @@ from typing import Union, List, Optional, Set, Dict, Any, Callable, Iterable
 
 import jpype
 
+from neuralogic import is_initialized, initialize
 from neuralogic.core.helpers import to_java_list
 from neuralogic.core.builder import Builder, DatasetBuilder
 from neuralogic.core.enums import Backend
@@ -85,6 +86,9 @@ class Template:
         self.template.extend(rules)
 
     def get_parsed_template(self, settings: SettingsProxy, java_factory: JavaFactory):
+        if not is_initialized():
+            initialize()
+
         if self.template_file is not None:
             return Builder(settings).build_template_from_file(settings, self.template_file)
 

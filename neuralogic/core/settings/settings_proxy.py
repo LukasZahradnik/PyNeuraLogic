@@ -1,5 +1,7 @@
-from neuralogic.core.enums import Optimizer, Initializer, ErrorFunction, Activation
 import jpype
+
+from neuralogic import is_initialized, initialize
+from neuralogic.core.enums import Optimizer, Initializer, ErrorFunction, Activation
 
 
 class SettingsProxy:
@@ -18,6 +20,9 @@ class SettingsProxy:
         iso_value_compression: bool,
         chain_pruning: bool,
     ):
+        if not is_initialized():
+            initialize()
+
         self.settings_class = jpype.JClass("cz.cvut.fel.ida.setup.Settings")
         self.settings = self.settings_class()
 
