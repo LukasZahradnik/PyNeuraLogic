@@ -1,10 +1,51 @@
 import os
-
 import jpype
 
 
 os.environ["CLASSPATH"] = os.path.join(os.path.abspath(os.path.dirname(__file__)), "jar", "NeuraLogic.jar")
+
 _is_initialized = False
+_std_out = None
+_std_err = None
+
+
+class TextIOWrapper:
+    def __init__(self, wrapped_text_io):
+        self.wrapped_text_io = wrapped_text_io
+
+    def write(self, string):
+        self.wrapped_text_io.write(str(string))
+
+
+def set_system_output(output, system_output_setter) -> None:
+    java_output_stream = os.devnull
+
+    if output is not None:
+        wrapped = TextIOWrapper(output)
+
+        java_io_wrapper = jpype.JProxy("cz.cvut.fel.ida.utils.python.PythonOutputStream.TextIOWrapper", inst=wrapped)
+        java_output_stream = jpype.JClass("cz.cvut.fel.ida.utils.python.PythonOutputStream")(java_io_wrapper)
+    system_output_setter(jpype.java.io.PrintStream(java_output_stream))
+
+
+def set_stdout(out_io=None) -> None:
+    global _std_out
+    _std_out = out_io
+
+    if not _is_initialized:
+        return
+
+    set_system_output(_std_out, jpype.java.lang.System.setOut)
+
+
+def set_stderr(err_io=None) -> None:
+    global _std_err
+    _std_err = err_io
+
+    if not _is_initialized:
+        return
+
+    set_system_output(_std_out, jpype.java.lang.System.setErr)
 
 
 def is_initialized() -> bool:
@@ -36,5 +77,5 @@ def initialize(
     else:
         jpype.startJVM(classpath=[os.environ["CLASSPATH"]])
 
-    jpype.java.lang.System.setOut(jpype.java.io.PrintStream(jpype.java.io.File("/dev/null")))
-    jpype.java.lang.System.setErr(jpype.java.io.PrintStream(jpype.java.io.File("/dev/null")))
+    set_stdout(_std_out)
+    set_stderr(_std_err)
