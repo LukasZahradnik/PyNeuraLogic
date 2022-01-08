@@ -5,7 +5,6 @@ omit=
     examples/
     benchmarks/
     neuralogic/jar/*
-    neuralogic/grammar/*
     neuralogic/utils/data/datasets/*
 [report]
 exclude_lines =

@@ -18,7 +18,6 @@ VERSION = None
 
 REQUIRED = [
     "JPype1 >=1.3.0",
-    "antlr4-python3-runtime >= 4.8",
     "numpy >= 1.19.0",
 ]
 
