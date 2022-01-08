@@ -6,8 +6,6 @@ import jpype
 from neuralogic.core.builder import Sample
 from neuralogic.core.settings import Settings, SettingsProxy
 
-from py4j.java_gateway import set_field
-
 
 def get_drawing_settings(img_type: str = "png", value_detail: int = 0) -> SettingsProxy:
     """Returns the default settings instance for drawing with a specified image type.
@@ -18,9 +16,9 @@ def get_drawing_settings(img_type: str = "png", value_detail: int = 0) -> Settin
     """
     settings = Settings().create_proxy()
 
-    set_field(settings.settings, "drawing", False)
-    set_field(settings.settings, "storeNotShow", True)
-    set_field(settings.settings, "imgType", img_type.lower())
+    settings.settings.drawing = False
+    settings.settings.storeNotShow = True
+    settings.settings.imgType = img_type.lower()
 
     if value_detail not in [0, 1, 2]:
         raise NotImplementedError
@@ -32,7 +30,7 @@ def get_drawing_settings(img_type: str = "png", value_detail: int = 0) -> Settin
         settings_class.superDetailedNumberFormat,
     ]
 
-    set_field(settings.settings, "defaultNumberFormat", details[value_detail])
+    settings.settings.defaultNumberFormat = details[value_detail]
 
     return settings
 
