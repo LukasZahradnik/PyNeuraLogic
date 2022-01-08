@@ -95,7 +95,7 @@ class NeuraLogic(AbstractNeuraLogic):
 
         if self.do_train:
             results = self.strategy.learnSamples(samples, epochs)
-            deserialized_results = json.loads(results)
+            deserialized_results = json.loads(str(results))
 
             return deserialized_results, len(samples)
 
