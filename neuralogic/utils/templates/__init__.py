@@ -49,6 +49,6 @@ class TemplateList:
         ]
 
         for i, features in enumerate(x):
-            example.append(Relation.get(TemplateList.feature_name)(i)[features.detach().numpy()])
+            example.append(Relation.get(TemplateList.feature_name)(i)[features.detach().numpy()].fixed())
 
         return queries, example
