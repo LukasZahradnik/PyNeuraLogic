@@ -2,7 +2,6 @@ from typing import Optional, Dict, Union
 
 from py4j.java_collections import ListConverter
 
-from neuralogic import get_gateway
 from neuralogic.core.enums import Backend
 from neuralogic.core import Template, BuiltDataset, Dataset
 from neuralogic.nn.base import AbstractEvaluator
@@ -23,8 +22,7 @@ class JavaEvaluator(AbstractEvaluator):
 
     def reset_dataset(self, dataset):
         if dataset is None:
-            empty_list = ListConverter().convert([], get_gateway()._gateway_client)
-            self.neuralogic_model.set_training_samples(empty_list)
+            self.neuralogic_model.set_training_samples([])
         else:
             self.neuralogic_model.set_training_samples(dataset.samples)
         self.dataset = dataset

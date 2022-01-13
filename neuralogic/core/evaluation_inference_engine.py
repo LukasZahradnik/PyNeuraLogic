@@ -1,7 +1,5 @@
 from typing import List, Union, Optional
 
-from py4j.java_gateway import get_field, set_field
-
 from neuralogic.core import Template, Settings, Backend, Dataset
 from neuralogic.core.constructs.atom import AtomType
 from neuralogic.core.constructs.rule import Rule
@@ -45,10 +43,10 @@ class EvaluationInferenceEngine:
 
         def generator():
             for result, sample in zip(results, built_dataset.samples):
-                sub_query = get_field(get_field(sample, "query"), "neuron").getName()
+                sub_query = str(sample.query.neuron.getName())
                 sub_query = sub_query.split("(")[1].strip()[:-1]
 
                 substitutions = sub_query.split(",")
-                yield (result[1], {label: substitutions[position].strip() for label, position in variables})
+                yield result[1], {label: substitutions[position].strip() for label, position in variables}
 
         return generator()

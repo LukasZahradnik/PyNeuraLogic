@@ -12,7 +12,8 @@ from neuralogic.utils.templates.modules.embedding import Embedding
 
 class TemplateList:
     """TemplateList is a collection of pre-defined modules"""
-    edge_name = "edge"
+
+    edge_name = "_edge"
     feature_name = "node_feature"
     output_name = "predict"
 
@@ -26,23 +27,28 @@ class TemplateList:
         previous_names = []
 
         for i, component in enumerate(self.modules):
-            previous_names.append(
-                component.build(template, i + 1, previous_names, self.feature_name, self.edge_name)
-            )
+            previous_names.append(component.build(template, i + 1, previous_names, self.feature_name, self.edge_name))
 
     @staticmethod
     def to_inputs(x: Iterable, edge_index: Iterable, y, y_mask):
         if y is None:
             queries = [Relation.get(TemplateList.output_name)]
-        else:
+        elif y_mask is not None:
             queries = [
                 Relation.get(TemplateList.output_name)(*term if isinstance(term, list) else term)[value]
                 for term, value in zip(y_mask, y)
             ]
+        elif y.shape == (1,):
+            queries = [Relation.get(TemplateList.output_name)[int(y.detach().numpy()[0])]]
+        else:
+            queries = [Relation.get(TemplateList.output_name)[y.detach().numpy()]]
+
         example = [
-            Relation.get(TemplateList.edge_name)(int(u), int(v))[1] for u, v in zip(edge_index[0], edge_index[1])
+            Relation.get(TemplateList.edge_name)(int(u), int(v))[1].fixed()
+            for u, v in zip(edge_index[0], edge_index[1])
         ]
 
         for i, features in enumerate(x):
-            example.append(Relation.get(TemplateList.feature_name)(i)[features])
+            example.append(Relation.get(TemplateList.feature_name)(i)[features.detach().numpy()].fixed())
+
         return queries, example

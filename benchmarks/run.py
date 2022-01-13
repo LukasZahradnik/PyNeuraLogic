@@ -1,42 +1,38 @@
 import argparse
 import json
 import os
-from pathlib import Path
 
-from utils import load_dataset_folds_external
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-fw", help="framework", type=str)
-    parser.add_argument("-sd", help="path to dataset for learning", type=str)
-    parser.add_argument("-model", help="type of model (gcn,gin)", type=str)
-    parser.add_argument("-out", help="path to output folder", type=str)
-    parser.add_argument("-lr", nargs="?", help="learning rate for Adam", type=float)
+    parser.add_argument("-model", help="type of model (gcn, gin, gsage)", type=str)
+    parser.add_argument("-out", nargs="?", help="path to output folder", type=str)
     parser.add_argument("-ts", nargs="?", help="number of training steps", type=int)
+    parser.add_argument("-ds", nargs="?", help="dataset", type=str)
 
     args = parser.parse_args()
 
-    steps = args.ts or 1000
-
     framework = args.fw
+    steps = args.ts or 300
+    dataset = args.ds or "MUTAG"
+    out = args.out or os.path.join(os.path.abspath(os.path.dirname(__file__)), "results", dataset, args.model)
+    dataset_loc = os.path.join(os.path.abspath(os.path.dirname(__file__)), "datasets")
 
-    filename = "_graphs.pkl"
-    dataset_folds = load_dataset_folds_external(args.sd, suffix=filename, framework=framework)
-
-    num_node_features = 51
+    if not os.path.exists(out):
+        os.makedirs(out)
 
     if framework == "pyg":
-        from pyg_benchmark import Evaluator
+        from pyg_benchmark import evaluate
     if framework == "dgl":
-        from dgl_benchmark import Evaluator
+        from dgl_benchmark import evaluate
     if framework == "pyneuralogic":
-        from pyneuralogic_benchmark import Evaluator
+        from pyneuralogic_benchmark import evaluate
+    if framework == "spektral":
+        from spektral_benchmark import evaluate
 
-    cross = Evaluator.crossvalidate(args.model.lower(), dataset_folds, Path(args.out), num_node_features, steps)
+    times = evaluate(args.model, dataset, steps, dataset_loc, 10)
 
-    content = json.dumps(cross.__dict__, indent=4)
-    outp = args.out
-
-    with open(os.path.join(outp, "crossval.json"), "w") as f:
-        f.writelines(content)
+    with open(os.path.join(out, f"{framework}.json"), "w") as fp:
+        json.dump({"times": times, "steps": steps}, fp)

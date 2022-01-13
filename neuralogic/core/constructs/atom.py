@@ -96,8 +96,6 @@ class WeightedAtom:  # todo gusta: mozna dedeni namisto kompozice?
     def fixed(self) -> "WeightedAtom":
         if self.is_fixed:
             raise Exception
-
-        # set_field(get_field(self.java_object, "weight"), "isFixed", True)
         return WeightedAtom(self.atom, self.weight, True)
 
     @property

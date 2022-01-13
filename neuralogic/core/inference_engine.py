@@ -1,33 +1,42 @@
-from typing import List, Union, Dict, Generator, Optional
+from typing import List, Union, Optional
 
-from py4j.java_collections import ListConverter
-from py4j.java_gateway import get_field, set_field
+import jpype
 
-from neuralogic import get_neuralogic, get_gateway
+from neuralogic import is_initialized, initialize
 from neuralogic.core import Template, JavaFactory, Settings
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core.constructs.atom import AtomType
 from neuralogic.core.constructs.rule import Rule
+from neuralogic.core.helpers import to_java_list
 
 
 class InferenceEngine:
     def __init__(self, template: Template):
+        if not is_initialized():
+            initialize()
+
         self.settings = Settings().create_disconnected_proxy()
         self.java_factory = JavaFactory()
 
-        set_field(self.settings.settings, "inferTemplateFacts", False)
+        self.settings.settings.inferTemplateFacts = False
 
         self.parsed_template = template.get_parsed_template(self.settings, self.java_factory)
         self.dataset_builder = DatasetBuilder(self.parsed_template, self.java_factory)
 
         self.examples: List[Union[AtomType, Rule]] = []
 
-        self.grounder = get_neuralogic().cz.cvut.fel.ida.logic.grounding.Grounder.getGrounder(self.settings.settings)
+        self.grounder = jpype.JClass("cz.cvut.fel.ida.logic.grounding.Grounder").getGrounder(self.settings.settings)
         field = self.grounder.getClass().getDeclaredField("herbrandModel")
         field.setAccessible(True)
 
         self.herbrand_model = field.get(self.grounder)
-        self.empty_example = get_neuralogic().cz.cvut.fel.ida.logic.constructs.example.LiftedExample()
+
+        self.examples_builder = jpype.JClass("cz.cvut.fel.ida.logic.constructs.building.ExamplesBuilder")
+        self.queries_builder = jpype.JClass("cz.cvut.fel.ida.logic.constructs.building.QueriesBuilder")
+        self.grounding_sample = jpype.JClass("cz.cvut.fel.ida.logic.grounding.GroundingSample")
+        self.horn_clause = jpype.JClass("cz.cvut.fel.ida.logic.HornClause")
+
+        self.empty_example = jpype.JClass("cz.cvut.fel.ida.logic.constructs.example.LiftedExample")()
 
     def set_knowledge(self, examples: List[Union[AtomType, Rule]]) -> None:
         self.examples = examples
@@ -35,43 +44,38 @@ class InferenceEngine:
     def q(self, query: AtomType, examples: Optional[List[Union[AtomType, Rule]]] = None):
         return self.query(query, examples)
 
-    # -> Generator[Dict[str, Union[float, int, str]]]
-
     def query(self, query: AtomType, examples: Optional[List[Union[AtomType, Rule]]] = None):
         if examples is None:
             examples = self.examples
 
-        namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.building
-        examples_builder = namespace.ExamplesBuilder(self.settings.settings)
-        query_builder = namespace.QueriesBuilder(self.settings.settings)
+        examples_builder = self.examples_builder(self.settings.settings)
+        query_builder = self.queries_builder(self.settings.settings)
         query_builder.setFactoriesFrom(examples_builder)
 
         self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
         queries = self.dataset_builder.build_queries([query], query_builder)
 
         self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
-        examples = ListConverter().convert(
-            self.dataset_builder.build_examples([examples], examples_builder), get_gateway()._gateway_client
-        )
+        examples = to_java_list(self.dataset_builder.build_examples([examples], examples_builder))
 
         logic_samples = DatasetBuilder.merge_queries_with_examples(queries, examples)
-        logic_samples = ListConverter().convert(logic_samples, get_gateway()._gateway_client)
+        logic_samples = to_java_list(logic_samples)
 
         sample = logic_samples[0]
 
-        gs = get_neuralogic().cz.cvut.fel.ida.logic.grounding.GroundingSample(sample, self.parsed_template)
+        gs = self.grounding_sample(sample, self.parsed_template)
 
-        lifted_example = get_field(get_field(gs, "query"), "evidence")
-        template = get_field(gs, "template")
+        lifted_example = gs.query.evidence
+        template = gs.template
 
         ground_template = self.grounder.groundRulesAndFacts(lifted_example, template)
 
         clause = self.java_factory.atom_to_clause(query)
-        horn_clause = get_neuralogic().cz.cvut.fel.ida.logic.HornClause(clause)
+        horn_clause = self.horn_clause(clause)
         substitutions = self.herbrand_model.groundingSubstitutions(horn_clause)
 
-        labels = list(get_field(substitutions, "r"))
-        substitutions_sets = list(get_field(substitutions, "s"))
+        labels = list(substitutions.r)
+        substitutions_sets = list(substitutions.s)
 
         def generator():
             for substitution_set in substitutions_sets:

@@ -1,145 +1,138 @@
-import os
 import time
 
-import gc
+from torch_geometric.datasets import TUDataset
 
-from pathlib import Path
-from typing import Optional
-
-from neuralogic import get_gateway
-from neuralogic.core import Template, Backend, Settings, ErrorFunction, Initializer
-from utils import Results, to_json, export_fold, ResultList, Crossval
+from neuralogic.core.dataset import Dataset, Data
+from neuralogic.core import Template, Backend, Settings, Optimizer, ErrorFunction, R, V, Activation, Aggregation
 
 
-class Evaluator:
-    @staticmethod
-    def train(model, dataset, epochs):
-        outputs = []
-        labels = []
-        losses = []
+def gcn(num_features: int, dim: int = 10):
+    template = Template()
 
-        results, _ = model(dataset.samples, train=True, epochs=epochs)
+    template += (R.atom_embed(V.X)[dim, num_features] <= R.node_feature(V.X)) | [Activation.IDENTITY]
+    template += R.atom_embed / 1 | [Activation.IDENTITY]
 
-        for result in results:
-            outputs.append(result[1])
-            labels.append(result[0])
-            losses.append(result[2])
-        return Results(outputs, labels, loss=losses)
+    template += (R.l1_embed(V.X)[dim, dim] <= (R.atom_embed(V.Y), R._edge(V.X, V.Y))) | [
+        Aggregation.SUM,
+        Activation.IDENTITY,
+    ]
+    template += R.l1_embed / 1 | [Activation.RELU]
 
-    @staticmethod
-    def test(model, dataset):
-        outputs = []
-        labels = []
-        losses = []
+    template += (R.l2_embed(V.X)[dim, dim] <= (R.l1_embed(V.Y), R._edge(V.X, V.Y))) | [
+        Aggregation.SUM,
+        Activation.IDENTITY,
+    ]
+    template += R.l2_embed / 1 | [Activation.IDENTITY]
 
-        results = model(dataset.samples, train=False)
+    template += (R.predict[1, dim] <= R.l2_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
+    template += R.predict / 0 | [Activation.SIGMOID]
 
-        for result in results:
-            outputs.append(result[1])
-            labels.append(result[0])
-            losses.append(result[2])
-        return Results(outputs, labels, loss=losses)
+    return template
 
-    @staticmethod
-    def learn(model, train_dataset, val_dataset, test_dataset, steps=1000, lr=0.000015):
-        best_val_results = Results()
-        best_val_results.loss = 1e10
-        best_train_results = None
-        best_test_results = None
 
-        cumtime = 0
+def gin(num_features: int, dim: int = 10):
+    template = Template()
 
-        for epoch in range(steps):
-            start = time.time()
-            train_results = Evaluator.train(model, train_dataset, 1)
-            val_results = Evaluator.test(model, val_dataset)
-            test_results = Evaluator.test(model, test_dataset)
+    template += (R.atom_embed(V.X)[dim, num_features] <= R.node_feature(V.X)) | [Activation.IDENTITY]
+    template += R.atom_embed / 1 | [Activation.IDENTITY]
 
-            end = time.time()
+    template += (R.l1_embed(V.X) <= (R.atom_embed(V.Y), R._edge(V.X, V.Y))) | [Aggregation.SUM, Activation.IDENTITY]
+    template += (R.l1_embed(V.X) <= R.atom_embed(V.X)) | [Activation.IDENTITY]
+    template += R.l1_embed / 1 | [Activation.IDENTITY]
 
-            if val_results.loss < best_val_results.loss:
-                print(f"improving validation loss to {val_results.loss} at epoch {epoch}")
-                best_val_results = val_results
-                best_test_results = test_results
-                best_train_results = train_results
-                print(f"storing respective test results with accuracy {best_test_results.accuracy}")
+    template += (R.l1_mlp_embed(V.X)[dim, dim] <= R.l1_embed(V.X)[dim, dim]) | [Activation.RELU]
+    template += R.l1_mlp_embed / 1 | [Activation.RELU]
 
-            elapsed = end - start
-            cumtime += elapsed
+    # --
+    template += (R.l2_embed(V.X) <= (R.l1_mlp_embed(V.Y), R._edge(V.X, V.Y))) | [Aggregation.SUM, Activation.IDENTITY]
+    template += (R.l2_embed(V.X) <= R.l1_mlp_embed(V.X)) | [Activation.IDENTITY]
+    template += R.l2_embed / 1 | [Activation.IDENTITY]
 
-            print(
-                "Epoch: {:03d}, Train Loss: {:.7f}, "
-                "Train Acc: {:.7f}, Val Acc: {:.7f}, Test Acc: {:.7f}".format(
-                    epoch, train_results.loss, train_results.accuracy, val_results.accuracy, test_results.accuracy
-                )
-                + " elapsed: "
-                + str(elapsed)
-            )
-        return best_train_results, best_val_results, best_test_results, cumtime / steps
+    template += (R.l2_mlp_embed(V.X)[dim, dim] <= R.l2_embed(V.X)[dim, dim]) | [Activation.RELU]
+    template += R.l2_mlp_embed / 1 | [Activation.RELU]
 
-    @staticmethod
-    def crossvalidate(
-        model_string,
-        folds,
-        outpath: Optional[Path],
-        num_node_features: int,
-        steps: int = 1000,
-        lr: float = 0.000015,
-        dim: int = 10,
-    ):
-        if outpath is None:
-            outpath = Path("./out")
+    # --
+    template += (R.l3_embed(V.X) <= (R.l2_mlp_embed(V.Y), R._edge(V.X, V.Y))) | [Aggregation.SUM, Activation.IDENTITY]
+    template += (R.l3_embed(V.X) <= R.l2_mlp_embed(V.X)) | [Activation.IDENTITY]
+    template += R.l3_embed / 1 | [Activation.IDENTITY]
 
-        train_results = []
-        val_results = []
-        test_results = []
-        times = []
+    template += (R.l3_mlp_embed(V.X)[dim, dim] <= R.l3_embed(V.X)[dim, dim]) | [Activation.RELU]
+    template += R.l3_mlp_embed / 1 | [Activation.RELU]
 
-        for train_fold, val_fold, test_fold in folds:
-            gc.collect()
-            get_gateway().jvm.System.gc()
+    # --
+    template += (R.l4_embed(V.X) <= (R.l3_mlp_embed(V.Y), R._edge(V.X, V.Y))) | [Aggregation.SUM, Activation.IDENTITY]
+    template += (R.l4_embed(V.X) <= R.l3_mlp_embed(V.X)) | [Activation.IDENTITY]
+    template += R.l4_embed / 1 | [Activation.IDENTITY]
 
-            template = Evaluator.get_template(model_string)
-            settings = Settings(
-                initializer=Initializer.GLOROT,
-                epochs=steps,
-                learning_rate=lr,
-                error_function=ErrorFunction.CROSSENTROPY,
-            )
+    template += (R.l4_mlp_embed(V.X)[dim, dim] <= R.l4_embed(V.X)[dim, dim]) | [Activation.RELU]
+    template += R.l4_mlp_embed / 1 | [Activation.RELU]
 
-            model = template.build(Backend.JAVA, settings)
+    # --
+    template += (R.l5_embed(V.X) <= (R.l4_mlp_embed(V.Y), R._edge(V.X, V.Y))) | [Aggregation.SUM, Activation.IDENTITY]
+    template += (R.l5_embed(V.X) <= R.l4_mlp_embed(V.X)) | [Activation.IDENTITY]
+    template += R.l5_embed / 1 | [Activation.IDENTITY]
 
-            built_train_fold = model.build_dataset(train_fold)
-            built_val_fold = model.build_dataset(val_fold)
-            built_test_fold = model.build_dataset(test_fold)
+    template += (R.l5_mlp_embed(V.X)[dim, dim] <= R.l5_embed(V.X)[dim, dim]) | [Activation.RELU]
+    template += R.l5_mlp_embed / 1 | [Activation.RELU]
 
-            best_train_results, best_val_results, best_test_results, elapsed = Evaluator.learn(
-                model, built_train_fold, built_val_fold, built_test_fold, steps
-            )
+    template += (R.predict[1, dim] <= R.l1_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
+    template += (R.predict[1, dim] <= R.l2_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
+    template += (R.predict[1, dim] <= R.l3_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
+    template += (R.predict[1, dim] <= R.l4_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
+    template += (R.predict[1, dim] <= R.l5_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
 
-            train_results.append(best_train_results)
-            val_results.append(best_val_results)
-            test_results.append(best_test_results)
-            times.append(elapsed)
+    template += R.predict / 0 | [Activation.SIGMOID]
 
-            train = to_json(ResultList(train_results, times=times))
-            export_fold(train, outpath / "train")
+    return template
 
-            test = to_json(ResultList(test_results))
-            export_fold(test, outpath / "test")
 
-            gc.collect()
-            get_gateway().jvm.System.gc()
-        return Crossval(train_results, val_results, test_results, times)
+def gsage(num_features: int, dim: int = 10):
+    template = Template()
 
-    @staticmethod
-    def get_template(string: str):
-        dirname = os.path.dirname(os.path.abspath(__file__))
+    template += (R.atom_embed(V.X)[dim, num_features] <= R.node_feature(V.X)) | [Activation.IDENTITY]
+    template += R.atom_embed / 1 | [Activation.IDENTITY]
 
-        if string == "gcn":
-            return Template(template_file=os.path.join(dirname, "templates", "gcn.txt"))
-        if string == "gsage":
-            return Template(template_file=os.path.join(dirname, "templates", "gsage.txt"))
-        if string == "gin":
-            return Template(template_file=os.path.join(dirname, "templates", "gin.txt"))
-        raise NotImplementedError
+    template += (R.l1_embed(V.X)[dim, dim] <= R.atom_embed(V.X)) | [Activation.IDENTITY]
+    template += (R.l1_embed(V.X)[dim, dim] <= (R.atom_embed(V.Y), R._edge(V.X, V.Y))) | [
+        Aggregation.AVG,
+        Activation.IDENTITY,
+    ]
+    template += R.l1_embed / 1 | [Activation.RELU]
+
+    template += (R.l2_embed(V.X)[dim, dim] <= R.l1_embed(V.X)) | [Activation.IDENTITY]
+    template += (R.l2_embed(V.X)[dim, dim] <= (R.l1_embed(V.Y), R._edge(V.X, V.Y))) | [
+        Aggregation.AVG,
+        Activation.IDENTITY,
+    ]
+    template += R.l2_embed / 1 | [Activation.IDENTITY]
+
+    template += (R.predict[1, dim] <= R.l2_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
+    template += R.predict / 0 | [Activation.SIGMOID]
+
+    return template
+
+
+def get_model(model):
+    if model == "gcn":
+        return gcn
+    if model == "gsage":
+        return gsage
+    if model == "gin":
+        return gin
+    raise NotImplementedError
+
+
+def evaluate(model, dataset, steps, dataset_loc, dim):
+    settings = Settings(optimizer=Optimizer.ADAM, error_function=ErrorFunction.CROSSENTROPY, learning_rate=1e-3)
+
+    ds = TUDataset(root=dataset_loc, name=dataset)
+    model = get_model(model)(num_features=ds.num_node_features, dim=dim).build(Backend.JAVA, settings)
+
+    dataset = Dataset(data=[Data.from_pyg(data)[0] for data in ds])
+    built_dataset = model.build_dataset(dataset)
+
+    start_time = time.perf_counter()
+    model(built_dataset.samples, train=True, epochs=steps)
+    times = [time.perf_counter() - start_time]
+
+    return times

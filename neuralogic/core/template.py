@@ -1,10 +1,9 @@
-from py4j.java_gateway import set_field
-
-from neuralogic import get_neuralogic, get_gateway
-from py4j.java_collections import ListConverter
-
 from typing import Union, List, Optional, Set, Dict, Any, Callable, Iterable
 
+import jpype
+
+from neuralogic import is_initialized, initialize
+from neuralogic.core.helpers import to_java_list
 from neuralogic.core.builder import Builder, DatasetBuilder
 from neuralogic.core.enums import Backend
 from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
@@ -87,6 +86,9 @@ class Template:
         self.template.extend(rules)
 
     def get_parsed_template(self, settings: SettingsProxy, java_factory: JavaFactory):
+        if not is_initialized():
+            initialize()
+
         if self.template_file is not None:
             return Builder(settings).build_template_from_file(settings, self.template_file)
 
@@ -102,19 +104,14 @@ class Template:
             elif isinstance(rule, (WeightedAtom, BaseAtom)):
                 valued_facts.append(java_factory.get_valued_fact(rule, java_factory.get_variable_factory()))
 
-        weighted_rules = ListConverter().convert(weighted_rules, get_gateway()._gateway_client)
-        valued_facts = ListConverter().convert(valued_facts, get_gateway()._gateway_client)
-        predicate_metadata = ListConverter().convert(predicate_metadata, get_gateway()._gateway_client)
+        parsed_template = jpype.JClass("cz.cvut.fel.ida.logic.constructs.template.types.ParsedTemplate")
+        template = parsed_template(to_java_list(weighted_rules), to_java_list(valued_facts))
 
-        template_namespace = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.types
-        template = template_namespace.ParsedTemplate(weighted_rules, valued_facts)
+        template.weightsMetadata = (jpype.java.util.List) @ to_java_list([])
+        template.predicatesMetadata = to_java_list(predicate_metadata)
 
-        set_field(template, "weightsMetadata", ListConverter().convert([], get_gateway()._gateway_client))
-        set_field(template, "predicatesMetadata", predicate_metadata)
-
-        metadata_processor = get_neuralogic().cz.cvut.fel.ida.logic.constructs.template.transforming.MetadataProcessor(
-            settings.settings
-        )
+        metadata_processor = jpype.JClass("cz.cvut.fel.ida.logic.constructs.template.transforming.MetadataProcessor")
+        metadata_processor = metadata_processor(settings.settings)
 
         metadata_processor.processMetadata(template)
         template.inferTemplateFacts()

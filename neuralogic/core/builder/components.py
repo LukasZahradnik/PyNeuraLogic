@@ -2,12 +2,11 @@ import json
 from typing import Any, Dict
 
 import numpy as np
-from py4j.java_gateway import get_field
 
 
 class Sample:
     def __init__(self, sample, java_sample):
-        serialized_sample = json.loads(sample.exportToJson())
+        serialized_sample = json.loads(str(sample.exportToJson()))
 
         self.id = serialized_sample["id"]
         self.target = json.loads(serialized_sample["target"])
@@ -58,11 +57,11 @@ class Neuron:
 
 class Weight:
     def __init__(self, weight):
-        self.index: int = get_field(weight, "index")
-        self.name = get_field(weight, "name")
-        self.dimensions = tuple(get_field(weight, "value").size())
-        self.value = json.loads(get_field(weight, "value").toString())
-        self.fixed = get_field(weight, "isFixed")
+        self.index: int = weight.index
+        self.name = str(weight.name)
+        self.dimensions = tuple(weight.value.size())
+        self.value = json.loads(str(weight.value.toString()))
+        self.fixed = weight.isFixed
 
         if not isinstance(self.value, list):
             self.value = self.value
@@ -71,6 +70,8 @@ class Weight:
             self.dimensions = (1,)
 
         if self.fixed:
+            print(self.value, type(self.value))
+
             self.value = np.array(self.value).reshape(self.dimensions)
 
     @staticmethod

@@ -1,26 +1,27 @@
-from neuralogic import get_neuralogic, get_gateway
-from neuralogic.core.settings import SettingsProxy
 from typing import List
+
+import jpype
+
+from neuralogic import is_initialized, initialize
+from neuralogic.core.settings import SettingsProxy
 
 
 class Sources:
     @staticmethod
     def from_settings(settings: SettingsProxy) -> "Sources":
-        neuralogic = get_neuralogic()
-        sources = neuralogic.cz.cvut.fel.ida.setup.Sources(settings.settings)
+        if not is_initialized():
+            initialize()
+
+        sources = jpype.JClass("cz.cvut.fel.ida.setup.Sources")(settings.settings)
         return Sources(sources)
 
     @staticmethod
     def from_args(args: List[str], settings: SettingsProxy) -> "Sources":
-        neuralogic = get_neuralogic()
-        gateway = get_gateway()
+        if not is_initialized():
+            initialize()
 
-        jargs = gateway.new_array(gateway.jvm.java.lang.String, len(args))
-
-        for i, item in enumerate(args):
-            jargs[i] = item
-
-        sources = neuralogic.cz.cvut.fel.ida.neuralogic.cli.utils.Runner.getSources(jargs, settings.settings)
+        runner = jpype.JClass("cz.cvut.fel.ida.neuralogic.cli.utils.Runner")
+        sources = runner.getSources(args, settings.settings)
         return Sources(sources)
 
     def __init__(self, sources):

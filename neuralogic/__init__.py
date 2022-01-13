@@ -1,162 +1,81 @@
-from typing import Union, Optional
-from pathlib import Path
-from contextlib import contextmanager
 import os
-from py4j.java_gateway import JavaGateway, JVMView, CallbackServerParameters
-from py4j.protocol import unescape_new_line
-
-neuralogic: Optional[JVMView] = None
-gateway: Optional[JavaGateway] = None
-
-std_out = None
-std_err = None
-port = os.environ.get("NEURALOGIC_PORT", 25333)
-
-
-def set_java_home(java_home: Union[Path, str]):
-    """
-    Set java home environment variable
-
-    :param java_home:
-    :return:
-    """
-    os.environ["JAVA_HOME"] = str(java_home)
-
-
-def set_gateway_port(gateway_port: int):
-    global port
-    port = gateway_port
-
-
-def set_std_out(out):
-    global std_out
-    std_out = out
-
-
-def set_std_err(out):
-    global std_err
-    std_err = out
-
-
-def initialize(
-    gateway_port: Optional[int] = None,
-    die_on_exit: bool = True,
-    debug_mode: bool = False,
-    debug_port: int = 12999,
-    is_debug_server: bool = True,
-    debug_suspend: bool = False,
-):
-    """
-    Initialize the gateway for the Java process. Has to be reinitialized if some settings (JAVA_HOME) changes
-
-    :param gateway_port:
-    :param die_on_exit:
-    :param debug_mode:
-    :param debug_port:
-    :param is_debug_server:
-    :param debug_suspend:
-    :return:
-    """
-    global gateway, neuralogic
-
-    if gateway_port is None:
-        gateway_port = port
-
-    if gateway is not None:
-        try:
-            gateway.shutdown()
-            gateway = None
-        except Exception:
-            pass
-
-    java_opts = []
-
-    if debug_mode:
-        debug_port = int(debug_port)
-        server = "y" if is_debug_server else "n"
-        suspend = "y" if debug_suspend else "n"
-
-        java_opts = [
-            "-Xint",
-            "-Xdebug",
-            "-Xnoagent",
-            f"-Xrunjdwp:transport=dt_socket,server={server},address={debug_port},suspend={suspend},quiet=y",
-        ]
-
-    for try_port in range(gateway_port, gateway_port + 10):
-        try:
-            gateway = JavaGateway.launch_gateway(
-                classpath=os.environ["CLASSPATH"],
-                redirect_stdout=std_out,
-                redirect_stderr=std_err,
-                die_on_exit=die_on_exit,
-                daemonize_redirect=True,
-                javaopts=java_opts,
-            )
-
-            raw_token = unescape_new_line(gateway.gateway_parameters.auth_token)
-
-            params = CallbackServerParameters(
-                eager_load=False,
-                auth_token=raw_token,
-                daemonize_connections=True,
-                daemonize=True,
-                port=try_port,
-            )
-
-            gateway.start_callback_server(params)
-            neuralogic = gateway.jvm
-
-            return
-        except Exception as e:
-            if gateway is not None:
-                gateway.shutdown()
-                gateway = None
-
-    if gateway is not None:
-        gateway.shutdown()
-        gateway = None
-
-    raise Exception(
-        f"Cannot find two free ports in the range <{gateway_port}-{gateway_port + 10 + 1}>.\n"
-        "Please specify different port in env var 'NEURALOGIC_PORT' or via neuralogic.set_gateway_port."
-    )
-
-
-def shutdown():
-    if gateway is not None:
-        gateway.shutdown()
-
-
-def get_gateway() -> JavaGateway:
-    """
-    Get the gateway for the Java process
-
-    :return:
-    """
-    if gateway is None:
-        initialize()
-    return gateway
-
-
-def get_neuralogic() -> JVMView:
-    """
-    Get the jvm view of the Java process
-
-    :return:
-    """
-    if neuralogic is None:
-        initialize()
-    return neuralogic
-
-
-@contextmanager
-def neuralogic_jvm():
-    if gateway is None:
-        initialize()
-    yield
-    if gateway is not None:
-        shutdown()
+import jpype
 
 
 os.environ["CLASSPATH"] = os.path.join(os.path.abspath(os.path.dirname(__file__)), "jar", "NeuraLogic.jar")
+
+_is_initialized = False
+_std_out = None
+_std_err = None
+
+
+class TextIOWrapper:
+    def __init__(self, wrapped_text_io):
+        self.wrapped_text_io = wrapped_text_io
+
+    def write(self, string):
+        self.wrapped_text_io.write(str(string))
+
+
+def set_system_output(output, system_output_setter) -> None:
+    java_output_stream = os.devnull
+
+    if output is not None:
+        wrapped = TextIOWrapper(output)
+
+        java_io_wrapper = jpype.JProxy("cz.cvut.fel.ida.utils.python.PythonOutputStream.TextIOWrapper", inst=wrapped)
+        java_output_stream = jpype.JClass("cz.cvut.fel.ida.utils.python.PythonOutputStream")(java_io_wrapper)
+    system_output_setter(jpype.java.io.PrintStream(java_output_stream))
+
+
+def set_stdout(out_io=None) -> None:
+    global _std_out
+    _std_out = out_io
+
+    if not _is_initialized:
+        return
+
+    set_system_output(_std_out, jpype.java.lang.System.setOut)
+
+
+def set_stderr(err_io=None) -> None:
+    global _std_err
+    _std_err = err_io
+
+    if not _is_initialized:
+        return
+
+    set_system_output(_std_out, jpype.java.lang.System.setErr)
+
+
+def is_initialized() -> bool:
+    return _is_initialized
+
+
+def initialize(
+    debug_mode: bool = False, debug_port: int = 12999, is_debug_server: bool = True, debug_suspend: bool = False
+):
+    global _is_initialized
+
+    if _is_initialized:
+        raise Exception("NeuraLogic already initialized")
+
+    _is_initialized = True
+    if debug_mode:
+        port = int(debug_port)
+        server = "y" if is_debug_server else "n"
+        suspend = "y" if debug_suspend else "n"
+
+        debug_params = [
+            "-Xint",
+            "-Xdebug",
+            "-Xnoagent",
+            f"-Xrunjdwp:transport=dt_socket,server={server},address={port},suspend={suspend}",
+        ]
+
+        jpype.startJVM(*debug_params, classpath=[os.environ["CLASSPATH"]])
+    else:
+        jpype.startJVM(classpath=[os.environ["CLASSPATH"]])
+
+    set_stdout(_std_out)
+    set_stderr(_std_err)

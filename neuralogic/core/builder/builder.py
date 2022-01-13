@@ -1,22 +1,29 @@
-from neuralogic import get_neuralogic, get_gateway
+from typing import List
+
+import jpype
+
+from neuralogic import is_initialized, initialize
 from neuralogic.core.builder.components import Weight, Sample
 from neuralogic.core.enums import Backend
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
 
-from typing import List, Optional
-from py4j.java_gateway import get_field, set_field
-
 
 def stream_to_list(stream) -> List:
-    return list(stream.collect(get_gateway().jvm.java.util.stream.Collectors.toList()))
+    return list(stream.collect(jpype.JClass("java.util.stream.Collectors").toList()))
 
 
 class Builder:
     def __init__(self, settings: SettingsProxy):
+        if not is_initialized():
+            initialize()
+
         self.settings = settings
         self.example_builder = Builder.get_builders(settings)
         self.builder = Builder.get_builders(settings)
+
+        self.neural_model = jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.training.NeuralModel")
+        self.collectors = jpype.JClass("java.util.stream.Collectors")
 
     def build_template_from_file(self, settings: SettingsProxy, filename: str):
         args = [
@@ -36,8 +43,8 @@ class Builder:
         source_pipeline.execute(None if sources is None else sources.sources)
         java_model = source_pipeline.get()
 
-        logic_samples = get_field(java_model, "s")
-        logic_samples = logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
+        logic_samples = java_model.s
+        logic_samples = logic_samples.collect(self.collectors.toList())
 
         if backend == Backend.JAVA:
             return logic_samples
@@ -48,8 +55,8 @@ class Builder:
         source_pipeline.execute(None)
         java_model = source_pipeline.get()
 
-        logic_samples = get_field(java_model, "s")
-        logic_samples = logic_samples.collect(get_neuralogic().java.util.stream.Collectors.toList())
+        logic_samples = java_model.s
+        logic_samples = logic_samples.collect(self.collectors.toList())
 
         if backend == Backend.JAVA:
             return logic_samples
@@ -57,9 +64,7 @@ class Builder:
         return Builder.build(logic_samples)
 
     def build_model(self, parsed_template, backend: Backend, settings: SettingsProxy):
-        namespace = get_neuralogic().cz.cvut.fel.ida.neural.networks.computation.training
-
-        neural_model = namespace.NeuralModel(parsed_template.getAllWeights(), settings.settings)
+        neural_model = self.neural_model(parsed_template.getAllWeights(), settings.settings)
 
         if backend == Backend.JAVA:
             return neural_model
@@ -77,16 +82,14 @@ class Builder:
 
     @staticmethod
     def get_builders(settings: SettingsProxy):
-        namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.building
-        builder = namespace.PythonBuilder(settings.settings)
+        builder = jpype.JClass("cz.cvut.fel.ida.pipelines.building.PythonBuilder")(settings.settings)
 
         return builder
 
     @staticmethod
     def build(samples):
-        serializer = get_neuralogic().cz.cvut.fel.ida.neural.networks.structure.export.NeuralSerializer()
-
-        super_detailed_format = get_neuralogic().cz.cvut.fel.ida.setup.Settings.superDetailedNumberFormat
-        set_field(serializer, "numberFormat", super_detailed_format)
+        serializer = jpype.JClass("cz.cvut.fel.ida.neural.networks.structure.export.NeuralSerializer")()
+        super_detailed_format = jpype.JClass("cz.cvut.fel.ida.setup.Settings").superDetailedNumberFormat
+        serializer.numberFormat = super_detailed_format
 
         return [Sample(serializer.serialize(sample), sample) for sample in samples]

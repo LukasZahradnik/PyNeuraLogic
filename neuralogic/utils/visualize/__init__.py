@@ -1,11 +1,10 @@
 import os
 from typing import Optional
 
-from neuralogic import get_neuralogic
+import jpype
+
 from neuralogic.core.builder import Sample
 from neuralogic.core.settings import Settings, SettingsProxy
-
-from py4j.java_gateway import set_field
 
 
 def get_drawing_settings(img_type: str = "png", value_detail: int = 0) -> SettingsProxy:
@@ -17,35 +16,31 @@ def get_drawing_settings(img_type: str = "png", value_detail: int = 0) -> Settin
     """
     settings = Settings().create_proxy()
 
-    set_field(settings.settings, "drawing", False)
-    set_field(settings.settings, "storeNotShow", True)
-    set_field(settings.settings, "imgType", img_type.lower())
+    settings.settings.drawing = False
+    settings.settings.storeNotShow = True
+    settings.settings.imgType = img_type.lower()
 
     if value_detail not in [0, 1, 2]:
         raise NotImplementedError
 
-    namespace = get_neuralogic().cz.cvut.fel.ida.setup.Settings
+    settings_class = settings.settings_class
     details = [
-        namespace.shortNumberFormat,
-        namespace.detailedNumberFormat,
-        namespace.superDetailedNumberFormat,
+        settings_class.shortNumberFormat,
+        settings_class.detailedNumberFormat,
+        settings_class.superDetailedNumberFormat,
     ]
 
-    set_field(settings.settings, "defaultNumberFormat", details[value_detail])
+    settings.settings.defaultNumberFormat = details[value_detail]
 
     return settings
 
 
 def get_template_drawer(settings: SettingsProxy):
-    namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.debugging.drawing
-
-    return namespace.TemplateDrawer(settings.settings)
+    return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.TemplateDrawer")(settings.settings)
 
 
 def get_sample_drawer(settings: SettingsProxy):
-    namespace = get_neuralogic().cz.cvut.fel.ida.pipelines.debugging.drawing
-
-    return namespace.NeuralNetDrawer(settings.settings)
+    return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.NeuralNetDrawer")(settings.settings)
 
 
 # todo gusta: + groundingDrawer, pipelineDrawer...

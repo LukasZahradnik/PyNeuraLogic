@@ -1,18 +1,11 @@
 import time
-from pathlib import Path
-from typing import Optional
-
-import torch.nn.functional as F
 
 import dgl
 import torch
-from dgl.nn.pytorch import GINConv, SAGEConv, GraphConv
+import torch.nn.functional as F
+from dgl.nn.pytorch import GraphConv, SAGEConv, GINConv
 from torch.nn import Linear, Sequential, ReLU
-
-from utils import Results, to_json, export_fold, ResultList, Crossval
-
-torch.set_default_tensor_type("torch.DoubleTensor")
-device = torch.device("cpu")
+from torch_geometric.datasets import TUDataset
 
 
 class NetGCN(torch.nn.Module):
@@ -97,147 +90,59 @@ class NetGIN(torch.nn.Module):
         g.ndata["h5"] = x5
         m5 = dgl.mean_nodes(g, "h5")
 
-        suma = torch.stack([self.l1(m1), self.l2(m2), self.l3(m3), self.l4(m4), self.l5(m5)], dim=0)
+        sum_ = torch.stack([self.l1(m1), self.l2(m2), self.l3(m3), self.l4(m4), self.l5(m5)], dim=0)
 
-        x = torch.sum(suma, dim=0)
+        x = torch.sum(sum_, dim=0)
 
         return torch.sigmoid(x)
 
 
-class Evaluator:
-    @staticmethod
-    def train(model, loader, optimizer):
+def get_model(model):
+    if model == "gcn":
+        return NetGCN
+    if model == "gsage":
+        return NetGraphSage
+    if model == "gin":
+        return NetGIN
+    raise NotImplementedError
+
+
+def evaluate(model, dataset, steps, dataset_loc, dim):
+    ds = TUDataset(root=dataset_loc, name=dataset)
+
+    model = get_model(model)(num_features=ds.num_node_features, dim=dim)
+
+    device = torch.device("cpu")
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+    dataset = []
+    for graph in ds:
+        u, v = graph["edge_index"]
+        g = dgl.graph((u, v), num_nodes=graph.num_nodes)
+
+        g.ndata["x"] = graph["x"].float()
+        g.y = graph.y.float()
+        dataset.append(g)
+
+    times = []
+    for _ in range(steps):
         model.train()
 
-        loss_all = 0
-        outputs = []
-        labels = []
-
-        for data in loader:
+        tm = 0
+        ls = 0
+        for data in dataset:
+            t = time.perf_counter()
             data = data.to(device)
+
             optimizer.zero_grad(set_to_none=True)
             output = model(data, data.ndata["x"])
 
-            loss = F.binary_cross_entropy(output[0][0], data.y[0].double())
-
-            if len(data.y) == 1:
-                outputs.append(output)
-                labels.append(data.y)
-            else:
-                outputs.extend(output)
-                labels.extend(data.y)
+            loss = F.binary_cross_entropy(output[0][0], data.y[0])
 
             loss.backward()
-            loss_all += loss.item()
             optimizer.step()
-        return Results(outputs, labels)
 
-    @staticmethod
-    def test(model, loader):
-        model.eval()
-
-        outputs = []
-        labels = []
-
-        for data in loader:
-            data = data.to(device)
-            output = model(data, data.ndata["x"])
-            pred = output.max(dim=1)[1]
-
-            if len(data.y) == 1:
-                outputs.append(output)
-                labels.append(data.y)
-            else:
-                outputs.extend(output)
-                labels.extend(data.y)
-        return Results(outputs, labels)
-
-    @staticmethod
-    def learn(model, train_dataset, val_dataset, test_dataset, steps=1000, lr=0.000015):
-        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-
-        best_val_results = Results()
-        best_val_results.loss = 1e10
-        best_train_results = None
-        best_test_results = None
-
-        cumtime = 0
-
-        for epoch in range(steps):
-            start = time.time()
-            train_results = Evaluator.train(model, train_dataset, optimizer)
-
-            val_results = Evaluator.test(model, val_dataset)
-            test_results = Evaluator.test(model, test_dataset)
-
-            end = time.time()
-
-            if val_results.loss < best_val_results.loss:
-                print(f"improving validation loss to {val_results.loss} at epoch {epoch}")
-                best_val_results = val_results
-                best_test_results = test_results
-                best_train_results = train_results
-                print(f"storing respective test results with accuracy {best_test_results.accuracy}")
-
-            elapsed = end - start
-            cumtime += elapsed
-
-            print(
-                "Epoch: {:03d}, Train Loss: {:.7f}, "
-                "Train Acc: {:.7f}, Val Acc: {:.7f}, Test Acc: {:.7f}".format(
-                    epoch, train_results.loss, train_results.accuracy, val_results.accuracy, test_results.accuracy
-                )
-                + " elapsed: "
-                + str(elapsed)
-            )
-        return best_train_results, best_val_results, best_test_results, cumtime / steps
-
-    @staticmethod
-    def crossvalidate(
-        model_string,
-        folds,
-        outpath: Optional[Path],
-        num_node_features: int,
-        steps: int = 1000,
-        lr: float = 0.000015,
-        dim: int = 10,
-    ):
-        if outpath is None:
-            outpath = Path("./out")
-
-        train_results = []
-        val_results = []
-        test_results = []
-        times = []
-
-        for train_fold, val_fold, test_fold in folds:
-            model = Evaluator.get_model(model_string, dim, num_node_features)
-
-            best_train_results, best_val_results, best_test_results, elapsed = Evaluator.learn(
-                model, train_fold, val_fold, test_fold, steps, lr
-            )
-
-            train_results.append(best_train_results)
-            val_results.append(best_val_results)
-            test_results.append(best_test_results)
-            times.append(elapsed)
-
-            train = to_json(ResultList(train_results, times=times))
-            export_fold(train, outpath / "train")
-
-            test = to_json(ResultList(test_results))
-            export_fold(test, outpath / "test")
-
-        return Crossval(train_results, val_results, test_results, times)
-
-    @staticmethod
-    def get_model(string: str, dim: int, num_node_features: int):
-        if string == "gcn":
-            model = NetGCN(num_node_features, dim=dim).to(device)
-        elif string == "gin":
-            model = NetGIN(num_node_features, dim=dim).to(device)
-        elif string == "gsage":
-            model = NetGraphSage(num_node_features, dim=dim).to(device)
-        else:
-            raise NotImplementedError("Unknown model")
-        return model
+            tm += time.perf_counter() - t
+            ls += loss.item()
+        times.append(tm)
+    return times
