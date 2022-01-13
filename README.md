@@ -67,7 +67,7 @@ While PyNeuraLogic allows you to easily declare highly expressive models with ca
 
 
 <p align="center">
-<img src="https://github.com/LukasZahradnik/PyNeuraLogic/blob/migrate-jpype/docs/_static/benchmark.svg" alt="Benchmark of PyNeuraLogic" title="Benchmark of PyNeuraLogic"/>
+<img src="https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/docs/_static/benchmark.svg" alt="Benchmark of PyNeuraLogic" title="Benchmark of PyNeuraLogic"/>
 </p>
 
 <!-- i ty popisky grafu bych tady zjednodusil: nadpisy jen "average time per epoch" a "average accuracies" - zbytek plyne z kontextu <sub>
