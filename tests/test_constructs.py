@@ -1,5 +1,8 @@
+import copy
+
 from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
-from neuralogic.core import R, Activation, Aggregation, Metadata, ActivationAgg
+from neuralogic.core import R, Activation, Aggregation, Metadata, ActivationAgg, V
+from neuralogic.core.constructs.rule import Rule
 
 
 def test_predicate_creation() -> None:
@@ -139,3 +142,24 @@ def test_rule_metadata():
     assert rule.metadata is not None
     assert rule.metadata.aggregation == Aggregation.AVG
     assert str(rule.metadata.activation) == "max-sigmoid"
+
+
+def test_rules():
+    my_rule: Rule = R.a(V.X) <= R.special.alldiff(...)
+
+    assert len(my_rule.body[0].terms) == 1
+    assert my_rule.body[0].terms[0] == V.X
+
+    my_rule: Rule = R.a(V.X) <= (R.special.alldiff(...), R.b(V.Y, V.Z))
+    assert len(my_rule.body[0].terms) == 3
+
+    terms = sorted(my_rule.body[0].terms)
+
+    assert terms[0] == V.X
+    assert terms[1] == V.Y
+    assert terms[2] == V.Z
+
+    my_rule = R.a <= R.b
+
+    assert len(my_rule.body) == 1
+    assert my_rule.body[0].predicate.name == "b"
