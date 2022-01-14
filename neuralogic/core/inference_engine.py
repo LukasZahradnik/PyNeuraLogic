@@ -7,7 +7,6 @@ from neuralogic.core import Template, JavaFactory, Settings
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core.constructs.atom import AtomType
 from neuralogic.core.constructs.rule import Rule
-from neuralogic.core.helpers import to_java_list
 
 
 class InferenceEngine:
@@ -56,10 +55,10 @@ class InferenceEngine:
         queries = self.dataset_builder.build_queries([query], query_builder)
 
         self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
-        examples = to_java_list(self.dataset_builder.build_examples([examples], examples_builder))
+        examples = jpype.java.util.ArrayList(self.dataset_builder.build_examples([examples], examples_builder))
 
         logic_samples = DatasetBuilder.merge_queries_with_examples(queries, examples)
-        logic_samples = to_java_list(logic_samples)
+        logic_samples = jpype.java.util.ArrayList(logic_samples)
 
         sample = logic_samples[0]
 

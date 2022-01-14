@@ -4,7 +4,6 @@ from typing import Dict, Sized
 import jpype
 
 from neuralogic import is_initialized, initialize
-from neuralogic.core.helpers import to_java_list
 from neuralogic.nn.base import AbstractNeuraLogic
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.enums import Backend
@@ -68,7 +67,7 @@ class NeuraLogic(AbstractNeuraLogic):
 
     def set_training_samples(self, samples):
         self.samples_len = len(samples)
-        self.strategy.setSamples(to_java_list(samples))
+        self.strategy.setSamples(jpype.java.util.ArrayList(samples))
 
     def __call__(self, samples=None, train: bool = None, auto_backprop: bool = False, epochs: int = 1):
         self.hooks_set = len(self.hooks) != 0

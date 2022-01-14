@@ -4,7 +4,6 @@ import numpy as np
 import jpype
 
 from neuralogic import is_initialized, initialize
-from neuralogic.core.helpers import to_java_list
 from neuralogic.core.settings import SettingsProxy, Settings
 
 
@@ -155,12 +154,12 @@ class JavaFactory:
             label_conjunction = self.get_conjunction([example.head], variable_factory, is_example=True)
             conjunctions.append(self.get_conjunction(example.body, variable_factory, is_example=True))
 
-        lifted_example = self.lifted_example(to_java_list(conjunctions), to_java_list(rules))
+        lifted_example = self.lifted_example(jpype.java.util.ArrayList(conjunctions), jpype.java.util.ArrayList(rules))
         return label_conjunction, lifted_example
 
     def get_conjunction(self, atoms, variable_factory, default_weight=None, is_example=False):
         valued_facts = [self.get_valued_fact(atom, variable_factory, default_weight, is_example) for atom in atoms]
-        return self.conjunction(to_java_list(valued_facts))
+        return self.conjunction(jpype.java.util.ArrayList(valued_facts))
 
     def get_predicate_metadata_pair(self, predicate_metadata):
         return self.pair(
@@ -195,7 +194,7 @@ class JavaFactory:
             java_rule.setWeight(weight)
 
         body_atoms = [self.get_atom(atom, variable_factory) for atom in rule.body]
-        body_atom_list = to_java_list(body_atoms)
+        body_atom_list = jpype.java.util.ArrayList(body_atoms)
 
         java_rule.setHead(self.head_atom(head_atom))
         java_rule.setBody(body_atom_list)

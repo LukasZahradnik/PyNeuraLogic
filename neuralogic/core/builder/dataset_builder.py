@@ -3,7 +3,6 @@ from typing import Union, Set, Dict
 import jpype
 
 from neuralogic import is_initialized, initialize
-from neuralogic.core.helpers import to_java_list
 from neuralogic.core.builder.builder import Builder
 from neuralogic.core.builder.components import BuiltDataset
 from neuralogic.core.enums import Backend
@@ -131,7 +130,7 @@ class DatasetBuilder:
             queries = self.build_queries(queries, query_builder)
 
             logic_samples = DatasetBuilder.merge_queries_with_examples(queries, examples)
-            logic_samples = to_java_list(logic_samples).stream()
+            logic_samples = jpype.java.util.ArrayList(logic_samples).stream()
 
             samples = Builder(settings).from_logic_samples(self.parsed_template, logic_samples, backend)
         else:

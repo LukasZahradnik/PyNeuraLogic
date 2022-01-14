@@ -3,7 +3,6 @@ from typing import Union, List, Optional, Set, Dict, Any, Callable, Iterable
 import jpype
 
 from neuralogic import is_initialized, initialize
-from neuralogic.core.helpers import to_java_list
 from neuralogic.core.builder import Builder, DatasetBuilder
 from neuralogic.core.enums import Backend
 from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
@@ -105,10 +104,10 @@ class Template:
                 valued_facts.append(java_factory.get_valued_fact(rule, java_factory.get_variable_factory()))
 
         parsed_template = jpype.JClass("cz.cvut.fel.ida.logic.constructs.template.types.ParsedTemplate")
-        template = parsed_template(to_java_list(weighted_rules), to_java_list(valued_facts))
+        template = parsed_template(jpype.java.util.ArrayList(weighted_rules), jpype.java.util.ArrayList(valued_facts))
 
-        template.weightsMetadata = (jpype.java.util.List) @ to_java_list([])
-        template.predicatesMetadata = to_java_list(predicate_metadata)
+        template.weightsMetadata = (jpype.java.util.List) @ jpype.java.util.ArrayList([])
+        template.predicatesMetadata = jpype.java.util.ArrayList(predicate_metadata)
 
         metadata_processor = jpype.JClass("cz.cvut.fel.ida.logic.constructs.template.transforming.MetadataProcessor")
         metadata_processor = metadata_processor(settings.settings)
