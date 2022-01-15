@@ -70,8 +70,6 @@ class Weight:
             self.dimensions = (1,)
 
         if self.fixed:
-            print(self.value, type(self.value))
-
             self.value = np.array(self.value).reshape(self.dimensions)
 
     @staticmethod

@@ -45,7 +45,7 @@ def set_stderr(err_io=None) -> None:
     if not _is_initialized:
         return
 
-    set_system_output(_std_out, jpype.java.lang.System.setErr)
+    set_system_output(_std_err, jpype.java.lang.System.setErr)
 
 
 def is_initialized() -> bool:
@@ -77,5 +77,5 @@ def initialize(
     else:
         jpype.startJVM(classpath=[os.environ["CLASSPATH"]])
 
-    set_stdout(_std_out)
     set_stderr(_std_err)
+    set_stdout(_std_out)
