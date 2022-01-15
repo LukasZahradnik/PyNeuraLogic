@@ -86,7 +86,7 @@ class NetGIN(Model):
         self.act = Activation("sigmoid")
 
     def call(self, inputs, training=None, mask=None):
-        x, a, i, p = inputs
+        x, a = inputs[0], inputs[1]
 
         x1 = self.conv1([x, a])
         x2 = self.conv2([x1, a])
@@ -126,7 +126,7 @@ def evaluate(model, dataset, steps, dataset_loc, dim):
     loss_fn = BinaryCrossentropy(from_logits=True)
 
     signature = loader.tf_signature()
-    signature = (*signature[:-1], tf.TensorSpec(shape=(1, 1), dtype=tf.float32))
+    signature = (*signature[:-1], tf.TensorSpec(shape=(1, 1), dtype=tf.float64))
 
     @tf.function(input_signature=signature, experimental_relax_shapes=True)
     def train_step(inputs, target):
@@ -142,7 +142,7 @@ def evaluate(model, dataset, steps, dataset_loc, dim):
 
     tm = 0
     for inputs, target in loader:
-        target_ = tf.constant(np.argmax(target), shape=(1, 1), dtype=tf.float32)
+        target_ = tf.constant(np.argmax(target), shape=(1, 1), dtype=tf.float64)
         step += 1
 
         t = time.perf_counter()
