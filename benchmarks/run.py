@@ -2,6 +2,8 @@ import argparse
 import json
 import os
 
+from helpers import Task
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -23,6 +25,8 @@ if __name__ == "__main__":
     if not os.path.exists(out):
         os.makedirs(out)
 
+    tasks = {"MUTAG": Task(), "ENZYMES": Task(output_size=6), "PROTEINS": Task()}
+
     if framework == "pyg":
         from pyg_benchmark import evaluate
     if framework == "dgl":
@@ -32,7 +36,7 @@ if __name__ == "__main__":
     if framework == "spektral":
         from spektral_benchmark import evaluate
 
-    times = evaluate(args.model, dataset, steps, dataset_loc, 10)
+    times = evaluate(args.model, dataset, steps, dataset_loc, 10, tasks[dataset])
 
     with open(os.path.join(out, f"{framework}.json"), "w") as fp:
         json.dump({"times": times, "steps": steps}, fp)

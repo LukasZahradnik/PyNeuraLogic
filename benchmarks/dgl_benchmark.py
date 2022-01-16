@@ -7,13 +7,17 @@ from dgl.nn.pytorch import GraphConv, SAGEConv, GINConv
 from torch.nn import Linear, Sequential, ReLU
 from torch_geometric.datasets import TUDataset
 
+from benchmarks.helpers import Task
+
 
 class NetGCN(torch.nn.Module):
-    def __init__(self, num_features, dim=10):
+    def __init__(self, activation: str, output_size: int, num_features, dim=10):
         super(NetGCN, self).__init__()
         self.conv1 = GraphConv(num_features, dim, norm="none", bias=False, allow_zero_in_degree=True)
         self.conv2 = GraphConv(dim, dim, norm="none", bias=False, allow_zero_in_degree=True)
-        self.fc1 = Linear(dim, 1, bias=False)
+        self.fc1 = Linear(dim, output_size, bias=False)
+
+        self.activation = getattr(torch, activation)
 
     def forward(self, g, features):
         x = F.relu(self.conv1(g, features))
@@ -23,15 +27,17 @@ class NetGCN(torch.nn.Module):
         x = dgl.mean_nodes(g, "h")
         x = self.fc1(x)
 
-        return torch.sigmoid(x)
+        return self.activation(x, dim=1)
 
 
 class NetGraphSage(torch.nn.Module):
-    def __init__(self, num_features, dim=10):
+    def __init__(self, activation: str, output_size: int, num_features, dim=10):
         super(NetGraphSage, self).__init__()
         self.conv1 = SAGEConv(num_features, dim, aggregator_type="mean", bias=False)
         self.conv2 = SAGEConv(dim, dim, aggregator_type="mean", bias=False)
-        self.fc1 = Linear(dim, 1, bias=False)
+        self.fc1 = Linear(dim, output_size, bias=False)
+
+        self.activation = getattr(torch, activation)
 
     def forward(self, g, features):
         x = F.relu(self.conv1(g, features))
@@ -42,13 +48,11 @@ class NetGraphSage(torch.nn.Module):
 
         x = self.fc1(x)
 
-        return torch.sigmoid(x)
+        return self.activation(x, dim=1)
 
 
 class NetGIN(torch.nn.Module):
-    """GIN model"""
-
-    def __init__(self, num_features, dim=10):
+    def __init__(self, activation: str, output_size: int, num_features, dim=10):
         super(NetGIN, self).__init__()
 
         nn1 = Sequential(Linear(num_features, dim), ReLU(), Linear(dim, dim))
@@ -66,11 +70,13 @@ class NetGIN(torch.nn.Module):
         nn5 = Sequential(Linear(dim, dim), ReLU(), Linear(dim, dim))
         self.conv5 = GINConv(nn5, "sum")
 
-        self.l1 = Linear(dim, 1, bias=False)
-        self.l2 = Linear(dim, 1, bias=False)
-        self.l3 = Linear(dim, 1, bias=False)
-        self.l4 = Linear(dim, 1, bias=False)
-        self.l5 = Linear(dim, 1, bias=False)
+        self.l1 = Linear(dim, output_size, bias=False)
+        self.l2 = Linear(dim, output_size, bias=False)
+        self.l3 = Linear(dim, output_size, bias=False)
+        self.l4 = Linear(dim, output_size, bias=False)
+        self.l5 = Linear(dim, output_size, bias=False)
+
+        self.activation = getattr(torch, activation)
 
     def forward(self, g, h):
         x1 = F.relu(self.conv1(g, h))
@@ -94,7 +100,7 @@ class NetGIN(torch.nn.Module):
 
         x = torch.sum(sum_, dim=0)
 
-        return torch.sigmoid(x)
+        return self.activation(x, dim=1)
 
 
 def get_model(model):
@@ -107,21 +113,27 @@ def get_model(model):
     raise NotImplementedError
 
 
-def evaluate(model, dataset, steps, dataset_loc, dim):
+def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
     ds = TUDataset(root=dataset_loc, name=dataset)
 
-    model = get_model(model)(num_features=ds.num_node_features, dim=dim)
+    model = get_model(model)
+    model = model(activation=task.activation, output_size=task.output_size, num_features=ds.num_node_features, dim=dim)
 
     device = torch.device("cpu")
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+    loss_fn = F.binary_cross_entropy if task.output_size == 1 else F.cross_entropy
 
     dataset = []
     for graph in ds:
         u, v = graph["edge_index"]
         g = dgl.graph((u, v), num_nodes=graph.num_nodes)
 
-        g.ndata["x"] = graph["x"].float()
-        g.y = graph.y.float()
+        g.ndata["x"] = graph["x"]
+        g.y = graph.y
+
+        if task.output_size == 1:
+            g.y = g.y.float()
         dataset.append(g)
 
     times = []
@@ -137,12 +149,13 @@ def evaluate(model, dataset, steps, dataset_loc, dim):
             optimizer.zero_grad(set_to_none=True)
             output = model(data, data.ndata["x"])
 
-            loss = F.binary_cross_entropy(output[0][0], data.y[0])
+            loss = loss_fn(output[0], data.y)
 
             loss.backward()
             optimizer.step()
 
             tm += time.perf_counter() - t
             ls += loss.item()
+        print(tm)
         times.append(tm)
     return times

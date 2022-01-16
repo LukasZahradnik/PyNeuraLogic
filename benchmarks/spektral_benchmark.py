@@ -1,6 +1,9 @@
 import os
 
+from keras.losses import CategoricalCrossentropy
 from tensorflow.python.keras.layers import Activation
+
+from benchmarks.helpers import Task
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
@@ -21,16 +24,16 @@ from spektral.layers.pooling import global_pool
 
 
 class NetGCN(Model):
-    def __init__(self, dim: int = 10):
+    def __init__(self, output_size: int, activation: str, dim: int = 10):
         super().__init__()
         self.conv1 = GCNConv(dim, activation="relu", use_bias=False)
         self.conv2 = GCNConv(dim, use_bias=False)
 
         self.mean_pool = global_pool.get("avg")()
-        self.fc1 = Dense(1, activation="sigmoid", use_bias=False)
+        self.fc1 = Dense(output_size, activation=activation, use_bias=False)
 
     def call(self, inputs, training=None, mask=None):
-        x, a, i, p = inputs
+        x, a = inputs[0], inputs[1]
         x = self.conv1([x, a])
         x = self.conv2([x, a])
 
@@ -39,16 +42,16 @@ class NetGCN(Model):
 
 
 class NetGraphSage(Model):
-    def __init__(self, dim: int = 10):
+    def __init__(self, output_size: int, activation: str, dim: int = 10):
         super().__init__()
         self.conv1 = GraphSageConv(dim, activation="relu", use_bias=False)
         self.conv2 = GraphSageConv(dim, use_bias=False)
 
         self.mean_pool = global_pool.get("avg")()
-        self.fc1 = Dense(1, activation="sigmoid", use_bias=False)
+        self.fc1 = Dense(output_size, activation=activation, use_bias=False)
 
     def call(self, inputs, training=None, mask=None):
-        x, a, i, p = inputs
+        x, a = inputs[0], inputs[1]
         x = self.conv1([x, a])
         x = self.conv2([x, a])
 
@@ -57,7 +60,7 @@ class NetGraphSage(Model):
 
 
 class NetGIN(Model):
-    def __init__(self, dim: int = 10):
+    def __init__(self, output_size: int, activation: str, dim: int = 10):
         super().__init__()
         self.conv1 = GINConv(
             dim, mlp_batchnorm=False, activation="relu", epsilon=0, use_bias=False, mlp_hidden=[dim, dim]
@@ -77,13 +80,13 @@ class NetGIN(Model):
 
         self.mean_pool = global_pool.get("avg")()
 
-        self.l1 = Dense(1, use_bias=False)
-        self.l2 = Dense(1, use_bias=False)
-        self.l3 = Dense(1, use_bias=False)
-        self.l4 = Dense(1, use_bias=False)
-        self.l5 = Dense(1, use_bias=False)
+        self.l1 = Dense(output_size, use_bias=False)
+        self.l2 = Dense(output_size, use_bias=False)
+        self.l3 = Dense(output_size, use_bias=False)
+        self.l4 = Dense(output_size, use_bias=False)
+        self.l5 = Dense(output_size, use_bias=False)
 
-        self.act = Activation("sigmoid")
+        self.act = Activation(activation)
 
     def call(self, inputs, training=None, mask=None):
         x, a = inputs[0], inputs[1]
@@ -116,17 +119,19 @@ def get_model(model):
     raise NotImplementedError
 
 
-def evaluate(model, dataset, steps, dataset_loc, dim):
+def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
     ds = TUDataset(dataset)
     loader = DisjointLoader(ds, batch_size=1, epochs=steps)
 
-    model = get_model(model)(dim=dim)
+    model = get_model(model)(output_size=task.output_size, activation=task.activation, dim=dim)
 
     optimizer = Adam(1e-3)
-    loss_fn = BinaryCrossentropy(from_logits=True)
+    loss_fn = (
+        BinaryCrossentropy(from_logits=True) if task.output_size == 1 else CategoricalCrossentropy(from_logits=True)
+    )
 
     signature = loader.tf_signature()
-    signature = (*signature[:-1], tf.TensorSpec(shape=(1, 1), dtype=tf.float64))
+    signature = (*signature[:-1], tf.TensorSpec(shape=(1, task.output_size), dtype=tf.float64))
 
     @tf.function(input_signature=signature, experimental_relax_shapes=True)
     def train_step(inputs, target):
@@ -142,7 +147,10 @@ def evaluate(model, dataset, steps, dataset_loc, dim):
 
     tm = 0
     for inputs, target in loader:
-        target_ = tf.constant(np.argmax(target), shape=(1, 1), dtype=tf.float64)
+        if task.output_size == 1:
+            target_ = tf.constant(np.argmax(target), shape=(1, 1), dtype=tf.float64)
+        else:
+            target_ = target
         step += 1
 
         t = time.perf_counter()
@@ -152,5 +160,6 @@ def evaluate(model, dataset, steps, dataset_loc, dim):
         if step == loader.steps_per_epoch:
             step = 0
             times.append(tm)
+            print(tm)
             tm = 0
     return times

@@ -2,11 +2,12 @@ import time
 
 from torch_geometric.datasets import TUDataset
 
+from benchmarks.helpers import Task
 from neuralogic.core.dataset import Dataset, Data
 from neuralogic.core import Template, Backend, Settings, Optimizer, ErrorFunction, R, V, Activation, Aggregation
 
 
-def gcn(num_features: int, dim: int = 10):
+def gcn(activation: Activation, output_size: int, num_features: int, dim: int = 10):
     template = Template()
 
     template += (R.atom_embed(V.X)[dim, num_features] <= R.node_feature(V.X)) | [Activation.IDENTITY]
@@ -24,13 +25,13 @@ def gcn(num_features: int, dim: int = 10):
     ]
     template += R.l2_embed / 1 | [Activation.IDENTITY]
 
-    template += (R.predict[1, dim] <= R.l2_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
-    template += R.predict / 0 | [Activation.SIGMOID]
+    template += (R.predict[output_size, dim] <= R.l2_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
+    template += R.predict / 0 | [activation]
 
     return template
 
 
-def gin(num_features: int, dim: int = 10):
+def gin(activation: Activation, output_size: int, num_features: int, dim: int = 10):
     template = Template()
 
     template += (R.atom_embed(V.X)[dim, num_features] <= R.node_feature(V.X)) | [Activation.IDENTITY]
@@ -75,18 +76,18 @@ def gin(num_features: int, dim: int = 10):
     template += (R.l5_mlp_embed(V.X)[dim, dim] <= R.l5_embed(V.X)[dim, dim]) | [Activation.RELU]
     template += R.l5_mlp_embed / 1 | [Activation.RELU]
 
-    template += (R.predict[1, dim] <= R.l1_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
-    template += (R.predict[1, dim] <= R.l2_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
-    template += (R.predict[1, dim] <= R.l3_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
-    template += (R.predict[1, dim] <= R.l4_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
-    template += (R.predict[1, dim] <= R.l5_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
+    template += (R.predict[output_size, dim] <= R.l1_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
+    template += (R.predict[output_size, dim] <= R.l2_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
+    template += (R.predict[output_size, dim] <= R.l3_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
+    template += (R.predict[output_size, dim] <= R.l4_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
+    template += (R.predict[output_size, dim] <= R.l5_mlp_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
 
-    template += R.predict / 0 | [Activation.SIGMOID]
+    template += R.predict / 0 | [activation]
 
     return template
 
 
-def gsage(num_features: int, dim: int = 10):
+def gsage(activation: Activation, output_size: int, num_features: int, dim: int = 10):
     template = Template()
 
     template += (R.atom_embed(V.X)[dim, num_features] <= R.node_feature(V.X)) | [Activation.IDENTITY]
@@ -106,8 +107,8 @@ def gsage(num_features: int, dim: int = 10):
     ]
     template += R.l2_embed / 1 | [Activation.IDENTITY]
 
-    template += (R.predict[1, dim] <= R.l2_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
-    template += R.predict / 0 | [Activation.SIGMOID]
+    template += (R.predict[output_size, dim] <= R.l2_embed(V.X)) | [Aggregation.AVG, Activation.IDENTITY]
+    template += R.predict / 0 | [activation]
 
     return template
 
@@ -122,13 +123,28 @@ def get_model(model):
     raise NotImplementedError
 
 
-def evaluate(model, dataset, steps, dataset_loc, dim):
-    settings = Settings(optimizer=Optimizer.ADAM, error_function=ErrorFunction.CROSSENTROPY, learning_rate=1e-3)
+def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
+    loss_fn = ErrorFunction.CROSSENTROPY
+    activation = Activation.SIGMOID
+
+    if task.activation == "softmax" and task.task == "classification":
+        loss_fn = ErrorFunction.SOFTENTROPY
+        activation = Activation.IDENTITY
+
+    settings = Settings(optimizer=Optimizer.ADAM, error_function=loss_fn, learning_rate=1e-3)
 
     ds = TUDataset(root=dataset_loc, name=dataset)
-    model = get_model(model)(num_features=ds.num_node_features, dim=dim).build(Backend.JAVA, settings)
+
+    model = get_model(model)
+    model = model(activation=activation, output_size=task.output_size, num_features=ds.num_node_features, dim=dim)
+    model = model.build(Backend.JAVA, settings)
 
     dataset = Dataset(data=[Data.from_pyg(data)[0] for data in ds])
+
+    if task.output_size != 1:
+        dataset.number_of_classes = task.output_size
+        dataset.one_hot_encoding = True
+
     built_dataset = model.build_dataset(dataset)
 
     start_time = time.perf_counter()
