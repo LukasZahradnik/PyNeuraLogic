@@ -15,9 +15,11 @@ if __name__ == "__main__":
         "spektral": "Spektral",
     }
 
-    dataset = "MUTAG"
+    dataset = "ENZYMES"
     models = ["gcn", "gsage", "gin"]
     base_dir = os.path.dirname(os.path.abspath(__file__))
+
+    plt.rcParams["axes.titlepad"] = 20
 
     time_data = [[] for _ in frameworks]
 
@@ -31,10 +33,29 @@ if __name__ == "__main__":
         print(framework, time_data[i])
 
     x = np.arange(len(models))
+    width = 0.2
     colors = ["#fb86ad", "#5595e4", "#87dcd7", "#c7a0f8"]
 
+    plt.ylabel("time (s)")
+    plt.title(f"Average time per epoch ({dataset} dataset)")
+
+    x_ticks = []
+    for tick in x:
+        x_ticks.append(tick - width / 2)
+        x_ticks.append(tick + width * len(frameworks) / 2 - width / 2)
+        x_ticks.append(tick + width * len(frameworks) - width / 2)
+
+    x_labels = ["", "GCN", "", "", "GraphSAGE", "", "", "GIN", ""]
+
+    plt.xticks(x_ticks, x_labels)
+
+    ax = plt.gca()
+    for i, tick in enumerate(filter(lambda x: x.get_marker() == 3, ax.xaxis.get_ticklines())):
+        if x_labels[i] != "":
+            tick.set_alpha(0)
+
     for i, fw_data in enumerate(time_data):
-        plt.bar(x + i * 0.2, fw_data, width=0.2, edgecolor=colors[i], color=colors[i])
-    plt.savefig("mutag.svg")
+        plt.bar(x + i * 0.2, fw_data, width=width, edgecolor=colors[i], color=colors[i])
+    plt.savefig(f"{dataset}.svg")
 
     plt.clf()
