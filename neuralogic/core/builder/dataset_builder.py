@@ -116,7 +116,14 @@ class DatasetBuilder:
                 for data in dataset.data:
                     from neuralogic.utils.templates import TemplateList
 
-                    query, example = TemplateList.to_inputs(data.x, data.edge_index, data.y, data.y_mask)
+                    query, example = TemplateList.to_inputs(
+                        data.x,
+                        data.edge_index,
+                        data.y,
+                        data.y_mask,
+                        dataset.one_hot_encoding,
+                        dataset.number_of_classes,
+                    )
                     examples.append(example)
                     queries.extend(query)
 

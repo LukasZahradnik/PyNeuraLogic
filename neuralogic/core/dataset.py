@@ -11,6 +11,7 @@ class Data:
     """
     Stores a learning example in the form of a tensor numeric representation instead of a rule based representation.
     """
+
     def __init__(
         self,
         x: Sized = None,
@@ -56,6 +57,8 @@ class Dataset:
         data: Optional[List[Data]] = None,
         examples_file: Optional[str] = None,
         queries_file: Optional[str] = None,
+        one_hot_encoding: bool = False,
+        number_of_classes: int = 1,
     ):
         self.file_sources = False
 
@@ -70,6 +73,9 @@ class Dataset:
 
         self.examples: List[DatasetEntries] = []
         self.queries: List[DatasetEntries] = []
+
+        self.one_hot_encoding = one_hot_encoding
+        self.number_of_classes = number_of_classes
 
     def __len__(self):
         if self.data is not None:

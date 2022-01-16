@@ -1,5 +1,7 @@
 from typing import List, Iterable
 
+import numpy as np
+
 from neuralogic.core import Template, Relation
 from neuralogic.utils.templates.modules import AbstractModule
 
@@ -30,7 +32,7 @@ class TemplateList:
             previous_names.append(component.build(template, i + 1, previous_names, self.feature_name, self.edge_name))
 
     @staticmethod
-    def to_inputs(x: Iterable, edge_index: Iterable, y, y_mask):
+    def to_inputs(x: Iterable, edge_index: Iterable, y, y_mask, one_hot_encoding=False, max_classes=1):
         if y is None:
             queries = [Relation.get(TemplateList.output_name)]
         elif y_mask is not None:
@@ -38,6 +40,10 @@ class TemplateList:
                 Relation.get(TemplateList.output_name)(*term if isinstance(term, list) else term)[value]
                 for term, value in zip(y_mask, y)
             ]
+        elif one_hot_encoding:
+            vector = np.zeros((max_classes,))
+            vector[y.detach().numpy()] = 1
+            queries = [Relation.get(TemplateList.output_name)[vector]]
         elif y.shape == (1,):
             queries = [Relation.get(TemplateList.output_name)[int(y.detach().numpy()[0])]]
         else:
