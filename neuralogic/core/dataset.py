@@ -1,5 +1,8 @@
-from typing import Optional, List, Union, Sized
+from typing import Optional, List, Union, Tuple, Sequence
 
+import numpy as np
+
+from neuralogic.core.constructs.factories import Relation
 from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
 from neuralogic.core.constructs.rule import Rule
 
@@ -14,17 +17,51 @@ class Data:
 
     def __init__(
         self,
-        x: Sized = None,
-        edge_index: Sized = None,
-        edge_attr: Optional[Sized] = None,
-        y_mask: Sized = None,
-        y: Sized = None,
+        x: Sequence = None,
+        edge_index: Sequence = None,
+        edge_attr: Optional[Sequence] = None,
+        y_mask: Sequence = None,
+        y: Sequence = None,
     ):
         self.x = x
         self.edge_index = edge_index
         self.edge_attr = edge_attr
         self.y = y
         self.y_mask = y_mask
+
+    def to_logic_form(
+        self,
+        feature_name: str = "node_feature",
+        edge_name: str = "edge",
+        output_name: str = "predict",
+        one_hot_encoding=False,
+        max_classes=1,
+    ) -> Tuple:
+        if one_hot_encoding:
+            vector = self.y
+            if len(self.y) != max_classes:
+                vector = np.zeros((max_classes,))
+                vector[self.y[0]] = 1
+            query = Relation.get(output_name)[vector]
+        elif len(self.y) == (1,):
+            query = Relation.get(output_name)[int(self.y[0])]
+        else:
+            if isinstance(self.y, (list, np.ndarray)):
+                query = Relation.get(output_name)[self.y]
+            else:
+                query = Relation.get(output_name)[self.y.detach().numpy()]
+
+        example = [
+            Relation.get(edge_name)(int(u), int(v))[1].fixed() for u, v in zip(self.edge_index[0], self.edge_index[1])
+        ]
+
+        if isinstance(self.x, (list, np.ndarray)):
+            for i, features in enumerate(self.x):
+                example.append(Relation.get(feature_name)(i)[features.detach().numpy()].fixed())
+        else:
+            for i, features in enumerate(self.x):
+                example.append(Relation.get(feature_name)(i)[features.detach().numpy()].fixed())
+        return query, example
 
     @staticmethod
     def from_pyg(data) -> List["Data"]:
@@ -112,3 +149,20 @@ class Dataset:
         if self.file_sources or self.data is not None:
             raise Exception
         self.queries = queries
+
+    def dump(
+        self,
+        queries_fp,
+        examples_fp,
+        feature_name: str = "node_feature",
+        edge_name: str = "edge",
+        output_name: str = "predict",
+        sep: str = "\n",
+    ):
+        for data in self.data:
+            query, examples = data.to_logic_form(
+                feature_name, edge_name, output_name, self.one_hot_encoding, self.number_of_classes
+            )
+
+            queries_fp.write(f"{query}{sep}")
+            examples_fp.write(f"{','.join(example.to_str(False) for example in examples)}{sep}")

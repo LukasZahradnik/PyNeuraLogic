@@ -114,18 +114,13 @@ class DatasetBuilder:
                 queries = []
 
                 for data in dataset.data:
-                    from neuralogic.utils.templates import TemplateList
-
-                    query, example = TemplateList.to_inputs(
-                        data.x,
-                        data.edge_index,
-                        data.y,
-                        data.y_mask,
-                        dataset.one_hot_encoding,
-                        dataset.number_of_classes,
+                    query, example = data.to_logic_form(
+                        one_hot_encoding=dataset.one_hot_encoding,
+                        max_classes=dataset.number_of_classes,
                     )
+
                     examples.append(example)
-                    queries.extend(query)
+                    queries.append(query)
 
             if len(examples) == 1:
                 settings.settings.groundingMode = self.grounding_mode.GLOBAL
