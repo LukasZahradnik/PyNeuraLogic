@@ -43,8 +43,8 @@ class Data:
                 vector = np.zeros((max_classes,))
                 vector[self.y[0]] = 1
             query = Relation.get(output_name)[vector]
-        elif len(self.y) == (1,):
-            query = Relation.get(output_name)[int(self.y[0])]
+        elif len(self.y) == 1 and not isinstance(self.y[0], Sequence):
+            query = Relation.get(output_name)[float(self.y[0])]
         else:
             if isinstance(self.y, (list, np.ndarray)):
                 query = Relation.get(output_name)[self.y]
@@ -165,4 +165,4 @@ class Dataset:
             )
 
             queries_fp.write(f"{query}{sep}")
-            examples_fp.write(f"{','.join(example.to_str(False) for example in examples)}{sep}")
+            examples_fp.write(f"{','.join(example.to_str(False) for example in examples)}.{sep}")
