@@ -1,3 +1,4 @@
+import tempfile
 from typing import Union, Set, Dict
 
 import jpype
@@ -88,12 +89,15 @@ class DatasetBuilder:
             self.counter += 1
         return logic_samples
 
-    def build_dataset(self, dataset: Dataset, backend: Backend, settings: SettingsProxy) -> BuiltDataset:
+    def build_dataset(
+        self, dataset: Dataset, backend: Backend, settings: SettingsProxy, file_mode: bool = False
+    ) -> BuiltDataset:
         """Builds the dataset (does grounding and neuralization) for this template instance and the backend
 
         :param dataset:
         :param backend:
         :param settings:
+        :param file_mode:
         :return:
         """
         self.counter = 0
@@ -110,6 +114,17 @@ class DatasetBuilder:
             queries = dataset.queries
 
             if dataset.data is not None:
+                if file_mode:
+                    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt") as q_tf:
+                        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt") as e_tf:
+                            dataset.dump(q_tf, e_tf)
+
+                            q_tf.flush()
+                            e_tf.flush()
+
+                            return self.build_dataset(
+                                Dataset(examples_file=e_tf.name, queries_file=q_tf.name), backend, settings, False
+                            )
                 examples = []
                 queries = []
 
