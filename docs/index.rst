@@ -13,6 +13,7 @@ PyNeuraLogic
     evaluation
     advanced
     examples
+    benchmarks
 
 .. toctree::
     :maxdepth: 1
