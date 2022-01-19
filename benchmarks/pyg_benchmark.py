@@ -32,7 +32,7 @@ class NetGCN(torch.nn.Module):
         x = global_mean_pool(x, batch)
 
         x = self.fc1(x)
-        return self.activation(x, dim=1)
+        return self.activation(x)
 
 
 class NetGraphSage(torch.nn.Module):
@@ -52,7 +52,7 @@ class NetGraphSage(torch.nn.Module):
         x = global_mean_pool(x, batch)
         x = self.fc1(x)
 
-        return self.activation(x, dim=1)
+        return self.activation(x)
 
 
 class NetGIN(torch.nn.Module):
@@ -98,7 +98,7 @@ class NetGIN(torch.nn.Module):
         stacked = torch.stack([self.l1(m1), self.l2(m2), self.l3(m3), self.l4(m4), self.l5(m5)], dim=0)
         x = torch.sum(stacked, dim=0)
 
-        return self.activation(x, dim=1)
+        return self.activation(x)
 
 
 def get_model(model):
@@ -146,4 +146,5 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
             tm += time.perf_counter() - t
         print(tm)
         times.append(tm)
-    return times
+
+    return times, 0

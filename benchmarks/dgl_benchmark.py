@@ -27,7 +27,7 @@ class NetGCN(torch.nn.Module):
         x = dgl.mean_nodes(g, "h")
         x = self.fc1(x)
 
-        return self.activation(x, dim=1)
+        return self.activation(x)
 
 
 class NetGraphSage(torch.nn.Module):
@@ -48,7 +48,7 @@ class NetGraphSage(torch.nn.Module):
 
         x = self.fc1(x)
 
-        return self.activation(x, dim=1)
+        return self.activation(x)
 
 
 class NetGIN(torch.nn.Module):
@@ -100,7 +100,7 @@ class NetGIN(torch.nn.Module):
 
         x = torch.sum(sum_, dim=0)
 
-        return self.activation(x, dim=1)
+        return self.activation(x)
 
 
 def get_model(model):
@@ -149,7 +149,7 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
             optimizer.zero_grad(set_to_none=True)
             output = model(data, data.ndata["x"])
 
-            loss = loss_fn(output[0], data.y)
+            loss = loss_fn(output, data.y)
 
             loss.backward()
             optimizer.step()
@@ -158,4 +158,4 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
             ls += loss.item()
         print(tm)
         times.append(tm)
-    return times
+    return times, 0

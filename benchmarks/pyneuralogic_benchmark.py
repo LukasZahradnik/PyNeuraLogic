@@ -127,10 +127,6 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
     loss_fn = ErrorFunction.CROSSENTROPY
     activation = Activation.SIGMOID
 
-    if task.activation == "softmax" and task.task == "classification":
-        loss_fn = ErrorFunction.SOFTENTROPY
-        activation = Activation.IDENTITY
-
     settings = Settings(optimizer=Optimizer.ADAM, error_function=loss_fn, learning_rate=1e-3)
 
     ds = TUDataset(root=dataset_loc, name=dataset)
@@ -139,16 +135,19 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
     model = model(activation=activation, output_size=task.output_size, num_features=ds.num_node_features, dim=dim)
     model = model.build(Backend.JAVA, settings)
 
-    dataset = Dataset(data=[Data.from_pyg(data)[0] for data in ds])
+    start_time = time.perf_counter()
+    dataset = Dataset(data=[Data.from_pyg(data)[0] for data in ds], number_of_classes=task.output_size)
 
     if task.output_size != 1:
         dataset.number_of_classes = task.output_size
         dataset.one_hot_encoding = True
 
-    built_dataset = model.build_dataset(dataset)
+    built_dataset = model.build_dataset(dataset, file_mode=True)
 
+    build_time = time.perf_counter() - start_time
     start_time = time.perf_counter()
+
     model(built_dataset.samples, train=True, epochs=steps)
     times = [time.perf_counter() - start_time]
 
-    return times
+    return times, build_time

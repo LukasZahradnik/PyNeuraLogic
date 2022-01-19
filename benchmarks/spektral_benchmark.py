@@ -126,9 +126,7 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
     model = get_model(model)(output_size=task.output_size, activation=task.activation, dim=dim)
 
     optimizer = Adam(1e-3)
-    loss_fn = (
-        BinaryCrossentropy(from_logits=True) if task.output_size == 1 else CategoricalCrossentropy(from_logits=True)
-    )
+    loss_fn = BinaryCrossentropy() if task.output_size == 1 else CategoricalCrossentropy()
 
     signature = loader.tf_signature()
     signature = (*signature[:-1], tf.TensorSpec(shape=(1, task.output_size), dtype=tf.float64))
@@ -162,4 +160,4 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
             times.append(tm)
             print(tm)
             tm = 0
-    return times
+    return times, 0
