@@ -4,7 +4,18 @@ from torch_geometric.datasets import TUDataset
 
 from benchmarks.helpers import Task
 from neuralogic.core.dataset import Dataset, Data
-from neuralogic.core import Template, Backend, Settings, Optimizer, ErrorFunction, R, V, Activation, Aggregation
+from neuralogic.core import (
+    Template,
+    Backend,
+    Settings,
+    Optimizer,
+    ErrorFunction,
+    R,
+    V,
+    Activation,
+    Aggregation,
+    Initializer,
+)
 
 
 def gcn(activation: Activation, output_size: int, num_features: int, dim: int = 10):
@@ -127,7 +138,9 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
     loss_fn = ErrorFunction.CROSSENTROPY
     activation = Activation.SIGMOID
 
-    settings = Settings(optimizer=Optimizer.ADAM, error_function=loss_fn, learning_rate=1e-3)
+    settings = Settings(
+        optimizer=Optimizer.ADAM, error_function=loss_fn, learning_rate=1e-3, initializer=Initializer.GLOROT
+    )
 
     ds = TUDataset(root=dataset_loc, name=dataset)
 
