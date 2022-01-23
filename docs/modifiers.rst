@@ -33,6 +33,7 @@ This issue can be solved by flagging the predicate :code:`edge` as :code:`hidden
     Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation._edge(Var.X, Var.Y))
 
 
+.. _special-modifier-label:
 
 Special Modifier
 ################
