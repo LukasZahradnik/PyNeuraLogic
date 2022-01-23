@@ -9,3 +9,7 @@
 .empty-title .admonition-title {
     display: none;
 }
+
+.sphinx-tabs-tab {
+    padding: 0.7rem 0.8rem !important;
+}

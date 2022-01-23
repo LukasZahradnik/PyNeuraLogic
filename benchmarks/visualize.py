@@ -15,7 +15,7 @@ if __name__ == "__main__":
         "spektral": "Spektral",
     }
 
-    dataset = "BZR"
+    dataset = "MUTAG"
     models = ["gcn", "gsage", "gin"]
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     for i, framework in enumerate(frameworks):
         for model in models:
-            path = os.path.join(base_dir, "nresults", dataset, model, f"{framework}.json")
+            path = os.path.join(base_dir, "results", dataset, model, f"{framework}.json")
 
             with open(path) as fp:
                 framework_data = json.load(fp)
