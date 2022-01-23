@@ -7,9 +7,33 @@
    viewBox="0 0 335 166"
    version="1.1"
    id="svg5"
+   inkscape:version="1.1.1 (26b7af14f2, 2022-01-19)"
+   sodipodi:docname="benchmark.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1.1369149"
+     inkscape:cx="609.54431"
+     inkscape:cy="283.6624"
+     inkscape:window-width="2488"
+     inkscape:window-height="1529"
+     inkscape:window-x="72"
+     inkscape:window-y="34"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     height="296mm" />
   <defs
      id="defs2">
     <rect
@@ -813,18 +837,20 @@
     </clipPath>
   </defs>
   <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
      id="layer1">
-    <text
-       xml:space="preserve"
-       transform="scale(0.26458333)"
-       id="text26069"
-       style="font-size:40px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect26071)" />
-    <g
-       id="patch_2-6"
-       transform="matrix(0.35277778,0,0,0.35277778,68.081348,180.59478)" />
+    <rect
+       style="opacity:1;fill:#ffffff;stroke-width:0.261167;stroke-linecap:round;stroke-miterlimit:3.2;paint-order:stroke markers fill"
+       id="rect4551"
+       width="334.14441"
+       height="164.75246"
+       x="0.38913292"
+       y="0.52956522" />
     <g
        id="g2926"
-       transform="translate(-2.5356937)">
+       transform="translate(-2.5356937)"
+       style="opacity:1">
       <g
          id="axes_1-7"
          transform="matrix(0.51199296,0,0,0.51199296,58.313394,-2.232391)">
@@ -2058,7 +2084,8 @@
             <path
                d="m 64.6,108.1845 h 154.22731 c 1.33333,0 2,-0.66667 2,-2 V 48.472 c 0,-1.333333 -0.66667,-2 -2,-2 H 64.6 c -1.333333,0 -2,0.666667 -2,2 v 57.7125 c 0,1.33333 0.666667,2 2,2 z"
                style="opacity:0.8;fill:#ffffff;stroke:#cccccc;stroke-linejoin:miter"
-               id="path835" />
+               id="path835"
+               sodipodi:nodetypes="sssssssss" />
           </g>
           <g
              id="patch_20">
@@ -2557,9 +2584,9 @@
          y="0"><tspan
            x="255.10156"
            y="485.8832"
-           id="tspan4415"><tspan
+           id="tspan6169"><tspan
              style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-             id="tspan4413">0.6.1</tspan></tspan></text>
+             id="tspan6167">0.6.1</tspan></tspan></text>
       <g
          id="g83160"
          transform="translate(30.707448,-121.41862)">
@@ -2572,9 +2599,9 @@
            y="0"><tspan
              x="255.10156"
              y="485.8832"
-             id="tspan4419"><tspan
+             id="tspan6173"><tspan
                style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-               id="tspan4417">2.0.2</tspan></tspan></text>
+               id="tspan6171">2.0.2</tspan></tspan></text>
       </g>
       <text
          xml:space="preserve"
@@ -2585,9 +2612,24 @@
          y="0"><tspan
            x="255.10156"
            y="485.8832"
-           id="tspan4423"><tspan
+           id="tspan6177"><tspan
              style="font-family:sans-serif;-inkscape-font-specification:sans-serif"
-             id="tspan4421">1.0.8</tspan></tspan></text>
+             id="tspan6175">1.0.8</tspan></tspan></text>
     </g>
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text26069"
+       style="font-size:40px;line-height:1.25;font-family:'CMU Classical Serif';-inkscape-font-specification:'CMU Classical Serif';white-space:pre;shape-inside:url(#rect26071)" />
+    <g
+       id="patch_2-6"
+       transform="matrix(0.35277778,0,0,0.35277778,68.081348,180.59478)" />
+    <rect
+       style="opacity:0;fill:#c7a0f8;stroke-width:0.262;stroke-linecap:round;stroke-miterlimit:3.2;paint-order:stroke markers fill"
+       id="rect4447"
+       width="0.10440037"
+       height="0"
+       x="-0.25875661"
+       y="0.12924349" />
   </g>
 </svg>
