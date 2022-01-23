@@ -149,7 +149,7 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
             optimizer.zero_grad(set_to_none=True)
             output = model(data, data.ndata["x"])
 
-            loss = loss_fn(output, data.y)
+            loss = loss_fn(output[0], data.y)
 
             loss.backward()
             optimizer.step()
