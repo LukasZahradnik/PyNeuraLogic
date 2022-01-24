@@ -166,3 +166,16 @@ class Dataset:
 
             queries_fp.write(f"{query}{sep}")
             examples_fp.write(f"{','.join(example.to_str(False) for example in examples)}.{sep}")
+
+    def dump_to_file(
+        self,
+        queries_filename: str,
+        examples_filename: str,
+        feature_name: str = "node_feature",
+        edge_name: str = "edge",
+        output_name: str = "predict",
+        sep: str = "\n",
+    ):
+        with open(queries_filename, "w") as queries_fp:
+            with open(examples_filename, "w") as examples_fp:
+                self.dump(queries_fp, examples_fp, feature_name, edge_name, output_name, sep)
