@@ -130,7 +130,8 @@ class DatasetBuilder:
 
                 for data in dataset.data:
                     query, example = data.to_logic_form(
-                        one_hot_encoding=dataset.one_hot_encoding,
+                        one_hot_encode_labels=dataset.one_hot_encode_labels,
+                        one_hot_decode_features=dataset.one_hot_decode_features,
                         max_classes=dataset.number_of_classes,
                     )
 
