@@ -28,19 +28,19 @@ Benchmarks
 
 
 
-We have compared PyNeuraLogic with a few popular GNN frameworks, namely |pyg| (2.0.2), |dgl| (0.6.1), and |spektral| (1.0.6) in terms of speed of different methods.
+Here we compare the speed of some popular GNN models encoded in PyNeuraLogic against some of the most popular GNN frameworks in their latest versions, namely |pyg| (2.0.2), |dgl| (0.6.1), and |spektral| (1.0.6).
 
-The focus of our benchmarks is on the comparison of the average training time per epoch of three different architectures
+The benchmarks report comparison of the average training time per epoch of three different architectures
 - GCN (two GCNConv layers), GraphSAGE (two GraphSAGEConv layers), and GIN (five GINConv layers).
 
-Datasets are picked from |tudataset| and are loaded into PyNeuraLogic, DGL, and PyG via PyG's |pygloader|.
+Datasets are picked from the common |tudataset| and are loaded into PyNeuraLogic, DGL, and PyG via PyG's |pygloader|.
 Spektral benchmark uses Spektral's |spektralloader|.
 
-We compare datasets for a binary graph classification task with only node's features. This is only for the sake of
-the simple generalization and reusability of introduced architectures. Statistics of each dataset can be seen down below.
+We compare the frameworks in a binary graph classification task with only node's features. This is merely for the sake of 
+simple reusability of the introduced architectures over the frameworks. Statistics of each dataset can be seen down below.
 
-PyNeuraLogic has to transform each dataset into logic form and then into a computation graph.
-The time spent on this task is labeled as "Dataset Build Time". Note that this transformation happens only once before
+Due to its declarative nature, PyNeuraLogic has to transform each dataset into a logic form and then into a computation graph.
+The time spent on this preprocessing task is labeled as "Dataset Build Time". Note that this transformation happens only once before
 the training.
 
 .. tabs::
