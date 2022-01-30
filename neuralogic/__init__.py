@@ -1,12 +1,16 @@
 import os
+from typing import Optional
+
 import jpype
 
-
-os.environ["CLASSPATH"] = os.path.join(os.path.abspath(os.path.dirname(__file__)), "jar", "NeuraLogic.jar")
 
 _is_initialized = False
 _std_out = None
 _std_err = None
+
+jvm_params = {
+    "classpath": os.path.join(os.path.abspath(os.path.dirname(__file__)), "jar", "NeuraLogic.jar"),
+}
 
 
 class TextIOWrapper:
@@ -48,6 +52,15 @@ def set_stderr(err_io=None) -> None:
     set_system_output(_std_err, jpype.java.lang.System.setErr)
 
 
+def set_jvm_path(path: Optional[str]) -> None:
+    global jvm_params
+
+    if path is None:
+        jvm_params.pop("jvmpath", None)
+    else:
+        jvm_params["jvmpath"] = path
+
+
 def is_initialized() -> bool:
     return _is_initialized
 
@@ -73,9 +86,9 @@ def initialize(
             f"-Xrunjdwp:transport=dt_socket,server={server},address={port},suspend={suspend}",
         ]
 
-        jpype.startJVM(*debug_params, classpath=[os.environ["CLASSPATH"]])
+        jpype.startJVM(*debug_params, **jvm_params)
     else:
-        jpype.startJVM(classpath=[os.environ["CLASSPATH"]])
+        jpype.startJVM(**jvm_params)
 
     set_stderr(_std_err)
     set_stdout(_std_out)
