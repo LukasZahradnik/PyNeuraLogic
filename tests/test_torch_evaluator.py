@@ -67,7 +67,7 @@ def test_evaluator_run_on_files(template: Template, dataset: Dataset, expected_r
     assert len(results) == len(expected_results)
 
     for result, expected_result in zip(results, expected_results):
-        assert expected_result == result
+        assert round(expected_result, 2) == round(result, 2)
 
 
 @pytest.mark.parametrize(
@@ -176,7 +176,7 @@ def test_evaluator_run_on_rules(
     assert len(results) == len(expected_results)
 
     for result, expected_result in zip(results, expected_results):
-        assert expected_result == result
+        assert round(expected_result, 2) == round(result, 2)
 
 
 @pytest.mark.parametrize(
@@ -217,4 +217,4 @@ def test_evaluator_state_loading(template: Template, dataset: Dataset, seed: int
 
     assert len(results) == len(second_results)
     for result, second_result in zip(results, second_results):
-        assert result == second_result
+        assert round(result, 2) == round(second_result, 2)
