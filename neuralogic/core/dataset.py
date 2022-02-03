@@ -21,7 +21,7 @@ class Data:
         edge_index: Sequence = None,
         edge_attr: Optional[Sequence] = None,
         y_mask: Sequence = None,
-        y: Sequence = None,
+        y: Union[Sequence, float, int] = None,
     ):
         self.x = x
         self.edge_index = edge_index
@@ -40,10 +40,13 @@ class Data:
     ) -> Tuple:
         if one_hot_encode_labels:
             vector = self.y
-            if len(self.y) != max_classes:
+
+            if not isinstance(self.y, Sequence) or len(self.y) != max_classes:
                 vector = np.zeros((max_classes,))
-                vector[self.y[0]] = 1
+                vector[self.y[0] if isinstance(self.y, Sequence) else self.y] = 1
             query = Relation.get(output_name)[vector]
+        elif not isinstance(self.y, Sequence):
+            query = Relation.get(output_name)[float(self.y)]
         elif len(self.y) == 1 and not isinstance(self.y[0], Sequence):
             query = Relation.get(output_name)[float(self.y[0])]
         else:
@@ -108,6 +111,9 @@ class Dataset:
         one_hot_encode_labels: bool = False,
         one_hot_decode_features: bool = False,
         number_of_classes: int = 1,
+        feature_name: str = "node_feature",
+        edge_name: str = "edge",
+        output_name: str = "predict",
     ):
         self.file_sources = False
 
@@ -126,6 +132,10 @@ class Dataset:
         self.one_hot_decode_features = one_hot_decode_features
         self.one_hot_encode_labels = one_hot_encode_labels
         self.number_of_classes = number_of_classes
+
+        self.feature_name: str = feature_name
+        self.edge_name: str = edge_name
+        self.output_name: str = output_name
 
     def __len__(self):
         if self.data is not None:
@@ -167,16 +177,13 @@ class Dataset:
         self,
         queries_fp,
         examples_fp,
-        feature_name: str = "node_feature",
-        edge_name: str = "edge",
-        output_name: str = "predict",
         sep: str = "\n",
     ):
         for data in self.data:
             query, examples = data.to_logic_form(
-                feature_name,
-                edge_name,
-                output_name,
+                self.feature_name,
+                self.edge_name,
+                self.output_name,
                 self.one_hot_encode_labels,
                 self.one_hot_decode_features,
                 self.number_of_classes,
@@ -189,11 +196,8 @@ class Dataset:
         self,
         queries_filename: str,
         examples_filename: str,
-        feature_name: str = "node_feature",
-        edge_name: str = "edge",
-        output_name: str = "predict",
         sep: str = "\n",
     ):
         with open(queries_filename, "w") as queries_fp:
             with open(examples_filename, "w") as examples_fp:
-                self.dump(queries_fp, examples_fp, feature_name, edge_name, output_name, sep)
+                self.dump(queries_fp, examples_fp, sep)
