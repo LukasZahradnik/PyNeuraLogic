@@ -6,7 +6,7 @@ from neuralogic.core import Template
 from neuralogic.core.settings import Settings
 
 
-def get_neuralogic_layer(backend: Backend, native_backend_models: bool = False):
+def get_neuralogic_layer(backend: Backend = Backend.JAVA):
     if backend == Backend.DYNET:
         from neuralogic.nn.dynet import NeuraLogic  # type: ignore
 
@@ -28,10 +28,8 @@ def get_neuralogic_layer(backend: Backend, native_backend_models: bool = False):
 
 def get_evaluator(
     template: Template,
-    backend: Backend,
+    backend: Backend = Backend.JAVA,
     settings: Optional[Settings] = None,
-    *,
-    native_backend_models=False,
 ):
     if settings is None:
         settings = Settings()
