@@ -18,6 +18,7 @@ class Activation(str, Enum):
     TANH = "TANH"
     SIGNUM = "SIGNUM"
     RELU = "RELU"
+    LEAKY_RELU = "LEAKYRELU"
     IDENTITY = "IDENTITY"
     LUKASIEWICZ = "LUKASIEWICZ"
     SOFTMAX = "SOFTMAX"
