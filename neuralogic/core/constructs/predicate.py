@@ -1,4 +1,4 @@
-from collections import Iterable
+from typing import Sequence
 
 from neuralogic.core.enums import Activation, Aggregation, ActivationAggregation, ActivationAgg
 from neuralogic.core.constructs.metadata import Metadata
@@ -32,7 +32,7 @@ class Predicate:
         return f"{hidden}{special}{self.name}/{self.arity}"
 
     def __or__(self, other) -> "PredicateMetadata":
-        if isinstance(other, Iterable):
+        if isinstance(other, Sequence):
             metadata = Metadata()
 
             for entry in other:
