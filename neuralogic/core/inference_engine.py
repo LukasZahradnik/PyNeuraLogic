@@ -55,7 +55,7 @@ class InferenceEngine:
         queries = self.dataset_builder.build_queries([query], query_builder)
 
         self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
-        examples = jpype.java.util.ArrayList(self.dataset_builder.build_examples([examples], examples_builder))
+        examples = jpype.java.util.ArrayList(self.dataset_builder.build_examples([examples], examples_builder)[0])
 
         logic_samples = DatasetBuilder.merge_queries_with_examples(queries, examples)
         logic_samples = jpype.java.util.ArrayList(logic_samples)
