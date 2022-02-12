@@ -66,9 +66,11 @@ class DatasetBuilder:
     def build_examples(self, examples, examples_builder):
         logic_samples = []
         one = jpype.JClass("cz.cvut.fel.ida.algebra.values.ScalarValue")(1.0)
+        examples_queries = False
 
         for example in examples:
             label, lifted_example = self.java_factory.get_lifted_example(example)
+            example_query = False
 
             value = one
             label_fact = None if label is None else label.facts
@@ -77,6 +79,7 @@ class DatasetBuilder:
             if label is None or label_size == 0:
                 query_atom = examples_builder.createQueryAtom(str(self.counter), None, lifted_example)
             elif label_size == 1:
+                example_query = True
                 if label_fact.get(0).getValue() is None:
                     literal_string = label_fact.get(0).literal.toString()
                     query_atom = examples_builder.createQueryAtom(literal_string, label_fact.get(0), lifted_example)
@@ -85,9 +88,14 @@ class DatasetBuilder:
                     query_atom = examples_builder.createQueryAtom(str(self.counter), label_fact.get(0), lifted_example)
             else:
                 raise NotImplementedError
+
+            if not example_query and examples_queries:
+                raise Exception("Inconsistent examples! Some examples have queries and some do not")
+
+            examples_queries = example_query
             logic_samples.append(self.logic_sample(value, query_atom))
             self.counter += 1
-        return logic_samples
+        return logic_samples, examples_queries
 
     def build_dataset(
         self, dataset: Dataset, backend: Backend, settings: SettingsProxy, file_mode: bool = False
@@ -142,12 +150,12 @@ class DatasetBuilder:
                 settings.settings.groundingMode = self.grounding_mode.GLOBAL
 
             self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
-            examples = self.build_examples(examples, examples_builder)
+            examples, example_queries = self.build_examples(examples, examples_builder)
 
             self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
             queries = self.build_queries(queries, query_builder)
 
-            logic_samples = DatasetBuilder.merge_queries_with_examples(queries, examples)
+            logic_samples = DatasetBuilder.merge_queries_with_examples(queries, examples, example_queries)
             logic_samples = jpype.java.util.ArrayList(logic_samples).stream()
 
             samples = Builder(settings).from_logic_samples(self.parsed_template, logic_samples, backend)
@@ -164,13 +172,15 @@ class DatasetBuilder:
         return BuiltDataset(samples)
 
     @staticmethod
-    def merge_queries_with_examples(queries, examples):
+    def merge_queries_with_examples(queries, examples, example_queries=True):
         logic_samples = []
 
         if len(examples) == 0:
             return queries
 
         if len(queries) == 0:
+            if not example_queries:
+                raise Exception("No queries provided! The query list is empty and examples do not contain queries")
             return examples
 
         if len(examples) == 1:
