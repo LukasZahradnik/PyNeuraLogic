@@ -1,4 +1,5 @@
 import os
+import tempfile
 from typing import Optional
 
 import jpype
@@ -19,6 +20,7 @@ def get_drawing_settings(img_type: str = "png", value_detail: int = 0) -> Settin
     settings.settings.drawing = False
     settings.settings.storeNotShow = True
     settings.settings.imgType = img_type.lower()
+    settings.settings.outDir = tempfile.gettempdir()
 
     if value_detail not in [0, 1, 2]:
         raise NotImplementedError
