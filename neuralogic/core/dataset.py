@@ -1,4 +1,4 @@
-from typing import Optional, List, Union, Tuple, Sequence
+from typing import Optional, List, Union, Tuple, Sequence, Iterable
 
 import numpy as np
 
@@ -41,23 +41,35 @@ class Data:
         if one_hot_encode_labels:
             vector = self.y
 
-            if not isinstance(self.y, Sequence) or len(self.y) != max_classes:
+            if not isinstance(self.y, (Sequence, np.ndarray)) or len(self.y) != max_classes:
                 vector = np.zeros((max_classes,))
-                vector[self.y[0] if isinstance(self.y, Sequence) else self.y] = 1
+                vector[self.y[0] if isinstance(self.y, (Sequence, np.ndarray)) else self.y] = 1
             query = Relation.get(output_name)[vector]
-        elif not isinstance(self.y, Sequence):
+        elif not isinstance(self.y, Iterable) or (getattr(self.y, "shape", -1) in (1, tuple())):
             query = Relation.get(output_name)[float(self.y)]
         elif len(self.y) == 1 and not isinstance(self.y[0], Sequence):
             query = Relation.get(output_name)[float(self.y[0])]
         else:
-            if isinstance(self.y, (list, np.ndarray)):
+            if isinstance(self.y, (Sequence, np.ndarray)):
                 query = Relation.get(output_name)[self.y]
             else:
                 query = Relation.get(output_name)[self.y.detach().numpy()]
 
-        example = [
-            Relation.get(edge_name)(int(u), int(v))[1].fixed() for u, v in zip(self.edge_index[0], self.edge_index[1])
-        ]
+        if self.edge_attr is None:
+            example = [
+                Relation.get(edge_name)(int(u), int(v))[1].fixed()
+                for u, v in zip(self.edge_index[0], self.edge_index[1])
+            ]
+        elif isinstance(self.edge_attr, (Sequence, np.ndarray)):
+            example = [
+                Relation.get(edge_name)(int(u), int(v))[w].fixed()
+                for u, v, w in zip(self.edge_index[0], self.edge_index[1], self.edge_attr)
+            ]
+        else:
+            example = [
+                Relation.get(edge_name)(int(u), int(v))[w].fixed()
+                for u, v, w in zip(self.edge_index[0], self.edge_index[1], self.edge_attr.detach().numpy())
+            ]
 
         if one_hot_decode_features:
             if isinstance(self.x, (list, np.ndarray)):
