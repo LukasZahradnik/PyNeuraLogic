@@ -1,15 +1,11 @@
 Installation
 ============
 
-The PyNeuraLogic library requires :code:`Python >= 3.7` and :code:`Java 1.8` to be installed.
+The PyNeuraLogic library requires :code:`Python >= 3.7` and :code:`Java >= 1.8` to be installed.
 Additionally, if you plan to use one of the supported backends (e.g., `DyNet <http://dynet.io/>`_),
 you have to install it manually.
 
 In case you want to use visualization provided in the library, it is required to have `Graphviz <https://graphviz.org/download/>`_ installed.
-
-.. note::
-
-    Make sure that you have correctly set the :code:`"JAVA_HOME"` environment variable, or set it via :py:data:`~neuralogic.set_java_home` before using any of the library features.
 
 Using PIP
 #########
@@ -19,5 +15,3 @@ PyNeuraLogic can be easily installed from PyPI repository via :code:`pip install
 .. code-block::
 
     pip install neuralogic
-
-
