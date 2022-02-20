@@ -54,7 +54,7 @@ def draw(drawer, obj, filename: Optional[str] = None, draw_ipython=True, img_typ
 
         return
 
-    data = drawer.drawIntoBytes(obj)
+    data = bytes(drawer.drawIntoBytes(obj))
 
     if draw_ipython:
         from IPython.display import Image, SVG
