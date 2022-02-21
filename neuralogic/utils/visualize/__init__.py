@@ -66,7 +66,7 @@ def draw(drawer, obj, filename: Optional[str] = None, draw_ipython=True, img_typ
 
 
 def to_dot_source(drawer, obj) -> str:
-    return drawer.getGraphSource(obj)
+    return str(drawer.getGraphSource(obj))
 
 
 def draw_model(
