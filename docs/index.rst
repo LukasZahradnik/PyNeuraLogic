@@ -44,15 +44,20 @@ PyNeuraLogic
 .. image:: https://img.shields.io/pypi/l/neuralogic
     :target: https://badge.fury.io/py/neuralogic
 
+.. image:: https://github.com/LukasZahradnik/PyNeuraLogic/actions/workflows/tests.yml/badge.svg
+    :target: https://github.com/LukasZahradnik/PyNeuraLogic/actions/workflows/tests.yml
+
+.. image:: https://readthedocs.org/projects/pyneuralogic/badge/?version=latest
+    :target: https://pyneuralogic.readthedocs.io/en/latest/?badge=latest
+
 
 PyNeuraLogic lets you use Python to create Differentiable Logic Programs
 
 --------
 
-Logic programming is a declarative coding paradigm in which you declare your logical *variables* and *relations* between them. A relation applied to a tuple of variables is then called an *atom*. These can be further composed into so-called *rules* that drive the computation. Such a rule set then forms a *logic program*, and its execution is equivalent to performing logic inference with the rules.
+Logic programming is a declarative coding paradigm in which you declare your logical **variables** and **relations** between them. These can be further composed into so-called _rules_ that drive the computation. Such a rule set then forms a **logic program**, and its execution is equivalent to performing logic inference with the rules.
 
-PyNeuralogic, through its `NeuraLogic <https://github.com/GustikS/NeuraLogic>`_ backend, then makes this inference process *differentiable*, which lets you learn numeric parameters that can be associated with the rules.
-
+PyNeuralogic, through its `NeuraLogic <https://github.com/GustikS/NeuraLogic>`_ backend, then makes this inference process **differentiable** which, in turn, makes it equivalent to forward propagation in deep learning. This lets you learn numeric parameters that can be associated with the rules, just like you learn weights in neural networks.
 
 What is this good for?
 **********************
@@ -110,8 +115,8 @@ Supported backends
 Models defined in PyNeuraLogic can be built for and evaluated in different backends. Currently, you can pick and use
 the following backends, which, except for the Java backend, have to be additionally installed:
 
-- `DyNet <https://github.com/clab/dynet>`_
 - Java
+- `DyNet <https://github.com/clab/dynet>`_
 - `PyTorch Geometric <https://github.com/rusty1s/pytorch_geometric>`_
 
 
@@ -141,6 +146,15 @@ Examples
 
 - |mutagcolab| `Mutagenesis <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Mutagenesis.ipynb>`_
 - |xorcolab| `XOR Example <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb>`_
+
 - |patterncolab| `Pattern Matching <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/PatternMatching.ipynb>`_
 - |kregularcolab| `Distinguishing k-regular graphs <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingKRegularGraphs.ipynb>`_
 - |nonregularcolab| `Distinguishing non-regular graphs <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingNonRegularGraphs.ipynb>`_
+
+
+Papers
+******
+
+- `Beyond Graph Neural Networks with Lifted Relational Neural Networks <https://arxiv.org/abs/2007.06286>`_ Machine Learning Journal, 2021
+- `Lifted Relational Neural Networks <https://arxiv.org/abs/1508.05128>`_ Journal of Artificial Intelligence Research, 2018
+- `Lossless compression of structured convolutional models via lifting <https://arxiv.org/abs/2007.06567>`_ ICLR, 2021
