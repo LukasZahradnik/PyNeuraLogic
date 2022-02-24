@@ -98,9 +98,9 @@ The last bottom layer expanded with additional inputs (:code:`R.feature`), and w
     :align: center
 
 
-This graph highlighted a different level - the level of nodes that operates on the whole rule body (this level was also present in the previous example, but it was meaningless since there was only one body relation). So how do those nodes process their inputs - values from body relations? They concatenate those values.
+This graph highlighted a different level - the level of nodes that operates on the whole rule body (this level was also present in the previous example, but it was meaningless since there was only one body relation). So how do those nodes process their inputs - values from body relations? They aggregate those values.
 
-The concatenation is the summation by default, but it can be adjusted. So, for example, the value of the leftmost magenta node will be calculated as follow (again, without any activation functions):
+The aggregation is the summation by default, but it can be adjusted. So, for example, the value of the leftmost magenta node will be calculated as follow (again, without any activation functions):
 
 .. code-block::
 
@@ -124,9 +124,9 @@ Up until now, nodes were required to have edges; otherwise, the relation :code:`
     :alt: Computation graph with two rules
     :align: center
 
-We introduced the rightmost branch highlighted with the magenta color by adding the second rule. This branch has the same structure as the right one - there is an aggregation node and node that concatenates body relations, but there isn't much to aggregate nor concatenate.
+We introduced the rightmost branch highlighted with the magenta color by adding the second rule. This branch has the same structure as the right one - there is an aggregation node and node that aggregates body relations, but there isn't much to aggregate.
 
-The interesting part here that might be unclear is the behavior of the topmost node that corresponds to the query - how are its two input branches handled? They are concatenated or aggregated - by default, they are summed.
+The interesting part here that might be unclear is the behavior of the topmost node that corresponds to the query - how are its two input branches handled? They are aggregated - by default, they are summed.
 
 
 Graph Readout
