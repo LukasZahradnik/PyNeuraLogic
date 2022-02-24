@@ -10,6 +10,7 @@ PyNeuraLogic
     quick_start
     language
     custom_model
+    rules_mapping
     evaluation
     advanced
     examples

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="126mm"
+   viewBox="0 0 210 126"
+   version="1.1"
+   id="svg155724"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs155721">
+    <rect
+       x="159.74564"
+       y="1031.6191"
+       width="536.2774"
+       height="213.70285"
+       id="rect156023" />
+    <rect
+       x="159.74564"
+       y="1031.6191"
+       width="536.2774"
+       height="213.70285"
+       id="rect156021" />
+    <rect
+       x="159.74564"
+       y="1031.6191"
+       width="536.2774"
+       height="213.70285"
+       id="rect156019" />
+    <rect
+       x="159.74564"
+       y="1031.6191"
+       width="536.2774"
+       height="213.70285"
+       id="rect156017" />
+    <radialGradient
+       xlink:href="#linearGradient8940"
+       id="radialGradient105320"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.6383369,1.1908259,-1.5549131,2.139245,186.03414,-347.64063)"
+       cx="89.487228"
+       cy="152.93709"
+       fx="89.487228"
+       fy="152.93709"
+       r="14.339726" />
+    <linearGradient
+       id="linearGradient8940">
+      <stop
+         style="stop-color:#95fb9a;stop-opacity:1;"
+         offset="0"
+         id="stop8936" />
+      <stop
+         style="stop-color:#5a5af4;stop-opacity:1"
+         offset="1"
+         id="stop8938" />
+    </linearGradient>
+    <radialGradient
+       xlink:href="#linearGradient8940"
+       id="radialGradient14284"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.6383369,1.1908259,-1.5549131,2.139245,268.21154,-347.15741)"
+       cx="89.487228"
+       cy="152.93709"
+       fx="89.487228"
+       fy="152.93709"
+       r="14.339726" />
+    <radialGradient
+       xlink:href="#linearGradient8940"
+       id="radialGradient14280"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.6383369,1.1908259,-1.5549131,2.139245,185.35772,-406.40013)"
+       cx="89.487228"
+       cy="152.93709"
+       fx="89.487228"
+       fy="152.93709"
+       r="14.339726" />
+    <radialGradient
+       xlink:href="#linearGradient8940"
+       id="radialGradient8942"
+       cx="89.487228"
+       cy="152.93709"
+       fx="89.487228"
+       fy="152.93709"
+       r="14.339726"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.6383369,1.1908259,-1.5549131,2.139245,104.01324,-347.11146)" />
+  </defs>
+  <g
+     id="layer1">
+    <path
+       style="fill:none;fill-opacity:1;stroke:#1a1a1a;stroke-width:1.465;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 187.24729,93.619014 v 0 0 -0.53805 H 22.676294 l 81.233886,-58.078757 -0.52689,58.011247"
+       id="path155991" />
+    <circle
+       style="fill:url(#radialGradient8942);fill-opacity:1;stroke:none;stroke-width:6.032;stroke-linecap:round;stroke-miterlimit:3.2;paint-order:stroke fill markers"
+       id="circle155993"
+       cx="22.373034"
+       cy="93.398705"
+       r="14.339726" />
+    <circle
+       style="fill:url(#radialGradient14280);fill-opacity:1;stroke:none;stroke-width:6.032;stroke-linecap:round;stroke-miterlimit:3.2;paint-order:stroke fill markers"
+       id="circle155995"
+       cx="103.71752"
+       cy="34.109947"
+       r="14.339726" />
+    <circle
+       style="fill:url(#radialGradient14284);fill-opacity:1;stroke:none;stroke-width:6.032;stroke-linecap:round;stroke-miterlimit:3.2;paint-order:stroke fill markers"
+       id="circle155997"
+       cx="186.57127"
+       cy="93.352715"
+       r="14.339726" />
+    <circle
+       style="fill:url(#radialGradient105320);fill-opacity:1;stroke:none;stroke-width:6.032;stroke-linecap:round;stroke-miterlimit:3.2;paint-order:stroke fill markers"
+       id="circle155999"
+       cx="104.39383"
+       cy="92.869545"
+       r="14.339726" />
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,58.485111,-161.81869)"
+       id="text156003"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:1.25;font-family:Mo;-inkscape-font-specification:Mo;word-spacing:0px;white-space:pre;shape-inside:url(#rect156017)"><tspan
+         x="159.74609"
+         y="1067.0098"
+         id="tspan156398"><tspan
+           style="font-family:monospace;-inkscape-font-specification:monospace"
+           id="tspan156396">1</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,142.0935,-161.81869)"
+       id="text156007"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:1.25;font-family:Mo;-inkscape-font-specification:Mo;word-spacing:0px;white-space:pre;shape-inside:url(#rect156019)"><tspan
+         x="159.74609"
+         y="1067.0098"
+         id="tspan156402"><tspan
+           style="font-family:monospace;-inkscape-font-specification:monospace"
+           id="tspan156400">2</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,-23.006534,-161.81869)"
+       id="text156011"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:1.25;font-family:Mo;-inkscape-font-specification:Mo;word-spacing:0px;white-space:pre;shape-inside:url(#rect156021)"><tspan
+         x="159.74609"
+         y="1067.0098"
+         id="tspan156406"><tspan
+           style="font-family:monospace;-inkscape-font-specification:monospace"
+           id="tspan156404">3</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       transform="matrix(0.26458333,0,0,0.26458333,58.485135,-269.76883)"
+       id="text156015"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:1.25;font-family:Mo;-inkscape-font-specification:Mo;word-spacing:0px;white-space:pre;shape-inside:url(#rect156023)"><tspan
+         x="159.74609"
+         y="1067.0098"
+         id="tspan156410"><tspan
+           style="font-family:monospace;-inkscape-font-specification:monospace"
+           id="tspan156408">4</tspan></tspan></text>
+  </g>
+</svg>
