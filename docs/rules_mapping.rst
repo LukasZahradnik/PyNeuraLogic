@@ -37,7 +37,7 @@ The Entry Template
 The first template is relatively simple; it contains one rule with only one body relation :code:`R.edge(V.X, V.Y)`.
 The rule roughly translates into plain English as
 
-    "To compute representation :code:`h` of any entity :code:`X` aggregate all values of relations :code:`R.edge` where holds that the source node is the entity :code:`X`."
+    "To compute representation :code:`h` of any entity :code:`X`, aggregate all values of relations :code:`R.edge` where the entity :code:`X` is the `source node` of the relation edge."
 
 So, for example, for a query :code:`R.h(1)`, there are exactly three edge relations that satisfy the template rule -
 :code:`R.edge(1, 2)`, :code:`R.edge(1, 3)`, and :code:`R.edge(1, 4)`. So in the end, we end up with a computation graph like the one below.
@@ -118,7 +118,7 @@ Now that we understand how multiple relations in the body are handled and how di
     R.h(V.X) <= R.feature(V.X),
 
 
-Up until now, nodes were required to have edges; otherwise, the relation :code:`R.h` couldn't be satisfied. With the additional rules, that is not the case anymore - the second rule will be satisfied for any node with features. Let's take a look at how the mapping changed for this template on the query :code:`R.h(1)`
+Up until now, nodes were required to have edges; otherwise, the relation :code:`R.h` could not be satisfied. With the additional rules, that is not the case anymore - the second rule will be satisfied for any node with features. Let's take a look at how the mapping changed for this template on the query :code:`R.h(1)`
 
 .. image:: _static/rulecomputationgraph_tworules.svg
     :alt: Computation graph with two rules
@@ -134,7 +134,7 @@ Graph Readout
 
 Up until now, we have been working with queries on top of one entity - node. What if we wanted to compute the value of relation :code:`R.h` for all available nodes and then somehow aggregate them into one value, i.e., do graph readout?
 
-It could done by listing out relations for all nodes in a single body, but in this case, we can leverage yet again the expressiveness of relational learning.
+It could be done by listing out relations for all nodes in a single body, but in this case, we can leverage yet again the expressiveness of relational learning.
 We can just say, "Aggregate all values of relation :code:`R.h` for all entities :code:`X` that satisfy the relation."
 We will use a different query, :code:`R.q`, for the readout for this case.
 
