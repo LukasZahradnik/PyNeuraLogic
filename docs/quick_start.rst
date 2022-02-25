@@ -2,7 +2,7 @@ Quick Start
 ===========
 
 The PyNeuraLogic library serves for learning on structured data. For the purpose of the introduction to the library and
-its syntax, we will further discuss use cases on graph structures.
+its syntax, we will further discuss use cases on graph structures. Nevertheless, the library is directly applicable to more complex structures, such as relational databases.
 
 .. Note::
     Check out one of the runnable :ref:`examples-label` in Google Colab!
@@ -11,11 +11,11 @@ its syntax, we will further discuss use cases on graph structures.
 Graph Representation
 ####################
 
-Graphs can describe entities (vertices) and their relations (edges) which can be useful for various tasks. Graphs are
+Graphs can describe entities (vertices) and their relations (edges) which can be useful for various tasks. These are
 used as inputs for models and are contained in the :py:class:`~neuralogic.core.dataset.Dataset` class.
 
-The :py:class:`~neuralogic.core.dataset.Dataset` class containing information about graphs can be used in different ways depending on the data format. The
-next section will showcase how to represent the following graph (triangle) in two formats - tensor and logic.
+The :py:class:`~neuralogic.core.dataset.Dataset` class containing the information about graphs can be used in different ways depending on the data format. The
+next section will showcase how to represent the following graph structure (triangle) in two formats - tensor and logic.
 
 .. image:: _static/simple_graph.svg
     :width: 300
@@ -60,7 +60,7 @@ format introduced in the next section.
 Logic Representation
 ********************
 
-The logic format utilizes constructs based on relational logic to encode input data - graphs. The input data are represented in the form of ground atoms (facts),
+The logic format utilizes constructs based on relational logic to encode the input data, such as the graphs. The input data are represented in the form of ground atoms (facts),
 which can be expressed as :code:`Relation.predicate_name(terms)[value]`.
 
 .. code-block:: Python
@@ -87,16 +87,14 @@ In this example, we represent the same simple graph (triangle) but in the logic 
     representing edges and *feature* predicate name for representing features.
 
 .. NOTE::
-    In the example, we encode the graph structure (and its features) using an *example* (:py:meth:`~neuralogic.core.dataset.Dataset.add_example`), which does not handle target
-    labels - those are handled by *queries* (:py:meth:`~neuralogic.core.dataset.Dataset.add_query`).
+    In the example, we encode the graph structure (and its features) using an *example* (:py:meth:`~neuralogic.core.dataset.Dataset.add_example`) which concerns solely the input data. The target "labels", which can generally take on more complex forms in relational learning, are handled by *queries* (:py:meth:`~neuralogic.core.dataset.Dataset.add_query`) instead.
 
 
 Model Definition
 ################
 
-The model architecture is encoded in the instance of the :py:class:`~neuralogic.core.template.Template` class via rules or a list of predefined modules
-(i.e. a :py:class:`~neuralogic.utils.templates.TemplateList` instance populated with modules, for example, with :py:class:`~neuralogic.utils.templates.modules.gcn.GCNConv`)
-
+Models in PyNeuraLogic are not just particular computational graphs, as common in classic deep learning, but can be viewed more generaly as *templates* for (differentiable) computation. The template structure is encoded in the instance of the :py:class:`~neuralogic.core.template.Template` class via relational *rules*, or a list of predefined modules
+(i.e. a :py:class:`~neuralogic.utils.templates.TemplateList` instance populated with modules, for example, with :py:class:`~neuralogic.utils.templates.modules.gcn.GCNConv`).
 
 .. code-block:: Python
 
@@ -110,11 +108,13 @@ The model architecture is encoded in the instance of the :py:class:`~neuralogic.
     ]))
 
 
+We further discuss template definition via the rule format, which forms the core advantage of this framework, in the section of the documentation.
+
 Evaluating Model
 ################
 
 The PyNeuraLogic library allows users to evaluate and train models on different backends. Those backends
-(except for the Java backend) have to be installed separately. To get a model that can be evaluated/trained,
+(except for the native Java backend) have to be installed separately. To get a model that can be evaluated/trained,
 you have to build its template first.
 
 .. code-block:: Python
@@ -141,8 +141,8 @@ performing the forward and backward propagation is straightforward.
 Evaluators
 **********
 
-For faster prototyping, we have prepared evaluators, which encapsulate helpers such as training loop and
-evaluation. Evaluators can be customized via various settings encapsulated in the :py:class:`~neuralogic.core.settings.Settings` class.
+For faster prototyping, we have prepared *evaluators* which encapsulate helpers, such as training loop and
+evaluation. Evaluators can then be customized via various settings encapsulated in the :py:class:`~neuralogic.core.settings.Settings` class.
 
 .. code-block:: Python
 
