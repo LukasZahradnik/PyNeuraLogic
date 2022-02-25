@@ -16,7 +16,7 @@ The 'compilation' is done in two steps. Firstly, we retrieve a model instance fo
     model = template.build(Backend.JAVA, settings)
 
 
-Then we can 'build' the examples and queries (dataset) to input samples, yielding different computation graphs.
+Then we can 'build' the examples and queries (dataset), yielding a multitude of computational graphs to be trained.
 
 .. code-block:: Python
 
@@ -39,11 +39,11 @@ When we want to load a state into our model, we can then simply pass the state i
 
 .. Warning::
 
-    The compatibility between backends for loading model state is ensured only for **DyNet** and **Java** backends.
+    The compatibility between backends for loading model state is ensured only for the **DyNet** and **Java** backends.
 
 .. note::
 
-    Evaluators offer the same interface for the saving/loading model.
+    Evaluators offer the same interface for saving/loading of the model.
 
 
 Utilizing Evaluators
@@ -64,16 +64,16 @@ Once you have an evaluator, you can evaluate or train the model on a dataset. Th
 
 .. note::
 
-    It is more efficient to pass into evaluator pre-built dataset if it is used more than once (it will prevent redundant dataset building).
+    If it is used more than once, it is more efficient to pass a pre-built dataset into the evaluator (this will prevent redundant dataset building).
 
 
 Settings Instance
 *****************
 
-The :py:class:`~neuralogic.core.settings.Settings` instance contains settings to customize the behavior of different parts of the library.
+The :py:class:`~neuralogic.core.settings.Settings` instance contains all the settings used to customize the behavior of different parts of the library.
 
 Most importantly, it affects the behavior of the model building (e.g., specify default rule/relation activation functions), evaluators (e.g., error function, number of epochs, learning rate, optimizer),
-and the model itself  - how are learnable parameters initialized.
+and the model itself (e.g., initialization of the learnable parameters).
 
 .. code-block:: Python
 
@@ -88,14 +88,14 @@ and the model itself  - how are learnable parameters initialized.
     )
 
 
-In the example above, we define settings to ensure that initial values of learnable parameters (of the model the settings are used in) are sampled from the uniform distribution.
+In the example above, we define settings to ensure that initial values of learnable parameters (of the model these settings are used for) are sampled from the uniform distribution.
 We also set properties utilized by evaluators: the number of epochs (:math:`100`) and the optimizer,
 which is set to Stochastic gradient descent (SGD) with a learning rate of :math:`0.1`.
 
 Evaluator Training/Testing Interface
 ************************************
 
-The evaluator's basic interface consists of two methods - :code:`train` and :code:`test` for training on a dataset and evaluating a dataset, respectively. Both methods have the same interface and are implemented in two modes - generator and non-generator.
+The evaluator's basic interface consists of two methods - :code:`train` and :code:`test` for training on a dataset and evaluating on a dataset, respectively. Both methods have the same interface and are implemented in two modes - generator and non-generator.
 
 The generator mode (default mode) yields a tuple of two elements (total loss and number of instances/samples) per each epoch. This mode can be useful when we want to, for example, visualize, log or do some other manipulations in real-time during the training (or testing).
 
@@ -105,7 +105,7 @@ The generator mode (default mode) yields a tuple of two elements (total loss and
         pass
 
 
-The non-generator mode, on the other hand, returns only a tuple of metrics of the last epoch.
+The non-generator mode, on the other hand, returns only a tuple of metrics from the last epoch.
 
 .. code-block:: Python
 
