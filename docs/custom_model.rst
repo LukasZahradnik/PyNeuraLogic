@@ -1,41 +1,27 @@
-Model Definition
+Problem Definition
 ================
 
-To be able to learn a problem via the PyNeuraLogic library, it is necessary to encode the problem
-as a template, queries and examples. A set of queries, together with a learning example of examples,
-forms a dataset.
-
-Template
-########
-
-The template (:py:class:`~neuralogic.core.template.Template`) is a set of rules that encode the problem's architecture - i.e. the model, which is
-essentially equivalent to composing modules in other frameworks, but more versatile. The versatility
-is achieved by utilizing lower-level primitives - the rules that can be freely modified.
-
-Interpretation of Rules
-***********************
-
-TODO: Understanding rules
-
+To approach relational machine learning problems with the PyNeuraLogic library in its full potential, we generally divide each learning scenario into (i) learning examples, (ii) queries, and (iii) a learning template. A set of learning examples together with the queries form a learning dataset. The learning template then constitues a "lifted" model architecture, i.e. a prescription for unfolding (differentiable) computational graphs.
 
 Dataset
 #######
 
-The dataset instance holds information about the specific problem instance and is divided into two parts - examples and queries.
+The dataset object holds factual information about the problem and is divided into two parts - (i) examples and (ii) queries.
 
 .. attention::
 
-    In the context of examples and queries, the weights of atoms are, in fact, not learnable parameters but concrete values that serve as feature inputs (examples) or target labels (queries).
+    In the context of examples and queries, the "weights" of the relations are, in fact, not learnable parameters but concrete *values* that serve as inputs (example features) or target outputs (query labels).
 
-    This means that it is not possible to use the dimension value for the weight (value) definition as it does not represent concrete value.
+    This means that it is not possible to use the dimensionality definition for the weight (value) in this case, as it does not represent a concrete value.
 
 
 Examples
 ********
 
-One example describes a specific graph - an instance of the learning problem encoded as ground atoms/facts and rules. An example can be seen as the input to a model defined by a template.
+An example describes a specific learning instance, such as a graph, generally encoded through the language of *ground* relations/facts and rules. Intuitively, a learning example can be seen as the input to the model defined by a template.
 
-For example, a complete graph with three nodes and some features can be encoded as:
+Examples can be loaded from files in various formats, or encoded directly in Python in the NeuraLogic language.
+For instance, a complete graph with three nodes and some features can be encoded as:
 
 .. code-block:: Python
 
@@ -56,25 +42,48 @@ For example, a complete graph with three nodes and some features can be encoded 
 Queries
 *******
 
-Queries are a set of valued ground atoms (facts) that determine what outputs of the defined template are.
+Queries are relations (facts) corresponding to the desired outputs of the learning model/template. These are commonly associated with (non-learnable) weights determining the expected values of the target (relation) labels, given some input example(s).
 
 
-We might, for example, want to learn the output of the :code:`Relation.h` for the entity with index :code:`1` to be :code:`0` and then for the entity with index :code:`2` to be :code:`1`, which might be expressed like this:
+We might, for example, want to learn the output values of the unary relation (property) :code:`Relation.h` of the entity :code:`anna` to be :code:`0`, and for the entity :code:`elsa` to be :code:`1`. This might be expressed like this:
 
 .. code-block:: Python
 
     dataset.add_queries([
-        Relation.h(1)[0],
-        Relation.h(2)[1],
+        Relation.h('anna')[0],
+        Relation.h('elsa')[1],
     ])
 
-Queries are not restricted only to one layer (atom) nor output shape. We can mix queries however we like - for example, we can define query :code:`Relation.a[0]` with scalar label and then query :code:`Relation.b[[1, 0, 1]]` with vector label.
+Note that, in constrast to classic machine learning labels, queries are not restricted to a single target "output" in the template, such as the "output layer" in classic neural models. We can thus ask different completely arbitray queries at the same time:
+
+.. code-block:: Python
+
+    dataset.add_queries([
+        Relation.h('anna')[0],
+        Relation.h('elsa')[1],
+        Relation.friend('anna','elsa')[1],
+    ])
+
+Also, the associated labels can be of arbitrary shapes. We can thus, for example, combine a query :code:`Relation.a[0]` with a scalar label with a query :code:`Relation.b[[1, 0, 1]]` with a vector label, each associated with a different part of the learning template.
 
 .. note::
 
-    Queries are valued ground atoms, but we don't have to define the value explicitly. If the value is not present, the default value (:code:`1.0`) is used as the label. This can be useful for queries outside of training scenarios - where labels are not needed/known.
+    Queries are valued ground atoms, but we don't have to define the value explicitly. If the value is not present, the default value (:code:`1.0`) is used as the label. This is useful, e.g., for queries outside the learning phase, where the labels are not needed/known.
 
+
+A single learning example may then be associated with a single query, as common in classic supervised machine learning, or with multiple queries, as common e.g. in knowledge-base completion or collective classification tasks.
 
 .. tip::
 
-    If the learning instance (example) does not change and is the same for every query, we can define only one example, and it will be reused for each query.
+    If the learning example does not change and is the same for every query, we can simly define only one example, and it will be reused for each query.
+
+
+Template
+########
+
+The template (:py:class:`~neuralogic.core.template.Template`) is a set of *rules* that encode the lifted model architecture. Intuitively, this is somewhat similar to composing modules in the common deep learning frameworks, but more versatile. The versatility follows from the *declarative* nature of the rules, which can be highly abstract and expressive, just like the modules, yet directly reveal an interface to the underlying lower-level principles of the module's computation.
+
+Interpretation of Rules
+***********************
+
+TODO: Understanding rules
