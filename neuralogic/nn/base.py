@@ -21,7 +21,7 @@ class AbstractNeuraLogic:
     def __call__(self, sample):
         raise NotImplementedError
 
-    def build_dataset(self, dataset: Union[Dataset, BuiltDataset], file_mode=False):
+    def build_dataset(self, dataset: Union[Dataset, BuiltDataset], file_mode: bool = False):
         return self.dataset_builder.build_dataset(dataset, self.backend, self.settings, file_mode)
 
     def set_hooks(self, hooks):
@@ -81,9 +81,9 @@ class AbstractEvaluator:
     def set_dataset(self, dataset: Union[Dataset, BuiltDataset]):
         self.dataset = self.build_dataset(dataset)
 
-    def build_dataset(self, dataset: Union[Dataset, BuiltDataset]):
+    def build_dataset(self, dataset: Union[Dataset, BuiltDataset], file_mode: bool = False):
         if isinstance(dataset, Dataset):
-            return self.neuralogic_model.build_dataset(dataset)
+            return self.neuralogic_model.build_dataset(dataset, file_mode)
         return dataset
 
     @property

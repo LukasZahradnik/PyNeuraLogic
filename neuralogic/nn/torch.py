@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union, Tuple
 import torch
 import numpy as np
 
@@ -21,10 +21,12 @@ def longtail(tensor: torch.Tensor, _: SettingsProxy):
 class NeuraLogic(AbstractNeuraLogic):
     activations = {
         "Sigmoid": torch.sigmoid,
-        "Average": torch.mean,
-        "Maximum": torch.max,
         "ReLu": torch.relu,
         "Tanh": torch.tanh,
+        "Average": torch.mean,
+        "Maximum": torch.max,
+        "Sum": torch.sum,
+        "Minimum": torch.min,
     }
 
     initializers = {
@@ -34,7 +36,8 @@ class NeuraLogic(AbstractNeuraLogic):
         ),
         Initializer.CONSTANT: lambda tensor, settings: torch.nn.init.constant_(tensor, settings.initializer_const),
         Initializer.LONGTAIL: longtail,
-        # TODO: GLOROT and HE
+        Initializer.GLOROT: lambda tensor, _: torch.nn.init.xavier_uniform_(tensor),
+        Initializer.HE: lambda tensor, _: torch.nn.init.kaiming_uniform_(tensor),
     }
 
     def __init__(self, model: List[Weight], template, settings: Optional[SettingsProxy] = None):
@@ -53,6 +56,7 @@ class NeuraLogic(AbstractNeuraLogic):
             raise NotImplementedError
 
         weight_initializer = NeuraLogic.initializers[initializer]
+        self.weights = []
 
         for weight in self.weights_meta:
             if weight.fixed:
@@ -107,31 +111,56 @@ class NeuraLogic(AbstractNeuraLogic):
         self, neuron: Neuron, neurons: List[torch.Tensor], weights: torch.nn.ParameterList
     ) -> torch.Tensor:
         if neuron.inputs:
-            out = self.process_neuron_inputs(neuron, neurons, weights)
+            out_scalar, out_vector, out_matrix = self.process_neuron_inputs(neuron, neurons, weights)
 
             if neuron.activation:
                 if not neuron.pooling:
-                    out = sum(out)
+                    out = sum(out_scalar) + sum(out_vector) + sum(out_matrix)
                 else:
-                    out = torch.stack(out)
+                    if out_matrix:
+                        shape = out_matrix[0].shape
+                        dummy_tensor = torch.zeros((shape), requires_grad=False)
+
+                        out = torch.stack(
+                            [
+                                *out_matrix,
+                                *(vector + dummy_tensor for vector in out_vector),
+                                *(scalar + dummy_tensor for scalar in out_scalar),
+                            ]
+                        )
+                    elif out_vector:
+                        shape = out_vector[0].shape
+                        dummy_tensor = torch.zeros((shape), requires_grad=False)
+                        out = torch.stack([*out_vector, *(scalar + dummy_tensor for scalar in out_scalar)])
+                    else:
+                        out = torch.stack(out_scalar)
                 if neuron.activation != "Identity":
-                    out = NeuraLogic.activations[neuron.activation](out)
+                    if neuron.pooling:
+                        out = NeuraLogic.activations[neuron.activation](out, dim=0)
+                    else:
+                        out = NeuraLogic.activations[neuron.activation](out)
             else:
-                out = sum(out)
+                out = sum(out_scalar) + sum(out_vector) + sum(out_matrix)
         else:
             out = NeuraLogic.to_tensor_value(neuron.value)
 
             if neuron.activation and neuron.activation != "Identity":
-                out = NeuraLogic.activations[neuron.activation](out)
+                if neuron.pooling:
+                    out = NeuraLogic.activations[neuron.activation](out, dim=0)
+                else:
+                    out = NeuraLogic.activations[neuron.activation](out)
 
         if self.hooks_set and neuron.hook_name is not None and neuron.hook_name in self.hooks:
             self.run_hook(neuron.hook_name, out.value())
+
         return out
 
     def process_neuron_inputs(
         self, neuron: Neuron, neurons: List[torch.Tensor], weights: torch.nn.ParameterList
-    ) -> List[torch.Tensor]:
-        out = []
+    ) -> Tuple[List[Union[torch.Tensor, int, float]], List[torch.Tensor], List[torch.Tensor]]:
+        out_matrix = []
+        out_vector = []
+        out_scalar = []
 
         if neuron.weights:
             for w, i in zip(neuron.weights, neuron.inputs):
@@ -142,10 +171,29 @@ class NeuraLogic(AbstractNeuraLogic):
                 weight_size = weight.size()
 
                 if not neuron_size or not weight_size or neuron_size == (1,) or weight_size == (1,):
-                    out.append(torch.multiply(weight, neuron))
+                    result = torch.multiply(weight, neuron)
                 else:
-                    out.append(torch.matmul(weight, neuron))
+                    result = torch.matmul(weight, neuron)
+
+                res_size = result.size()
+                if not res_size or res_size == (1,):
+                    out_scalar.append(result)
+                elif len(res_size) == 1:
+                    out_vector.append(result)
+                else:
+                    out_matrix.append(result)
         else:
             for i in neuron.inputs:
-                out.append(neurons[i])
-        return out
+                result = neurons[i]
+
+                if isinstance(result, (int, float)):
+                    out_scalar.append(result)
+                else:
+                    res_size = result.size()
+                    if not res_size or res_size == (1,):
+                        out_scalar.append(result)
+                    elif len(res_size) == 1:
+                        out_vector.append(result)
+                    else:
+                        out_matrix.append(result)
+        return out_scalar, out_vector, out_matrix
