@@ -151,6 +151,9 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
     start_time = time.perf_counter()
     dataset = Dataset(data=[Data.from_pyg(data)[0] for data in ds], number_of_classes=task.output_size)
 
+    for data in dataset.data:
+        data.edge_attr = None
+
     if task.output_size != 1:
         dataset.number_of_classes = task.output_size
         dataset.one_hot_encoding = True
