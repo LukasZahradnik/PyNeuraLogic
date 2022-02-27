@@ -15,6 +15,30 @@ def XOR():
     return template, dataset
 
 
+def Family():
+    from neuralogic.core.template import Template
+
+    template = Template(template_file=os.path.join(base_path, "simple", "family", "template.txt"))
+    dataset = Dataset(
+        examples_file=os.path.join(base_path, "simple", "family", "examples.txt"),
+        queries_file=os.path.join(base_path, "simple", "family", "queries.txt"),
+    )
+
+    return template, dataset
+
+
+def Nations():
+    from neuralogic.core.template import Template
+
+    template = Template(template_file=os.path.join(base_path, "nations", "template.txt"))
+    dataset = Dataset(
+        examples_file=os.path.join(base_path, "nations", "examples.txt"),
+        queries_file=os.path.join(base_path, "nations", "queries.txt"),
+    )
+
+    return template, dataset
+
+
 def Trains():
     from neuralogic.core.template import Template
 

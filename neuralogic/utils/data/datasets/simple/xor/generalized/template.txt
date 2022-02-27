@@ -1,0 +1,9 @@
+*next(0, 1).
+*next(1, 2).
+*next(2, 3).
+*next(3, 4).
+*next(4, 5).
+
+xor_at(0) :- val_at(0).
+{1, 8} xor_at(Y) :- {8, 1} val_at(Y), {8, 1} xor_at(X), *next(X, Y). [activation=relu]
+xor_at/1 [activation=relu]

@@ -1,0 +1,2 @@
+1.0 foal(star).
+0.0 negFoal(star).

@@ -1,0 +1,8 @@
+import ./embeddings.txt
+
+{1,3} predict(Nation, Attribute) :- {3,3} embed_nation(Nation), {3,3} embed_att(Attribute).
+
+embed_nat1(X) :- {3,3} embed_rel(R), {3,3} embed_nation(Y), {3} r(X,R,Y).
+embed_nat2(Y) :- {3,3} embed_nation(X), {3,3} embed_rel(R), {3} r(X,R,Y).
+
+{1,3} predict(X,R,Y) :- {3,3} embed_nat1(X), {3,3} embed_nat2(Y), {3,3} embed_rel(R).

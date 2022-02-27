@@ -1,0 +1,1 @@
+<1.0> horse(aida), <1.0> horse(cheyenne), <1.0> horse(dakotta), <1.0> parent(star,cheyenne), <1.0> parent(star,aida), <1.0> sibling(star,dakotta).
