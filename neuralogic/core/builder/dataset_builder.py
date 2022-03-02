@@ -31,11 +31,14 @@ class DatasetBuilder:
         self.examples_builder = jpype.JClass("cz.cvut.fel.ida.logic.constructs.building.ExamplesBuilder")
         self.queries_builder = jpype.JClass("cz.cvut.fel.ida.logic.constructs.building.QueriesBuilder")
 
-        self.counter = 0
+        self.query_counter = 0
+        self.examples_counter = 0
+
         self.hooks: Dict[str, Set] = {}
 
     def build_queries(self, queries, query_builder):
         logic_samples = []
+        one_query_per_example = True
 
         for query in queries:
             head, conjunction = self.java_factory.get_query(query)
@@ -56,12 +59,15 @@ class DatasetBuilder:
                         ]
                     )
             else:
-                id = str(self.counter)
+                id = str(self.query_counter)
+                if len(facts) > 1:
+                    one_query_per_example = False
+
                 logic_samples.extend(
                     [self.logic_sample(f.getValue(), query_builder.createQueryAtom(id, f), True) for f in facts]
                 )
-            self.counter += 1
-        return logic_samples
+            self.query_counter += 1
+        return logic_samples, one_query_per_example
 
     def build_examples(self, examples, examples_builder):
         logic_samples = []
@@ -77,7 +83,7 @@ class DatasetBuilder:
             label_size = 0 if label is None else label_fact.size()
 
             if label is None or label_size == 0:
-                query_atom = examples_builder.createQueryAtom(str(self.counter), None, lifted_example)
+                query_atom = examples_builder.createQueryAtom(str(self.examples_counter), None, lifted_example)
             elif label_size == 1:
                 example_query = True
                 if label_fact.get(0).getValue() is None:
@@ -85,7 +91,9 @@ class DatasetBuilder:
                     query_atom = examples_builder.createQueryAtom(literal_string, label_fact.get(0), lifted_example)
                 else:
                     value = label_fact.get(0).getValue()
-                    query_atom = examples_builder.createQueryAtom(str(self.counter), label_fact.get(0), lifted_example)
+                    query_atom = examples_builder.createQueryAtom(
+                        str(self.examples_counter), label_fact.get(0), lifted_example
+                    )
             else:
                 raise NotImplementedError
 
@@ -94,7 +102,7 @@ class DatasetBuilder:
 
             examples_queries = example_query
             logic_samples.append(self.logic_sample(value, query_atom))
-            self.counter += 1
+            self.examples_counter += 1
         return logic_samples, examples_queries
 
     def build_dataset(
@@ -108,7 +116,9 @@ class DatasetBuilder:
         :param file_mode:
         :return:
         """
-        self.counter = 0
+        self.examples_counter = 0
+        self.query_counter = 0
+
         weight_factory = self.java_factory.weight_factory
 
         examples_builder = self.examples_builder(settings.settings)
@@ -153,9 +163,11 @@ class DatasetBuilder:
             examples, example_queries = self.build_examples(examples, examples_builder)
 
             self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
-            queries = self.build_queries(queries, query_builder)
+            queries, one_query_per_example = self.build_queries(queries, query_builder)
 
-            logic_samples = DatasetBuilder.merge_queries_with_examples(queries, examples, example_queries)
+            logic_samples = DatasetBuilder.merge_queries_with_examples(
+                queries, examples, one_query_per_example, example_queries
+            )
             logic_samples = jpype.java.util.ArrayList(logic_samples).stream()
 
             samples = Builder(settings).from_logic_samples(self.parsed_template, logic_samples, backend)
@@ -172,9 +184,7 @@ class DatasetBuilder:
         return BuiltDataset(samples)
 
     @staticmethod
-    def merge_queries_with_examples(queries, examples, example_queries=True):
-        logic_samples = []
-
+    def merge_queries_with_examples(queries, examples, one_query_per_example, example_queries=True):
         if len(examples) == 0:
             return queries
 
@@ -183,7 +193,9 @@ class DatasetBuilder:
                 raise Exception("No queries provided! The query list is empty and examples do not contain queries")
             return examples
 
+        # One large example for one or more queries
         if len(examples) == 1:
+            logic_samples = []
             for query in queries:
                 example = examples[0] if query.query.evidence is None else query
                 query_object = query if query.isQueryOnly else examples[0]
@@ -191,12 +203,31 @@ class DatasetBuilder:
                 logic_samples.append(query)
             return logic_samples
 
-        if len(examples) != len(queries):
-            raise Exception(f"The size of examples {len(examples)} doesn't match the size of queries {len(queries)}")
+        # One example per query
+        if one_query_per_example:
+            if len(examples) != len(queries):
+                raise Exception(
+                    f"The size of examples {len(examples)} doesn't match the size of queries {len(queries)}"
+                )
 
-        for query, example in zip(queries, examples):
-            example_object = example if query.query.evidence is None else query
-            query_object = query if query.isQueryOnly else example
+            logic_samples = []
+
+            for query, example in zip(queries, examples):
+                example_object = example if query.query.evidence is None else query
+                query_object = query if query.isQueryOnly else example
+                query_object.query.evidence = example_object.query.evidence
+                logic_samples.append(query)
+            return logic_samples
+
+        logic_samples = []
+        example_map = {e.getId(): e for e in examples}
+
+        # Multiple queries per example
+        for query in queries:
+            query_id = query.getId()
+
+            example_object = example_map[query_id] if query.query.evidence is None else query
+            query_object = query if query.isQueryOnly else example_map[query_id]
             query_object.query.evidence = example_object.query.evidence
             logic_samples.append(query)
         return logic_samples

@@ -52,14 +52,14 @@ class InferenceEngine:
         query_builder.setFactoriesFrom(examples_builder)
 
         self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
-        queries = self.dataset_builder.build_queries([query], query_builder)
+        queries, one_query_per_example = self.dataset_builder.build_queries([query], query_builder)
 
         self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
-        examples = jpype.java.util.ArrayList(self.dataset_builder.build_examples([examples], examples_builder)[0])
+        examples = self.dataset_builder.build_examples([examples], examples_builder)[0]
 
-        logic_samples = DatasetBuilder.merge_queries_with_examples(queries, examples)
-        logic_samples = jpype.java.util.ArrayList(logic_samples)
-
+        logic_samples = self.dataset_builder.merge_queries_with_examples(
+            queries, examples, examples_builder, one_query_per_example
+        )
         sample = logic_samples[0]
 
         gs = self.grounding_sample(sample, self.parsed_template)
