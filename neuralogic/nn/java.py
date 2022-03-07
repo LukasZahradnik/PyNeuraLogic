@@ -36,8 +36,8 @@ class NeuraLogic(AbstractNeuraLogic):
         def handleHook(self, hook, value):
             self.module.run_hook(hook, json.loads(value))
 
-    def __init__(self, model, template, settings: SettingsProxy):
-        super().__init__(Backend.JAVA, template, settings)
+    def __init__(self, model, dataset_builder, template, settings: SettingsProxy):
+        super().__init__(Backend.JAVA, dataset_builder, template, settings)
 
         if not is_initialized():
             initialize()
@@ -112,7 +112,10 @@ class NeuraLogic(AbstractNeuraLogic):
                 size = list(value.size())
 
                 if len(size) == 0 or size[0] == 0:
-                    weights_dict[weight.index] = value.value
+                    try:
+                        weights_dict[weight.index] = value.value
+                    except Exception:
+                        weights_dict[weight.index] = 1.0
                 elif len(size) == 1 or size[0] == 1 or size[1] == 1:
                     weights_dict[weight.index] = list(value.values)
                 else:

@@ -129,7 +129,7 @@ class Template:
         parsed_template = self.get_parsed_template(settings_proxy, java_factory)
         model = Builder(settings_proxy).build_model(parsed_template, backend, settings_proxy)
 
-        return get_neuralogic_layer(backend)(model, DatasetBuilder(parsed_template, java_factory), settings_proxy)
+        return get_neuralogic_layer(backend)(model, DatasetBuilder(parsed_template, java_factory), self, settings_proxy)
 
     def __str__(self) -> str:
         return "\n".join(str(r) for r in self.template)
