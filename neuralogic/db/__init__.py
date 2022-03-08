@@ -1,7 +1,9 @@
 from collections import defaultdict
+from typing import Dict, Tuple, List
+
 from neuralogic.core import Settings, Activation, Aggregation
 from neuralogic.core.constructs.atom import WeightedAtom, BaseAtom
-from neuralogic.core.constructs.predicate import PredicateMetadata
+from neuralogic.core.constructs.predicate import PredicateMetadata, Predicate
 from neuralogic.core.constructs.rule import Rule
 
 from neuralogic.db.sql_convertors import (
@@ -13,11 +15,12 @@ from neuralogic.db.sql_convertors import (
 from neuralogic.db.sql_helpers import helpers
 
 
-def to_sql(model, mapping, settings: Settings) -> str:
+def to_sql(model, mapping: Dict[Predicate, Tuple[str, Tuple[str], str]], settings: Settings) -> str:
     """Converts the model into SQL"""
     template = model.source_template
     batched_relations = defaultdict(lambda: defaultdict(list))
     predicates_metadata = {}
+    mapping = {f"{key.name}/{key.arity}": value for key, value in mapping.items()}
 
     weight_index = 0
     weights = model.state_dict()["weights"]
@@ -67,6 +70,9 @@ def to_sql(model, mapping, settings: Settings) -> str:
 
     for name, arities in batched_relations.items():
         for arity, relations_by_arity in arities.items():
+            if f"{name}/{arity}" in mapping:
+                raise Exception
+
             activation = relation_default_activation
             aggregation = default_aggregation
             predicate_metadata = predicates_metadata.get(f"{name}/{arity}", None)
@@ -88,7 +94,7 @@ def to_sql(model, mapping, settings: Settings) -> str:
                             agg = str(relation.metadata.aggregation).lower()
 
                     sql_fun = _get_rule_sql_function(
-                        relation, index, activations[act], aggregations[agg], weight_indices, weights
+                        relation, index, activations[act], aggregations[agg], weight_indices, weights, mapping
                     )
                 else:
                     sql_fun = _get_fact_sql_function(relation, index, weight_indices, weights)

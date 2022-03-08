@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 
 def _is_var(term) -> bool:
@@ -68,7 +68,15 @@ $$ LANGUAGE SQL STABLE;
     """.strip()
 
 
-def _get_rule_sql_function(rule, id, activation, aggregation, weights_ids: List[int], weights: Dict):
+def _get_rule_sql_function(
+    rule,
+    id: int,
+    activation: str,
+    aggregation: str,
+    weights_ids: List[int],
+    weights: Dict,
+    mapping: Dict[str, Tuple[str, Tuple[str], str]],
+):
     """Return the SQL function of one rule"""
     if weights_ids[0] is None:
         select = [f"{aggregation}(out.value) as value"]
@@ -94,33 +102,42 @@ def _get_rule_sql_function(rule, id, activation, aggregation, weights_ids: List[
     for t_index, (relation, weight_id) in enumerate(zip(rule.body, weights_ids[1:])):
         join_on = []
 
+        relation_mapping = mapping.get(str(relation.predicate), None)
+        value = "value" if relation_mapping is None else relation_mapping[-1]
+
         if weight_id is None:
-            inner_value_select.append(f"s{t_index}.value")
+            inner_value_select.append(f"s{t_index}.{value}")
         else:
-            inner_value_select.append(f"pynelo_mul({weights[weight_id]}, s{t_index}.value)")
+            inner_value_select.append(f"pynelo_mul({weights[weight_id]}, s{t_index}.{value})")
 
         if len(inner_value_select) == 2:
             inner_value_select = [f"pynelo_sum({', '.join(inner_value_select)})"]
 
         for index, term in enumerate(relation.terms):
-            if _is_var(term):
-                if str(term) in vars_body_mapping:
-                    join_on.append(f"s{t_index}.t{index} = {vars_body_mapping[str(term)]}")
-                else:
-                    vars_body_mapping[str(term)] = f"s{t_index}.t{index}"
-                    if str(term) in vars_mapping:
-                        inner_select.append(f"s{t_index}.t{index} AS {vars_mapping[str(term)]}")
+            if relation_mapping is None:
+                field = f"t{index}"
             else:
-                where.append(f"s{t_index}.t{index} = '{str(term)}'")
+                field = relation_mapping[1][index]
 
-        function_name = f"__{relation.predicate.name}_{relation.predicate.arity}"
+            if not _is_var(term):
+                where.append(f"s{t_index}.{field} = '{str(term)}'")
+                continue
+            if str(term) in vars_body_mapping:
+                join_on.append(f"s{t_index}.{field} = {vars_body_mapping[str(term)]}")
+                continue
+            vars_body_mapping[str(term)] = f"s{t_index}.{field}"
+            if str(term) in vars_mapping:
+                inner_select.append(f"s{t_index}.{field} AS {vars_mapping[str(term)]}")
+
+        if relation_mapping is None:
+            function_name = f"__{relation.predicate.name}_{relation.predicate.arity}()"
+        else:
+            function_name = relation_mapping[0]
 
         if not from_clause:
-            from_clause.append(f"{function_name}() AS s{t_index}")
+            from_clause.append(f"{function_name} AS s{t_index}")
         else:
-            from_clause.append(
-                f"{function_name}() AS s{t_index} ON {'1 = 1' if not join_on else ' AND '.join(join_on)}"
-            )
+            from_clause.append(f"{function_name} AS s{t_index} ON {'1 = 1' if not join_on else ' AND '.join(join_on)}")
 
     from_clause = f"{' INNER JOIN '.join(from_clause)}"
     where_clause = f" WHERE {' AND '.join(where)}"
