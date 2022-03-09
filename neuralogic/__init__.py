@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, List
 
 import jpype
 
@@ -12,6 +12,8 @@ jvm_params = {
     "classpath": os.path.join(os.path.abspath(os.path.dirname(__file__)), "jar", "NeuraLogic.jar"),
 }
 
+jvm_options = []
+
 
 class TextIOWrapper:
     def __init__(self, wrapped_text_io):
@@ -19,6 +21,11 @@ class TextIOWrapper:
 
     def write(self, string):
         self.wrapped_text_io.write(str(string))
+
+
+def set_jvm_options(options: List[str]) -> None:
+    global jvm_options
+    jvm_options = options
 
 
 def set_system_output(output, system_output_setter) -> None:
@@ -86,9 +93,9 @@ def initialize(
             f"-Xrunjdwp:transport=dt_socket,server={server},address={port},suspend={suspend}",
         ]
 
-        jpype.startJVM(*debug_params, **jvm_params)
+        jpype.startJVM(*jvm_options, *debug_params, **jvm_params)
     else:
-        jpype.startJVM(**jvm_params)
+        jpype.startJVM(*jvm_options, **jvm_params)
 
     set_stderr(_std_err)
     set_stdout(_std_out)
