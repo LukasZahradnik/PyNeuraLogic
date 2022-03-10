@@ -1,7 +1,7 @@
 import torch
 import torch_geometric
 
-from neuralogic.core.settings import Activation, Aggregation
+from neuralogic.core.enums import Activation, Aggregation
 from neuralogic.utils.templates import TemplateList, GINConv, SAGEConv, GCNConv, GlobalPooling, Embedding
 
 native_activations = {
