@@ -30,7 +30,6 @@ class Template:
         if module_list is not None and template_file is None:
             self.module_list = module_list
             module_list.build(self)
-            self.locked_template = True
 
         self.hooks: Dict[str, Set] = {}
 

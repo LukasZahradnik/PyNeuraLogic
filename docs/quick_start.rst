@@ -38,7 +38,7 @@ represented in a graph connectivity format, i.e., tensor of shape :code:`[num_of
 
     data = Data(
         edge_index=[[1, 2], [2, 1], [1, 3], [3, 1], [2, 3], [3, 2]],
-        x=[[0], [1], [-1]],
+        x=[[0], [0], [1], [-1]],  # There is one extra feature, the first feature belongs to node with id 0
     )
 
     dataset = Dataset(data=[data])
@@ -74,15 +74,15 @@ which can be expressed as :code:`Relation.predicate_name(terms)[value]`.
         Relation.edge(1, 2), Relation.edge(2, 1), Relation.edge(1, 3),
         Relation.edge(3, 1), Relation.edge(2, 3), Relation.edge(3, 2),
 
-        Relation.feature(1)[0],
-        Relation.feature(2)[1],
-        Relation.feature(3)[-1],
+        Relation.node_feature(1)[0],
+        Relation.node_feature(2)[1],
+        Relation.node_feature(3)[-1],
     ])
 
 In this example, we represent the same simple graph (triangle) but in the logic format.
 
 .. NOTE::
-    We used the *edge* as the predicate name (:code:`Relation.edge`) to represent the graph edges and the *feature* (:code:`Relation.feature`) to represent nodes' features. This naming is arbitrary -
+    We used the *edge* as the predicate name (:code:`Relation.edge`) to represent the graph edges and the *feature* (:code:`Relation.node_feature`) to represent nodes' features. This naming is arbitrary -
     edges and any other input data can have any predicate name. In this documentation, we will stick to *edge* predicate name for
     representing edges and *feature* predicate name for representing features.
 
@@ -103,7 +103,7 @@ Models in PyNeuraLogic are not just particular computational graphs, as common i
 
 
     template = Template(module_list=TemplateList([
-        GCNConv(in_channels=5, out_channels=5),
+        GCNConv(in_channels=1, out_channels=5),
         GCNConv(in_channels=5, out_channels=1),
     ]))
 

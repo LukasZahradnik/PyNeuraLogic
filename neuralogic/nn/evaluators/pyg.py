@@ -47,7 +47,11 @@ class PyGEvaluator(AbstractEvaluator):
                     trainer.zero_grad()
 
                     out = self.neuralogic_model(x=data.x, edge_index=data.edge_index)
-                    loss = error_function(out[data.y_mask], data.y[data.y_mask])
+
+                    if data.y_mask is None:
+                        loss = error_function(out, data.y)
+                    else:
+                        loss = error_function(out[data.y_mask], data.y[data.y_mask])
                     loss.backward()
                     trainer.step()
 
