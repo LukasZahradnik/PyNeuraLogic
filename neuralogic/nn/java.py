@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Sized
+from typing import Dict, Sized, Union, List
 
 import jpype
 
@@ -10,20 +10,21 @@ from neuralogic.core.enums import Backend
 
 
 class Loss:
-    def __init__(self, loss):
+    def __init__(self, loss, number_format):
         self.loss = loss
+        self.number_format = number_format
 
     def backward(self):
         self.loss.backward()
 
     def value(self) -> float:
-        return self.loss.getError().value
+        return json.loads(str(self.loss.getError().toString(self.number_format)))
 
-    def output(self) -> float:
-        return self.loss.getOutput().value
+    def output(self) -> Union[List[float], float]:
+        return json.loads(str(self.loss.getOutput().toString(self.number_format)))
 
-    def target(self) -> float:
-        return self.loss.getTarget().value
+    def target(self) -> Union[List[float], float]:
+        return json.loads(str(self.loss.getTarget().toString(self.number_format)))
 
 
 class NeuraLogic(AbstractNeuraLogic):
@@ -90,7 +91,7 @@ class NeuraLogic(AbstractNeuraLogic):
                     result = self.strategy.learnSample(samples)
                     return json.loads(str(result)), 1
             result = self.strategy.evaluateSample(samples)
-            return Loss(result)
+            return Loss(result, self.settings.settings_class.superDetailedNumberFormat)
 
         if self.do_train:
             results = self.strategy.learnSamples(samples, epochs)
