@@ -1,4 +1,6 @@
-from typing import Iterable, Union, Generator, Tuple, List, Collection, Sequence
+from typing import Iterable, Union
+
+import numpy as np
 
 from neuralogic.core.constructs.predicate import Predicate
 from neuralogic.core.constructs import rule, factories
@@ -90,7 +92,9 @@ class WeightedAtom:  # todo gusta: mozna dedeni namisto kompozice?
             self.weight_name = str(weight[0].start)
             self.weight = (weight[0].stop, *weight[1:])
 
-        if isinstance(weight, Iterable) and not isinstance(weight, tuple):
+        if isinstance(weight, np.ndarray):
+            self.weight = weight.tolist()
+        elif isinstance(weight, Iterable) and not isinstance(weight, tuple):
             self.weight = list(weight)
 
     def fixed(self) -> "WeightedAtom":

@@ -29,6 +29,33 @@ class Data:
         self.y = y
         self.y_mask = y_mask
 
+    @staticmethod
+    def get_query(
+        y, output_name: str = "predict", one_hot_encode_labels: bool = False, max_classes=1, index: Optional[int] = None
+    ):
+        relation = Relation.get(output_name)
+
+        if index is not None:
+            relation = relation(index)
+
+        if one_hot_encode_labels:
+            vector = y
+
+            if not isinstance(y, (Sequence, np.ndarray)) or len(y) != max_classes:
+                vector = np.zeros((max_classes,))
+                vector[y[0] if isinstance(y, (Sequence, np.ndarray)) else y] = 1
+            query = relation[vector]
+        elif not isinstance(y, Iterable) or (getattr(y, "shape", -1) in (1, tuple())):
+            query = relation[float(y)]
+        elif len(y) == 1 and not isinstance(y[0], Sequence):
+            query = relation[float(y[0])]
+        else:
+            if isinstance(y, (Sequence, np.ndarray)):
+                query = relation[y]
+            else:
+                query = relation[y.detach().numpy()]
+        return query
+
     def to_logic_form(
         self,
         feature_name: str = "node_feature",
@@ -38,36 +65,34 @@ class Data:
         one_hot_decode_features=False,
         max_classes=1,
     ) -> Tuple:
-        if one_hot_encode_labels:
-            vector = self.y
+        if self.y_mask is not None:
+            query = []
 
-            if not isinstance(self.y, (Sequence, np.ndarray)) or len(self.y) != max_classes:
-                vector = np.zeros((max_classes,))
-                vector[self.y[0] if isinstance(self.y, (Sequence, np.ndarray)) else self.y] = 1
-            query = Relation.get(output_name)[vector]
-        elif not isinstance(self.y, Iterable) or (getattr(self.y, "shape", -1) in (1, tuple())):
-            query = Relation.get(output_name)[float(self.y)]
-        elif len(self.y) == 1 and not isinstance(self.y[0], Sequence):
-            query = Relation.get(output_name)[float(self.y[0])]
+            for i in self.y_mask:
+                query.append(Data.get_query(self.y[int(i)], output_name, one_hot_encode_labels, max_classes, int(i)))
         else:
-            if isinstance(self.y, (Sequence, np.ndarray)):
-                query = Relation.get(output_name)[self.y]
-            else:
-                query = Relation.get(output_name)[self.y.detach().numpy()]
+            query = Data.get_query(self.y, output_name, one_hot_encode_labels, max_classes)
 
         if self.edge_attr is None:
             example = [
                 Relation.get(edge_name)(int(u), int(v))[1].fixed()
                 for u, v in zip(self.edge_index[0], self.edge_index[1])
             ]
+        elif isinstance(self.edge_attr, np.ndarray):
+            example = [
+                Relation.get(edge_name)(int(u), int(v))[w if w.size == 1 else w].fixed()
+                for u, v, w in zip(self.edge_index[0], self.edge_index[1], self.edge_attr)
+            ]
         elif isinstance(self.edge_attr, (Sequence, np.ndarray)):
             example = [
-                Relation.get(edge_name)(int(u), int(v))[w].fixed()
+                Relation.get(edge_name)(int(u), int(v))[
+                    w if len(w) == 1 and isinstance(w[0], float, int) else w
+                ].fixed()
                 for u, v, w in zip(self.edge_index[0], self.edge_index[1], self.edge_attr)
             ]
         else:
             example = [
-                Relation.get(edge_name)(int(u), int(v))[w].fixed()
+                Relation.get(edge_name)(int(u), int(v))[w if w.size == 1 else w].fixed()
                 for u, v, w in zip(self.edge_index[0], self.edge_index[1], self.edge_attr.detach().numpy())
             ]
 
@@ -81,12 +106,22 @@ class Data:
                     class_ = np.argmax(features)
                     example.append(Relation.get(f"{feature_name}_{class_}")(i)[1].fixed())
         else:
-            if isinstance(self.x, (list, np.ndarray)):
+            if isinstance(self.x, np.ndarray):
                 for i, features in enumerate(self.x):
-                    example.append(Relation.get(feature_name)(i)[features].fixed())
+                    example.append(
+                        Relation.get(feature_name)(i)[features[0] if features.size == 1 else features].fixed()
+                    )
+            if isinstance(self.x, list):
+                for i, features in enumerate(self.x):
+                    example.append(
+                        Relation.get(feature_name)(i)[
+                            features[0] if len(features) == 1 and isinstance(features[0], (int, float)) else features
+                        ].fixed()
+                    )
             else:
                 for i, features in enumerate(self.x):
-                    example.append(Relation.get(feature_name)(i)[features.detach().numpy()].fixed())
+                    weight = features.detach().numpy()
+                    example.append(Relation.get(feature_name)(i)[weight[0] if weight.size == 1 else weight].fixed())
         return query, example
 
     @staticmethod

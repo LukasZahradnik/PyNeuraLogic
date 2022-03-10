@@ -56,6 +56,13 @@ def test_data_from_python_lists() -> None:
     for a, b in zip(expected_examples, example):
         assert str(a) == str(b)
 
+    data = Data(x=features, edge_index=edges, y=[0, 1, 2, 3], y_mask=[1, 2])
+    query, _ = data.to_logic_form()
+
+    assert len(query) == 2
+    assert str(query[0]) == "1.0 predict(1)."
+    assert str(query[1]) == "2.0 predict(2)."
+
 
 def test_data_from_numpy() -> None:
     """Tests data creation from numpy"""
@@ -109,6 +116,13 @@ def test_data_from_numpy() -> None:
     for a, b in zip(expected_examples, example):
         assert str(a) == str(b)
 
+    data = Data(x=features, edge_index=edges, y=np.array([0, 1, 2, 3]), y_mask=np.array([1, 2]))
+    query, _ = data.to_logic_form()
+
+    assert len(query) == 2
+    assert str(query[0]) == "1.0 predict(1)."
+    assert str(query[1]) == "2.0 predict(2)."
+
 
 def test_data_from_torch() -> None:
     """Tests data creation from torch"""
@@ -161,6 +175,13 @@ def test_data_from_torch() -> None:
     assert str(query) == "[0, 1] out."
     for a, b in zip(expected_examples, example):
         assert str(a) == str(b)
+
+    data = Data(x=features, edge_index=edges, y=torch.tensor([0, 1, 2, 3]), y_mask=torch.tensor([1, 2]))
+    query, _ = data.to_logic_form()
+
+    assert len(query) == 2
+    assert str(query[0]) == "1.0 predict(1)."
+    assert str(query[1]) == "2.0 predict(2)."
 
 
 def test_data_edge_features_from_torch() -> None:
