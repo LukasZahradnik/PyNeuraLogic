@@ -12,10 +12,13 @@ jvm_params = {
     "classpath": os.path.join(os.path.abspath(os.path.dirname(__file__)), "jar", "NeuraLogic.jar"),
 }
 
-jvm_options = []
+jvm_options = ["-Xms1g", "-Xmx64g"]
 
 
 def set_jvm_options(options: List[str]) -> None:
+    """
+    Set the jvm options - by default ["-Xms1g", "-Xmx64g"],
+    """
     global jvm_options
     jvm_options = options
 
