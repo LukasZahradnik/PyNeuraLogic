@@ -111,7 +111,7 @@ class Data:
                     example.append(
                         Relation.get(feature_name)(i)[features[0] if features.size == 1 else features].fixed()
                     )
-            if isinstance(self.x, list):
+            elif isinstance(self.x, list):
                 for i, features in enumerate(self.x):
                     example.append(
                         Relation.get(feature_name)(i)[
