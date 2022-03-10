@@ -2,7 +2,7 @@ import torch
 import torch_geometric
 
 from neuralogic.core.enums import Activation, Aggregation
-from neuralogic.utils.templates import TemplateList, GINConv, SAGEConv, GCNConv, GlobalPooling, Embedding
+from neuralogic.utils.templates import TemplateList, GINConv, SAGEConv, GCNConv, GlobalPooling
 
 native_activations = {
     str(Activation.RELU): torch.relu,
@@ -32,12 +32,7 @@ class NeuraLogic(torch.nn.Module):
                 raise Exception
             activation_fun = native_activations[activation]
 
-            if isinstance(module, Embedding):
-                self.module_list.append(torch.nn.Embedding(module.num_embeddings, module.embedding_dim))
-                self.evaluations.append(lambda x, edge_index, batch, xs, i=i: self.module_list[i](x))
-
-                continue
-            elif isinstance(module, GCNConv):
+            if isinstance(module, GCNConv):
                 self.module_list.append(
                     torch_geometric.nn.GCNConv(
                         module.in_channels, module.out_channels, normalize=False, cached=False, bias=False

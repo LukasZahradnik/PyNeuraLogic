@@ -4,13 +4,6 @@ neuralogic.utils.templates.modules package
 Submodules
 ----------
 
-neuralogic.utils.templates.modules.embedding module
----------------------------------------------------
-
-.. automodule:: neuralogic.utils.templates.modules.embedding
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 neuralogic.utils.templates.modules.gcn module
 ---------------------------------------------
