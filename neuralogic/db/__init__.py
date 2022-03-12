@@ -55,11 +55,11 @@ def to_sql(model, mapping: Dict[Predicate, Tuple[str, Tuple[str], str]], setting
                     weight_indices.append(None)
             batched_relations[rule.head.predicate.name][rule.head.predicate.arity].append((rule, weight_indices))
         elif isinstance(rule, (WeightedAtom, BaseAtom)):
-            weight_indices = []
-
             if isinstance(rule, WeightedAtom) and rule.weight is not None:
-                weight_indices.append(weight_index)
+                weight_indices = [weight_index]
                 weight_index += 1
+            else:
+                weight_indices = [None]
             batched_relations[rule.predicate.name][rule.predicate.arity].append((rule, weight_indices))
         elif isinstance(rule, PredicateMetadata):
             predicates_metadata[str(rule.predicate)] = rule.metadata
