@@ -33,8 +33,6 @@ class SettingsProxy:
             self.__setattr__(key, value)
 
         self.settings.debugExporting = False
-        self.settings.squishLastLayer = False
-        self.settings.trainOnlineResultsType = self.settings_class.ResultsType.REGRESSION
         self.settings.exportBlocks = []
 
         self.settings.infer()
@@ -108,12 +106,16 @@ class SettingsProxy:
     @error_function.setter
     def error_function(self, error_function: ErrorFunction):
         if error_function == ErrorFunction.SQUARED_DIFF:
+            self.settings.squishLastLayer = False
+            self.settings.trainOnlineResultsType = self.settings_class.ResultsType.REGRESSION
             java_error_function = self.settings_class.ErrorFcn.SQUARED_DIFF
-        # elif error_function == ErrorFunction.ABS_DIFF:
-        #     java_error_function = self.namespace.Settings.ErrorFcn.ABS_DIFF
         elif error_function == ErrorFunction.SOFTENTROPY:
+            self.settings.squishLastLayer = True
+            self.settings.trainOnlineResultsType = self.settings_class.ResultsType.CLASSIFICATION
             java_error_function = self.settings_class.ErrorFcn.SOFTENTROPY
         elif error_function == ErrorFunction.CROSSENTROPY:
+            self.settings.squishLastLayer = False
+            self.settings.trainOnlineResultsType = self.settings_class.ResultsType.CLASSIFICATION
             java_error_function = self.settings_class.ErrorFcn.CROSSENTROPY
         else:
             raise NotImplementedError
