@@ -16,7 +16,7 @@ class TextIOWrapper:
         self.wrapped_text_io.write(str(string))
 
 
-class LEVEL(Enum):
+class Level(Enum):
     """Logging level"""
 
     OFF = "OFF"
@@ -30,7 +30,7 @@ class LEVEL(Enum):
     ALL = "ALL"
 
 
-class FORMATTER(Enum):
+class Formatter(Enum):
     """Logged information formatters"""
 
     COLOR = "color"
@@ -47,11 +47,11 @@ def _init_logging():
     _is_logging_initialized = True
 
     for handler_settings in _loggers_buffer:
-        add_handlers(*handler_settings)
+        add_handler(*handler_settings)
     _loggers_buffer.clear()
 
 
-def add_handlers(output, level: LEVEL = LEVEL.FINER, formatter: FORMATTER = FORMATTER.COLOR):
+def add_handler(output, level: Level = Level.FINER, formatter: Formatter = Formatter.COLOR):
     """
     Add logger handler for an insight into the java backend
 
@@ -69,9 +69,9 @@ def add_handlers(output, level: LEVEL = LEVEL.FINER, formatter: FORMATTER = FORM
     java_io_wrapper = jpype.JProxy("cz.cvut.fel.ida.utils.python.PythonOutputStream.TextIOWrapper", inst=wrapped)
     java_output_stream = jpype.JClass("cz.cvut.fel.ida.utils.python.PythonOutputStream")(java_io_wrapper)
 
-    if formatter == FORMATTER.COLOR:
+    if formatter == Formatter.COLOR:
         java_formatter = jpype.JClass("cz.cvut.fel.ida.logging.ColoredFormatter")()
-    elif formatter == FORMATTER.NORMAL:
+    elif formatter == Formatter.NORMAL:
         java_formatter = jpype.JClass("cz.cvut.fel.ida.logging.NormalFormatter")()
     else:
         raise NotImplementedError(f"Unknown formatter {formatter}")
