@@ -33,7 +33,7 @@ class GINConv(AbstractModule):
 
         head_atom = Relation.get(embed_name)(Var.X)
 
-        layer = head_atom <= (Relation.get(previous_name)(Var.Y), Relation.get(edge_name)(Var.X, Var.Y))
+        layer = head_atom <= (Relation.get(previous_name)(Var.Y), Relation.get(edge_name)(Var.Y, Var.X))
         template.add_rule(layer | Metadata(aggregation=Aggregation.SUM, activation=Activation.IDENTITY))
         template.add_rule((head_atom <= Relation.get(previous_name)(Var.X)) | Metadata(activation=Activation.IDENTITY))
         template.add_rule(Relation.get(embed_name) / 1 | Metadata(activation=Activation.IDENTITY))

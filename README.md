@@ -30,13 +30,13 @@ Many things! For instance - ever heard of [Graph Neural Networks](https://distil
 Or, a bit more 'formally':
 
 ```
-Relation.message2(Var.X) <= (Relation.message1(Var.Y), Relation.edge(Var.X,Var.Y))
+Relation.message2(Var.X) <= (Relation.message1(Var.Y), Relation.edge(Var.Y, Var.X))
 ```
 
 ...and that's the actual _code_! Now for a classic learnable GNN layer, you'll want to add some weights, such as
 
 ```
-Relation.message2(Var.X)[5,10] <= (Relation.message1(Var.Y)[10,20], Relation.edge(Var.X,Var.Y))
+Relation.message2(Var.X)[5,10] <= (Relation.message1(Var.Y)[10,20], Relation.edge(Var.Y, Var.X))
 ```
 
 to project your `[1,20]` input node embeddings ('message1') through a learnable ``[10,20]`` layer before the aggregation, and subsequently a `[5,10]` layer after the aggregation.
@@ -44,7 +44,7 @@ to project your `[1,20]` input node embeddings ('message1') through a learnable 
 If you don't like the default settings, you can of course [specify](https://pyneuralogic.readthedocs.io/en/latest/language.html) various additional details, such as the particular aggregation and activation functions
 
 ```
-R.message2(V.X)[5,10] <= (R.message1(V.Y)[10,20], R.edge(V.X,V.Y)) | [Activation.RELU, Aggregation.AVG]
+R.message2(V.X)[5,10] <= (R.message1(V.Y)[10,20], R.edge(V.Y, V.X)) | [Activation.RELU, Aggregation.AVG]
 ```
 
 to instantiate the classic GCN layer specification, which you can directly train now!
@@ -69,19 +69,9 @@ The [backend engine](https://jair.org/index.php/jair/article/view/11203) then cr
 
 While PyNeuraLogic allows you to easily declare highly expressive models with capabilities far [beyond the common GNNs](https://arxiv.org/abs/2007.06286), it does not come at the cost of performance for the basic GNNs either. On the contrary, for a range of common GNN models and applications, such as learning with molecules, PyNeuraLogic is actually _considerably_ faster than the popular GNN frameworks, as demonstrated in our [benchmarks](https://pyneuralogic.readthedocs.io/en/latest/benchmarks.html).
 
-
-<!-- Running a few experiments shows that PyNeuraLogic can outperform popular GNN frameworks in regards to time performance while achieving nearly the same accuracy. Results for a few experiments can be seen in the chart below. -->
-
-<!-- vsechny ty detaily bych nechal az do nejake podrobnejsi dokumentace : Note that PyNeuraLogic requires some time to startup (e.g., translate logic programs into neural networks). In the experiments below, the PyNeuraLogic required to startup, on average, _20.9s (+- 0.85s)_ for GCN, _22.5s (+- 0.49s)_ for GraphSAGE, and _58.48s (+- 1.84s)_ for GIN. The startup is done only once before the training and is compensated for in a few epochs due to PyNeuraLogic higher speed performance.  -->
-
-
 <p align="center">
 <img src="https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/docs/_static/benchmark.svg" alt="Benchmark of PyNeuraLogic" title="Benchmark of PyNeuraLogic"/>
 </p>
-
-<!-- i ty popisky grafu bych tady zjednodusil: nadpisy jen "average time per epoch" a "average accuracies" - zbytek plyne z kontextu <sub>
-  Benchmarks in the plot above were run on the NCI 786_0 dataset on the CPU using scripts that you can find <a href="https://github.com/LukasZahradnik/PyNeuraLogic/tree/master/benchmarks" target="_blank">here</a>. Models were trained in 100 epochs using Adam optimizer with a learning rate of 1.5e-5.
-</sub> -->
 
 </br>
 

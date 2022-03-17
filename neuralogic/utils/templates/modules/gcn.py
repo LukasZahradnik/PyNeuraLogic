@@ -12,7 +12,7 @@ class GCNConv(AbstractModule):
         previous_name = feature_name if len(previous_names) == 0 else previous_names[-1]
 
         head_atom = Relation.get(name)(Var.X)[self.out_channels, self.in_channels]
-        layer = head_atom <= (Relation.get(previous_name)(Var.Y), Relation.get(edge_name)(Var.X, Var.Y))
+        layer = head_atom <= (Relation.get(previous_name)(Var.Y), Relation.get(edge_name)(Var.Y, Var.X))
 
         template.add_rule(layer | Metadata(aggregation=Aggregation.SUM, activation=Activation.IDENTITY))
         template.add_rule(Relation.get(name) / 1 | Metadata(activation=self.activation))

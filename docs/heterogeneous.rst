@@ -48,7 +48,7 @@ rule for the aggregation of neighbor nodes of the central node with the same typ
         Relation.feature(Var.Y),
         Relation.type(Var.X, Var.Type),
         Relation.type(Var.Y, Var.Type),
-        Relation.edge(Var.X, Var.Y),
+        Relation.edge(Var.Y, Var.X),
     )
 
 
@@ -66,5 +66,5 @@ input examples and then utilize them in the aggregation.
         Relation.feature(Var.Y),
         Relation.type_feature(Var.Type),
         Relation.type(Var.Y, Var.Type),
-        Relation.edge(Var.X, Var.Y),
+        Relation.edge(Var.Y, Var.X),
     )

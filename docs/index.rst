@@ -73,13 +73,13 @@ Or, a bit more 'formally':
 
 .. code-block::
 
-    Relation.node2(Var.X) <= (Relation.node1(Var.Y), Relation.edge(Var.X,Var.Y))
+    Relation.node2(Var.X) <= (Relation.node1(Var.Y), Relation.edge(Var.Y, Var.X))
 
 ...and that's the actual *code*! Now for a classic learnable GNN layer, you'll want to add some numeric parameters, such as
 
 .. code-block::
 
-    Relation.node2(Var.X)[5,10] <= (Relation.node1(Var.Y)[10,20], Relation.edge(Var.X,Var.Y))
+    Relation.node2(Var.X)[5,10] <= (Relation.node1(Var.Y)[10,20], Relation.edge(Var.Y, Var.X))
 
 to project your :code:`[1,20]` input node embeddings through a learnable :code:`[10,20]` layer before the aggregation,
 and subsequently a :code:`[5,10]` layer after the aggregation. The particular aggregation and activation functions, as

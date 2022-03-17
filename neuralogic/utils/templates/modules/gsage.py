@@ -13,7 +13,7 @@ class SAGEConv(AbstractModule):
 
         head_atom = Relation.get(name)(Var.X)[self.out_channels, self.in_channels]
 
-        layer = head_atom <= (Relation.get(previous_name)(Var.Y), Relation.get(edge_name)(Var.X, Var.Y))
+        layer = head_atom <= (Relation.get(previous_name)(Var.Y), Relation.get(edge_name)(Var.Y, Var.X))
         template.add_rule(layer | Metadata(aggregation=Aggregation.AVG, activation=Activation.IDENTITY))
 
         layer = Relation.get(name)(Var.X)[self.out_channels, self.in_channels] <= Relation.get(previous_name)(Var.X)
