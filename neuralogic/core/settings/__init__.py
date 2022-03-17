@@ -12,7 +12,7 @@ class Settings:
         optimizer: Optimizer = Optimizer.ADAM,
         learning_rate: Optional[float] = None,
         epochs: int = 3000,
-        error_function: ErrorFunction = ErrorFunction.SQUARED_DIFF,
+        error_function: ErrorFunction = ErrorFunction.MSE,
         initializer: Initializer = Initializer.UNIFORM,
         initializer_const: float = 0.1,
         initializer_uniform_scale: float = 2.0,

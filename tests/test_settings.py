@@ -1,24 +1,28 @@
 from typing import Dict, Any
 
+import neuralogic.core.error_function
 from neuralogic.core import Settings, Initializer, ErrorFunction, Optimizer, Activation
 
 
 import pytest
 
 
-@pytest.mark.parametrize("parameters", [
-    {
-        "optimizer": Optimizer.SGD,
-        "learning_rate": 0.5,
-        "epochs": 100,
-        "error_function": ErrorFunction.SOFTENTROPY,
-        "initializer": Initializer.NORMAL,
-        "initializer_const": 1,
-        "initializer_uniform_scale": 5.0,
-        "rule_neuron_activation": Activation.SIGMOID,
-        "relation_neuron_activation": Activation.RELU,
-    }
-])
+@pytest.mark.parametrize(
+    "parameters",
+    [
+        {
+            "optimizer": Optimizer.SGD,
+            "learning_rate": 0.5,
+            "epochs": 100,
+            "error_function": ErrorFunction.SOFTENTROPY,
+            "initializer": Initializer.NORMAL,
+            "initializer_const": 1,
+            "initializer_uniform_scale": 5.0,
+            "rule_neuron_activation": Activation.SIGMOID,
+            "relation_neuron_activation": Activation.RELU,
+        }
+    ],
+)
 def test_settings_proxy_properties_setting(parameters: Dict[str, Any]) -> None:
     """Tests propagation of changes on settings to its proxies"""
     settings = Settings()
@@ -27,6 +31,8 @@ def test_settings_proxy_properties_setting(parameters: Dict[str, Any]) -> None:
     for key, value in parameters.items():
         if isinstance(value, (int, float)):
             assert settings.__getattribute__(key) == settings_proxy.__getattribute__(key)
+        elif isinstance(settings.__getattribute__(key), neuralogic.core.error_function.ErrorFunction):
+            assert str(settings.__getattribute__(key)) == str(settings_proxy.__getattribute__(key))
         else:
             assert settings.__getattribute__(key) == str(settings_proxy.__getattribute__(key))
 
@@ -36,6 +42,8 @@ def test_settings_proxy_properties_setting(parameters: Dict[str, Any]) -> None:
     for key, value in parameters.items():
         if isinstance(value, (int, float)):
             assert settings.__getattribute__(key) == settings_proxy.__getattribute__(key)
+        elif isinstance(settings.__getattribute__(key), neuralogic.core.error_function.ErrorFunction):
+            assert str(settings.__getattribute__(key)) == str(settings_proxy.__getattribute__(key))
         else:
             assert settings.__getattribute__(key) == str(settings_proxy.__getattribute__(key))
 

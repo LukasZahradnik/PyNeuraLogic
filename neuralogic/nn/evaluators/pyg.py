@@ -14,7 +14,10 @@ class PyGEvaluator(AbstractEvaluator):
         Optimizer.ADAM: lambda param, rate: torch.optim.Adam(param, lr=rate),
     }
 
-    error_functions = {ErrorFunction.SQUARED_DIFF: F.mse_loss, ErrorFunction.CROSSENTROPY: F.cross_entropy}
+    error_functions = {
+        str(ErrorFunction.MSE): F.mse_loss,
+        str(ErrorFunction.CROSSENTROPY): F.cross_entropy,
+    }
 
     def __init__(self, template: Template, settings: Settings):
         super().__init__(Backend.PYG, template, settings)
@@ -23,7 +26,7 @@ class PyGEvaluator(AbstractEvaluator):
         # dataset = self.dataset if dataset is None else self.build_dataset(dataset)
 
         epochs = self.settings.epochs
-        error_function = ErrorFunction[str(self.settings.error_function)]
+        error_function = str(self.settings.error_function)
         optimizer = Optimizer[str(self.settings.optimizer)]
 
         if optimizer not in PyGEvaluator.trainers:

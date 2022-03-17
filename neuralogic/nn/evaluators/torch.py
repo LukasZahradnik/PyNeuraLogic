@@ -16,7 +16,7 @@ class TorchEvaluator(AbstractEvaluator):
     }
 
     error_functions = {
-        ErrorFunction.SQUARED_DIFF: torch.nn.MSELoss()
+        str(ErrorFunction.MSE): torch.nn.MSELoss()
         # ErrorFunction.ABS_DIFF: lambda out, target: dy.abs(out - target),
         # ErrorFunction.CROSSENTROPY: lambda out, target: pass
     }
@@ -32,7 +32,7 @@ class TorchEvaluator(AbstractEvaluator):
         dataset = self.dataset if dataset is None else self.build_dataset(dataset)
 
         epochs = self.settings.epochs
-        error_function = ErrorFunction[str(self.settings.error_function)]
+        error_function = str(self.settings.error_function)
         optimizer = Optimizer[str(self.settings.optimizer)]
 
         if optimizer not in TorchEvaluator.trainers:

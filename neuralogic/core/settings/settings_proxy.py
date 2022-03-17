@@ -2,6 +2,7 @@ import jpype
 
 from neuralogic import is_initialized, initialize
 from neuralogic.core.enums import Optimizer, Initializer, ErrorFunction, Activation
+from neuralogic.core.error_function import MSE, SoftEntropy, CrossEntropy
 
 
 class SettingsProxy:
@@ -105,20 +106,26 @@ class SettingsProxy:
 
     @error_function.setter
     def error_function(self, error_function: ErrorFunction):
-        if error_function == ErrorFunction.SQUARED_DIFF:
+        if isinstance(error_function, MSE):
             self.settings.squishLastLayer = False
             self.settings.trainOnlineResultsType = self.settings_class.ResultsType.REGRESSION
             java_error_function = self.settings_class.ErrorFcn.SQUARED_DIFF
-        elif error_function == ErrorFunction.SOFTENTROPY:
+        elif isinstance(error_function, SoftEntropy):
             self.settings.squishLastLayer = True
             self.settings.trainOnlineResultsType = self.settings_class.ResultsType.CLASSIFICATION
             java_error_function = self.settings_class.ErrorFcn.SOFTENTROPY
-        elif error_function == ErrorFunction.CROSSENTROPY:
-            self.settings.squishLastLayer = False
+        elif isinstance(error_function, CrossEntropy):
             self.settings.trainOnlineResultsType = self.settings_class.ResultsType.CLASSIFICATION
-            java_error_function = self.settings_class.ErrorFcn.CROSSENTROPY
+
+            if error_function.with_logits:
+                self.settings.squishLastLayer = True
+                java_error_function = self.settings_class.ErrorFcn.SOFTENTROPY
+            else:
+                self.settings.squishLastLayer = False
+                java_error_function = self.settings_class.ErrorFcn.CROSSENTROPY
         else:
             raise NotImplementedError
+
         self.settings.errorFunction = java_error_function
 
     @property
