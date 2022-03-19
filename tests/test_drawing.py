@@ -4,10 +4,6 @@ from neuralogic.utils.visualize import draw_model, draw_sample
 from neuralogic.utils.data import XOR_Vectorized
 from neuralogic.core import Settings, Backend
 
-from neuralogic.logging import add_handler, Formatter
-
-add_handler(sys.stdout, formatter=Formatter.NORMAL)
-
 
 def test_draw_model():
     template, dataset = XOR_Vectorized()

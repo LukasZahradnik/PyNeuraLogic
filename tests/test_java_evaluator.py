@@ -1,7 +1,5 @@
-import sys
 from typing import List
 
-from neuralogic.logging import add_handler, Formatter
 from neuralogic.core import Settings, Optimizer, Template, Dataset, Backend
 from neuralogic.nn import get_evaluator
 from neuralogic.utils.data import XOR, XOR_Vectorized, Trains, Mutagenesis
@@ -14,8 +12,6 @@ from examples.datasets import (
     horses,
     vectorized_xor,
 )
-
-add_handler(sys.stdout, formatter=Formatter.NORMAL)
 
 
 import pytest
