@@ -9,13 +9,13 @@ from neuralogic.core import (
     Backend,
     Settings,
     Optimizer,
-    ErrorFunction,
     R,
     V,
     Activation,
     Aggregation,
     Initializer,
 )
+from neuralogic.core.error_function import CrossEntropy
 
 
 def gcn(activation: Activation, output_size: int, num_features: int, dim: int = 10):
@@ -135,7 +135,7 @@ def get_model(model):
 
 
 def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
-    loss_fn = ErrorFunction.CROSSENTROPY
+    loss_fn = CrossEntropy()
     activation = Activation.SIGMOID
 
     settings = Settings(

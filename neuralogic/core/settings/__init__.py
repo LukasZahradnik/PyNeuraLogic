@@ -1,8 +1,9 @@
 from typing import Any, Optional
 import weakref
 
+from neuralogic.core.error_function import MSE, ErrorFunction
 from neuralogic.core.settings.settings_proxy import SettingsProxy
-from neuralogic.core.enums import Optimizer, Initializer, ErrorFunction, Activation
+from neuralogic.core.enums import Optimizer, Initializer, Activation
 
 
 class Settings:
@@ -12,7 +13,7 @@ class Settings:
         optimizer: Optimizer = Optimizer.ADAM,
         learning_rate: Optional[float] = None,
         epochs: int = 3000,
-        error_function: ErrorFunction = ErrorFunction.MSE,
+        error_function: ErrorFunction = MSE(),
         initializer: Initializer = Initializer.UNIFORM,
         initializer_const: float = 0.1,
         initializer_uniform_scale: float = 2.0,

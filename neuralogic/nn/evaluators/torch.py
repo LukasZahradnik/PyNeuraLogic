@@ -1,12 +1,14 @@
 from typing import Optional, Dict, Union
 
 import torch
+import torch.nn.functional
 
+from neuralogic.core.error_function import ErrorFunctionNames
 from neuralogic.nn.base import AbstractEvaluator
 
 from neuralogic.core import Template, BuiltDataset, Dataset
 from neuralogic.core.settings import Settings
-from neuralogic.core.enums import Backend, Optimizer, ErrorFunction
+from neuralogic.core.enums import Backend, Optimizer
 
 
 class TorchEvaluator(AbstractEvaluator):
@@ -16,7 +18,8 @@ class TorchEvaluator(AbstractEvaluator):
     }
 
     error_functions = {
-        str(ErrorFunction.MSE): torch.nn.MSELoss()
+        str(ErrorFunctionNames.MSE): torch.nn.MSELoss(),
+        str(ErrorFunctionNames.SOFTENTROPY): torch.nn.CrossEntropyLoss(),
         # ErrorFunction.ABS_DIFF: lambda out, target: dy.abs(out - target),
         # ErrorFunction.CROSSENTROPY: lambda out, target: pass
     }

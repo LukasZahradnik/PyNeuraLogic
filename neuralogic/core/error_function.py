@@ -1,3 +1,9 @@
+class ErrorFunctionNames:
+    MSE = "SQUARED_DIFF"
+    CROSSENTROPY = "CROSSENTROPY"
+    SOFTENTROPY = "SOFTENTROPY"
+
+
 class ErrorFunction:
     pass
 
@@ -7,7 +13,7 @@ class MSE(ErrorFunction):
         super().__init__()
 
     def __str__(self):
-        return "SQUARED_DIFF"
+        return ErrorFunctionNames.MSE
 
 
 class CrossEntropy(ErrorFunction):
@@ -16,7 +22,7 @@ class CrossEntropy(ErrorFunction):
         self.with_logits = with_logits
 
     def __str__(self):
-        return "SOFTENTROPY" if self.with_logits else "CROSSENTROPY"
+        return ErrorFunctionNames.SOFTENTROPY if self.with_logits else ErrorFunctionNames.CROSSENTROPY
 
 
 class SoftEntropy(ErrorFunction):
@@ -24,4 +30,4 @@ class SoftEntropy(ErrorFunction):
         super().__init__()
 
     def __str__(self):
-        return "SOFTENTROPY"
+        return ErrorFunctionNames.SOFTENTROPY

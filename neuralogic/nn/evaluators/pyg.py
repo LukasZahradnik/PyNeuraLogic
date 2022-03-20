@@ -3,9 +3,10 @@ from typing import Optional, Union
 import torch.nn.functional as F
 import torch
 
+from neuralogic.core.error_function import ErrorFunctionNames
 from neuralogic.nn.base import AbstractEvaluator
 
-from neuralogic.core import Template, BuiltDataset, Backend, Settings, Optimizer, ErrorFunction, Dataset
+from neuralogic.core import Template, BuiltDataset, Backend, Settings, Optimizer, Dataset
 
 
 class PyGEvaluator(AbstractEvaluator):
@@ -15,8 +16,8 @@ class PyGEvaluator(AbstractEvaluator):
     }
 
     error_functions = {
-        str(ErrorFunction.MSE): F.mse_loss,
-        str(ErrorFunction.CROSSENTROPY): F.cross_entropy,
+        str(ErrorFunctionNames.MSE): F.mse_loss,
+        str(ErrorFunctionNames.CROSSENTROPY): F.cross_entropy,
     }
 
     def __init__(self, template: Template, settings: Settings):

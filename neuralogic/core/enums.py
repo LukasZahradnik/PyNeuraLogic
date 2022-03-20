@@ -9,12 +9,6 @@ class Optimizer(str, Enum):
     SGD = "SGD"
 
 
-class ErrorFunction:
-    MSE = MSE()
-    CROSSENTROPY = CrossEntropy()
-    SOFTENTROPY = SoftEntropy()
-
-
 class Activation(str, Enum):
     SIGMOID = "SIGMOID"
     TANH = "TANH"

@@ -1,8 +1,8 @@
 from typing import Dict, Any
 
 import neuralogic.core.error_function
-from neuralogic.core import Settings, Initializer, ErrorFunction, Optimizer, Activation
-
+from neuralogic.core import Settings, Initializer, Optimizer, Activation
+from neuralogic.core.error_function import SoftEntropy
 
 import pytest
 
@@ -14,7 +14,7 @@ import pytest
             "optimizer": Optimizer.SGD,
             "learning_rate": 0.5,
             "epochs": 100,
-            "error_function": ErrorFunction.SOFTENTROPY,
+            "error_function": SoftEntropy(),
             "initializer": Initializer.NORMAL,
             "initializer_const": 1,
             "initializer_uniform_scale": 5.0,
