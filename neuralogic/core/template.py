@@ -10,6 +10,7 @@ from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.predicate import PredicateMetadata
 from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import SettingsProxy, Settings
+from neuralogic.utils.module.module import Module
 
 TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
 
@@ -83,6 +84,14 @@ class Template:
         """
         self.template.extend(rules)
 
+    def add_module(self, module: Module):
+        """Expands the module into rules and adds them into the template
+
+        :param module:
+        :return:
+        """
+        self.add_rules(module())
+
     def get_parsed_template(self, settings: SettingsProxy, java_factory: JavaFactory):
         if not is_initialized():
             initialize()
@@ -136,6 +145,8 @@ class Template:
     def __iadd__(self, other) -> "Template":
         if isinstance(other, Iterable):
             self.template.extend(other)
+        elif isinstance(other, Module):
+            self.template.extend(other())
         else:
             self.template.append(other)
         return self
