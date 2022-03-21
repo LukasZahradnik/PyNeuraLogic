@@ -23,7 +23,7 @@ class Metadata:
         if self.learnable is not None:
             metadata_list.append(f"learnable={str(self.learnable).lower()}")
         if self.activation is not None:
-            metadata_list.append(f"activation={self.activation}")
+            metadata_list.append(f"activation={str(self.activation)}")
         if self.aggregation is not None:
             metadata_list.append(f"aggregation={self.aggregation.value}")
         return f"[{', '.join(metadata_list)}]"
