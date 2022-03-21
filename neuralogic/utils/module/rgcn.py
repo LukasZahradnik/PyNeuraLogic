@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.enums import Activation, Aggregation
@@ -13,7 +13,7 @@ class RGCNConv(Module):
         out_channels: int,
         output_name: str,
         feature_name: str,
-        edge_name: str,
+        edge_name: Optional[str],
         relations: List[str],
         activation: Activation = Activation.IDENTITY,
         aggregation: Aggregation = Aggregation.AVG,
@@ -33,20 +33,17 @@ class RGCNConv(Module):
     def __call__(self):
         head = R.get(self.output_name)(V.X)
         metadata = Metadata(activation=Activation.IDENTITY, aggregation=self.aggregation)
+        feature = R.get(self.feature_name)(V.Y)[self.out_channels, self.in_channels]
 
-        relation_rules = [
-            (
-                (
-                    head
-                    <= (
-                        R.get(self.feature_name)(V.Y)[self.out_channels, self.in_channels],
-                        R.get(self.edge_name)(V.Y, relation, V.X),
-                    )
-                )
-                | metadata
-            )
-            for relation in self.relations
-        ]
+        if self.edge_name is not None:
+            relation_rules = [
+                ((head <= (feature, R.get(self.edge_name)(V.Y, relation, V.X))) | metadata)
+                for relation in self.relations
+            ]
+        else:
+            relation_rules = [
+                ((head <= (feature, R.get(relation)(V.Y, V.X))) | metadata) for relation in self.relations
+            ]
 
         return [
             (head <= R.get(self.feature_name)(V.X)[self.out_channels, self.in_channels]) | metadata,
