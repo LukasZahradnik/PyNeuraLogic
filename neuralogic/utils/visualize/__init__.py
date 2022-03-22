@@ -8,14 +8,20 @@ from neuralogic.core.builder import Sample
 from neuralogic.core.settings import Settings, SettingsProxy
 
 
-def get_drawing_settings(img_type: str = "png", value_detail: int = 0) -> SettingsProxy:
+def get_drawing_settings(
+    img_type: str = "png", value_detail: int = 0, graphviz_path: Optional[str] = None
+) -> SettingsProxy:
     """Returns the default settings instance for drawing with a specified image type.
 
     :param img_type:
     :param value_detail:
+    :param graphviz_path:
     :return:
     """
     settings = Settings().create_proxy()
+
+    if graphviz_path is not None:
+        settings.settings.graphvizPath = graphviz_path
 
     settings.settings.drawing = False
     settings.settings.storeNotShow = True
@@ -50,11 +56,24 @@ def get_sample_drawer(settings: SettingsProxy):
 
 def draw(drawer, obj, filename: Optional[str] = None, draw_ipython=True, img_type="png", *args, **kwargs):
     if filename is not None:
-        drawer.drawIntoFile(obj, os.path.abspath(filename))
+        try:
+            drawer.drawIntoFile(obj, os.path.abspath(filename))
+        except jpype.java.lang.NullPointerException as e:
+            raise Exception(
+                "Drawing raised NullPointerException. Try to install GraphViz on "
+                "your Path or specify the path via the `graphviz_path` parameter"
+            ) from e
 
         return
 
-    data = bytes(drawer.drawIntoBytes(obj))
+    data = drawer.drawIntoBytes(obj)
+
+    if data is None:
+        raise Exception(
+            "Drawing failed. Try to install GraphViz on your Path or specify the path via the `graphviz_path` parameter"
+        )
+
+    data = bytes(data)
 
     if draw_ipython:
         from IPython.display import Image, SVG
@@ -70,7 +89,14 @@ def to_dot_source(drawer, obj) -> str:
 
 
 def draw_model(
-    model, filename: Optional[str] = None, draw_ipython=True, img_type="png", value_detail: int = 0, *args, **kwargs
+    model,
+    filename: Optional[str] = None,
+    draw_ipython=True,
+    img_type="png",
+    value_detail: int = 0,
+    graphviz_path: Optional[str] = None,
+    *args,
+    **kwargs,
 ):
     """Draws model either as an image of type img_type either into:
         * a file - if filename is specified),
@@ -82,6 +108,7 @@ def draw_model(
     :param draw_ipython:
     :param img_type:
     :param value_detail:
+    :param graphviz_path:
     :param args:
     :param kwargs:
     :return:
@@ -90,13 +117,20 @@ def draw_model(
         model.sync_template()
 
     template = model.template
-    template_drawer = get_template_drawer(get_drawing_settings(img_type=img_type, value_detail=value_detail))
+    template_drawer = get_template_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
 
     return draw(template_drawer, template, filename, draw_ipython, img_type, *args, **kwargs)
 
 
 def draw_sample(
-    sample, filename: Optional[str] = None, draw_ipython=True, img_type="png", value_detail: int = 0, *args, **kwargs
+    sample,
+    filename: Optional[str] = None,
+    draw_ipython=True,
+    img_type="png",
+    value_detail: int = 0,
+    graphviz_path: Optional[str] = None,
+    *args,
+    **kwargs,
 ):
     """Draws sample either as an image of type img_type either into:
         * a file - if filename is specified),
@@ -108,6 +142,7 @@ def draw_sample(
     :param draw_ipython:
     :param img_type:
     :param detail:
+    :param graphviz_path:
     :param args:
     :param kwargs:
     :return:
@@ -116,7 +151,7 @@ def draw_sample(
     if isinstance(draw_object, Sample):
         draw_object = draw_object.java_sample
 
-    sample_drawer = get_sample_drawer(get_drawing_settings(img_type=img_type, value_detail=value_detail))
+    sample_drawer = get_sample_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
 
     return draw(sample_drawer, draw_object, filename, draw_ipython, img_type, *args, **kwargs)
 
