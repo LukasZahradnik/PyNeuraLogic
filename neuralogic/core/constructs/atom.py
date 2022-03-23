@@ -128,6 +128,8 @@ class WeightedAtom:  # todo gusta: mozna dedeni namisto kompozice?
             weight = f"{{{', '.join(str(w) for w in self.weight)}}}"
         else:
             weight = str(self.weight)
+        if self.weight_name:
+            weight = f"${self.weight_name}={weight}"
 
         if self.is_fixed:
             return f"<{weight}> {self.atom.to_str(end)}"
