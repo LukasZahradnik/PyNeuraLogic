@@ -1,5 +1,5 @@
 from neuralogic.core import Template, Activation, Aggregation
-from neuralogic.utils.module import RGCNConv, SAGEConv, GCNConv, GINConv, TAGConv
+from neuralogic.utils.module import RGCNConv, SAGEConv, GCNConv, GINConv, TAGConv, GATv2Conv
 
 
 def test_rgcnconv():
@@ -72,3 +72,31 @@ def test_tagconv():
     assert template_str[0] == zero_hop
     assert template_str[1] == sec_hop
     assert template_str[2] == "h1/1 [activation=identity]"
+
+
+def test_gatv2conv():
+    template = Template()
+
+    template += GATv2Conv(1, 2, "h1", "h0", "_edge")
+    template_str = str(template).split("\n")
+
+    attention = "{2, 2} h1__attention(I, J) :- $h1__left={2, 1} h0(I), $h1__right={2, 1} h0(J). [activation=leakyrelu]"
+    assert template_str[0] == attention
+    assert template_str[1] == "h1__attention/2 [activation=softmax]"
+
+    h1_rule = "h1(I) :- h1__attention(I, J), $h1__right={2, 1} h0(J), *edge(J, I). [activation=product-identity, aggregation=sum]"
+    assert template_str[2] == h1_rule
+    assert template_str[3] == "h1/1 [activation=identity]"
+
+    template = Template()
+
+    template += GATv2Conv(1, 2, "h1", "h0", "_edge", share_weights=True)
+    template_str = str(template).split("\n")
+
+    attention = "{2, 2} h1__attention(I, J) :- $h1__right={2, 1} h0(I), $h1__right={2, 1} h0(J). [activation=leakyrelu]"
+    assert template_str[0] == attention
+    assert template_str[1] == "h1__attention/2 [activation=softmax]"
+
+    h1_rule = "h1(I) :- h1__attention(I, J), $h1__right={2, 1} h0(J), *edge(J, I). [activation=product-identity, aggregation=sum]"
+    assert template_str[2] == h1_rule
+    assert template_str[3] == "h1/1 [activation=identity]"
