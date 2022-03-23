@@ -1,5 +1,5 @@
 from neuralogic.core import Template, Activation, Aggregation
-from neuralogic.utils.module import RGCNConv, SAGEConv, GCNConv, GINConv
+from neuralogic.utils.module import RGCNConv, SAGEConv, GCNConv, GINConv, TAGConv
 
 
 def test_rgcnconv():
@@ -46,4 +46,29 @@ def test_sageconv():
 
     assert template_str[0] == "{2, 1} h1(X) :- h0(Y), *edge(Y, X). [activation=identity, aggregation=sum]"
     assert template_str[1] == "{2, 1} h1(X) :- h0(X). [activation=identity, aggregation=sum]"
+    assert template_str[2] == "h1/1 [activation=identity]"
+
+
+def test_tagconv():
+    template = Template()
+
+    template += TAGConv(1, 2, "h1", "h0", "_edge")
+    template_str = str(template).split("\n")
+
+    zero_hop = "h1(X0) :- {2, 1} h0(X0), *edge(X1, X0). [activation=identity, aggregation=sum]"
+    sec_hop = "h1(X0) :- {2, 1} h0(X1), *edge(X1, X0), *edge(X2, X1). [activation=identity, aggregation=sum]"
+    hop = "h1(X0) :- {2, 1} h0(X2), *edge(X1, X0), *edge(X2, X1), *edge(X3, X2). [activation=identity, aggregation=sum]"
+
+    assert template_str[0] == zero_hop
+    assert template_str[1] == sec_hop
+    assert template_str[2] == hop
+    assert template_str[3] == "h1/1 [activation=identity]"
+
+    template = Template()
+
+    template += TAGConv(1, 2, "h1", "h0", "_edge", 1)
+    template_str = str(template).split("\n")
+
+    assert template_str[0] == zero_hop
+    assert template_str[1] == sec_hop
     assert template_str[2] == "h1/1 [activation=identity]"
