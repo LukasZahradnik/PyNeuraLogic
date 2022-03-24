@@ -36,10 +36,10 @@ class TAGConv(Module):
         for i in range(self.k + 1):
             hop_rules.append(
                 (
-                    head(V.X0)
+                    head(V.I0)
                     <= (
-                        feature(f"X{i}")[self.out_channels, self.in_channels],
-                        *(edge(f"X{b}", f"X{a}") for a, b in zip(range(i + 1), range(1, i + 2))),
+                        feature(f"I{i}")[self.out_channels, self.in_channels],
+                        *(edge(f"I{b}", f"I{a}") for a, b in zip(range(i + 1), range(1, i + 2))),
                     )
                 )
                 | metadata

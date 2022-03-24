@@ -1,5 +1,5 @@
 from neuralogic.core import Template, Activation, Aggregation
-from neuralogic.utils.module import RGCNConv, SAGEConv, GCNConv, GINConv, TAGConv, GATv2Conv
+from neuralogic.utils.module import RGCNConv, SAGEConv, GCNConv, GINConv, TAGConv, GATv2Conv, SGConv, APPNPConv
 
 
 def test_rgcnconv():
@@ -8,10 +8,10 @@ def test_rgcnconv():
     template += RGCNConv(1, 2, "h1", "h0", "_edge", ["a", "b", "c"])
     template_str = str(template).split("\n")
 
-    assert template_str[0] == "h1(X) :- {2, 1} h0(X). [activation=identity, aggregation=avg]"
-    assert template_str[1] == "h1(X) :- {2, 1} h0(Y), *edge(Y, a, X). [activation=identity, aggregation=avg]"
-    assert template_str[2] == "h1(X) :- {2, 1} h0(Y), *edge(Y, b, X). [activation=identity, aggregation=avg]"
-    assert template_str[3] == "h1(X) :- {2, 1} h0(Y), *edge(Y, c, X). [activation=identity, aggregation=avg]"
+    assert template_str[0] == "h1(I) :- {2, 1} h0(I). [activation=identity, aggregation=avg]"
+    assert template_str[1] == "h1(I) :- {2, 1} h0(J), *edge(J, a, I). [activation=identity, aggregation=avg]"
+    assert template_str[2] == "h1(I) :- {2, 1} h0(J), *edge(J, b, I). [activation=identity, aggregation=avg]"
+    assert template_str[3] == "h1(I) :- {2, 1} h0(J), *edge(J, c, I). [activation=identity, aggregation=avg]"
     assert template_str[4] == "h1/1 [activation=identity]"
 
 
@@ -21,10 +21,10 @@ def test_rgcnconv_relations_edge_replace():
     template += RGCNConv(1, 2, "h1", "h0", None, ["a", "b", "c"], Activation.SIGMOID)
     template_str = str(template).split("\n")
 
-    assert template_str[0] == "h1(X) :- {2, 1} h0(X). [activation=identity, aggregation=avg]"
-    assert template_str[1] == "h1(X) :- {2, 1} h0(Y), a(Y, X). [activation=identity, aggregation=avg]"
-    assert template_str[2] == "h1(X) :- {2, 1} h0(Y), b(Y, X). [activation=identity, aggregation=avg]"
-    assert template_str[3] == "h1(X) :- {2, 1} h0(Y), c(Y, X). [activation=identity, aggregation=avg]"
+    assert template_str[0] == "h1(I) :- {2, 1} h0(I). [activation=identity, aggregation=avg]"
+    assert template_str[1] == "h1(I) :- {2, 1} h0(J), a(J, I). [activation=identity, aggregation=avg]"
+    assert template_str[2] == "h1(I) :- {2, 1} h0(J), b(J, I). [activation=identity, aggregation=avg]"
+    assert template_str[3] == "h1(I) :- {2, 1} h0(J), c(J, I). [activation=identity, aggregation=avg]"
     assert template_str[4] == "h1/1 [activation=sigmoid]"
 
 
@@ -34,7 +34,7 @@ def test_gcnconv():
     template += GCNConv(1, 2, "h1", "h0", "_edge")
     template_str = str(template).split("\n")
 
-    assert template_str[0] == "{2, 1} h1(X) :- h0(Y), *edge(Y, X). [activation=identity, aggregation=sum]"
+    assert template_str[0] == "{2, 1} h1(I) :- h0(J), *edge(J, I). [activation=identity, aggregation=sum]"
     assert template_str[1] == "h1/1 [activation=identity]"
 
 
@@ -44,8 +44,8 @@ def test_sageconv():
     template += SAGEConv(1, 2, "h1", "h0", "_edge")
     template_str = str(template).split("\n")
 
-    assert template_str[0] == "{2, 1} h1(X) :- h0(Y), *edge(Y, X). [activation=identity, aggregation=sum]"
-    assert template_str[1] == "{2, 1} h1(X) :- h0(X). [activation=identity, aggregation=sum]"
+    assert template_str[0] == "{2, 1} h1(I) :- h0(J), *edge(J, I). [activation=identity, aggregation=sum]"
+    assert template_str[1] == "{2, 1} h1(I) :- h0(I). [activation=identity, aggregation=sum]"
     assert template_str[2] == "h1/1 [activation=identity]"
 
 
@@ -55,9 +55,9 @@ def test_tagconv():
     template += TAGConv(1, 2, "h1", "h0", "_edge")
     template_str = str(template).split("\n")
 
-    zero_hop = "h1(X0) :- {2, 1} h0(X0), *edge(X1, X0). [activation=identity, aggregation=sum]"
-    sec_hop = "h1(X0) :- {2, 1} h0(X1), *edge(X1, X0), *edge(X2, X1). [activation=identity, aggregation=sum]"
-    hop = "h1(X0) :- {2, 1} h0(X2), *edge(X1, X0), *edge(X2, X1), *edge(X3, X2). [activation=identity, aggregation=sum]"
+    zero_hop = "h1(I0) :- {2, 1} h0(I0), *edge(I1, I0). [activation=identity, aggregation=sum]"
+    sec_hop = "h1(I0) :- {2, 1} h0(I1), *edge(I1, I0), *edge(I2, I1). [activation=identity, aggregation=sum]"
+    hop = "h1(I0) :- {2, 1} h0(I2), *edge(I1, I0), *edge(I2, I1), *edge(I3, I2). [activation=identity, aggregation=sum]"
 
     assert template_str[0] == zero_hop
     assert template_str[1] == sec_hop
@@ -100,3 +100,51 @@ def test_gatv2conv():
     h1_rule = "h1(I) :- h1__attention(I, J), $h1__right={2, 1} h0(J), *edge(J, I). [activation=product-identity, aggregation=sum]"
     assert template_str[2] == h1_rule
     assert template_str[3] == "h1/1 [activation=identity]"
+
+
+def test_sgconv():
+    template = Template()
+
+    template += SGConv(1, 2, "h1", "h0", "_edge", k=2)
+    template_str = str(template).split("\n")
+    rule = "{2, 1} h1(I0) :- h0(I2), *edge(I1, I0), *edge(I2, I1). [activation=identity, aggregation=sum]"
+
+    assert template_str[0] == rule
+    assert template_str[1] == "h1/1 [activation=identity]"
+
+    template = Template()
+
+    template += SGConv(1, 2, "h1", "h0", "_edge")
+    template_str = str(template).split("\n")
+    rule = "{2, 1} h1(I0) :- h0(I1), *edge(I1, I0). [activation=identity, aggregation=sum]"
+
+    assert template_str[0] == rule
+    assert template_str[1] == "h1/1 [activation=identity]"
+
+
+def test_appnp():
+    template = Template()
+
+    template += APPNPConv("h1", "h0", "_edge", 1, 0.1)
+    template_str = str(template).split("\n")
+
+    assert template_str[0] == "h1(I) :- <0.1> h0(I). [activation=identity, aggregation=sum]"
+    assert template_str[1] == "h1(I) :- <0.9> h0(J), *edge(J, I). [activation=identity, aggregation=sum]"
+    assert template_str[2] == "h1/1 [activation=identity]"
+
+    template = Template()
+
+    template += APPNPConv("h1", "h0", "_edge", 3, 0.1)
+    template_str = str(template).split("\n")
+
+    assert template_str[0] == "h1__1(I) :- <0.1> h0(I). [activation=identity, aggregation=sum]"
+    assert template_str[1] == "h1__1(I) :- <0.9> h0(J), *edge(J, I). [activation=identity, aggregation=sum]"
+    assert template_str[2] == "h1__1/1 [activation=identity]"
+
+    assert template_str[3] == "h1__2(I) :- <0.1> h0(I). [activation=identity, aggregation=sum]"
+    assert template_str[4] == "h1__2(I) :- <0.9> h1__1(J), *edge(J, I). [activation=identity, aggregation=sum]"
+    assert template_str[5] == "h1__2/1 [activation=identity]"
+
+    assert template_str[6] == "h1(I) :- <0.1> h0(I). [activation=identity, aggregation=sum]"
+    assert template_str[7] == "h1(I) :- <0.9> h1__2(J), *edge(J, I). [activation=identity, aggregation=sum]"
+    assert template_str[8] == "h1/1 [activation=identity]"

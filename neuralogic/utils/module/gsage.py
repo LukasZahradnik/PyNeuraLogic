@@ -26,11 +26,11 @@ class SAGEConv(Module):
         self.activation = activation
 
     def __call__(self):
-        head = R.get(self.output_name)(V.X)[self.out_channels, self.in_channels]
+        head = R.get(self.output_name)(V.I)[self.out_channels, self.in_channels]
         metadata = Metadata(activation=Activation.IDENTITY, aggregation=self.aggregation)
 
         return [
-            (head <= (R.get(self.feature_name)(V.Y), R.get(self.edge_name)(V.Y, V.X))) | metadata,
-            (head <= R.get(self.feature_name)(V.X)) | metadata,
+            (head <= (R.get(self.feature_name)(V.J), R.get(self.edge_name)(V.J, V.I))) | metadata,
+            (head <= R.get(self.feature_name)(V.I)) | metadata,
             R.get(self.output_name) / 1 | Metadata(activation=self.activation),
         ]

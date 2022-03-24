@@ -7,6 +7,15 @@ from neuralogic.utils.module.module import Module
 
 
 class RGCNConv(Module):
+    r"""
+    Relational Graph Convolutional layer from X. Which can be expressed as:
+
+    .. math::
+        \mathbf{x}^{\prime}_i = act(\mathbf{W_0} \cdot \mathbf{x}_i + \sum_{r \in \mathcal{R}}
+        {agg}_{j \in \mathcal{N}(i)}(\mathbf{W_r} \cdot \mathbf{x}_j))
+
+    """
+
     def __init__(
         self,
         in_channels: int,
@@ -31,22 +40,22 @@ class RGCNConv(Module):
         self.activation = activation
 
     def __call__(self):
-        head = R.get(self.output_name)(V.X)
+        head = R.get(self.output_name)(V.I)
         metadata = Metadata(activation=Activation.IDENTITY, aggregation=self.aggregation)
-        feature = R.get(self.feature_name)(V.Y)[self.out_channels, self.in_channels]
+        feature = R.get(self.feature_name)(V.J)[self.out_channels, self.in_channels]
 
         if self.edge_name is not None:
             relation_rules = [
-                ((head <= (feature, R.get(self.edge_name)(V.Y, relation, V.X))) | metadata)
+                ((head <= (feature, R.get(self.edge_name)(V.J, relation, V.I))) | metadata)
                 for relation in self.relations
             ]
         else:
             relation_rules = [
-                ((head <= (feature, R.get(relation)(V.Y, V.X))) | metadata) for relation in self.relations
+                ((head <= (feature, R.get(relation)(V.J, V.I))) | metadata) for relation in self.relations
             ]
 
         return [
-            (head <= R.get(self.feature_name)(V.X)[self.out_channels, self.in_channels]) | metadata,
+            (head <= R.get(self.feature_name)(V.I)[self.out_channels, self.in_channels]) | metadata,
             *relation_rules,
             R.get(self.output_name) / 1 | Metadata(activation=self.activation),
         ]

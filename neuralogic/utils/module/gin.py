@@ -26,16 +26,15 @@ class GINConv(Module):
         self.activation = activation
 
     def __call__(self):
-        head = R.get(self.output_name)(V.X)[self.out_channels, self.in_channels]
-        embed = R.get(f"embed__{self.output_name}")(V.X)
+        head = R.get(self.output_name)(V.I)[self.out_channels, self.in_channels]
+        embed = R.get(f"embed__{self.output_name}")
 
         metadata = Metadata(activation=Activation.IDENTITY, aggregation=self.aggregation)
 
         return [
-            (head <= (R.get(self.feature_name)(V.Y), R.get(self.edge_name)(V.Y, V.X))) | metadata,
-            (embed <= R.get(self.feature_name)(V.X)) | metadata,
-            (head <= R.get(f"embed__{self.output_name}")(V.X)[self.in_channels, self.in_channels])
-            | Metadata(activation=self.activation),
-            R.get(f"embed__{self.output_name}") / 1 | Metadata(activation=Activation.IDENTITY),
+            (head <= (R.get(self.feature_name)(V.J), R.get(self.edge_name)(V.J, V.I))) | metadata,
+            (embed(V.I) <= R.get(self.feature_name)(V.I)) | metadata,
+            (head <= embed(V.I)[self.in_channels, self.in_channels]) | Metadata(activation=self.activation),
+            embed / 1 | Metadata(activation=Activation.IDENTITY),
             R.get(self.output_name) / 1 | Metadata(activation=self.activation),
         ]
