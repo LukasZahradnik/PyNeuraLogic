@@ -14,12 +14,13 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath(".."))
-
+add_module_names = False
+python_use_unqualified_type_names = True
 
 # -- Project information -----------------------------------------------------
 
 project = "PyNeuraLogic"
-copyright = "2021, Lukáš Zahradník"
+copyright = "2022, Lukáš Zahradník"
 author = "Lukáš Zahradník"
 
 
@@ -34,6 +35,8 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_rtd_theme",
     "sphinx_tabs.tabs",
+    "sphinxcontrib.napoleon",
+    "sphinx.ext.viewcode",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
