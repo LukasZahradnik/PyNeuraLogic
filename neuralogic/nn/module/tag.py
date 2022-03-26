@@ -1,7 +1,7 @@
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.enums import Activation, Aggregation
 from neuralogic.core.constructs.factories import R, V
-from neuralogic.utils.module.module import Module
+from neuralogic.nn.module.module import Module
 
 
 class TAGConv(Module):

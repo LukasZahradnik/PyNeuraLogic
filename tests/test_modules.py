@@ -1,5 +1,5 @@
 from neuralogic.core import Template, Activation, Aggregation
-from neuralogic.utils.module import RGCNConv, SAGEConv, GCNConv, GINConv, TAGConv, GATv2Conv, SGConv, APPNPConv
+from neuralogic.nn.module import RGCNConv, SAGEConv, GCNConv, GINConv, TAGConv, GATv2Conv, SGConv, APPNPConv
 
 
 def test_rgcnconv():

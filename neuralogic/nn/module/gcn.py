@@ -1,30 +1,31 @@
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.enums import Activation, Aggregation
 from neuralogic.core.constructs.factories import R, V
-from neuralogic.utils.module.module import Module
+from neuralogic.nn.module.module import Module
 
 
 class GCNConv(Module):
     r"""
-    Graph Convolutional layer from X. Which can be expressed as:
+    Graph Convolutional layer from `"Semi-supervised Classification with Graph Convolutional Networks" <https://arxiv.org/abs/1609.02907>`_.
+    Which can be expressed as:
 
     .. math::
         \mathbf{x}^{\prime}_i = act(\mathbf{W} \cdot {agg}_{j \in \mathcal{N}(i)}(\mathbf{x}_j))
 
-    Where *act* is an activation function, *agg* aggregation function and *W* a learnable parameter. This equation is
+    Where *act* is an activation function, *agg* aggregation function and *W* is a learnable parameter. This equation is
     translated into the logic form as:
 
-    .. code:: Python
+    .. code:: logtalk
 
          (R.<output_name>(V.I)[<W>] <= (R.<feature_name>(V.J), R.<edge_name>(V.J, V.I)) | [<aggregation>, Activation.IDENTITY]
          R.<output_name> / 1 | [<activation>]
 
-    Example
-    -------
+    Examples
+    --------
 
-    :code:`GCNConv(2, 3, "h1", "h0", "_edge")` represents:
+    The whole computation of this module (parametrized as :code:`GCNConv(2, 3, "h1", "h0", "_edge")`) is as follows:
 
-    .. code:: Python
+    .. code:: logtalk
 
         (R.h1(V.I)[2, 3] <= (R.h0(V.J), R._edge(V.J, V.I)) | [Aggregation.SUM, Activation.IDENTITY]
         R.h1 / 1 | [Activation.IDENTITY]
@@ -33,19 +34,21 @@ class GCNConv(Module):
     ----------
 
     in_channels : int
-        Input feature size
+        Input feature size.
     out_channels : int
-        Output feature size
+        Output feature size.
     output_name : str
-        Output (head) predicate name of the module
+        Output (head) predicate name of the module.
     feature_name : str
-        Feature predicate name to get features from
+        Feature predicate name to get features from.
     edge_name : str
-        Edge predicate name to use for neighborhood relations
+        Edge predicate name to use for neighborhood relations.
     activation : Activation
-        Activation function of the output. Default: ``Activation.IDENTITY``.
+        Activation function of the output.
+        Default: ``Activation.IDENTITY``
     aggregation : Aggregation
-        Aggregation function of nodes' neighbors. Default: ``Aggregation.SUM``
+        Aggregation function of nodes' neighbors.
+        Default: ``Aggregation.SUM``
 
     """
 

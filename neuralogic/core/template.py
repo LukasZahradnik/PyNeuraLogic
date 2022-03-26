@@ -10,7 +10,7 @@ from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.predicate import PredicateMetadata
 from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import SettingsProxy, Settings
-from neuralogic.utils.module.module import Module
+from neuralogic.nn.module.module import Module
 
 TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
 
