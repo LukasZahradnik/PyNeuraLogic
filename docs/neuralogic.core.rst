@@ -30,6 +30,30 @@ neuralogic.core.enums module
    :undoc-members:
    :show-inheritance:
 
+neuralogic.core.error\_function module
+--------------------------------------
+
+.. automodule:: neuralogic.core.error_function
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+neuralogic.core.evaluation\_inference\_engine module
+----------------------------------------------------
+
+.. automodule:: neuralogic.core.evaluation_inference_engine
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+neuralogic.core.inference\_engine module
+----------------------------------------
+
+.. automodule:: neuralogic.core.inference_engine
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 neuralogic.core.sources module
 ------------------------------
 

@@ -4,7 +4,6 @@ neuralogic.utils.templates.modules package
 Submodules
 ----------
 
-
 neuralogic.utils.templates.modules.gcn module
 ---------------------------------------------
 
