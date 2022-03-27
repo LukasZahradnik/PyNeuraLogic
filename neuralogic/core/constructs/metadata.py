@@ -10,11 +10,13 @@ class Metadata:
         learnable: bool = None,
         activation: Union[str, Activation, ActivationAgg, ActivationAggregation] = None,
         aggregation: Aggregation = None,
+        duplicit_grounding: bool = False,
     ):
         self.offset = offset
         self.learnable = learnable
         self.activation = activation
         self.aggregation = aggregation
+        self.duplicit_grounding = duplicit_grounding
 
     def __str__(self):
         metadata_list = []
