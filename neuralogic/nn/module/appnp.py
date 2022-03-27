@@ -13,10 +13,10 @@ class APPNPConv(Module):
         \mathbf{x}^{0}_i = \mathbf{x}_i
 
     .. math::
-        \mathbf{x}^{k} = \alpha \cdot \mathbf{x}^0_i + (1 - \alpha) \cdot {agg}_{j \in \mathcal{N}(i)}(\mathbf{x}^{k - 1}_j)
+        \mathbf{x}^{k}_i = \alpha \cdot \mathbf{x}^0_i + (1 - \alpha) \cdot {agg}_{j \in \mathcal{N}(i)}(\mathbf{x}^{k - 1}_j)
 
     .. math::
-        \mathbf{x}^{\prime}_i = act(\mathbf{x}^{K})
+        \mathbf{x}^{\prime}_i = act(\mathbf{x}^{K}_i)
 
     Where *act* is an activation function and *agg* aggregation function.
 
