@@ -5,6 +5,68 @@ from neuralogic.nn.module.module import Module
 
 
 class SGConv(Module):
+    r"""
+    Simple Graph Convolutional layer from `"Simplifying Graph Convolutional Networks" <https://arxiv.org/abs/1902.07153>`_.
+    Which can be expressed as:
+
+    .. math::
+        \mathbf{x}^{\prime}_i = act(\mathbf{W} \cdot {agg}_{j \in \mathcal{N}^k(i)}(\mathbf{x}_j))
+
+    Where *act* is an activation function, *agg* aggregation function, *W* is a learnable parameter and :math:`\mathcal{N}^k(i)` denotes nodes that are *k* hops away from the node *i*.
+    This equation is translated into the logic form as:
+
+    .. code:: logtalk
+
+        (R.<output_name>(V.I)[<W>] <= (
+            R.<feature_name>(V.I<k>),
+            R.<edge_name>(V.I<1>, V.I<0>), R.<edge_name>(V.I<2>, V.I<1>), ..., R.<edge_name>(V.I<k>, V.I<k-1>),
+        )) | [<aggregation>, Activation.IDENTITY]
+
+        R.<output_name> / 1 | [<activation>]
+
+    Examples
+    --------
+
+    The whole computation of this module (parametrized as :code:`SGConv(2, 3, "h1", "h0", "_edge", 2)`) is as follows:
+
+    .. code:: logtalk
+
+        (R.h1(V.I0)[2, 3] <= (R.h0(V.I2), R._edge(V.I1, V.I0), R._edge(V.I2, V.I1))) | [Activation.IDENTITY, Aggregation.SUM]
+        R.h1 / 1 | [Activation.IDENTITY]
+
+    Module parametrized as :code:`SGConv(2, 3, "h1", "h0", "_edge", 1)` translates into:
+
+    .. code:: logtalk
+
+        (R.h1(V.I0)[2, 3] <= (R.h0(V.I1), R._edge(V.I1, V.I0))) | [Activation.IDENTITY, Aggregation.SUM]
+        R.h1 / 1 | [Activation.IDENTITY]
+
+
+    Parameters
+    ----------
+
+    in_channels : int
+        Input feature size.
+    out_channels : int
+        Output feature size.
+    output_name : str
+        Output (head) predicate name of the module.
+    feature_name : str
+        Feature predicate name to get features from.
+    edge_name : str
+        Edge predicate name to use for neighborhood relations.
+    k : int
+        Number of hops.
+        Default: ``1``
+    activation : Activation
+        Activation function of the output.
+        Default: ``Activation.IDENTITY``
+    aggregation : Aggregation
+        Aggregation function of nodes' neighbors.
+        Default: ``Aggregation.SUM``
+
+    """
+
     def __init__(
         self,
         in_channels: int,
@@ -30,14 +92,15 @@ class SGConv(Module):
 
     def __call__(self):
         head = R.get(self.output_name)(V.I0)[self.out_channels, self.in_channels]
-        metadata = Metadata(activation=Activation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(activation=Activation.IDENTITY, aggregation=self.aggregation, duplicit_grounding=True)
         edge = R.get(self.edge_name)
+        feature = R.get(self.feature_name)
 
         return [
             (
                 head
                 <= (
-                    R.get(self.feature_name)(f"I{self.k}"),
+                    feature(f"I{self.k}"),
                     *(edge(f"I{b}", f"I{a}") for a, b in zip(range(self.k), range(1, self.k + 1))),
                 )
             )

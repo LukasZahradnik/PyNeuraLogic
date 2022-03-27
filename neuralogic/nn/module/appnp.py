@@ -43,15 +43,15 @@ class APPNPConv(Module):
         metadata = Metadata(activation=Activation.IDENTITY, aggregation=Aggregation.SUM)
 
         (R.h1__1(V.I) <= R.h0(V.I)[0.1].fixed()) | metadata
-        (R.h1__1(V.I) <= R.h0(V.J)[0.9].fixed(), R._edge(V.J, V.I)) | metadata
+        (R.h1__1(V.I) <= (R.h0(V.J)[0.9].fixed(), R._edge(V.J, V.I))) | metadata
         R.h1__1/1 [Activation.IDENTITY]
 
         (R.h1__2(V.I) <= <0.1> R.h0(V.I)) | metadata
-        (R.h1__2(V.I) <= <0.9> R.h1__1(V.J), R._edge(V.J, V.I)) | metadata
+        (R.h1__2(V.I) <= (<0.9> R.h1__1(V.J), R._edge(V.J, V.I))) | metadata
         R.h1__2/1 [Activation.IDENTITY]
 
         (R.h1(V.I) <= <0.1> R.h0(V.I)) | metadata
-        (R.h1(V.I) <= <0.9> R.h1__2(V.J), R._edge(V.J, V.I)) | metadata
+        (R.h1(V.I) <= (<0.9> R.h1__2(V.J), R._edge(V.J, V.I))) | metadata
         R.h1 / 1 [Activation.SIGMOID]
 
 

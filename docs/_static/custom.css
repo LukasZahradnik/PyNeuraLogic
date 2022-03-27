@@ -32,3 +32,17 @@ dt.field-odd {
 p.rubric {
     padding-top: 25px;
 }
+
+
+.field-list {
+    display: block !important;
+    padding-bottom: 5px;
+}
+
+dd.field-odd {
+    padding-top: 15px;
+}
+
+dl dd {
+    margin: 0 !important;
+}

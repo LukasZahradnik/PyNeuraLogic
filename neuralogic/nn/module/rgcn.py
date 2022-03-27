@@ -47,9 +47,9 @@ class RGCNConv(Module):
 
         metadata = Metadata(activation=Activation.IDENTITY, aggregation=Aggregation.AVG)
 
-        (R.h1(V.I) :- R.h0(V.I)[2, 1]) | metadata
-        (R.h1(V.I) :- R.h0(V.J)[2, 1], R._edge(V.J, sibling, V.I)) | metadata
-        (R.h1(V.I) :- R.h0(V.J)[2, 1], R._edge(V.J, parent, V.I)) | metadata
+        (R.h1(V.I) <= R.h0(V.I)[2, 1]) | metadata
+        (R.h1(V.I) <= (R.h0(V.J)[2, 1], R._edge(V.J, sibling, V.I))) | metadata
+        (R.h1(V.I) <= (R.h0(V.J)[2, 1], R._edge(V.J, parent, V.I))) | metadata
         R.h1 / 1 [Activation.IDENTITY]
 
     Module parametrized as :code:`RGCNConv(1, 2, "h1", "h0", None, ["sibling", "parent"])` translates into:
@@ -58,9 +58,9 @@ class RGCNConv(Module):
 
         metadata = Metadata(activation=Activation.IDENTITY, aggregation=Aggregation.AVG)
 
-        (R.h1(V.I) :- R.h0(V.I)[2, 1]) | metadata
-        (R.h1(V.I) :- R.h0(V.J)[2, 1], R.sibling(V.J, V.I)) | metadata
-        (R.h1(V.I) :- R.h0(V.J)[2, 1], R.parent(V.J, V.I)) | metadata
+        (R.h1(V.I) <= R.h0(V.I)[2, 1]) | metadata
+        (R.h1(V.I) <= (R.h0(V.J)[2, 1], R.sibling(V.J, V.I))) | metadata
+        (R.h1(V.I) <= (R.h0(V.J)[2, 1], R.parent(V.J, V.I))) | metadata
         R.h1 / 1 [Activation.IDENTITY]
 
     Parameters
@@ -84,7 +84,6 @@ class RGCNConv(Module):
     aggregation : Aggregation
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.SUM``
-
 
     """
 

@@ -17,7 +17,7 @@ class GCNConv(Module):
 
     .. code:: logtalk
 
-         (R.<output_name>(V.I)[<W>] <= (R.<feature_name>(V.J), R.<edge_name>(V.J, V.I)) | [<aggregation>, Activation.IDENTITY]
+         (R.<output_name>(V.I)[<W>] <= (R.<feature_name>(V.J), R.<edge_name>(V.J, V.I))) | [<aggregation>, Activation.IDENTITY]
          R.<output_name> / 1 | [<activation>]
 
     Examples
