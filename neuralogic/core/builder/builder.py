@@ -3,7 +3,7 @@ from typing import List
 import jpype
 
 from neuralogic import is_initialized, initialize
-from neuralogic.core.builder.components import Weight, Sample
+from neuralogic.core.builder.components import Weight, Sample, RawSample
 from neuralogic.core.enums import Backend
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
@@ -47,7 +47,7 @@ class Builder:
         logic_samples = logic_samples.collect(self.collectors.toList())
 
         if backend == Backend.JAVA:
-            return logic_samples
+            return [RawSample(sample) for sample in logic_samples]
         return Builder.build(logic_samples)
 
     def from_logic_samples(self, parsed_template, logic_samples, backend: Backend):
@@ -59,7 +59,7 @@ class Builder:
         logic_samples = logic_samples.collect(self.collectors.toList())
 
         if backend == Backend.JAVA:
-            return logic_samples
+            return [RawSample(sample) for sample in logic_samples]
 
         return Builder.build(logic_samples)
 

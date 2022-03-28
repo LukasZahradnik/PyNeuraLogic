@@ -4,6 +4,8 @@ from neuralogic.core.settings import Settings
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core import Template, Backend, BuiltDataset, SettingsProxy, Dataset
 
+from neuralogic.utils.visualize import draw_model
+
 
 class AbstractNeuraLogic:
     def __init__(self, backend: Backend, dataset_builder: DatasetBuilder, settings: SettingsProxy):
@@ -66,6 +68,18 @@ class AbstractNeuraLogic:
     def load_state_dict(self, state_dict: Dict):
         raise NotImplementedError
 
+    def draw(
+        self,
+        filename: Optional[str] = None,
+        draw_ipython=True,
+        img_type="png",
+        value_detail: int = 0,
+        graphviz_path: Optional[str] = None,
+        *args,
+        **kwargs,
+    ):
+        return draw_model(self, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs)
+
 
 class AbstractEvaluator:
     def __init__(self, backend: Backend, template: Template, settings: Settings):
@@ -104,3 +118,17 @@ class AbstractEvaluator:
 
     def reset_parameters(self):
         self.neuralogic_model.reset_parameters()
+
+    def draw(
+        self,
+        filename: Optional[str] = None,
+        draw_ipython=True,
+        img_type="png",
+        value_detail: int = 0,
+        graphviz_path: Optional[str] = None,
+        *args,
+        **kwargs,
+    ):
+        return self.neuralogic_model.draw(
+            filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs
+        )

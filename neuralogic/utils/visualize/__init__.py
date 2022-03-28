@@ -4,7 +4,6 @@ from typing import Optional
 
 import jpype
 
-from neuralogic.core.builder import Sample
 from neuralogic.core.settings import Settings, SettingsProxy
 
 
@@ -147,9 +146,7 @@ def draw_sample(
     :param kwargs:
     :return:
     """
-    draw_object = sample
-    if isinstance(draw_object, Sample):
-        draw_object = draw_object.java_sample
+    draw_object = sample.java_sample
 
     sample_drawer = get_sample_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
 

@@ -12,6 +12,9 @@ from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import SettingsProxy, Settings
 from neuralogic.nn.module.module import Module
 
+from neuralogic.utils.visualize import draw_model
+
+
 TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
 
 
@@ -138,6 +141,27 @@ class Template:
         model = Builder(settings_proxy).build_model(parsed_template, backend, settings_proxy)
 
         return get_neuralogic_layer(backend)(model, DatasetBuilder(parsed_template, java_factory), settings_proxy)
+
+    def draw(
+        self,
+        filename: Optional[str] = None,
+        draw_ipython=True,
+        img_type="png",
+        value_detail: int = 0,
+        graphviz_path: Optional[str] = None,
+        *args,
+        **kwargs,
+    ):
+        from neuralogic.nn import get_neuralogic_layer
+
+        settings_proxy = Settings().create_proxy()
+        java_factory = JavaFactory()
+
+        parsed_template = self.get_parsed_template(settings_proxy, java_factory)
+        model = Builder(settings_proxy).build_model(parsed_template, Backend.JAVA, settings_proxy)
+        layer = get_neuralogic_layer(Backend.JAVA)(model, DatasetBuilder(parsed_template, java_factory), settings_proxy)
+
+        return draw_model(layer, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs)
 
     def __str__(self) -> str:
         return "\n".join(str(r) for r in self.template)

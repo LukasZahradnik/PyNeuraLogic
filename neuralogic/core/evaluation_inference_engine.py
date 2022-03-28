@@ -33,6 +33,7 @@ class EvaluationInferenceEngine:
             built_dataset = self.model.build_dataset(self.dataset)
             results = self.model(built_dataset.samples, train=False)
         except Exception as e:
+            print(e)
             self.dataset.examples = global_examples
             return {}
 
@@ -43,7 +44,7 @@ class EvaluationInferenceEngine:
 
         def generator():
             for result, sample in zip(results, built_dataset.samples):
-                sub_query = str(sample.query.neuron.getName())
+                sub_query = str(sample.java_sample.query.neuron.getName())
                 sub_query = sub_query.split("(")[1].strip()[:-1]
 
                 substitutions = sub_query.split(",")

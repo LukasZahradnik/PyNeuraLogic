@@ -18,13 +18,17 @@ class JavaEvaluator(AbstractEvaluator):
 
     def set_dataset(self, dataset: Union[Dataset, BuiltDataset]):
         super().set_dataset(dataset)
-        self.neuralogic_model.set_training_samples(self.dataset.samples)
+        self.neuralogic_model.set_training_samples(
+            jpype.java.util.ArrayList([sample.java_sample for sample in self.dataset.samples])
+        )
 
     def reset_dataset(self, dataset):
         if dataset is None:
             self.neuralogic_model.set_training_samples(jpype.java.util.ArrayList([]))
         else:
-            self.neuralogic_model.set_training_samples(dataset.samples)
+            self.neuralogic_model.set_training_samples(
+                jpype.java.util.ArrayList([sample.java_sample for sample in dataset.samples])
+            )
         self.dataset = dataset
 
     def train(
