@@ -55,9 +55,9 @@ def test_tagconv():
     template += TAGConv(1, 2, "h1", "h0", "_edge")
     template_str = str(template).split("\n")
 
-    zero_hop = "h1(I0) :- {2, 1} h0(I0), *edge(I1, I0). [activation=identity, aggregation=sum]"
-    sec_hop = "h1(I0) :- {2, 1} h0(I1), *edge(I1, I0), *edge(I2, I1). [activation=identity, aggregation=sum]"
-    hop = "h1(I0) :- {2, 1} h0(I2), *edge(I1, I0), *edge(I2, I1), *edge(I3, I2). [activation=identity, aggregation=sum]"
+    zero_hop = "{2, 1} h1(I0) :- h0(I0). [activation=identity, aggregation=sum]"
+    sec_hop = "{2, 1} h1(I0) :- h0(I1), *edge(I1, I0). [activation=identity, aggregation=sum]"
+    hop = "{2, 1} h1(I0) :- h0(I2), *edge(I1, I0), *edge(I2, I1). [activation=identity, aggregation=sum]"
 
     assert template_str[0] == zero_hop
     assert template_str[1] == sec_hop
