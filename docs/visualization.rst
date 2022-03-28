@@ -4,7 +4,7 @@ Visualization
 .. admonition:: \ \
     :class: empty-title
 
-    You can run this page in `Jupyter Notebook <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Visualization.ipynb>`_
+    You can run this page in `Jupyter Notebook <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Visualization.ipynb>`_ |thiscolab|
 
 
 .. |thiscolab| image:: https://colab.research.google.com/assets/colab-badge.svg
@@ -36,11 +36,10 @@ in `XOR Example <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/exam
 Model Rendering
 ***************
 
-All that is needed to visualize the model - the template with current weights' values is to call the :code:`draw_model` function.
+All that is needed to visualize the model - the template with current weights' values is to call the :code:`draw` method.
 
 .. code-block:: Python
 
-    from neuralogic.utils.visualize import draw_model
     from neuralogic.utils.data import XOR_Vectorized
     from neuralogic.core import Settings, Backend
 
@@ -48,7 +47,7 @@ All that is needed to visualize the model - the template with current weights' v
     template, dataset = XOR_Vectorized()
     model = template.build(Backend.JAVA, Settings())
 
-    draw_model(model)
+    model.draw()
 
 
 .. image:: _static/template_render.png
@@ -60,7 +59,11 @@ All that is needed to visualize the model - the template with current weights' v
 
 .. tip::
 
-    If you are using evaluators, you can get the model object via the :code:`evaluator.model` property.
+    If you are using evaluators, you can draw the model via the :code:`evaluator.draw` method.
+
+.. tip::
+
+    You can also visualize the template by calling the :code:`template.draw` method.
 
 Templates (models) and samples can be drawn into various raster formats (such as PNG or JPEG) or SVG format, which is
 considerably faster for larger graphs. To set the format, simply use the :code:`img_type` parameter.
@@ -74,13 +77,13 @@ To draw the model into a file, all we have to do is add the :code:`filename` par
 
 .. code-block:: Python
 
-    draw_model(model, filename="my_image.png")
+    model.draw(filename="my_image.png")
 
 We can also get raw images bytes by turning off displaying into IPython:
 
 .. code-block:: Python
 
-    draw_model(model, draw_ipython=False)
+    model.draw(draw_ipython=False)
 
 .. tip::
     If you are drawing straight into Jupyter Notebook, you can include additional parameters into drawing functions
@@ -96,11 +99,9 @@ An example of drawing samples can be seen in the code below, where we render the
 
 .. code-block:: Python
 
-    from neuralogic.utils.visualize import draw_sample
-
     built_dataset = model.build_dataset(dataset)
 
-    draw_sample(built_dataset.samples[0])
+    built_dataset.samples[0].draw()
 
 
 .. image:: _static/sample_render.png
