@@ -59,7 +59,7 @@ def draw(drawer, obj, filename: Optional[str] = None, draw_ipython=True, img_typ
             drawer.drawIntoFile(obj, os.path.abspath(filename))
         except jpype.java.lang.NullPointerException as e:
             raise Exception(
-                "Drawing raised NullPointerException. Try to install GraphViz on "
+                "Drawing raised NullPointerException. Try to install GraphViz (https://graphviz.org/download/) on "
                 "your Path or specify the path via the `graphviz_path` parameter"
             ) from e
 
@@ -69,7 +69,8 @@ def draw(drawer, obj, filename: Optional[str] = None, draw_ipython=True, img_typ
 
     if data is None:
         raise Exception(
-            "Drawing failed. Try to install GraphViz on your Path or specify the path via the `graphviz_path` parameter"
+            "Drawing failed. Try to install GraphViz (https://graphviz.org/download/) on your Path or specify the "
+            "path via the `graphviz_path` parameter"
         )
 
     data = bytes(data)
