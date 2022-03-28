@@ -178,4 +178,4 @@ def sample_to_dot_source(sample, value_detail: int = 0) -> str:
     """
     sample_drawer = get_sample_drawer(get_drawing_settings(value_detail=value_detail))
 
-    return to_dot_source(sample_drawer, sample)
+    return to_dot_source(sample_drawer, sample.java_sample)
