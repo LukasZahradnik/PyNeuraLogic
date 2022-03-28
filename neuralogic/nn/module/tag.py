@@ -10,9 +10,12 @@ class TAGConv(Module):
     Which can be expressed as:
 
     .. math::
-        \mathbf{x}^{\prime}_i = act(\sum_{k=0}^K \mathbf{W} \cdot {agg}_{j \in \mathcal{N}_k(i)}(\mathbf{x}_j))
+        \mathbf{x}^{\prime}_i = act(\sum_{k=0}^K \mathbf{W}_k \cdot {agg}_{j \in \mathcal{N}^k(i)}(\mathbf{x}_j))
 
-    Where *act* is an activation function, *agg* aggregation function and *W* is a learnable parameter. This equation is
+    Where *act* is an activation function, *agg* aggregation function, *Wk* are learnable parameters and :math:`\mathcal{N}^k(i)` denotes nodes that are *k* hops away from the node *i*.
+    This equation is translated into the logic form as:
+
+     This equation is
     translated into the logic form as:
 
     .. code:: logtalk
