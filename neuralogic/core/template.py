@@ -22,19 +22,12 @@ class Template:
     def __init__(
         self,
         *,
-        module_list: Optional = None,
         template_file: Optional[str] = None,
     ):
         self.template: List[TemplateEntries] = []
         self.template_file = template_file
 
         self.counter = 0
-        self.module_list = None
-
-        if module_list is not None and template_file is None:
-            self.module_list = module_list
-            module_list.build(self)
-
         self.hooks: Dict[str, Set] = {}
 
     def add_hook(self, atom: Union[BaseAtom, str], callback: Callable[[Any], None]) -> None:
