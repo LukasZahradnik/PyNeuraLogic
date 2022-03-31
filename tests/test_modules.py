@@ -1,5 +1,6 @@
 from neuralogic.core import Template, Activation, Aggregation
-from neuralogic.nn.module import RGCNConv, SAGEConv, GCNConv, GINConv, TAGConv, GATv2Conv, SGConv, APPNPConv
+from neuralogic.nn.module import RGCNConv, SAGEConv, GCNConv, GINConv, TAGConv, GATv2Conv, SGConv, APPNPConv, \
+    ResGatedGraphConv
 
 
 def test_rgcnconv():
@@ -148,3 +149,21 @@ def test_appnp():
     assert template_str[6] == "h1(I) :- <0.1> h0(I). [activation=identity, aggregation=sum]"
     assert template_str[7] == "h1(I) :- <0.9> h1__2(J), *edge(J, I). [activation=identity, aggregation=sum]"
     assert template_str[8] == "h1/1 [activation=identity]"
+
+
+def test_res_gated():
+    template = Template()
+
+    template += ResGatedGraphConv(1, 2, "h1", "h0", "edge")
+    template_str = str(template).split("\n")
+
+    rule = "h1(I) :- h1__gate(I, J), {2, 1} h0(J), edge(J, I). [activation=elementproduct-identity, aggregation=sum]"
+
+    assert template_str[0] == "h1__gate(I, J) :- {2, 1} h0(I), {2, 1} h0(J). [activation=identity]"
+    assert template_str[1] == "h1__gate/2 [activation=sigmoid]"
+    assert template_str[2] == "h1(I) :- {2, 1} h0(I). [activation=identity]"
+    assert template_str[3] == rule
+    assert template_str[4] == "h1/1 [activation=identity]"
+
+    print()
+    print(template)

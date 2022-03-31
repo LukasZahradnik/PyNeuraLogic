@@ -7,3 +7,4 @@ from neuralogic.nn.module.tag import TAGConv
 from neuralogic.nn.module.gatv2 import GATv2Conv
 from neuralogic.nn.module.sg import SGConv
 from neuralogic.nn.module.appnp import APPNPConv
+from neuralogic.nn.module.res_gated import ResGatedGraphConv
