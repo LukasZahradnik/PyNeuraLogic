@@ -33,7 +33,7 @@ class ResGatedGraphConv(Module):
     Examples
     --------
 
-    The whole computation of this module (parametrized as :code:`ResGatedGraphConv(1, 2, "h1", "h0", "edge")`) is as follows:
+    The whole computation of this module (parametrized as :code:`ResGatedGraphConv(1, 2, "h1", "h0", "_edge")`) is as follows:
 
     .. code:: logtalk
         metadata = Metadata(activation="elementproduct-identity", aggregation=Aggregation.SUM)
@@ -42,7 +42,7 @@ class ResGatedGraphConv(Module):
         R.h1__gate / 2 | [Activation.SIGMOID]
 
         (R.h1(V.I) <= R.<feature_name>(V.I)[2, 1]) | [Activation.IDENTITY]
-        (R.h1(V.I) <= (R.h1__gate(V.I, V.J), R.h0(V.J)[2, 1], R.edge(V.J, V.I))) | metadata
+        (R.h1(V.I) <= (R.h1__gate(V.I, V.J), R.h0(V.J)[2, 1], R._edge(V.J, V.I))) | metadata
         R.h1 / 1 | [Activation.IDENTITY]
 
     Parameters

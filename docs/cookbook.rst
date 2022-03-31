@@ -45,7 +45,7 @@ Pre-defined GNN Modules
     * - :class:`~neuralogic.nn.module.appnp.APPNPConv`
       - :code:`R.<edge_name>(<source>, <target>)`
     * - :class:`~neuralogic.nn.module.res_gated.ResGatedGraphConv`
-      - :code:`R.<edge_name>(<source>, <target>)[<edge_feats>]`
+      - :code:`R.<edge_name>(<source>, <target>)`
 
 .. autoclass:: neuralogic.nn.module.gcn::GCNConv
    :members:
