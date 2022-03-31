@@ -11,15 +11,16 @@ class ResGatedGraphConv(Module):
 
     .. math::
         \mathbf{x}^{\prime}_i = act(\mathbf{W}_1 \mathbf{x}_i +
-         {agg}_{j \in \mathcal{N}(i)}(\eta_{i,j} \odot \mathbf{W}_2 \mathbf{x}_j)
+         {agg}_{j \in \mathcal{N}(i)}(\eta_{i,j} \odot \mathbf{W}_2 \mathbf{x}_j))
 
     .. math::
-        \mathbf{\eta}_{i,j} = gating_act(\mathbf{W}_3 \mathbf{x}_i + \mathbf{W}_4 \mathbf{x}_j)
+        \mathbf{\eta}_{i,j} = gating\_act(\mathbf{W}_3 \mathbf{x}_i + \mathbf{W}_4 \mathbf{x}_j)
 
     Where *act* is an activation function, *agg* aggregation function, *gating_act* is a gating activation function and :math:`W_n` are learnable parameters. This equation is
     translated into the logic form as:
 
     .. code:: logtalk
+
         (R.<output_name>__gate(V.I, V.J) <= (R.<feature_name>(V.I)[<W>], R.<feature_name>(V.J)[<W>])) | [Activation.IDENTITY]
         R.<output_name>__gate / 2 | [<activation>]
 
