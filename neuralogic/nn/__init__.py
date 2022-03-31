@@ -13,10 +13,6 @@ def get_neuralogic_layer(backend: Backend = Backend.JAVA):
         from neuralogic.nn.java import NeuraLogic  # type: ignore
 
         return NeuraLogic
-    if backend == Backend.PYG:
-        from neuralogic.nn.native.pyg import NeuraLogic
-
-        return NeuraLogic
     if backend == Backend.TORCH:
         from neuralogic.nn.torch import NeuraLogic  # type: ignore
 
@@ -40,10 +36,6 @@ def get_evaluator(
         from neuralogic.nn.evaluators.java import JavaEvaluator
 
         return JavaEvaluator(template, settings)
-    if backend == Backend.PYG:
-        from neuralogic.nn.evaluators.pyg import PyGEvaluator
-
-        return PyGEvaluator(template, settings)
     if backend == Backend.TORCH:
         from neuralogic.nn.evaluators.torch import TorchEvaluator
 

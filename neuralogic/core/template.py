@@ -131,9 +131,6 @@ class Template:
     def build(self, backend: Backend, settings: Settings):
         from neuralogic.nn import get_neuralogic_layer
 
-        if backend == Backend.PYG:
-            return get_neuralogic_layer(backend)(self.module_list)
-
         java_factory = JavaFactory()
         settings_proxy = settings.create_proxy()
 

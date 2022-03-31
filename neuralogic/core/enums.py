@@ -61,7 +61,6 @@ class Initializer(str, Enum):
 class Backend(Enum):
     DYNET = "dynet"
     JAVA = "java"
-    PYG = "pyg"
     TORCH = "torch"
 
 
