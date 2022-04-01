@@ -16,8 +16,8 @@ class SettingsProxy:
         initializer: Initializer,
         initializer_const: float,
         initializer_uniform_scale: float,
-        rule_neuron_activation: Activation,
-        relation_neuron_activation: Activation,
+        rule_activation: Activation,
+        relation_activation: Activation,
         iso_value_compression: bool,
         chain_pruning: bool,
     ):
@@ -167,19 +167,19 @@ class SettingsProxy:
         self.settings.initializer = self.settings_class.InitSet.SIMPLE
 
     @property
-    def relation_neuron_activation(self) -> Activation:
+    def relation_activation(self) -> Activation:
         return self.settings.atomNeuronActivation
 
-    @relation_neuron_activation.setter
-    def relation_neuron_activation(self, value: Activation):
+    @relation_activation.setter
+    def relation_activation(self, value: Activation):
         self.settings.atomNeuronActivation = self.get_activation_function(value)
 
     @property
-    def rule_neuron_activation(self) -> Activation:
+    def rule_activation(self) -> Activation:
         return self.settings.ruleNeuronActivation
 
-    @rule_neuron_activation.setter
-    def rule_neuron_activation(self, value: Activation):
+    @rule_activation.setter
+    def rule_activation(self, value: Activation):
         self.settings.ruleNeuronActivation = self.get_activation_function(value)
 
     @property

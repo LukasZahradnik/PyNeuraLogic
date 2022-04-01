@@ -18,8 +18,8 @@ import pytest
             "initializer": Initializer.NORMAL,
             "initializer_const": 1,
             "initializer_uniform_scale": 5.0,
-            "rule_neuron_activation": Activation.SIGMOID,
-            "relation_neuron_activation": Activation.RELU,
+            "rule_activation": Activation.SIGMOID,
+            "relation_activation": Activation.RELU,
         }
     ],
 )
