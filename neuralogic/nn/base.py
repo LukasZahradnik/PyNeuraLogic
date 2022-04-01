@@ -2,7 +2,8 @@ from typing import Dict, Optional, Union
 
 from neuralogic.core.settings import Settings
 from neuralogic.core.builder import DatasetBuilder
-from neuralogic.core import Template, Backend, BuiltDataset, SettingsProxy, Dataset
+from neuralogic.core import Template, Backend, BuiltDataset, SettingsProxy
+from neuralogic.dataset.base import BaseDataset
 
 from neuralogic.utils.visualize import draw_model
 
@@ -23,7 +24,7 @@ class AbstractNeuraLogic:
     def __call__(self, sample):
         raise NotImplementedError
 
-    def build_dataset(self, dataset: Union[Dataset, BuiltDataset], file_mode: bool = False):
+    def build_dataset(self, dataset: Union[BaseDataset, BuiltDataset], file_mode: bool = False):
         return self.dataset_builder.build_dataset(dataset, self.backend, self.settings, file_mode)
 
     def set_hooks(self, hooks):
@@ -90,11 +91,11 @@ class AbstractEvaluator:
         self.neuralogic_model = template.build(backend, settings)
         self.neuralogic_model.set_hooks(template.hooks)
 
-    def set_dataset(self, dataset: Union[Dataset, BuiltDataset]):
+    def set_dataset(self, dataset: Union[BaseDataset, BuiltDataset]):
         self.dataset = self.build_dataset(dataset)
 
-    def build_dataset(self, dataset: Union[Dataset, BuiltDataset], file_mode: bool = False):
-        if isinstance(dataset, Dataset):
+    def build_dataset(self, dataset: Union[BaseDataset, BuiltDataset], file_mode: bool = False):
+        if isinstance(dataset, BaseDataset):
             return self.neuralogic_model.build_dataset(dataset, file_mode)
         return dataset
 
@@ -102,10 +103,10 @@ class AbstractEvaluator:
     def model(self) -> AbstractNeuraLogic:
         return self.neuralogic_model
 
-    def train(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
+    def train(self, dataset: Optional[Union[BaseDataset, BuiltDataset]] = None, *, generator: bool = True):
         pass
 
-    def test(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
+    def test(self, dataset: Optional[Union[BaseDataset, BuiltDataset]] = None, *, generator: bool = True):
         pass
 
     def state_dict(self) -> Dict:

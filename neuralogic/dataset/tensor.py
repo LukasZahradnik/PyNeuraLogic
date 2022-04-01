@@ -3,11 +3,7 @@ from typing import Optional, List, Union, Tuple, Sequence, Iterable
 import numpy as np
 
 from neuralogic.core.constructs.factories import Relation
-from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
-from neuralogic.core.constructs.rule import Rule
-
-
-DatasetEntries = Union[BaseAtom, WeightedAtom, Rule]
+from neuralogic.dataset.logic import Dataset
 
 
 class Data:
@@ -148,13 +144,10 @@ class Data:
         return data_list
 
 
-class Dataset:
+class TensorDataset:
     def __init__(
         self,
-        *,
-        data: Optional[List[Data]] = None,
-        examples_file: Optional[str] = None,
-        queries_file: Optional[str] = None,
+        data: List[Data] = None,
         one_hot_encode_labels: bool = False,
         one_hot_decode_features: bool = False,
         number_of_classes: int = 1,
@@ -162,19 +155,7 @@ class Dataset:
         edge_name: str = "edge",
         output_name: str = "predict",
     ):
-        self.file_sources = False
-
-        if examples_file is not None or queries_file is not None:
-            if data is not None:
-                raise Exception
-            self.file_sources = True
-
         self.data = data
-        self.examples_file = examples_file
-        self.queries_file = queries_file
-
-        self.examples: List[DatasetEntries] = []
-        self.queries: List[DatasetEntries] = []
 
         self.one_hot_decode_features = one_hot_decode_features
         self.one_hot_encode_labels = one_hot_encode_labels
@@ -184,41 +165,25 @@ class Dataset:
         self.edge_name: str = edge_name
         self.output_name: str = output_name
 
-    def __len__(self):
-        if self.data is not None:
-            return len(self.data)
-        if self.file_sources:
-            return -1
-        return max(len(self.examples), len(self.queries))
+    def add_data(self, data: Data):
+        self.data.append(data)
 
-    def __getitem__(self, item):
-        pass
+    def to_dataset(self) -> Dataset:
+        dataset = Dataset()
 
-    def add_example(self, example):
-        self.add_examples([example])
+        for data in self.data:
+            query, examples = data.to_logic_form(
+                self.feature_name,
+                self.edge_name,
+                self.output_name,
+                self.one_hot_encode_labels,
+                self.one_hot_decode_features,
+                self.number_of_classes,
+            )
 
-    def add_examples(self, examples: List):
-        if self.file_sources or self.data is not None:
-            raise Exception
-        self.examples.extend(examples)
-
-    def set_examples(self, examples: List):
-        if self.file_sources or self.data is not None:
-            raise Exception
-        self.examples = examples
-
-    def add_query(self, query):
-        self.add_queries([query])
-
-    def add_queries(self, queries: List):
-        if self.file_sources or self.data is not None:
-            raise Exception
-        self.queries.extend(queries)
-
-    def set_queries(self, queries: List):
-        if self.file_sources or self.data is not None:
-            raise Exception
-        self.queries = queries
+            dataset.add_query(query)
+            dataset.add_example(example)
+        return dataset
 
     def dump(
         self,
@@ -238,13 +203,3 @@ class Dataset:
 
             queries_fp.write(f"{query}{sep}")
             examples_fp.write(f"{','.join(example.to_str(False) for example in examples)}.{sep}")
-
-    def dump_to_file(
-        self,
-        queries_filename: str,
-        examples_filename: str,
-        sep: str = "\n",
-    ):
-        with open(queries_filename, "w") as queries_fp:
-            with open(examples_filename, "w") as examples_fp:
-                self.dump(queries_fp, examples_fp, sep)

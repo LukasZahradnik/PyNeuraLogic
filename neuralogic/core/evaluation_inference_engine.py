@@ -1,8 +1,10 @@
 from typing import List, Union, Optional
 
-from neuralogic.core import Template, Settings, Backend, Dataset
+from neuralogic.core import Template, Settings, Backend
 from neuralogic.core.constructs.atom import AtomType
 from neuralogic.core.constructs.rule import Rule
+
+from neuralogic.dataset import Dataset
 
 
 class EvaluationInferenceEngine:

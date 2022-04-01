@@ -3,7 +3,6 @@ import time
 from torch_geometric.datasets import TUDataset
 
 from benchmarks.helpers import Task
-from neuralogic.core.dataset import Dataset, Data
 from neuralogic.core import (
     Template,
     Backend,
@@ -16,6 +15,7 @@ from neuralogic.core import (
     Initializer,
 )
 from neuralogic.core.error_function import CrossEntropy
+from neuralogic.dataset import TensorDataset, Data
 
 
 def gcn(activation: Activation, output_size: int, num_features: int, dim: int = 10):
@@ -149,7 +149,7 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
     model = model.build(Backend.JAVA, settings)
 
     start_time = time.perf_counter()
-    dataset = Dataset(data=[Data.from_pyg(data)[0] for data in ds], number_of_classes=task.output_size)
+    dataset = TensorDataset(data=[Data.from_pyg(data)[0] for data in ds], number_of_classes=task.output_size)
 
     for data in dataset.data:
         data.edge_attr = None

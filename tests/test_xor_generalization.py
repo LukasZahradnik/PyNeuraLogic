@@ -4,7 +4,8 @@ import itertools
 import pytest
 
 from neuralogic.nn import get_evaluator
-from neuralogic.core import Backend, Settings, Optimizer, Dataset, R, V, Template, Activation
+from neuralogic.core import Backend, Settings, Optimizer, R, V, Template, Activation
+from neuralogic.dataset import Dataset
 
 
 @pytest.mark.parametrize(

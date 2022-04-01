@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from neuralogic.core import Data
+from neuralogic.dataset import Data
 
 
 def test_data_from_python_lists() -> None:

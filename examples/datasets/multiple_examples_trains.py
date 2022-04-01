@@ -1,7 +1,8 @@
 from typing import List
 from examples.datasets.data.train_example_data import train_example_data
 
-from neuralogic.core import Relation, Template, Var, Term, Dataset
+from neuralogic.core import Relation, Template, Var, Term
+from neuralogic.dataset import Dataset
 
 
 dataset = Dataset()
