@@ -35,8 +35,10 @@ def to_sql(model, mapping: Dict[Predicate, Tuple[str, Tuple[str], str]], setting
         str(Aggregation.AVG).lower(): "AVG",
     }
 
-    rule_default_activation = str(settings.rule_neuron_activation).lower()
-    relation_default_activation = str(settings.relation_neuron_activation).lower()
+    used_activations = set()
+
+    rule_default_activation = str(settings.rule_activation).lower()
+    relation_default_activation = str(settings.relation_activation).lower()
     default_aggregation = str(Aggregation.AVG).lower()
 
     for rule in template:
@@ -66,7 +68,7 @@ def to_sql(model, mapping: Dict[Predicate, Tuple[str, Tuple[str], str]], setting
         else:
             raise NotImplementedError("Template can contain only relations or predicate metadata!")
 
-    sql_source = [helpers]
+    sql_source = []
 
     for name, arities in batched_relations.items():
         for arity, relations_by_arity in arities.items():
@@ -93,12 +95,15 @@ def to_sql(model, mapping: Dict[Predicate, Tuple[str, Tuple[str], str]], setting
                         if relation.metadata.aggregation is not None:
                             agg = str(relation.metadata.aggregation).lower()
 
+                    used_activations.add(act)
                     sql_fun = _get_rule_sql_function(
                         relation, index, activations[act], aggregations[agg], weight_indices, weights, mapping
                     )
                 else:
                     sql_fun = _get_fact_sql_function(relation, index, weight_indices, weights)
                 sql_source.append(sql_fun)
+
+            used_activations.add(activation)
             sql_source.append(
                 _get_rule_aggregation_sql_function(
                     name,
@@ -109,4 +114,10 @@ def to_sql(model, mapping: Dict[Predicate, Tuple[str, Tuple[str], str]], setting
                 )
             )
             sql_source.append(_get_relation_interface_sql_function(name, arity))
+
+    for activation in used_activations:
+        if activation not in helpers:
+            raise NotImplementedError(f"Activation {activation} is not supported for the SQL translation")
+        sql_source.append(helpers[activation])
+
     return "\n".join(sql_source)
