@@ -10,6 +10,10 @@ from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.predicate import PredicateMetadata
 from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import SettingsProxy, Settings
+from neuralogic.nn.module.module import Module
+
+from neuralogic.utils.visualize import draw_model
+
 
 TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
 
@@ -18,20 +22,12 @@ class Template:
     def __init__(
         self,
         *,
-        module_list: Optional = None,
         template_file: Optional[str] = None,
     ):
         self.template: List[TemplateEntries] = []
         self.template_file = template_file
 
         self.counter = 0
-        self.module_list = None
-
-        if module_list is not None and template_file is None:
-            self.module_list = module_list
-            module_list.build(self)
-            self.locked_template = True
-
         self.hooks: Dict[str, Set] = {}
 
     def add_hook(self, atom: Union[BaseAtom, str], callback: Callable[[Any], None]) -> None:
@@ -84,6 +80,14 @@ class Template:
         """
         self.template.extend(rules)
 
+    def add_module(self, module: Module):
+        """Expands the module into rules and adds them into the template
+
+        :param module:
+        :return:
+        """
+        self.add_rules(module())
+
     def get_parsed_template(self, settings: SettingsProxy, java_factory: JavaFactory):
         if not is_initialized():
             initialize()
@@ -117,11 +121,8 @@ class Template:
 
         return template
 
-    def build(self, backend: Backend, settings: Settings):
+    def build(self, settings: Settings, backend: Backend = Backend.JAVA):
         from neuralogic.nn import get_neuralogic_layer
-
-        if backend == Backend.PYG:
-            return get_neuralogic_layer(backend)(self.module_list)
 
         java_factory = JavaFactory()
         settings_proxy = settings.create_proxy()
@@ -131,12 +132,35 @@ class Template:
 
         return get_neuralogic_layer(backend)(model, DatasetBuilder(parsed_template, java_factory), self, settings_proxy)
 
+    def draw(
+        self,
+        filename: Optional[str] = None,
+        draw_ipython=True,
+        img_type="png",
+        value_detail: int = 0,
+        graphviz_path: Optional[str] = None,
+        *args,
+        **kwargs,
+    ):
+        from neuralogic.nn import get_neuralogic_layer
+
+        settings_proxy = Settings().create_proxy()
+        java_factory = JavaFactory()
+
+        parsed_template = self.get_parsed_template(settings_proxy, java_factory)
+        model = Builder(settings_proxy).build_model(parsed_template, Backend.JAVA, settings_proxy)
+        layer = get_neuralogic_layer(Backend.JAVA)(model, DatasetBuilder(parsed_template, java_factory), settings_proxy)
+
+        return draw_model(layer, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs)
+
     def __str__(self) -> str:
         return "\n".join(str(r) for r in self.template)
 
     def __iadd__(self, other) -> "Template":
         if isinstance(other, Iterable):
             self.template.extend(other)
+        elif isinstance(other, Module):
+            self.template.extend(other())
         else:
             self.template.append(other)
         return self

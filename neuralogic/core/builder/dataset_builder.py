@@ -12,7 +12,9 @@ from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
-from neuralogic.core.dataset import Dataset
+from neuralogic.dataset.base import BaseDataset
+from neuralogic.dataset import FileDataset, TensorDataset, Dataset
+
 
 TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
 
@@ -106,7 +108,7 @@ class DatasetBuilder:
         return logic_samples, examples_queries
 
     def build_dataset(
-        self, dataset: Dataset, backend: Backend, settings: SettingsProxy, file_mode: bool = False
+        self, dataset: BaseDataset, backend: Backend, settings: SettingsProxy, file_mode: bool = False
     ) -> BuiltDataset:
         """Builds the dataset (does grounding and neuralization) for this template instance and the backend
 
@@ -116,45 +118,33 @@ class DatasetBuilder:
         :param file_mode:
         :return:
         """
-        self.examples_counter = 0
-        self.query_counter = 0
+        if isinstance(dataset, TensorDataset):
+            if not file_mode:
+                return self.build_dataset(dataset.to_dataset(), backend, settings, False)
 
-        weight_factory = self.java_factory.weight_factory
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".txt") as q_tf,\
+                    tempfile.NamedTemporaryFile(mode="w", suffix=".txt") as e_tf:
+                dataset.dump(q_tf, e_tf)
 
-        examples_builder = self.examples_builder(settings.settings)
-        query_builder = self.queries_builder(settings.settings)
-        query_builder.setFactoriesFrom(examples_builder)
+                q_tf.flush()
+                e_tf.flush()
 
-        settings.settings.groundingMode = self.grounding_mode.INDEPENDENT
+                return self.build_dataset(FileDataset(e_tf.name, q_tf.name), backend, settings, False)
 
-        if not dataset.file_sources:
+        if isinstance(dataset, Dataset):
+            self.examples_counter = 0
+            self.query_counter = 0
+
+            weight_factory = self.java_factory.weight_factory
+
+            examples_builder = self.examples_builder(settings.settings)
+            query_builder = self.queries_builder(settings.settings)
+            query_builder.setFactoriesFrom(examples_builder)
+
+            settings.settings.groundingMode = self.grounding_mode.INDEPENDENT
+
             examples = dataset.examples
             queries = dataset.queries
-
-            if dataset.data is not None:
-                if file_mode:
-                    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt") as q_tf:
-                        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt") as e_tf:
-                            dataset.dump(q_tf, e_tf)
-
-                            q_tf.flush()
-                            e_tf.flush()
-
-                            return self.build_dataset(
-                                Dataset(examples_file=e_tf.name, queries_file=q_tf.name), backend, settings, False
-                            )
-                examples = []
-                queries = []
-
-                for data in dataset.data:
-                    query, example = data.to_logic_form(
-                        one_hot_encode_labels=dataset.one_hot_encode_labels,
-                        one_hot_decode_features=dataset.one_hot_decode_features,
-                        max_classes=dataset.number_of_classes,
-                    )
-
-                    examples.append(example)
-                    queries.append(query)
 
             if len(examples) == 1:
                 settings.settings.groundingMode = self.grounding_mode.GLOBAL
@@ -171,7 +161,9 @@ class DatasetBuilder:
             logic_samples = jpype.java.util.ArrayList(logic_samples).stream()
 
             samples = Builder(settings).from_logic_samples(self.parsed_template, logic_samples, backend)
-        else:
+
+            self.java_factory.weight_factory = weight_factory
+        elif isinstance(dataset, FileDataset):
             args = ["-t", dataset.examples_file or dataset.queries_file]
             if dataset.queries_file is not None:
                 args.extend(["-q", dataset.queries_file])
@@ -179,8 +171,9 @@ class DatasetBuilder:
                 args.extend(["-e", dataset.examples_file])
             sources = Sources.from_args(args, settings)
             samples = Builder(settings).from_sources(self.parsed_template, sources, backend)
+        else:
+            raise NotImplementedError
 
-        self.java_factory.weight_factory = weight_factory
         return BuiltDataset(samples)
 
     @staticmethod

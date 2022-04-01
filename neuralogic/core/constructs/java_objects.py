@@ -202,6 +202,10 @@ class JavaFactory:
         offset = None  # TODO: Implement
 
         java_rule.setOffset(offset)
+
+        if rule.metadata is not None:
+            java_rule.allowDuplicitGroundings = rule.metadata.duplicit_grounding
+
         java_rule.setMetadata(self.get_metadata(rule.metadata, self.rule_metadata))
 
         return java_rule
@@ -217,7 +221,7 @@ class JavaFactory:
         return self.weight_factory.construct(name, value, fixed, initialized)
 
     def get_value(self, weight):
-        if isinstance(weight, (int, float)):
+        if isinstance(weight, (int, float, np.number)):
             value = self.scalar_value(float(weight))
             initialized = True
         elif isinstance(weight, tuple):

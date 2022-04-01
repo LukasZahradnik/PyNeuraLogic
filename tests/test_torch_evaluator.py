@@ -1,6 +1,7 @@
 from typing import List
 
-from neuralogic.core import Settings, Optimizer, Template, Dataset, Backend
+from neuralogic.core import Settings, Optimizer, Template, Backend
+from neuralogic.dataset.base import BaseDataset
 from neuralogic.nn import get_evaluator
 from neuralogic.utils.data import XOR, XOR_Vectorized, Trains
 
@@ -49,7 +50,7 @@ import pytest
         ),
     ],
 )
-def test_evaluator_run_on_files(template: Template, dataset: Dataset, expected_results: List[float]) -> None:
+def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expected_results: List[float]) -> None:
     """Tests for running torch evaluator on files"""
     torch.manual_seed(1)
 
@@ -157,7 +158,7 @@ def test_evaluator_run_on_files(template: Template, dataset: Dataset, expected_r
     ],
 )
 def test_evaluator_run_on_rules(
-    template: Template, dataset: Dataset, expected_results: List[float], seed: int = 1
+    template: Template, dataset: BaseDataset, expected_results: List[float], seed: int = 1
 ) -> None:
     """Tests for running torch evaluator on rules"""
     torch.manual_seed(seed)
@@ -185,7 +186,7 @@ def test_evaluator_run_on_rules(
         (naive_xor.template, naive_xor.dataset),
     ],
 )
-def test_evaluator_state_loading(template: Template, dataset: Dataset, seed: int = 1) -> None:
+def test_evaluator_state_loading(template: Template, dataset: BaseDataset, seed: int = 1) -> None:
     """Tests for loading state"""
     torch.manual_seed(seed)
     settings = Settings(optimizer=Optimizer.SGD, learning_rate=0.1, epochs=20)

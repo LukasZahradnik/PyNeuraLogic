@@ -38,7 +38,7 @@ The propagation through standard edges can be similarly extended to support prop
 
 .. code-block::
 
-    Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation.edge(Var.X, Var.Y))
+    Relation.h(Var.X) <= (Relation.feature(Var.Y), Relation.edge(Var.Y, Var.X))
 
 
 The propagation through standard edges above, where :code:`Relation.feature` might represent vertex features,
@@ -50,7 +50,5 @@ vertices) as follows:
     Relation.h(Var.X) <= (
         Relation.feature(Var.Y),
         Relation.feature(Var.Z),
-        Relation.edge(Var.X, Var.Y, Var.Z),
+        Relation.edge(Var.Y, Var.Z, Var.X),
     )
-
-

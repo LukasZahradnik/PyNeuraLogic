@@ -4,10 +4,10 @@ neuralogic.nn.native package
 Submodules
 ----------
 
-neuralogic.nn.native.torch module
----------------------------------
+neuralogic.nn.native.pyg module
+-------------------------------
 
-.. automodule:: neuralogic.nn.native.torch
+.. automodule:: neuralogic.nn.native.pyg
    :members:
    :undoc-members:
    :show-inheritance:

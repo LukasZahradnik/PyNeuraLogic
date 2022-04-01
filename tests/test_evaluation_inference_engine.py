@@ -1,6 +1,6 @@
 from neuralogic.core import Template, R, V, T, Metadata, Aggregation, Activation
 
-from neuralogic.core.evaluation_inference_engine import EvaluationInferenceEngine
+from neuralogic.inference.evaluation_inference_engine import EvaluationInferenceEngine
 
 
 def test_eval_inference_engine_london_reachable() -> None:

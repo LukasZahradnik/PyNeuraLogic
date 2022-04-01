@@ -12,6 +12,7 @@ PyNeuraLogic
     custom_model
     rules_mapping
     evaluation
+    cookbook
     advanced
     examples
     benchmarks
@@ -56,9 +57,10 @@ PyNeuraLogic lets you use Python to create Differentiable Logic Programs
 
 --------
 
-Logic programming is a declarative coding paradigm in which you declare your logical **variables** and **relations** between them. These can be further composed into so-called _rules_ that drive the computation. Such a rule set then forms a **logic program**, and its execution is equivalent to performing logic inference with the rules.
+Logic programming is a declarative coding paradigm in which you declare your logical *variables* and *relations* between them. These can be further composed into so-called *rules* that drive the computation. Such a rule set then forms a *logic program*, and its execution is equivalent to performing logic inference with the rules.
 
-PyNeuralogic, through its `NeuraLogic <https://github.com/GustikS/NeuraLogic>`_ backend, then makes this inference process **differentiable** which, in turn, makes it equivalent to forward propagation in deep learning. This lets you learn numeric parameters that can be associated with the rules, just like you learn weights in neural networks.
+PyNeuralogic, through its `NeuraLogic <https://github.com/GustikS/NeuraLogic>`_ backend, then makes this inference process
+*differentiable* which, in turn, makes it equivalent to forward propagation in deep learning. This lets you learn numeric parameters that can be associated with the rules, just like you learn weights in neural networks.
 
 What is this good for?
 **********************
@@ -73,13 +75,13 @@ Or, a bit more 'formally':
 
 .. code-block::
 
-    Relation.node2(Var.X) <= (Relation.node1(Var.Y), Relation.edge(Var.X,Var.Y))
+    Relation.node2(Var.X) <= (Relation.node1(Var.Y), Relation.edge(Var.Y, Var.X))
 
 ...and that's the actual *code*! Now for a classic learnable GNN layer, you'll want to add some numeric parameters, such as
 
 .. code-block::
 
-    Relation.node2(Var.X)[5,10] <= (Relation.node1(Var.Y)[10,20], Relation.edge(Var.X,Var.Y))
+    Relation.node2(Var.X)[5,10] <= (Relation.node1(Var.Y)[10,20], Relation.edge(Var.Y, Var.X))
 
 to project your :code:`[1,20]` input node embeddings through a learnable :code:`[10,20]` layer before the aggregation,
 and subsequently a :code:`[5,10]` layer after the aggregation. The particular aggregation and activation functions, as

@@ -23,3 +23,26 @@
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Raleway', sans-serif;
 }
+
+
+dt.field-odd {
+    padding-left: 0 !important;
+}
+
+p.rubric {
+    padding-top: 25px;
+}
+
+
+.field-list {
+    display: block !important;
+    padding-bottom: 5px;
+}
+
+dd.field-odd {
+    padding-top: 15px;
+}
+
+dl dd {
+    margin: 0 !important;
+}

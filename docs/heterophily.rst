@@ -24,7 +24,7 @@ can be achieved just with two rules, that can be written in the following form:
 
 .. code-block:: Python
 
-    Relation.layer_1(Var.X) <= (Relation.layer_0(Var.Y), Relation.edge(Var.X, Var.Y)),
+    Relation.layer_1(Var.X) <= (Relation.layer_0(Var.Y), Relation.edge(Var.Y, Var.X)),
     Relation.layer_1(Var.X) <= Relation.layer_0(Var.X)
 
 
@@ -42,8 +42,8 @@ the following rule:
 
     Relation.layer_1(Var.X) <= (
         Relation.layer_0(Var.Z),
-        Relation.edge(Var.X, Var.Y),
-        Relation.edge(Var.Y, Var.Z),
+        Relation.edge(Var.Y, Var.X),
+        Relation.edge(Var.Z, Var.Y),
         Relation.special.alldiff(...),
     )
 

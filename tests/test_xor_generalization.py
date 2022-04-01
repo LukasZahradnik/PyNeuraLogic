@@ -4,7 +4,8 @@ import itertools
 import pytest
 
 from neuralogic.nn import get_evaluator
-from neuralogic.core import Backend, Settings, Optimizer, Dataset, R, V, Template, Activation
+from neuralogic.core import Backend, Settings, Optimizer, R, V, Template, Activation
+from neuralogic.dataset import Dataset
 
 
 @pytest.mark.parametrize(
@@ -36,7 +37,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
     )
 
     settings = Settings(
-        epochs=5000, rule_neuron_activation=Activation.TANH, relation_neuron_activation=Activation.IDENTITY
+        epochs=5000, rule_activation=Activation.TANH, relation_activation=Activation.IDENTITY
     )
 
     evaluator = get_evaluator(template, Backend.JAVA, settings)

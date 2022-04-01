@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Sized
+from typing import Dict, Sized, Union, List
 
 import jpype
 
@@ -10,20 +10,21 @@ from neuralogic.core.enums import Backend
 
 
 class Loss:
-    def __init__(self, loss):
+    def __init__(self, loss, number_format):
         self.loss = loss
+        self.number_format = number_format
 
     def backward(self):
         self.loss.backward()
 
     def value(self) -> float:
-        return self.loss.getError().value
+        return json.loads(str(self.loss.getError().toString(self.number_format)))
 
-    def output(self) -> float:
-        return self.loss.getOutput().value
+    def output(self) -> Union[List[float], float]:
+        return json.loads(str(self.loss.getOutput().toString(self.number_format)))
 
-    def target(self) -> float:
-        return self.loss.getTarget().value
+    def target(self) -> Union[List[float], float]:
+        return json.loads(str(self.loss.getTarget().toString(self.number_format)))
 
 
 class NeuraLogic(AbstractNeuraLogic):
@@ -87,18 +88,20 @@ class NeuraLogic(AbstractNeuraLogic):
         if not isinstance(samples, Sized):
             if self.do_train:
                 if auto_backprop:
-                    result = self.strategy.learnSample(samples)
+                    result = self.strategy.learnSample(samples.java_sample)
                     return json.loads(str(result)), 1
-            result = self.strategy.evaluateSample(samples)
-            return Loss(result)
+            result = self.strategy.evaluateSample(samples.java_sample)
+            return Loss(result, self.settings.settings_class.superDetailedNumberFormat)
 
         if self.do_train:
-            results = self.strategy.learnSamples(samples, epochs)
+            results = self.strategy.learnSamples(
+                jpype.java.util.ArrayList([sample.java_sample for sample in samples]), epochs
+            )
             deserialized_results = json.loads(str(results))
 
             return deserialized_results, len(samples)
 
-        results = self.strategy.evaluateSamples(samples)
+        results = self.strategy.evaluateSamples(jpype.java.util.ArrayList([sample.java_sample for sample in samples]))
         return json.loads(str(results))
 
     def state_dict(self) -> Dict:

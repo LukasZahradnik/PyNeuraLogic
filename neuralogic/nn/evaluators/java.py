@@ -3,9 +3,11 @@ from typing import Optional, Dict, Union
 import jpype
 
 from neuralogic.core.enums import Backend
-from neuralogic.core import Template, BuiltDataset, Dataset
+from neuralogic.core import Template, BuiltDataset
 from neuralogic.nn.base import AbstractEvaluator
 from neuralogic.core.settings import Settings
+
+from neuralogic.dataset.base import BaseDataset
 
 
 class JavaEvaluator(AbstractEvaluator):
@@ -16,19 +18,23 @@ class JavaEvaluator(AbstractEvaluator):
     ):
         super().__init__(Backend.JAVA, problem, settings)
 
-    def set_dataset(self, dataset: Union[Dataset, BuiltDataset]):
+    def set_dataset(self, dataset: Union[BaseDataset, BuiltDataset]):
         super().set_dataset(dataset)
-        self.neuralogic_model.set_training_samples(self.dataset.samples)
+        self.neuralogic_model.set_training_samples(
+            jpype.java.util.ArrayList([sample.java_sample for sample in self.dataset.samples])
+        )
 
     def reset_dataset(self, dataset):
         if dataset is None:
             self.neuralogic_model.set_training_samples(jpype.java.util.ArrayList([]))
         else:
-            self.neuralogic_model.set_training_samples(dataset.samples)
+            self.neuralogic_model.set_training_samples(
+                jpype.java.util.ArrayList([sample.java_sample for sample in dataset.samples])
+            )
         self.dataset = dataset
 
     def train(
-        self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True, epochs: int = None
+        self, dataset: Optional[Union[BaseDataset, BuiltDataset]] = None, *, generator: bool = True, epochs: int = None
     ):
         old_dataset = None
 
@@ -55,7 +61,7 @@ class JavaEvaluator(AbstractEvaluator):
 
         return sum(result[2] for result in results), total_len
 
-    def test(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
+    def test(self, dataset: Optional[Union[BaseDataset, BuiltDataset]] = None, *, generator: bool = True):
         dataset = self.dataset if dataset is None else self.build_dataset(dataset)
 
         def _test():

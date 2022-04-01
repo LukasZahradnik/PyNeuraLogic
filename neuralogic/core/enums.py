@@ -1,16 +1,12 @@
 from enum import Enum
 
 
+from neuralogic.core.error_function import SoftEntropy, CrossEntropy, MSE
+
+
 class Optimizer(str, Enum):
     ADAM = "ADAM"
     SGD = "SGD"
-
-
-class ErrorFunction(str, Enum):
-    SQUARED_DIFF = "SQUARED_DIFF"
-    # ABS_DIFF = "ABS_DIFF"
-    CROSSENTROPY = "CROSSENTROPY"
-    SOFTENTROPY = "SOFTENTROPY"
 
 
 class Activation(str, Enum):
@@ -65,7 +61,6 @@ class Initializer(str, Enum):
 class Backend(Enum):
     DYNET = "dynet"
     JAVA = "java"
-    PYG = "pyg"
     TORCH = "torch"
 
 

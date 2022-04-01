@@ -1,6 +1,6 @@
 from neuralogic.core import Template, R, V, T
 
-from neuralogic.core.inference_engine import InferenceEngine
+from neuralogic.inference.inference_engine import InferenceEngine
 
 
 def test_inference_engine_london_reachable() -> None:

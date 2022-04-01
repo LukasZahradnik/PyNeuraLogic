@@ -1,12 +1,13 @@
 from typing import Optional, Dict, Union
 
 import dynet as dy
+from neuralogic.core.error_function import ErrorFunctionNames
 
 from neuralogic.nn.base import AbstractEvaluator
 
 from neuralogic.core import Template, BuiltDataset, Dataset
 from neuralogic.core.settings import Settings
-from neuralogic.core.enums import Backend, Optimizer, ErrorFunction
+from neuralogic.core.enums import Backend, Optimizer
 
 
 class DynetEvaluator(AbstractEvaluator):
@@ -16,7 +17,7 @@ class DynetEvaluator(AbstractEvaluator):
     }
 
     error_functions = {
-        ErrorFunction.SQUARED_DIFF: lambda out, target: dy.squared_distance(out, target),
+        str(ErrorFunctionNames.MSE): lambda out, target: dy.squared_distance(out, target),
         # ErrorFunction.ABS_DIFF: lambda out, target: dy.abs(out - target),
         # ErrorFunction.CROSSENTROPY: lambda out, target: pass
     }
@@ -32,7 +33,7 @@ class DynetEvaluator(AbstractEvaluator):
         dataset = self.dataset if dataset is None else self.build_dataset(dataset)
 
         epochs = self.settings.epochs
-        error_function = ErrorFunction[str(self.settings.error_function)]
+        error_function = str(self.settings.error_function)
         optimizer = Optimizer[str(self.settings.optimizer)]
 
         if optimizer not in DynetEvaluator.trainers:

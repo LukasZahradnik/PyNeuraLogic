@@ -1,8 +1,9 @@
 from typing import Any, Optional
 import weakref
 
+from neuralogic.core.error_function import MSE, ErrorFunction
 from neuralogic.core.settings.settings_proxy import SettingsProxy
-from neuralogic.core.enums import Optimizer, Initializer, ErrorFunction, Activation
+from neuralogic.core.enums import Optimizer, Initializer, Activation
 
 
 class Settings:
@@ -12,12 +13,12 @@ class Settings:
         optimizer: Optimizer = Optimizer.ADAM,
         learning_rate: Optional[float] = None,
         epochs: int = 3000,
-        error_function: ErrorFunction = ErrorFunction.SQUARED_DIFF,
+        error_function: ErrorFunction = MSE(),
         initializer: Initializer = Initializer.UNIFORM,
         initializer_const: float = 0.1,
         initializer_uniform_scale: float = 2.0,
-        rule_neuron_activation: Activation = Activation.TANH,
-        relation_neuron_activation: Activation = Activation.TANH,
+        rule_activation: Activation = Activation.TANH,
+        relation_activation: Activation = Activation.TANH,
         iso_value_compression: bool = True,
         chain_pruning: bool = True,
     ):
@@ -109,20 +110,20 @@ class Settings:
         self._update("initializer", initializer)
 
     @property
-    def relation_neuron_activation(self) -> Activation:
-        return self.params["relation_neuron_activation"]
+    def relation_activation(self) -> Activation:
+        return self.params["relation_activation"]
 
-    @relation_neuron_activation.setter
-    def relation_neuron_activation(self, value: Activation):
-        self._update("relation_neuron_activation", value)
+    @relation_activation.setter
+    def relation_activation(self, value: Activation):
+        self._update("relation_activation", value)
 
     @property
-    def rule_neuron_activation(self) -> Activation:
-        return self.params["rule_neuron_activation"]
+    def rule_activation(self) -> Activation:
+        return self.params["rule_activation"]
 
-    @rule_neuron_activation.setter
-    def rule_neuron_activation(self, value: Activation):
-        self._update("rule_neuron_activation", value)
+    @rule_activation.setter
+    def rule_activation(self, value: Activation):
+        self._update("rule_activation", value)
 
     def create_proxy(self) -> SettingsProxy:
         proxy = SettingsProxy(**self.params)

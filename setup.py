@@ -9,7 +9,7 @@ from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = "neuralogic"
-DESCRIPTION = "PyNeuraLogic is a framework which combines relational and deep learning."
+DESCRIPTION = "PyNeuraLogic lets you use Python to create Differentiable Logic Programs."
 URL = "https://github.com/LukasZahradnik/PyNeuraLogic"
 EMAIL = "lukaszahradnik96@seznam.cz"
 AUTHOR = "Lukáš Zahradník"

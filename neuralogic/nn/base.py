@@ -2,7 +2,10 @@ from typing import Dict, Optional, Union
 
 from neuralogic.core.settings import Settings
 from neuralogic.core.builder import DatasetBuilder
-from neuralogic.core import Template, Backend, BuiltDataset, SettingsProxy, Dataset
+from neuralogic.core import Template, Backend, BuiltDataset, SettingsProxy
+from neuralogic.dataset.base import BaseDataset
+
+from neuralogic.utils.visualize import draw_model
 
 
 class AbstractNeuraLogic:
@@ -22,7 +25,7 @@ class AbstractNeuraLogic:
     def __call__(self, sample):
         raise NotImplementedError
 
-    def build_dataset(self, dataset: Union[Dataset, BuiltDataset], file_mode: bool = False):
+    def build_dataset(self, dataset: Union[BaseDataset, BuiltDataset], file_mode: bool = False):
         return self.dataset_builder.build_dataset(dataset, self.backend, self.settings, file_mode)
 
     def set_hooks(self, hooks):
@@ -67,6 +70,18 @@ class AbstractNeuraLogic:
     def load_state_dict(self, state_dict: Dict):
         raise NotImplementedError
 
+    def draw(
+        self,
+        filename: Optional[str] = None,
+        draw_ipython=True,
+        img_type="png",
+        value_detail: int = 0,
+        graphviz_path: Optional[str] = None,
+        *args,
+        **kwargs,
+    ):
+        return draw_model(self, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs)
+
 
 class AbstractEvaluator:
     def __init__(self, backend: Backend, template: Template, settings: Settings):
@@ -74,16 +89,14 @@ class AbstractEvaluator:
         self.backend = backend
         self.dataset: Optional[BuiltDataset] = None
 
-        self.neuralogic_model = template.build(backend, settings)
+        self.neuralogic_model = template.build(settings, backend)
+        self.neuralogic_model.set_hooks(template.hooks)
 
-        if backend != Backend.PYG:
-            self.neuralogic_model.set_hooks(template.hooks)
-
-    def set_dataset(self, dataset: Union[Dataset, BuiltDataset]):
+    def set_dataset(self, dataset: Union[BaseDataset, BuiltDataset]):
         self.dataset = self.build_dataset(dataset)
 
-    def build_dataset(self, dataset: Union[Dataset, BuiltDataset], file_mode: bool = False):
-        if isinstance(dataset, Dataset):
+    def build_dataset(self, dataset: Union[BaseDataset, BuiltDataset], file_mode: bool = False):
+        if isinstance(dataset, BaseDataset):
             return self.neuralogic_model.build_dataset(dataset, file_mode)
         return dataset
 
@@ -91,10 +104,10 @@ class AbstractEvaluator:
     def model(self) -> AbstractNeuraLogic:
         return self.neuralogic_model
 
-    def train(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
+    def train(self, dataset: Optional[Union[BaseDataset, BuiltDataset]] = None, *, generator: bool = True):
         pass
 
-    def test(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
+    def test(self, dataset: Optional[Union[BaseDataset, BuiltDataset]] = None, *, generator: bool = True):
         pass
 
     def state_dict(self) -> Dict:
@@ -105,3 +118,17 @@ class AbstractEvaluator:
 
     def reset_parameters(self):
         self.neuralogic_model.reset_parameters()
+
+    def draw(
+        self,
+        filename: Optional[str] = None,
+        draw_ipython=True,
+        img_type="png",
+        value_detail: int = 0,
+        graphviz_path: Optional[str] = None,
+        *args,
+        **kwargs,
+    ):
+        return self.neuralogic_model.draw(
+            filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs
+        )

@@ -3,11 +3,7 @@ from typing import Optional, List, Union, Tuple, Sequence, Iterable
 import numpy as np
 
 from neuralogic.core.constructs.factories import Relation
-from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
-from neuralogic.core.constructs.rule import Rule
-
-
-DatasetEntries = Union[BaseAtom, WeightedAtom, Rule]
+from neuralogic.dataset.logic import Dataset
 
 
 class Data:
@@ -29,6 +25,33 @@ class Data:
         self.y = y
         self.y_mask = y_mask
 
+    @staticmethod
+    def get_query(
+        y, output_name: str = "predict", one_hot_encode_labels: bool = False, max_classes=1, index: Optional[int] = None
+    ):
+        relation = Relation.get(output_name)
+
+        if index is not None:
+            relation = relation(index)
+
+        if one_hot_encode_labels:
+            vector = y
+
+            if not isinstance(y, (Sequence, np.ndarray)) or len(y) != max_classes:
+                vector = np.zeros((max_classes,))
+                vector[y[0] if isinstance(y, (Sequence, np.ndarray)) else y] = 1
+            query = relation[vector]
+        elif not isinstance(y, Iterable) or (getattr(y, "shape", -1) in (1, tuple())):
+            query = relation[float(y)]
+        elif len(y) == 1 and not isinstance(y[0], Sequence):
+            query = relation[float(y[0])]
+        else:
+            if isinstance(y, (Sequence, np.ndarray)):
+                query = relation[y]
+            else:
+                query = relation[y.detach().numpy()]
+        return query
+
     def to_logic_form(
         self,
         feature_name: str = "node_feature",
@@ -38,36 +61,34 @@ class Data:
         one_hot_decode_features=False,
         max_classes=1,
     ) -> Tuple:
-        if one_hot_encode_labels:
-            vector = self.y
+        if self.y_mask is not None:
+            query = []
 
-            if not isinstance(self.y, (Sequence, np.ndarray)) or len(self.y) != max_classes:
-                vector = np.zeros((max_classes,))
-                vector[self.y[0] if isinstance(self.y, (Sequence, np.ndarray)) else self.y] = 1
-            query = Relation.get(output_name)[vector]
-        elif not isinstance(self.y, Iterable) or (getattr(self.y, "shape", -1) in (1, tuple())):
-            query = Relation.get(output_name)[float(self.y)]
-        elif len(self.y) == 1 and not isinstance(self.y[0], Sequence):
-            query = Relation.get(output_name)[float(self.y[0])]
+            for i in self.y_mask:
+                query.append(Data.get_query(self.y[int(i)], output_name, one_hot_encode_labels, max_classes, int(i)))
         else:
-            if isinstance(self.y, (Sequence, np.ndarray)):
-                query = Relation.get(output_name)[self.y]
-            else:
-                query = Relation.get(output_name)[self.y.detach().numpy()]
+            query = Data.get_query(self.y, output_name, one_hot_encode_labels, max_classes)
 
         if self.edge_attr is None:
             example = [
                 Relation.get(edge_name)(int(u), int(v))[1].fixed()
                 for u, v in zip(self.edge_index[0], self.edge_index[1])
             ]
+        elif isinstance(self.edge_attr, np.ndarray):
+            example = [
+                Relation.get(edge_name)(int(u), int(v))[w if w.size == 1 else w].fixed()
+                for u, v, w in zip(self.edge_index[0], self.edge_index[1], self.edge_attr)
+            ]
         elif isinstance(self.edge_attr, (Sequence, np.ndarray)):
             example = [
-                Relation.get(edge_name)(int(u), int(v))[w].fixed()
+                Relation.get(edge_name)(int(u), int(v))[
+                    w if len(w) == 1 and isinstance(w[0], float, int) else w
+                ].fixed()
                 for u, v, w in zip(self.edge_index[0], self.edge_index[1], self.edge_attr)
             ]
         else:
             example = [
-                Relation.get(edge_name)(int(u), int(v))[w].fixed()
+                Relation.get(edge_name)(int(u), int(v))[w if w.size == 1 else w].fixed()
                 for u, v, w in zip(self.edge_index[0], self.edge_index[1], self.edge_attr.detach().numpy())
             ]
 
@@ -81,12 +102,22 @@ class Data:
                     class_ = np.argmax(features)
                     example.append(Relation.get(f"{feature_name}_{class_}")(i)[1].fixed())
         else:
-            if isinstance(self.x, (list, np.ndarray)):
+            if isinstance(self.x, np.ndarray):
                 for i, features in enumerate(self.x):
-                    example.append(Relation.get(feature_name)(i)[features].fixed())
+                    example.append(
+                        Relation.get(feature_name)(i)[features[0] if features.size == 1 else features].fixed()
+                    )
+            elif isinstance(self.x, list):
+                for i, features in enumerate(self.x):
+                    example.append(
+                        Relation.get(feature_name)(i)[
+                            features[0] if len(features) == 1 and isinstance(features[0], (int, float)) else features
+                        ].fixed()
+                    )
             else:
                 for i, features in enumerate(self.x):
-                    example.append(Relation.get(feature_name)(i)[features.detach().numpy()].fixed())
+                    weight = features.detach().numpy()
+                    example.append(Relation.get(feature_name)(i)[weight[0] if weight.size == 1 else weight].fixed())
         return query, example
 
     @staticmethod
@@ -113,13 +144,10 @@ class Data:
         return data_list
 
 
-class Dataset:
+class TensorDataset:
     def __init__(
         self,
-        *,
-        data: Optional[List[Data]] = None,
-        examples_file: Optional[str] = None,
-        queries_file: Optional[str] = None,
+        data: List[Data] = None,
         one_hot_encode_labels: bool = False,
         one_hot_decode_features: bool = False,
         number_of_classes: int = 1,
@@ -127,19 +155,7 @@ class Dataset:
         edge_name: str = "edge",
         output_name: str = "predict",
     ):
-        self.file_sources = False
-
-        if examples_file is not None or queries_file is not None:
-            if data is not None:
-                raise Exception
-            self.file_sources = True
-
         self.data = data
-        self.examples_file = examples_file
-        self.queries_file = queries_file
-
-        self.examples: List[DatasetEntries] = []
-        self.queries: List[DatasetEntries] = []
 
         self.one_hot_decode_features = one_hot_decode_features
         self.one_hot_encode_labels = one_hot_encode_labels
@@ -149,41 +165,25 @@ class Dataset:
         self.edge_name: str = edge_name
         self.output_name: str = output_name
 
-    def __len__(self):
-        if self.data is not None:
-            return len(self.data)
-        if self.file_sources:
-            return -1
-        return max(len(self.examples), len(self.queries))
+    def add_data(self, data: Data):
+        self.data.append(data)
 
-    def __getitem__(self, item):
-        pass
+    def to_dataset(self) -> Dataset:
+        dataset = Dataset()
 
-    def add_example(self, example):
-        self.add_examples([example])
+        for data in self.data:
+            query, examples = data.to_logic_form(
+                self.feature_name,
+                self.edge_name,
+                self.output_name,
+                self.one_hot_encode_labels,
+                self.one_hot_decode_features,
+                self.number_of_classes,
+            )
 
-    def add_examples(self, examples: List):
-        if self.file_sources or self.data is not None:
-            raise Exception
-        self.examples.extend(examples)
-
-    def set_examples(self, examples: List):
-        if self.file_sources or self.data is not None:
-            raise Exception
-        self.examples = examples
-
-    def add_query(self, query):
-        self.add_queries([query])
-
-    def add_queries(self, queries: List):
-        if self.file_sources or self.data is not None:
-            raise Exception
-        self.queries.extend(queries)
-
-    def set_queries(self, queries: List):
-        if self.file_sources or self.data is not None:
-            raise Exception
-        self.queries = queries
+            dataset.add_query(query)
+            dataset.add_example(example)
+        return dataset
 
     def dump(
         self,
@@ -203,13 +203,3 @@ class Dataset:
 
             queries_fp.write(f"{query}{sep}")
             examples_fp.write(f"{','.join(example.to_str(False) for example in examples)}.{sep}")
-
-    def dump_to_file(
-        self,
-        queries_filename: str,
-        examples_filename: str,
-        sep: str = "\n",
-    ):
-        with open(queries_filename, "w") as queries_fp:
-            with open(examples_filename, "w") as examples_fp:
-                self.dump(queries_fp, examples_fp, sep)

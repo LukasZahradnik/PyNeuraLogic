@@ -1,20 +1,45 @@
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import numpy as np
 
+from neuralogic.utils.visualize import draw_sample
 
-class Sample:
+
+class RawSample:
+    __slots__ = "java_sample"
+
+    def __init__(self, sample):
+        self.java_sample = sample
+
+    def draw(
+        self,
+        filename: Optional[str] = None,
+        draw_ipython=True,
+        img_type="png",
+        value_detail: int = 0,
+        graphviz_path: Optional[str] = None,
+        *args,
+        **kwargs,
+    ):
+        return draw_sample(self, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs)
+
+
+class Sample(RawSample):
+    __slots__ = ("id", "target", "neurons", "output_neuron", "java_sample")
+
     def __init__(self, sample, java_sample):
+        super().__init__(sample)
         serialized_sample = json.loads(str(sample.exportToJson()))
 
         self.id = serialized_sample["id"]
         self.target = json.loads(serialized_sample["target"])
-        self.neurons = self.deserialize_network(serialized_sample["network"])
+        self.neurons = Sample.deserialize_network(serialized_sample["network"])
         self.output_neuron = self.neurons[-1].index
         self.java_sample = java_sample
 
-    def deserialize_network(self, network):
+    @staticmethod
+    def deserialize_network(network):
         neurons = []
 
         for i, neuron in enumerate(network):

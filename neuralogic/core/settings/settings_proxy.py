@@ -1,7 +1,8 @@
 import jpype
 
 from neuralogic import is_initialized, initialize
-from neuralogic.core.enums import Optimizer, Initializer, ErrorFunction, Activation
+from neuralogic.core.enums import Optimizer, Initializer, Activation
+from neuralogic.core.error_function import MSE, SoftEntropy, CrossEntropy, ErrorFunction
 
 
 class SettingsProxy:
@@ -15,8 +16,8 @@ class SettingsProxy:
         initializer: Initializer,
         initializer_const: float,
         initializer_uniform_scale: float,
-        rule_neuron_activation: Activation,
-        relation_neuron_activation: Activation,
+        rule_activation: Activation,
+        relation_activation: Activation,
         iso_value_compression: bool,
         chain_pruning: bool,
     ):
@@ -33,8 +34,6 @@ class SettingsProxy:
             self.__setattr__(key, value)
 
         self.settings.debugExporting = False
-        self.settings.squishLastLayer = False
-        self.settings.trainOnlineResultsType = self.settings_class.ResultsType.REGRESSION
         self.settings.exportBlocks = []
 
         self.settings.infer()
@@ -107,16 +106,26 @@ class SettingsProxy:
 
     @error_function.setter
     def error_function(self, error_function: ErrorFunction):
-        if error_function == ErrorFunction.SQUARED_DIFF:
+        if isinstance(error_function, MSE):
+            self.settings.squishLastLayer = False
+            self.settings.trainOnlineResultsType = self.settings_class.ResultsType.REGRESSION
             java_error_function = self.settings_class.ErrorFcn.SQUARED_DIFF
-        # elif error_function == ErrorFunction.ABS_DIFF:
-        #     java_error_function = self.namespace.Settings.ErrorFcn.ABS_DIFF
-        elif error_function == ErrorFunction.SOFTENTROPY:
+        elif isinstance(error_function, SoftEntropy):
+            self.settings.squishLastLayer = True
+            self.settings.trainOnlineResultsType = self.settings_class.ResultsType.CLASSIFICATION
             java_error_function = self.settings_class.ErrorFcn.SOFTENTROPY
-        elif error_function == ErrorFunction.CROSSENTROPY:
-            java_error_function = self.settings_class.ErrorFcn.CROSSENTROPY
+        elif isinstance(error_function, CrossEntropy):
+            self.settings.trainOnlineResultsType = self.settings_class.ResultsType.CLASSIFICATION
+
+            if error_function.with_logits:
+                self.settings.squishLastLayer = True
+                java_error_function = self.settings_class.ErrorFcn.SOFTENTROPY
+            else:
+                self.settings.squishLastLayer = False
+                java_error_function = self.settings_class.ErrorFcn.CROSSENTROPY
         else:
             raise NotImplementedError
+
         self.settings.errorFunction = java_error_function
 
     @property
@@ -158,19 +167,19 @@ class SettingsProxy:
         self.settings.initializer = self.settings_class.InitSet.SIMPLE
 
     @property
-    def relation_neuron_activation(self) -> Activation:
+    def relation_activation(self) -> Activation:
         return self.settings.atomNeuronActivation
 
-    @relation_neuron_activation.setter
-    def relation_neuron_activation(self, value: Activation):
+    @relation_activation.setter
+    def relation_activation(self, value: Activation):
         self.settings.atomNeuronActivation = self.get_activation_function(value)
 
     @property
-    def rule_neuron_activation(self) -> Activation:
+    def rule_activation(self) -> Activation:
         return self.settings.ruleNeuronActivation
 
-    @rule_neuron_activation.setter
-    def rule_neuron_activation(self, value: Activation):
+    @rule_activation.setter
+    def rule_activation(self, value: Activation):
         self.settings.ruleNeuronActivation = self.get_activation_function(value)
 
     @property

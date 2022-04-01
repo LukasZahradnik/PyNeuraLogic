@@ -1,14 +1,16 @@
 from typing import List, Union, Optional
 
-from neuralogic.core import Template, Settings, Backend, Dataset
+from neuralogic.core import Template, Settings, Backend
 from neuralogic.core.constructs.atom import AtomType
 from neuralogic.core.constructs.rule import Rule
+
+from neuralogic.dataset import Dataset
 
 
 class EvaluationInferenceEngine:
     def __init__(self, template: Template):
         self.settings = Settings()
-        self.model = template.build(Backend.JAVA, self.settings)
+        self.model = template.build(self.settings)
 
         self.examples: List[Union[AtomType, Rule]] = []
         self.dataset = Dataset()
@@ -43,7 +45,7 @@ class EvaluationInferenceEngine:
 
         def generator():
             for result, sample in zip(results, built_dataset.samples):
-                sub_query = str(sample.query.neuron.getName())
+                sub_query = str(sample.java_sample.query.neuron.getName())
                 sub_query = sub_query.split("(")[1].strip()[:-1]
 
                 substitutions = sub_query.split(",")

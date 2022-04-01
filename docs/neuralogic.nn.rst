@@ -37,6 +37,14 @@ neuralogic.nn.java module
    :undoc-members:
    :show-inheritance:
 
+neuralogic.nn.torch module
+--------------------------
+
+.. automodule:: neuralogic.nn.torch
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

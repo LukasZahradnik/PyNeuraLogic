@@ -9,17 +9,6 @@ Subpackages
 
    neuralogic.utils.templates.modules
 
-Submodules
-----------
-
-neuralogic.utils.templates.translator module
---------------------------------------------
-
-.. automodule:: neuralogic.utils.templates.translator
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 
