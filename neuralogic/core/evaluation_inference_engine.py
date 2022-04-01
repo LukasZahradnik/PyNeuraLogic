@@ -10,7 +10,7 @@ from neuralogic.dataset import Dataset
 class EvaluationInferenceEngine:
     def __init__(self, template: Template):
         self.settings = Settings()
-        self.model = template.build(Backend.JAVA, self.settings)
+        self.model = template.build(self.settings)
 
         self.examples: List[Union[AtomType, Rule]] = []
         self.dataset = Dataset()

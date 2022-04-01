@@ -146,7 +146,7 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
 
     model = get_model(model)
     model = model(activation=activation, output_size=task.output_size, num_features=ds.num_node_features, dim=dim)
-    model = model.build(Backend.JAVA, settings)
+    model = model.build(settings)
 
     start_time = time.perf_counter()
     dataset = TensorDataset(data=[Data.from_pyg(data)[0] for data in ds], number_of_classes=task.output_size)

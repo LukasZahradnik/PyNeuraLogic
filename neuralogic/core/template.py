@@ -121,7 +121,7 @@ class Template:
 
         return template
 
-    def build(self, backend: Backend, settings: Settings):
+    def build(self, settings: Settings, backend: Backend = Backend.JAVA):
         from neuralogic.nn import get_neuralogic_layer
 
         java_factory = JavaFactory()

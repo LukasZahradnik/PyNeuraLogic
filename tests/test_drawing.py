@@ -8,7 +8,7 @@ from neuralogic.core import Settings, Backend
 
 def test_draw_model():
     template, dataset = XOR_Vectorized()
-    model = template.build(Backend.JAVA, Settings())
+    model = template.build(Settings())
 
     result = draw_model(model, draw_ipython=False)
 
@@ -18,7 +18,7 @@ def test_draw_model():
 
 def test_draw_sample():
     template, dataset = XOR_Vectorized()
-    model = template.build(Backend.JAVA, Settings())
+    model = template.build(Settings())
 
     built_dataset = model.build_dataset(dataset)
     result = draw_sample(built_dataset.samples[0], draw_ipython=False)
@@ -47,7 +47,7 @@ def test_draw_model_from_evaluator():
 
 def test_draw_sample_from_raw_sample():
     template, dataset = XOR_Vectorized()
-    model = template.build(Backend.JAVA, Settings())
+    model = template.build(Settings())
 
     built_dataset = model.build_dataset(dataset)
     result = built_dataset.samples[0].draw(draw_ipython=False)

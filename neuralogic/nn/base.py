@@ -88,7 +88,7 @@ class AbstractEvaluator:
         self.backend = backend
         self.dataset: Optional[BuiltDataset] = None
 
-        self.neuralogic_model = template.build(backend, settings)
+        self.neuralogic_model = template.build(settings, backend)
         self.neuralogic_model.set_hooks(template.hooks)
 
     def set_dataset(self, dataset: Union[BaseDataset, BuiltDataset]):
