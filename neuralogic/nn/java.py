@@ -9,7 +9,7 @@ from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.enums import Backend
 
 
-class Loss:
+class LossResult:
     def __init__(self, loss, number_format):
         self.loss = loss
         self.number_format = number_format
@@ -28,15 +28,6 @@ class Loss:
 
 
 class NeuraLogic(AbstractNeuraLogic):
-    @jpype.JImplements(jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler"))
-    class HookHandler:
-        def __init__(self, module: "NeuraLogic"):
-            self.module = module
-
-        @jpype.JOverride
-        def handleHook(self, hook, value):
-            self.module.run_hook(hook, json.loads(value))
-
     def __init__(self, model, template, settings: SettingsProxy):
         super().__init__(Backend.JAVA, template, settings)
 
@@ -54,7 +45,17 @@ class NeuraLogic(AbstractNeuraLogic):
         self.strategy = python_strategy(settings.settings, model)
         self.samples_len = 0
 
-        self.hook_handler = NeuraLogic.HookHandler(self)
+        @jpype.JImplements(
+            jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler"))
+        class HookHandler:
+            def __init__(self, module: "NeuraLogic"):
+                self.module = module
+
+            @jpype.JOverride
+            def handleHook(self, hook, value):
+                self.module.run_hook(hook, json.loads(value))
+
+        self.hook_handler = HookHandler(self)
         self.reset_parameters()
 
     def reset_parameters(self):
@@ -91,7 +92,7 @@ class NeuraLogic(AbstractNeuraLogic):
                     result = self.strategy.learnSample(samples.java_sample)
                     return json.loads(str(result)), 1
             result = self.strategy.evaluateSample(samples.java_sample)
-            return Loss(result, self.settings.settings_class.superDetailedNumberFormat)
+            return LossResult(result, self.settings.settings_class.superDetailedNumberFormat)
 
         if self.do_train:
             results = self.strategy.learnSamples(

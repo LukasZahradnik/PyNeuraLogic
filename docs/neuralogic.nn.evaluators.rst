@@ -20,14 +20,6 @@ neuralogic.nn.evaluators.java module
    :undoc-members:
    :show-inheritance:
 
-neuralogic.nn.evaluators.pyg module
------------------------------------
-
-.. automodule:: neuralogic.nn.evaluators.pyg
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 neuralogic.nn.evaluators.torch module
 -------------------------------------
 

@@ -8,7 +8,6 @@ Subpackages
    :maxdepth: 4
 
    neuralogic.nn.evaluators
-   neuralogic.nn.native
 
 Submodules
 ----------
