@@ -1,7 +1,7 @@
 from typing import Optional, Dict, Union
 
 import dynet as dy
-from neuralogic.core.error_function import ErrorFunctionNames
+from neuralogic.nn.error_function import ErrorFunctionNames
 
 from neuralogic.nn.base import AbstractEvaluator
 

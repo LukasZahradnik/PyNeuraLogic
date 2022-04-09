@@ -1,7 +1,7 @@
 from typing import Any, Optional
 import weakref
 
-from neuralogic.core.error_function import MSE, ErrorFunction
+from neuralogic.nn.loss import MSE, ErrorFunction
 from neuralogic.core.settings.settings_proxy import SettingsProxy
 from neuralogic.core.enums import Optimizer, Initializer, Activation
 

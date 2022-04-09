@@ -2,7 +2,7 @@ import jpype
 
 from neuralogic import is_initialized, initialize
 from neuralogic.core.enums import Optimizer, Initializer, Activation
-from neuralogic.core.error_function import MSE, SoftEntropy, CrossEntropy, ErrorFunction
+from neuralogic.nn.loss import MSE, SoftEntropy, CrossEntropy, ErrorFunction
 
 
 class SettingsProxy:

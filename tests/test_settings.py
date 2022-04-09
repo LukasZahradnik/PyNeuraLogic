@@ -1,8 +1,7 @@
 from typing import Dict, Any
 
-import neuralogic.core.error_function
 from neuralogic.core import Settings, Initializer, Optimizer, Activation
-from neuralogic.core.error_function import SoftEntropy
+from neuralogic.nn.loss import SoftEntropy, ErrorFunction
 
 import pytest
 
@@ -31,7 +30,7 @@ def test_settings_proxy_properties_setting(parameters: Dict[str, Any]) -> None:
     for key, value in parameters.items():
         if isinstance(value, (int, float)):
             assert settings.__getattribute__(key) == settings_proxy.__getattribute__(key)
-        elif isinstance(settings.__getattribute__(key), neuralogic.core.error_function.ErrorFunction):
+        elif isinstance(settings.__getattribute__(key), ErrorFunction):
             assert str(settings.__getattribute__(key)) == str(settings_proxy.__getattribute__(key))
         else:
             assert settings.__getattribute__(key) == str(settings_proxy.__getattribute__(key))
@@ -42,7 +41,7 @@ def test_settings_proxy_properties_setting(parameters: Dict[str, Any]) -> None:
     for key, value in parameters.items():
         if isinstance(value, (int, float)):
             assert settings.__getattribute__(key) == settings_proxy.__getattribute__(key)
-        elif isinstance(settings.__getattribute__(key), neuralogic.core.error_function.ErrorFunction):
+        elif isinstance(settings.__getattribute__(key), ErrorFunction):
             assert str(settings.__getattribute__(key)) == str(settings_proxy.__getattribute__(key))
         else:
             assert settings.__getattribute__(key) == str(settings_proxy.__getattribute__(key))

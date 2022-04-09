@@ -1,9 +1,6 @@
 from enum import Enum
 
 
-from neuralogic.core.error_function import SoftEntropy, CrossEntropy, MSE
-
-
 class Optimizer(str, Enum):
     ADAM = "ADAM"
     SGD = "SGD"

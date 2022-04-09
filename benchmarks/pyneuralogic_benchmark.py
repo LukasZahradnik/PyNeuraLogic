@@ -5,7 +5,6 @@ from torch_geometric.datasets import TUDataset
 from benchmarks.helpers import Task
 from neuralogic.core import (
     Template,
-    Backend,
     Settings,
     Optimizer,
     R,
@@ -14,7 +13,7 @@ from neuralogic.core import (
     Aggregation,
     Initializer,
 )
-from neuralogic.core.error_function import CrossEntropy
+from neuralogic.nn.loss import CrossEntropy
 from neuralogic.dataset import TensorDataset, Data
 
 
