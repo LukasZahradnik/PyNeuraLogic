@@ -46,3 +46,29 @@ dd.field-odd {
 dl dd {
     margin: 0 !important;
 }
+
+
+.rst-content div[class^="highlight"], .rst-content pre.literal-block {
+    border: 0;
+}
+
+.kn {
+    color: #df1c6a !important;
+}
+
+.mi {
+    color: #006aff !important;
+}
+
+.nn {
+    color: inherit !important;
+    font-weight: normal !important;
+}
+
+.o + .n {
+    color: #491a90 !important;
+}
+
+.kc {
+    color: #34a164 !important;
+}
