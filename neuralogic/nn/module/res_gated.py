@@ -10,10 +10,12 @@ class ResGatedGraphConv(Module):
     Which can be expressed as:
 
     .. math::
+
         \mathbf{x}^{\prime}_i = act(\mathbf{W}_1 \mathbf{x}_i +
          {agg}_{j \in \mathcal{N}(i)}(\eta_{i,j} \odot \mathbf{W}_2 \mathbf{x}_j))
 
     .. math::
+
         \mathbf{\eta}_{i,j} = gating\_act(\mathbf{W}_3 \mathbf{x}_i + \mathbf{W}_4 \mathbf{x}_j)
 
     Where *act* is an activation function, *agg* aggregation function, *gating_act* is a gating activation function and :math:`W_n` are learnable parameters. This equation is
@@ -37,12 +39,13 @@ class ResGatedGraphConv(Module):
     The whole computation of this module (parametrized as :code:`ResGatedGraphConv(1, 2, "h1", "h0", "_edge")`) is as follows:
 
     .. code:: logtalk
+
         metadata = Metadata(activation="elementproduct-identity", aggregation=Aggregation.SUM)
 
         (R.h1__gate(V.I, V.J) <= (R.h0(V.I)[2, 1], R.h0(V.J)[2, 1])) | [Activation.IDENTITY]
         R.h1__gate / 2 | [Activation.SIGMOID]
 
-        (R.h1(V.I) <= R.<feature_name>(V.I)[2, 1]) | [Activation.IDENTITY]
+        (R.h1(V.I) <= R.h0(V.I)[2, 1]) | [Activation.IDENTITY]
         (R.h1(V.I) <= (R.h1__gate(V.I, V.J), R.h0(V.J)[2, 1], R._edge(V.J, V.I))) | metadata
         R.h1 / 1 | [Activation.IDENTITY]
 
@@ -61,13 +64,14 @@ class ResGatedGraphConv(Module):
         Edge predicate name to use for neighborhood relations.
     gating_activation : Activation
         Gating activation function.
-        Default: ``Activation.SIGMOID`
+        Default: ``Activation.SIGMOID``
     activation : Activation
         Activation function of the output.
         Default: ``Activation.IDENTITY``
     aggregation : Aggregation
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.SUM``
+
     """
 
     def __init__(
