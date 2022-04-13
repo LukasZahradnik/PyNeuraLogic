@@ -9,5 +9,4 @@ Advanced Usage
     eval_inference_engine
     modifiers
     visualization
-    hooks
     java_gateway

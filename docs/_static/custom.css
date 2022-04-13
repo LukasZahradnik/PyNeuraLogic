@@ -16,7 +16,8 @@
 }
 
 .wy-menu-vertical p.caption {
-    color: #82c7b7 !important;
+    /*color: #82c7b7 !important;*/
+    color: #5ce6cb !important;
 }
 
 
@@ -71,4 +72,22 @@ dl dd {
 
 .kc {
     color: #34a164 !important;
+}
+
+.mf {
+    color: #006aff !important;
+}
+
+.k {
+    color: #df1c6a !important;
+}
+
+
+.kn {
+    color: #df1c6a !important;
+}
+
+.ow {
+    font-weight: normal !important;
+    color: #006aff !important;
 }

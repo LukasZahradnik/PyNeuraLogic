@@ -15,8 +15,7 @@ class TAGConv(Module):
     Where *act* is an activation function, *agg* aggregation function, *Wk* are learnable parameters and :math:`\mathcal{N}^k(i)` denotes nodes that are *k* hops away from the node *i*.
     This equation is translated into the logic form as:
 
-     This equation is
-    translated into the logic form as:
+    This equation is translated into the logic form as:
 
     .. code:: logtalk
 

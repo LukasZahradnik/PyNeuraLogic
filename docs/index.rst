@@ -33,10 +33,10 @@ PyNeuraLogic
     :caption: Package Reference
     :hidden:
 
-    neuralogic
-    neuralogic.core
-    neuralogic.nn
-    neuralogic.utils
+    package/neuralogic
+    package/neuralogic.core
+    package/neuralogic.nn
+    package/neuralogic.utils
 
 
 
