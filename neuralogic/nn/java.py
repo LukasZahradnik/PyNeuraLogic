@@ -107,6 +107,7 @@ class NeuraLogic(AbstractNeuraLogic):
     def state_dict(self) -> Dict:
         weights = self.neural_model.getAllWeights()
         weights_dict = {}
+        weight_names = {}
 
         for weight in weights:
             if weight.isLearnable:
@@ -115,13 +116,15 @@ class NeuraLogic(AbstractNeuraLogic):
                 size = list(value.size())
 
                 if len(size) == 0 or size[0] == 0:
-                    weights_dict[weight.index] = value.value
+                    weights_dict[weight.index] = value.get(0)
                 elif len(size) == 1 or size[0] == 1 or size[1] == 1:
                     weights_dict[weight.index] = list(value.values)
                 else:
-                    weights_dict[weight.index] = json.loads(value.toString())
+                    weights_dict[weight.index] = [list(value) for value in value.values]
+                weight_names[weight.index] = weight.name
         return {
             "weights": weights_dict,
+            "weight_names": weight_names,
         }
 
     def load_state_dict(self, state_dict: Dict):
