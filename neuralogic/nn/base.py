@@ -62,6 +62,9 @@ class AbstractNeuraLogic:
                 for j, val in enumerate(values):
                     weight_value.set(i * rows + j, float(val))
 
+    def parameters(self) -> Dict:
+        return self.state_dict()
+
     def state_dict(self) -> Dict:
         raise NotImplementedError
 
@@ -109,6 +112,9 @@ class AbstractEvaluator:
 
     def test(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
         pass
+
+    def parameters(self) -> Dict:
+        return self.state_dict()
 
     def state_dict(self) -> Dict:
         pass
