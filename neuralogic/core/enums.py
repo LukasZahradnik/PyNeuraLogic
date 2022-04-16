@@ -46,15 +46,6 @@ class Aggregation(str, Enum):
     MIN = "min"
 
 
-class Initializer(str, Enum):
-    UNIFORM = "UNIFORM"
-    NORMAL = "NORMAL"
-    CONSTANT = "CONSTANT"
-    LONGTAIL = "LONGTAIL"
-    GLOROT = "GLOROT"
-    HE = "HE"
-
-
 class Backend(Enum):
     DYNET = "dynet"
     JAVA = "java"

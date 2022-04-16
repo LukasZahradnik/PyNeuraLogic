@@ -4,8 +4,9 @@ import numpy as np
 
 from neuralogic.core.builder import Sample, Weight, Neuron
 from neuralogic.core.settings import SettingsProxy
-from neuralogic.core.enums import Initializer, Backend
+from neuralogic.core.enums import Backend
 from neuralogic.nn.base import AbstractNeuraLogic
+from neuralogic.nn.init import InitializerNames
 
 
 def longtail(tensor: torch.Tensor, _: SettingsProxy):
@@ -30,14 +31,14 @@ class NeuraLogic(AbstractNeuraLogic):
     }
 
     initializers = {
-        Initializer.NORMAL: lambda tensor, _: torch.nn.init.normal_(tensor),
-        Initializer.UNIFORM: lambda tensor, settings: torch.nn.init.uniform_(
+        InitializerNames.NORMAL: lambda tensor, _: torch.nn.init.normal_(tensor),
+        InitializerNames.UNIFORM: lambda tensor, settings: torch.nn.init.uniform_(
             tensor, -settings.initializer_uniform_scale / 2, settings.initializer_uniform_scale / 2
         ),
-        Initializer.CONSTANT: lambda tensor, settings: torch.nn.init.constant_(tensor, settings.initializer_const),
-        Initializer.LONGTAIL: longtail,
-        Initializer.GLOROT: lambda tensor, _: torch.nn.init.xavier_uniform_(tensor),
-        Initializer.HE: lambda tensor, _: torch.nn.init.kaiming_uniform_(tensor),
+        InitializerNames.CONSTANT: lambda tensor, settings: torch.nn.init.constant_(tensor, settings.initializer_const),
+        InitializerNames.LONGTAIL: longtail,
+        InitializerNames.GLOROT: lambda tensor, _: torch.nn.init.xavier_uniform_(tensor),
+        InitializerNames.HE: lambda tensor, _: torch.nn.init.kaiming_uniform_(tensor),
     }
 
     def __init__(self, model: List[Weight], template, settings: Optional[SettingsProxy] = None):
@@ -50,7 +51,7 @@ class NeuraLogic(AbstractNeuraLogic):
         self.reset_parameters()
 
     def reset_parameters(self):
-        initializer = Initializer[str(self.settings.initializer)]
+        initializer = str(self.settings.initializer)
 
         if initializer not in NeuraLogic.initializers:
             raise NotImplementedError

@@ -1,6 +1,7 @@
 from typing import Dict, Any
 
-from neuralogic.core import Settings, Initializer, Optimizer, Activation
+from neuralogic.core import Settings, Optimizer, Activation
+from neuralogic.nn.init import Normal, Initializer, Uniform
 from neuralogic.nn.loss import SoftEntropy, ErrorFunction
 
 import pytest
@@ -14,8 +15,7 @@ import pytest
             "learning_rate": 0.5,
             "epochs": 100,
             "error_function": SoftEntropy(),
-            "initializer": Initializer.NORMAL,
-            "initializer_const": 1,
+            "initializer": Uniform(5.0),
             "initializer_uniform_scale": 5.0,
             "rule_activation": Activation.SIGMOID,
             "relation_activation": Activation.RELU,
@@ -28,9 +28,13 @@ def test_settings_proxy_properties_setting(parameters: Dict[str, Any]) -> None:
     settings_proxy = settings.create_proxy()
 
     for key, value in parameters.items():
+        if key == "initializer_uniform_scale":
+            assert settings.initializer.scale == settings_proxy.__getattribute__(key)
+            continue
+
         if isinstance(value, (int, float)):
             assert settings.__getattribute__(key) == settings_proxy.__getattribute__(key)
-        elif isinstance(settings.__getattribute__(key), ErrorFunction):
+        elif isinstance(settings.__getattribute__(key), (ErrorFunction, Initializer)):
             assert str(settings.__getattribute__(key)) == str(settings_proxy.__getattribute__(key))
         else:
             assert settings.__getattribute__(key) == str(settings_proxy.__getattribute__(key))
@@ -39,9 +43,13 @@ def test_settings_proxy_properties_setting(parameters: Dict[str, Any]) -> None:
         settings.__setattr__(key, value)
 
     for key, value in parameters.items():
+        if key == "initializer_uniform_scale":
+            assert settings.initializer.scale == settings_proxy.__getattribute__(key)
+            continue
+
         if isinstance(value, (int, float)):
             assert settings.__getattribute__(key) == settings_proxy.__getattribute__(key)
-        elif isinstance(settings.__getattribute__(key), ErrorFunction):
+        elif isinstance(settings.__getattribute__(key), (ErrorFunction, Initializer)):
             assert str(settings.__getattribute__(key)) == str(settings_proxy.__getattribute__(key))
         else:
             assert settings.__getattribute__(key) == str(settings_proxy.__getattribute__(key))

@@ -1,7 +1,8 @@
 import jpype
 
 from neuralogic import is_initialized, initialize
-from neuralogic.core.enums import Optimizer, Initializer, Activation
+from neuralogic.core.enums import Optimizer, Activation
+from neuralogic.nn.init import Initializer
 from neuralogic.nn.loss import MSE, SoftEntropy, CrossEntropy, ErrorFunction
 
 
@@ -14,8 +15,6 @@ class SettingsProxy:
         epochs: int,
         error_function: ErrorFunction,
         initializer: Initializer,
-        initializer_const: float,
-        initializer_uniform_scale: float,
         rule_activation: Activation,
         relation_activation: Activation,
         iso_value_compression: bool,
@@ -146,25 +145,20 @@ class SettingsProxy:
 
     @initializer.setter
     def initializer(self, initializer: Initializer):
-        if initializer == Initializer.HE:
-            self.settings.initializer = self.settings_class.InitSet.HE
-            return
-        if initializer == Initializer.GLOROT:
-            self.settings.initializer = self.settings_class.InitSet.GLOROT
-            return
+        if not isinstance(initializer, Initializer):
+            raise TypeError()
 
-        if initializer == Initializer.NORMAL:
-            init_dist = self.settings_class.InitDistribution.NORMAL
-        elif initializer == Initializer.UNIFORM:
-            init_dist = self.settings_class.InitDistribution.UNIFORM
-        elif initializer == Initializer.CONSTANT:
-            init_dist = self.settings_class.InitDistribution.CONSTANT
-        elif initializer == Initializer.LONGTAIL:
-            init_dist = self.settings_class.InitDistribution.LONGTAIL
+        settings = initializer.get_settings()
+        init_name = settings.pop("initializer")
+
+        if initializer.is_simple():
+            self.settings.initializer = self.settings_class.InitSet.SIMPLE
+            self.settings.initDistribution = getattr(self.settings_class.InitDistribution, init_name)
         else:
-            raise NotImplementedError
-        self.settings.initDistribution = init_dist
-        self.settings.initializer = self.settings_class.InitSet.SIMPLE
+            self.settings.initializer = getattr(self.settings_class.InitSet, init_name)
+
+        for key, value in settings.items():
+            self.__setattr__(key, value)
 
     @property
     def relation_activation(self) -> Activation:
