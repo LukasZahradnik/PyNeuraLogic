@@ -182,7 +182,7 @@ class TensorDataset:
             )
 
             dataset.add_query(query)
-            dataset.add_example(example)
+            dataset.add_example(examples)
         return dataset
 
     def dump(
