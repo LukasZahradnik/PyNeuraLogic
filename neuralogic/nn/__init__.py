@@ -30,14 +30,14 @@ def get_evaluator(
         settings = Settings()
 
     if backend == Backend.DYNET:
-        from neuralogic.nn.evaluators.dynet import DynetEvaluator
+        from neuralogic.nn.evaluator.dynet import DynetEvaluator
 
         return DynetEvaluator(template, settings)
     if backend == Backend.JAVA:
-        from neuralogic.nn.evaluators.java import JavaEvaluator
+        from neuralogic.nn.evaluator.java import JavaEvaluator
 
         return JavaEvaluator(template, settings)
     if backend == Backend.TORCH:
-        from neuralogic.nn.evaluators.torch import TorchEvaluator
+        from neuralogic.nn.evaluator.torch import TorchEvaluator
 
         return TorchEvaluator(template, settings)

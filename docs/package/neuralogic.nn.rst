@@ -7,7 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   neuralogic.nn.evaluators
+   neuralogic.nn.evaluator
 
 Submodules
 ----------

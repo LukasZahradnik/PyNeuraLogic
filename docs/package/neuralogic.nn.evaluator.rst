@@ -1,29 +1,29 @@
-neuralogic.nn.evaluators package
+neuralogic.nn.evaluator package
 ================================
 
 Submodules
 ----------
 
-neuralogic.nn.evaluators.dynet module
+neuralogic.nn.evaluator.dynet module
 -------------------------------------
 
-.. automodule:: neuralogic.nn.evaluators.dynet
+.. automodule:: neuralogic.nn.evaluator.dynet
    :members:
    :undoc-members:
    :show-inheritance:
 
-neuralogic.nn.evaluators.java module
+neuralogic.nn.evaluator.java module
 ------------------------------------
 
-.. automodule:: neuralogic.nn.evaluators.java
+.. automodule:: neuralogic.nn.evaluator.java
    :members:
    :undoc-members:
    :show-inheritance:
 
-neuralogic.nn.evaluators.torch module
+neuralogic.nn.evaluator.torch module
 -------------------------------------
 
-.. automodule:: neuralogic.nn.evaluators.torch
+.. automodule:: neuralogic.nn.evaluator.torch
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ neuralogic.nn.evaluators.torch module
 Module contents
 ---------------
 
-.. automodule:: neuralogic.nn.evaluators
+.. automodule:: neuralogic.nn.evaluator
    :members:
    :undoc-members:
    :show-inheritance:
