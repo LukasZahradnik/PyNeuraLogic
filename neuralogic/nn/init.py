@@ -11,7 +11,6 @@ class InitializerNames:
 
 
 class Initializer:
-
     def is_simple(self) -> bool:
         return True
 
@@ -20,6 +19,16 @@ class Initializer:
 
 
 class Uniform(Initializer):
+    r"""Initializes learnable parameters with random uniformly distributed samples from the interval
+    ``[-scale / 2, scale / 2]``.
+
+    Parameters
+    ----------
+
+    scale : float
+        Scale of the distribution interval [-scale / 2, scale / 2]. Default: ``2``
+
+    """
     def __init__(self, scale: float = 2):
         self.scale = scale
 
@@ -34,11 +43,21 @@ class Uniform(Initializer):
 
 
 class Normal(Initializer):
+    r"""Initializes learnable parameters with random samples from a normal (Gaussian) distribution"""
     def __str__(self):
         return InitializerNames.NORMAL
 
 
 class Constant(Initializer):
+    r"""Initializes learnable parameters with the ``value``.
+
+    Parameters
+    ----------
+
+    value : float
+        Value to fill weights with. Default: ``0.1``
+
+    """
     def __init__(self, value: float = 0.1):
         self.value = value
 
@@ -53,11 +72,22 @@ class Constant(Initializer):
 
 
 class Longtail(Initializer):
+    """Initializes learnable parameters with random samples from a long tail distribution"""
     def __str__(self):
         return InitializerNames.LONGTAIL
 
 
 class Glorot(Initializer):
+    r"""Initializes learnable parameters with samples from a uniform distribution (from the interval
+    ``[-scale / 2, scale / 2]``) using the Glorot method.
+
+    Parameters
+    ----------
+
+    scale : float
+        Scale of a uniform distribution interval [-scale / 2, scale / 2]. Default: ``2``
+
+    """
     def __init__(self, scale: float = 2):
         self.scale = scale
 
@@ -75,6 +105,16 @@ class Glorot(Initializer):
 
 
 class He(Initializer):
+    r"""Initializes learnable parameters with samples from a uniform distribution (from the interval
+    ``[-scale / 2, scale / 2]``) using the He method.
+
+    Parameters
+    ----------
+
+    scale : float
+        Scale of a uniform distribution interval [-scale / 2, scale / 2]. Default: ``2``
+
+    """
     def __init__(self, scale: float = 2):
         self.scale = scale
 
