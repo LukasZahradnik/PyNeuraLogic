@@ -8,6 +8,59 @@ DatasetEntries = Union[BaseAtom, WeightedAtom, Rule]
 
 
 class Dataset(BaseDataset):
+    r"""
+    Dataset encapsulating (learning) samples in the form of logic format, allowing users to fully take advantage of the PyNeuraLogic library.
+
+    One learning sample consists of:
+    * Example: A list of logic facts and rules representing some instance (e.g., a graph)
+    * Query: A logic fact to mark the output of a model and optionally target label.
+
+    Examples and queries in the dataset can be paired in the following ways:
+    * N:N - Dataset contains N examples and N queries. They will be paired by their index.
+
+    .. code:: python
+
+        dataset.add_example(first_example)
+        dataset.add_example(second_example)
+
+        dataset.add_query(first_query)
+        dataset.add_query(second_query)
+
+        # Learning samples: [first_example, first_query], [second_example, second_query]
+
+    * 1:N - Dataset contains 1 example and N queries. All queries will be run on the example.
+
+    .. code:: python
+
+        dataset.add_example(example)
+
+        dataset.add_query(first_query)
+        dataset.add_query(second_query)
+
+        # Learning samples: [example, first_query], [example, second_query]
+
+    * N:M - Dataset contains N examples and M queries (N <= M). It pairs queries similarly to the N: N case but also
+      allows running multiple queries on a specific example (by inserting a list of queries instead of one query).
+
+    .. code:: python
+
+        dataset.add_example(first_example)
+        dataset.add_example(second_example)
+
+        dataset.add_query([first_query_0, first_query_1])
+        dataset.add_query(second_query)
+
+        # Learning samples: [first_example, first_query_0], [first_example, first_query_1], [second_example, second_query]
+
+    Parameters
+    ----------
+
+    examples : Optional[List]
+        List of examples. Default: ``None``
+    queries : Optional[List]
+        List of queries. Default: ``None``
+
+    """
     def __init__(self, examples: Optional[List[DatasetEntries]] = None, queries: Optional[List[DatasetEntries]] = None):
         self.examples: List[DatasetEntries] = examples if examples is not None else []
         self.queries: List[DatasetEntries] = queries if queries is not None else []

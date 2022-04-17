@@ -12,6 +12,15 @@ Subpackages
 Submodules
 ----------
 
+
+neuralogic.nn.init module
+-------------------------
+
+.. automodule:: neuralogic.nn.init
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 neuralogic.nn.base module
 -------------------------
 

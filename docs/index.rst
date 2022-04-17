@@ -35,6 +35,7 @@ PyNeuraLogic
 
     package/neuralogic
     package/neuralogic.core
+    package/neuralogic.dataset
     package/neuralogic.nn
     package/neuralogic.utils
 

@@ -8,7 +8,7 @@ Subpackages
    :maxdepth: 4
 
    neuralogic.core
-   neuralogic.jar
+   neuralogic.dataset
    neuralogic.nn
    neuralogic.utils
 

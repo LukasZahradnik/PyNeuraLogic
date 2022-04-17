@@ -7,22 +7,54 @@ from neuralogic.dataset.logic import Dataset
 
 
 class Data:
-    """
-    Stores a learning example in the form of a tensor numeric representation instead of a rule based representation.
+    r"""The ``Data`` instance stores information about one specific graph instance.
+
+    Example
+    -------
+
+    For example, the directed graph :math:`G = (V, E)`, where :math:`E = \{(0, 1), (1, 2), (2, 0)\}`,
+    node features :math:`X = \{[0], [1], [0]\}` and target nodes' labels
+    :math:`Y = \{0, 1, 0\}` would be represented as:
+
+    .. code-block:: python
+
+        data = Data(
+            x=[[0], [1], [0]],
+            edge_index=[
+                [0, 1, 2],
+                [1, 2, 0],
+            ],
+            y=[0, 1, 0],
+        )
+
+    Parameters
+    ----------
+
+    x : Sequence
+        Sequence of node features.
+    edge_index : Sequence
+        Edges represented via a graph connectivity format - matrix ``[[...src], [...dst]]``.
+    y : Union[Sequence, float, int]
+        Sequence of labels of all nodes or one graph label.
+    edge_attr : Optional[Sequence]
+        Optional sequence of edge features. Default: ``None``
+    y_mask : Optional[Sequence]
+        Optional sequence of node ids to generate queries for. Default: ``None`` (all nodes)
+
     """
 
     def __init__(
         self,
-        x: Sequence = None,
-        edge_index: Sequence = None,
+        x: Sequence,
+        edge_index: Sequence,
+        y: Union[Sequence, float, int],
         edge_attr: Optional[Sequence] = None,
-        y_mask: Sequence = None,
-        y: Union[Sequence, float, int] = None,
+        y_mask: Optional[Sequence] = None,
     ):
         self.x = x
         self.edge_index = edge_index
-        self.edge_attr = edge_attr
         self.y = y
+        self.edge_attr = edge_attr
         self.y_mask = y_mask
 
     @staticmethod
@@ -128,7 +160,7 @@ class Data:
         for each mask the conversion yields a new data instance.
 
         :param data: The PyTorch Geometric Data instance
-        :return: The list of PyNeuraLogic Data instances
+        :return: The list of PyNeuraLogic :py:class:`~neuralogic.dataset.tensor.Data` instances
         """
         data_list = []
 
@@ -145,9 +177,39 @@ class Data:
 
 
 class TensorDataset:
+    r"""The ``TensorDataset`` holds a list of :py:class:`~neuralogic.dataset.tensor.Data` instances -
+    a list of graphs represented in a tensor format.
+
+    Parameters
+    ----------
+
+    data : List[Data]
+        List of data (graph) instances.
+    one_hot_encode_labels : bool
+        Turn numerical labels into one hot encoded vectors - e.g., label ``2`` would be turned
+        into a vector ``[0, 0, 1, .., 0]`` of length ``number_of_classes``.
+        Default: ``False``
+    one_hot_decode_features : bool = False
+        Turn one hot encoded feature vectors into a scalar - e.g., feature vector ``[0, 0, 1]`` would be turned into a
+        scalar feature ``2``.
+        Default: ``False``
+    number_of_classes : int
+        Specifies the number of classes for converting numerical labels to one hot encoded vectors.
+        Default: ``1``
+    feature_name : str
+        Specify the node feature predicate name used for converting into the logic format.
+        Default: ``node_feature``
+    edge_name : str
+        Specify the edge predicate name used for converting into the logic format.
+        Default: ``edge``
+    output_name : str
+        Specify the output predicate name used for converting into the logic format.
+        Default: ``predict``
+
+    """
     def __init__(
         self,
-        data: List[Data] = None,
+        data: List[Data],
         one_hot_encode_labels: bool = False,
         one_hot_decode_features: bool = False,
         number_of_classes: int = 1,
