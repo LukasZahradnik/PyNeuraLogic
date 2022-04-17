@@ -113,7 +113,7 @@ Model Definition
 ################
 
 Models in PyNeuraLogic are not just particular computational graphs, as common in classic deep learning, but can be viewed more generally as *templates* for (differentiable) computation.
-The template structure is encoded in the instance of the :py:class:`~neuralogic.core.template.Template` class via relational *rules* or, for convenience, pre-defined modules (which are also expanded into said rules, check out the :doc:`cookbook` for a list of modules).
+The template structure is encoded in the instance of the :py:class:`~neuralogic.core.template.Template` class via relational *rules* or, for convenience, pre-defined modules (which are also expanded into said rules, check out the :doc:`zoo` for a list of modules).
 
 .. code-block:: python
 

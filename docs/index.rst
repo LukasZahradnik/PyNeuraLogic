@@ -12,7 +12,7 @@ PyNeuraLogic
     custom_model
     rules_mapping
     evaluation
-    cookbook
+    zoo
     advanced
     examples
     benchmarks

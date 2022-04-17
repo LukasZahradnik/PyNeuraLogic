@@ -1,7 +1,7 @@
-🧑‍🍳 Cookbook
+🦓 Model Zoo
 ==============
 
-Welcome to our cookbook, the place where we discuss all pre-defined modules and outline how they are mapped to logic programs.
+Welcome to our model zoo, the place where we discuss all pre-defined modules and outline how they are mapped to logic programs.
 
 All modules listed here are defined in the :code:`neuralogic.nn.module` package, and their usage is quite similar to the usage
 of regular rules. You can add them to your template via the :code:`+=` operator or :code:`add_module` method, e.g.:
