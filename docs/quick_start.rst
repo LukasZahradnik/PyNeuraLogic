@@ -49,6 +49,7 @@ The :py:class:`~neuralogic.dataset.tensor.TensorDataset` instance then holds a l
         ],
         x=[[0], [1], [-1]],
         y=[[1], [0], [1]],
+        y_mask=[0, 1, 2],
     )
 
     dataset = TensorDataset(data=[data])
@@ -99,14 +100,14 @@ In this example, we will label nodes, just like in the case of tensor format rep
 .. code-block:: Python
 
     dataset.add_queries([
-        Relation.h1(0)[1]
-        Relation.h1(1)[0]
-        Relation.h1(2)[1]
+        Relation.predict(0)[1],
+        Relation.predict(1)[0],
+        Relation.predict(2)[1],
     ])
 
 .. NOTE::
 
-    The name :code:`Relation.h1` refers to the output layer of our model, which we will define in the next section.
+    The name :code:`Relation.predict` refers to the output layer of our model, which we will define in the next section.
 
 
 Model Definition
@@ -117,7 +118,7 @@ The template structure is encoded in the instance of the :py:class:`~neuralogic.
 
 .. code-block:: python
 
-    from neuralogic.core import Template
+    from neuralogic.core import Template, Settings
     from neuralogic.nn.module import GCNConv
 
 
@@ -125,7 +126,9 @@ The template structure is encoded in the instance of the :py:class:`~neuralogic.
     template.add_module(
         GCNConv(in_channels=1, out_channels=5, output_name="h0", feature_name="node_feature", edge_name="edge")
     )
-    template.add_module(GCNConv(in_channels=5, out_channels=1, output_name="h1", feature_name="h0", edge_name="edge"))
+    template.add_module(
+        GCNConv(in_channels=5, out_channels=1, output_name="predict", feature_name="h0", edge_name="edge")
+    )
 
 Here we defined two :py:class:`~neuralogic.nn.module.gcn.GCNConv` layers via pre-defined modules.
 We further discuss template definition via the rule format, which forms the core advantage of this framework, in the section of the documentation.
@@ -138,7 +141,10 @@ We do that by calling the :code:`build` method.
 
 .. code-block:: Python
 
-    model = template.build()
+    from neuralogic.core import Settings, Optimizer
+
+    settings = Settings(learning_rate=0.01, optimizer=Optimizer.SGD, epochs=100)
+    model = template.build(Settings())
 
 
 The input dataset that we are trying to evaluate/train has to be also built. When we have the built dataset and model,
@@ -149,9 +155,7 @@ performing the forward and backward propagation is straightforward.
     built_dataset = model.build_dataset(dataset)
 
     model.train()  # or model.test() to change the mode
-    loss = model(built_dataset)
-
-    loss.backward()
+    output = model(built_dataset)
 
 
 Evaluators
@@ -170,4 +174,4 @@ evaluation. Evaluators can then be customized via various settings wrapped in th
     evaluator = get_evaluator(template, settings=settings)
 
     built_dataset = evaluator.build_dataset(dataset)
-    evaluator.train(build_dataset, generator=False)
+    evaluator.train(built_dataset, generator=False)
