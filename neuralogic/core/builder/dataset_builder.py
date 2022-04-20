@@ -3,6 +3,7 @@ from typing import Union, Set, Dict
 
 import jpype
 
+import neuralogic.dataset as datasets
 from neuralogic import is_initialized, initialize
 from neuralogic.core.builder.builder import Builder
 from neuralogic.core.builder.components import BuiltDataset
@@ -12,8 +13,6 @@ from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
-from neuralogic.dataset.base import BaseDataset
-from neuralogic.dataset import FileDataset, TensorDataset, Dataset
 
 
 TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
@@ -108,7 +107,7 @@ class DatasetBuilder:
         return logic_samples, examples_queries
 
     def build_dataset(
-        self, dataset: BaseDataset, backend: Backend, settings: SettingsProxy, file_mode: bool = False
+        self, dataset: datasets.BaseDataset, backend: Backend, settings: SettingsProxy, file_mode: bool = False
     ) -> BuiltDataset:
         """Builds the dataset (does grounding and neuralization) for this template instance and the backend
 
@@ -118,7 +117,7 @@ class DatasetBuilder:
         :param file_mode:
         :return:
         """
-        if isinstance(dataset, TensorDataset):
+        if isinstance(dataset, datasets.TensorDataset):
             if not file_mode:
                 return self.build_dataset(dataset.to_dataset(), backend, settings, False)
 
@@ -129,9 +128,9 @@ class DatasetBuilder:
                 q_tf.flush()
                 e_tf.flush()
 
-                return self.build_dataset(FileDataset(e_tf.name, q_tf.name), backend, settings, False)
+                return self.build_dataset(datasets.FileDataset(e_tf.name, q_tf.name), backend, settings, False)
 
-        if isinstance(dataset, Dataset):
+        if isinstance(dataset, datasets.Dataset):
             self.examples_counter = 0
             self.query_counter = 0
 
@@ -163,7 +162,7 @@ class DatasetBuilder:
             samples = Builder(settings).from_logic_samples(self.parsed_template, logic_samples, backend)
 
             self.java_factory.weight_factory = weight_factory
-        elif isinstance(dataset, FileDataset):
+        elif isinstance(dataset, datasets.FileDataset):
             args = ["-t", dataset.examples_file or dataset.queries_file]
             if dataset.queries_file is not None:
                 args.extend(["-q", dataset.queries_file])
