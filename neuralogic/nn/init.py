@@ -15,7 +15,7 @@ class Initializer:
         return True
 
     def get_settings(self) -> Dict[str, Any]:
-        raise {"initializer": str(self)}
+        return {"initializer": str(self)}
 
 
 class Uniform(Initializer):
