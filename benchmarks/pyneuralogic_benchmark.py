@@ -11,8 +11,8 @@ from neuralogic.core import (
     V,
     Activation,
     Aggregation,
-    Initializer,
 )
+from neuralogic.nn.init import Glorot
 from neuralogic.nn.loss import CrossEntropy
 from neuralogic.dataset import TensorDataset, Data
 
@@ -138,7 +138,7 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
     activation = Activation.SIGMOID
 
     settings = Settings(
-        optimizer=Optimizer.ADAM, error_function=loss_fn, learning_rate=1e-3, initializer=Initializer.GLOROT
+        optimizer=Optimizer.ADAM, error_function=loss_fn, learning_rate=1e-3, initializer=Glorot()
     )
 
     ds = TUDataset(root=dataset_loc, name=dataset)
