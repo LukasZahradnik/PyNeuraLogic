@@ -12,6 +12,8 @@ Advanced Usage
     visualization
     java_gateway
 
+.. |wip-shield| image:: https://img.shields.io/badge/-WIP-yellow
+
 * | :doc:`heterogeneous`
   | Learn how to represent heterogeneous graphs and possible ways to incorporate rules utilizing them into your templates.
 
@@ -27,5 +29,5 @@ Advanced Usage
 * | :doc:`visualization`
   | Having a visual representation of your model can help you get a better insight. Learn how to utilize prepared tools to visualize your models/templates and samples.
 
-* | :doc:`java_gateway`
+* | |wip-shield| :doc:`java_gateway`
   | In this section, we go through all the different settings of the backend engine, such as using its logging, passing additional JVM arguments, etc.
