@@ -61,9 +61,13 @@ class Dataset(BaseDataset):
         List of queries. Default: ``None``
 
     """
-    def __init__(self, examples: Optional[List[DatasetEntries]] = None, queries: Optional[List[DatasetEntries]] = None):
-        self.examples: List[DatasetEntries] = examples if examples is not None else []
-        self.queries: List[DatasetEntries] = queries if queries is not None else []
+    def __init__(
+        self,
+        examples: Optional[List[List[DatasetEntries]]] = None,
+        queries: Optional[List[Union[List[DatasetEntries], DatasetEntries]]] = None
+    ):
+        self.examples: List[List[DatasetEntries]] = examples if examples is not None else []
+        self.queries: List[Union[List[DatasetEntries], DatasetEntries]] = queries if queries is not None else []
 
     def add_example(self, example):
         self.add_examples([example])
