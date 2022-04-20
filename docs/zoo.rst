@@ -1,7 +1,7 @@
-🦓 Model Zoo
+🦓 Module Zoo
 ==============
 
-Welcome to our model zoo, the place where we discuss all pre-defined modules and outline how they are mapped to logic programs.
+Welcome to our module zoo, the place where we discuss all pre-defined modules and outline how they are mapped to logic programs.
 
 All modules listed here are defined in the :code:`neuralogic.nn.module` package, and their usage is quite similar to the usage
 of regular rules. You can add them to your template via the :code:`+=` operator or :code:`add_module` method, e.g.:
@@ -18,34 +18,57 @@ Right after adding a module into a template, it is expanded into logic form - ru
 pre-defined modules and create new variations by adding your own custom rules or just mixing modules together.
 
 
-Pre-defined GNN Modules
-***********************
+Pre-defined Modules
+*******************
 
-.. list-table::
-    :widths: 10 90
-    :header-rows: 1
+.. tabs::
 
-    * - Name
-      - Edge formats
+    .. tab:: GNN
 
-    * - :class:`~neuralogic.nn.module.gcn.GCNConv`
-      - :code:`R.<edge_name>(<source>, <target>)`
-    * - :class:`~neuralogic.nn.module.gsage.SAGEConv`
-      - :code:`R.<edge_name>(<source>, <target>)`
-    * - :class:`~neuralogic.nn.module.gin.GINConv`
-      - :code:`R.<edge_name>(<source>, <target>)`
-    * - :class:`~neuralogic.nn.module.rgcn.RGCNConv`
-      - :code:`R.<edge_name>(<source>, <relation>, <target>)` or :code:`R.<relation>(<source>, <target>)`
-    * - :class:`~neuralogic.nn.module.tag.TAGConv`
-      - :code:`R.<edge_name>(<source>, <target>)`
-    * - :class:`~neuralogic.nn.module.gatv2.GATv2Conv`
-      - :code:`R.<edge_name>(<source>, <target>)`
-    * - :class:`~neuralogic.nn.module.sg.SGConv`
-      - :code:`R.<edge_name>(<source>, <target>)`
-    * - :class:`~neuralogic.nn.module.appnp.APPNPConv`
-      - :code:`R.<edge_name>(<source>, <target>)`
-    * - :class:`~neuralogic.nn.module.res_gated.ResGatedGraphConv`
-      - :code:`R.<edge_name>(<source>, <target>)`
+        .. list-table::
+            :widths: 10 90
+            :header-rows: 1
+
+            * - Name
+              - Edge formats
+
+            * - :class:`~neuralogic.nn.module.gcn.GCNConv`
+              - :code:`R.<edge_name>(<source>, <target>)`
+            * - :class:`~neuralogic.nn.module.gsage.SAGEConv`
+              - :code:`R.<edge_name>(<source>, <target>)`
+            * - :class:`~neuralogic.nn.module.gin.GINConv`
+              - :code:`R.<edge_name>(<source>, <target>)`
+            * - :class:`~neuralogic.nn.module.rgcn.RGCNConv`
+              - :code:`R.<edge_name>(<source>, <relation>, <target>)` or :code:`R.<relation>(<source>, <target>)`
+            * - :class:`~neuralogic.nn.module.tag.TAGConv`
+              - :code:`R.<edge_name>(<source>, <target>)`
+            * - :class:`~neuralogic.nn.module.gatv2.GATv2Conv`
+              - :code:`R.<edge_name>(<source>, <target>)`
+            * - :class:`~neuralogic.nn.module.sg.SGConv`
+              - :code:`R.<edge_name>(<source>, <target>)`
+            * - :class:`~neuralogic.nn.module.appnp.APPNPConv`
+              - :code:`R.<edge_name>(<source>, <target>)`
+            * - :class:`~neuralogic.nn.module.res_gated.ResGatedGraphConv`
+              - :code:`R.<edge_name>(<source>, <target>)`
+
+    .. tab:: Basic Blocks
+
+        .. list-table::
+            :widths: 99 1
+            :header-rows: 1
+
+            * - Name
+              -
+
+            * - :class:`~neuralogic.nn.module.linear.Linear`
+              -
+            * - :class:`~neuralogic.nn.module.mlp.MLP`
+              -
+
+----
+
+GNN Modules
+***********
 
 .. autoclass:: neuralogic.nn.module.gcn::GCNConv
    :members:
@@ -72,4 +95,15 @@ Pre-defined GNN Modules
    :members:
 
 .. autoclass:: neuralogic.nn.module.res_gated::ResGatedGraphConv
+   :members:
+
+-----
+
+Basic Block Modules
+*******************
+
+.. autoclass:: neuralogic.nn.module.linear::Linear
+   :members:
+
+.. autoclass:: neuralogic.nn.module.mlp::MLP
    :members:
