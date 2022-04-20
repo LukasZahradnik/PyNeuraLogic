@@ -56,7 +56,7 @@ Writing custom training loops and handling different backends can be cumbersome 
     from neuralogic.nn import get_evaluator
 
 
-    evaluator = get_evaluator(template, Backend.JAVA, settings)
+    evaluator = get_evaluator(template, settings, Backend.JAVA)
 
 
 Once you have an evaluator, you can evaluate or train the model on a dataset. The dataset doesn't have to be pre-built, as in the case of classical evaluation - the evaluator handles that for you.
@@ -78,10 +78,11 @@ and the model itself (e.g., initialization of the learnable parameters).
 .. code-block:: Python
 
     from neuralogic.core import Settings, Optimizer, Initializer
+    from neuralogic.nn.init import Uniform
 
 
     Settings(
-        initializer=Initializer.UNIFORM,
+        initializer=Uniform(),
         optimizer=Optimizer.SGD,
         learning_rate=0.1,
         epochs=100,
@@ -110,5 +111,3 @@ The non-generator mode, on the other hand, returns only a tuple of metrics from 
 .. code-block:: Python
 
     results = neuralogic_evaluator.train(dataset, generator=False)
-
-

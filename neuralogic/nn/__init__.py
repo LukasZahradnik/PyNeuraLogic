@@ -21,8 +21,8 @@ def get_neuralogic_layer(backend: Backend = Backend.JAVA):
 
 def get_evaluator(
     template: "Template",
-    backend: Backend = Backend.JAVA,
     settings=None,
+    backend: Backend = Backend.JAVA,
 ):
     from neuralogic.core.settings import Settings
 

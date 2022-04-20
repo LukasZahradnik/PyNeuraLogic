@@ -56,7 +56,7 @@ def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expect
 
     settings = Settings(optimizer=Optimizer.SGD, learning_rate=0.1, epochs=50)
 
-    evaluator = get_evaluator(template, Backend.TORCH, settings)
+    evaluator = get_evaluator(template, settings, Backend.TORCH)
 
     built_dataset = evaluator.build_dataset(dataset)
     evaluator.train(built_dataset, generator=False)
@@ -165,7 +165,7 @@ def test_evaluator_run_on_rules(
 
     settings = Settings(optimizer=Optimizer.SGD, epochs=100)
 
-    evaluator = get_evaluator(template, Backend.TORCH, settings)
+    evaluator = get_evaluator(template, settings, Backend.TORCH)
 
     built_dataset = evaluator.build_dataset(dataset)
     evaluator.train(built_dataset, generator=False)
@@ -191,7 +191,7 @@ def test_evaluator_state_loading(template: Template, dataset: BaseDataset, seed:
     torch.manual_seed(seed)
     settings = Settings(optimizer=Optimizer.SGD, learning_rate=0.1, epochs=20)
 
-    evaluator = get_evaluator(template, Backend.TORCH, settings)
+    evaluator = get_evaluator(template, settings, Backend.TORCH)
     built_dataset = evaluator.build_dataset(dataset)
     evaluator.train(built_dataset, generator=False)
 
@@ -200,7 +200,7 @@ def test_evaluator_state_loading(template: Template, dataset: BaseDataset, seed:
     for _, predicted in evaluator.test(built_dataset):
         results.append(round(predicted, 3))
 
-    second_evaluator = get_evaluator(template, Backend.TORCH, settings)
+    second_evaluator = get_evaluator(template, settings, Backend.TORCH)
     built_dataset = second_evaluator.build_dataset(dataset)
 
     second_results = []

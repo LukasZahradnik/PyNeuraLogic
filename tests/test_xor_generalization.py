@@ -40,7 +40,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
         epochs=5000, rule_activation=Activation.TANH, relation_activation=Activation.IDENTITY
     )
 
-    evaluator = get_evaluator(template, Backend.JAVA, settings)
+    evaluator = get_evaluator(template, settings, Backend.JAVA)
     evaluator.train(dataset, generator=False)
 
     # build the dataset for n inputs
@@ -103,7 +103,7 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
     ])
 
     settings = Settings(optimizer=Optimizer.SGD, epochs=300)
-    neuralogic_evaluator = get_evaluator(template, Backend.JAVA, settings)
+    neuralogic_evaluator = get_evaluator(template, settings, Backend.JAVA)
 
     # Train on the dataset with two var input
     neuralogic_evaluator.train(dataset, generator=False)

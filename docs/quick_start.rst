@@ -171,7 +171,7 @@ evaluation. Evaluators can then be customized via various settings wrapped in th
 
 
     settings = Settings(learning_rate=0.01, optimizer=Optimizer.SGD, epochs=100)
-    evaluator = get_evaluator(template, settings=settings)
+    evaluator = get_evaluator(template, settings)
 
     built_dataset = evaluator.build_dataset(dataset)
     evaluator.train(built_dataset, generator=False)
