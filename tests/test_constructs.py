@@ -89,8 +89,8 @@ def test_predicate_creation() -> None:
     assert str(predicate_metadata.metadata.activation) == "max-tanh"
 
 
-def test_atom_creation() -> None:
-    """Test atom creation related operations and properties"""
+def test_relation_creation() -> None:
+    """Test relation creation related operations and properties"""
     relation = R.my_atom
     assert len(relation.terms) == 0
     assert isinstance(relation, BaseAtom)

@@ -68,7 +68,7 @@ Also, the associated labels can be of arbitrary shapes. We can thus, for example
 
 .. note::
 
-    Queries are valued ground atoms, but we don't have to define the value explicitly. If the value is not present, the default value (:code:`1.0`) is used as the label. This is useful, e.g., for queries outside the learning phase, where the labels are not needed/known.
+    Queries are valued ground relations, but we don't have to define the value explicitly. If the value is not present, the default value (:code:`1.0`) is used as the label. This is useful, e.g., for queries outside the learning phase, where the labels are not needed/known.
 
 
 A single learning example may then be associated with a single query, as common in classic supervised machine learning, or with multiple queries, as common e.g. in knowledge-base completion or collective classification tasks.

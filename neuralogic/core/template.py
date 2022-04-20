@@ -30,17 +30,17 @@ class Template:
         self.counter = 0
         self.hooks: Dict[str, Set] = {}
 
-    def add_hook(self, atom: Union[BaseAtom, str], callback: Callable[[Any], None]) -> None:
-        """Hooks the callable to be called with the atom's value as an argument when the value of
-        the atom is being calculated.
+    def add_hook(self, relation: Union[BaseAtom, str], callback: Callable[[Any], None]) -> None:
+        """Hooks the callable to be called with the relation's value as an argument when the value of
+        the relation is being calculated.
 
-        :param atom:
+        :param relation:
         :param callback:
         :return:
         """
-        name = str(atom)
+        name = str(relation)
 
-        if isinstance(atom, BaseAtom):
+        if isinstance(relation, BaseAtom):
             name = name[:-1]
 
         if name not in self.hooks:
@@ -48,16 +48,16 @@ class Template:
         else:
             self.hooks[name].add(callback)
 
-    def remove_hook(self, atom: Union[BaseAtom, str], callback):
-        """Removes the callable from the atom's hooks
+    def remove_hook(self, relation: Union[BaseAtom, str], callback):
+        """Removes the callable from the relation's hooks
 
-        :param atom:
+        :param relation:
         :param callback:
         :return:
         """
-        name = str(atom)
+        name = str(relation)
 
-        if isinstance(atom, BaseAtom):
+        if isinstance(relation, BaseAtom):
             name = name[:-1]
 
         if name not in self.hooks:
