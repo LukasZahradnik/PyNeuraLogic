@@ -6,6 +6,37 @@ from neuralogic.nn.module.module import Module
 
 class Linear(Module):
     r"""
+    Apply linear transformation on the input. Can be expressed as:
+
+    .. math::
+
+        h_{i_0, .., i_{n}} = W \cdot x_{i_0, .., i_{n}}
+
+    Where :math:`x` is the input, :math:`W \in R^{(out\_channels \times in\_channels)}` is a learnable parameter,
+    and :math:`n` is the arity of the input and output.
+
+    It is also possible to attach non-linearity via the activation parameter and compute:
+
+    .. math::
+
+        h_{i_0, .., i_{n}} = act(W \cdot x_{i_0, .., i_{n}})
+
+    Example
+    -------
+
+    The whole computation of this module (parametrized as :code:`Linear(1, 2, "h1", "h0")`) is as follows:
+
+    .. code:: logtalk
+
+        (R.h1(V.X0)[2, 1] <= R.h0(V.X0)) | [Activation.IDENTITY]
+        R.h1 / 1 | [Activation.IDENTITY]
+
+    Module parametrized as :code:`Linear(1, 2, "h1", "h0", Activation.SIGMOID.MAX, 2)` translates into:
+
+    .. code:: logtalk
+
+        (R.h1(V.X0, V.X1)[2, 1] <= R.h0(V.X0, V.X1)) | [Activation.IDENTITY]
+        R.h1 / 2 | [Activation.SIGMOID]
 
     Parameters
     ----------
@@ -21,6 +52,8 @@ class Linear(Module):
     activation : Activation
         Activation function of the output.
         Default: ``Activation.IDENTITY``
+    arity : int
+        Arity of the input and output predicate. Default: ``1``
     """
 
     def __init__(
@@ -30,6 +63,7 @@ class Linear(Module):
         output_name: str,
         input_name: str,
         activation: Activation = Activation.IDENTITY,
+        arity: int = 1,
     ):
         self.output_name = output_name
         self.input_name = input_name
@@ -38,12 +72,13 @@ class Linear(Module):
         self.out_channels = out_channels
 
         self.activation = activation
+        self.arity = arity
 
     def __call__(self):
-        head = R.get(self.output_name)(V.I)[self.out_channels, self.in_channels]
-        metadata = Metadata(activation=Activation.IDENTITY)
+        terms = [f"X{i}" for i in range(self.arity)]
+        head = R.get(self.output_name)(terms)[self.out_channels, self.in_channels]
 
         return [
-            (head <= R.get(self.input_name)(V.J)) | [Activation.IDENTITY],
-            R.get(self.output_name) / 1 | Metadata(activation=self.activation),
+            (head <= R.get(self.input_name)(terms)) | [Activation.IDENTITY],
+            R.get(self.output_name) / len(terms) | Metadata(activation=self.activation),
         ]

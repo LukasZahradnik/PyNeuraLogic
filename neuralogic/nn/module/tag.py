@@ -33,17 +33,17 @@ class TAGConv(Module):
 
     .. code:: logtalk
 
-        (R.h1(V.I0)[1, 2] <= R.h0(V.I0)) | [Aggregation.SUM, Activation.IDENTITY]
-        (R.h1(V.I0)[1, 2] <= (R.h0(V.I1), R._edge(V.I1, V.I0)) | [Aggregation.SUM, Activation.IDENTITY]
-        (R.h1(V.I0)[1, 2] <= (R.h0(V.I2), R._edge(V.I1, V.I0), R._edge(V.I2, V.I1)) | [Aggregation.SUM, Activation.IDENTITY]
+        (R.h1(V.I0)[2, 2] <= R.h0(V.I0)) | [Aggregation.SUM, Activation.IDENTITY]
+        (R.h1(V.I0)[2, 1] <= (R.h0(V.I1), R._edge(V.I1, V.I0)) | [Aggregation.SUM, Activation.IDENTITY]
+        (R.h1(V.I0)[2, 1] <= (R.h0(V.I2), R._edge(V.I1, V.I0), R._edge(V.I2, V.I1)) | [Aggregation.SUM, Activation.IDENTITY]
         R.h1 / 1 | [Activation.IDENTITY]
 
     Module parametrized as :code:`TAGConv(1, 2, "h1", "h0", "_edge", 1)` translates into:
 
     .. code:: logtalk
 
-        (R.h1(V.I0)[1, 2] <= R.h0(V.I0)) | [Aggregation.SUM, Activation.IDENTITY]
-        (R.h1(V.I0)[1, 2] <= (R.h0(V.I1), R._edge(V.I1, V.I0)) | [Aggregation.SUM, Activation.IDENTITY]
+        (R.h1(V.I0)[2, 1] <= R.h0(V.I0)) | [Aggregation.SUM, Activation.IDENTITY]
+        (R.h1(V.I0)[2, 1] <= (R.h0(V.I1), R._edge(V.I1, V.I0)) | [Aggregation.SUM, Activation.IDENTITY]
         R.h1 / 1 | [Activation.IDENTITY]
 
     Parameters

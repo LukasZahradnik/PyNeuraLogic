@@ -27,7 +27,7 @@ class GCNConv(Module):
 
     .. code:: logtalk
 
-        (R.h1(V.I)[2, 3] <= (R.h0(V.J), R._edge(V.J, V.I)) | [Aggregation.SUM, Activation.IDENTITY]
+        (R.h1(V.I)[3, 2] <= (R.h0(V.J), R._edge(V.J, V.I)) | [Aggregation.SUM, Activation.IDENTITY]
         R.h1 / 1 | [Activation.IDENTITY]
 
     Parameters
