@@ -13,7 +13,7 @@ The 'compilation' is done in two steps. Firstly, we retrieve a model instance fo
     from neuralogic.core import Backend, Settings
 
     settings = Settings()
-    model = template.build(Backend.JAVA, settings)
+    model = template.build(settings)
 
 
 Then we can 'build' the examples and queries (dataset), yielding a multitude of computational graphs to be trained.
