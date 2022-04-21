@@ -64,6 +64,14 @@ Pre-defined Modules
               -
             * - :class:`~neuralogic.nn.module.mlp.MLP`
               -
+            * - :class:`~neuralogic.nn.module.pooling.Pooling`
+              -
+            * - :class:`~neuralogic.nn.module.pooling.SumPooling`
+              -
+            * - :class:`~neuralogic.nn.module.pooling.AvgPooling`
+              -
+            * - :class:`~neuralogic.nn.module.pooling.MaxPooling`
+              -
 
 ----
 
@@ -106,4 +114,16 @@ Basic Block Modules
    :members:
 
 .. autoclass:: neuralogic.nn.module.mlp::MLP
+   :members:
+
+.. autoclass:: neuralogic.nn.module.pooling::Pooling
+   :members:
+
+.. autoclass:: neuralogic.nn.module.pooling::SumPooling
+   :members:
+
+.. autoclass:: neuralogic.nn.module.pooling::AvgPooling
+   :members:
+
+.. autoclass:: neuralogic.nn.module.pooling::MaxPooling
    :members:

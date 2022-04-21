@@ -1,5 +1,5 @@
 Problem Definition
-================
+==================
 
 To approach relational machine learning problems with the PyNeuraLogic library in its full potential, we generally divide each learning scenario into (i) learning examples, (ii) queries, and (iii) a learning template. A set of learning examples together with the queries form a learning dataset. The learning template then constitues a "lifted" model architecture, i.e. a prescription for unfolding (differentiable) computational graphs.
 
