@@ -45,14 +45,6 @@ class Settings:
         self._update("chain_pruning", chain_pruning)
 
     @property
-    def seed(self) -> int:
-        return self.params["seed"]
-
-    @seed.setter
-    def seed(self, seed: int):
-        self._update("seed", seed)
-
-    @property
     def learning_rate(self) -> float:
         return self.params["learning_rate"]
 

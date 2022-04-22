@@ -1,5 +1,6 @@
 import jpype
 
+import neuralogic
 from neuralogic import is_initialized, initialize
 from neuralogic.core.enums import Optimizer, Activation
 from neuralogic.nn.init import Initializer
@@ -36,6 +37,13 @@ class SettingsProxy:
         self.settings.exportBlocks = []
 
         self.settings.infer()
+        self._setup_random_generator()
+
+    def _setup_random_generator(self):
+        if neuralogic._rnd_generator is None:
+            neuralogic._rnd_generator = self.settings.random
+            self.settings.random.setSeed(neuralogic._seed)
+        self.settings.random = neuralogic._rnd_generator
 
     @property
     def iso_value_compression(self) -> bool:
@@ -52,14 +60,6 @@ class SettingsProxy:
     @chain_pruning.setter
     def chain_pruning(self, chain_pruning: bool):
         self.settings.chainPruning = chain_pruning
-
-    @property
-    def seed(self) -> int:
-        return self.settings.seed
-
-    @seed.setter
-    def seed(self, seed: int):
-        self.settings.seed = seed
 
     @property
     def learning_rate(self) -> float:

@@ -3,6 +3,7 @@ import itertools
 
 import pytest
 
+from neuralogic import manual_seed
 from neuralogic.nn import get_evaluator
 from neuralogic.core import Backend, Settings, Optimizer, R, V, Template, Activation
 from neuralogic.dataset import Dataset
@@ -18,6 +19,7 @@ from neuralogic.dataset import Dataset
     ],
 )
 def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
+    manual_seed(0)
     max_number_of_max_vars = 20
 
     dataset = Dataset()
@@ -65,7 +67,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
 def test_xor_generalization(n: int, expected: List[int]) -> None:
     """Tests xor generalization"""
     # fmt: off
-
+    manual_seed(0)
     template = Template()
 
     # We have three weights in total named "a", "b" and "c"

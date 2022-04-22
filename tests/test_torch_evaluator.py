@@ -1,5 +1,6 @@
 from typing import List
 
+from neuralogic import manual_seed
 from neuralogic.core import Settings, Optimizer, Template, Backend
 from neuralogic.dataset.base import BaseDataset
 from neuralogic.nn import get_evaluator
@@ -53,6 +54,7 @@ import pytest
 def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expected_results: List[float]) -> None:
     """Tests for running torch evaluator on files"""
     torch.manual_seed(1)
+    manual_seed(0)
 
     settings = Settings(optimizer=Optimizer.SGD, learning_rate=0.1, epochs=50)
 
@@ -162,6 +164,7 @@ def test_evaluator_run_on_rules(
 ) -> None:
     """Tests for running torch evaluator on rules"""
     torch.manual_seed(seed)
+    manual_seed(0)
 
     settings = Settings(optimizer=Optimizer.SGD, epochs=100)
 
