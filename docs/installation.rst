@@ -12,6 +12,10 @@ Using PIP
 
 PyNeuraLogic can be easily installed from PyPI repository via :code:`pip install` command.
 
-.. code-block::
 
-    pip install neuralogic
+.. tip::
+    :class: empty-title
+
+    .. code-block::
+
+        pip install neuralogic

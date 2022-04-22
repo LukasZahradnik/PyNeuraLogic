@@ -11,6 +11,10 @@
     display: none;
 }
 
+.empty-title .tip-title {
+    display: none;
+}
+
 .sphinx-tabs-tab {
     padding: 0.7rem 0.8rem !important;
 }

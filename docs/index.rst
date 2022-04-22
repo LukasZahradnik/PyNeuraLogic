@@ -24,9 +24,6 @@ PyNeuraLogic
 
     hypergraphs
     heterophily
-    pattern_propagation
-    tree_gnns
-    tabnet
 
 
 .. toctree::
