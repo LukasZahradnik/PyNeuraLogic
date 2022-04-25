@@ -51,7 +51,7 @@ Pre-defined Modules
             * - :class:`~neuralogic.nn.module.res_gated.ResGatedGraphConv`
               - :code:`R.<edge_name>(<source>, <target>)`
 
-    .. tab:: Basic Blocks
+    .. tab:: General Blocks
 
         .. list-table::
             :widths: 99 1
@@ -107,8 +107,8 @@ GNN Modules
 
 -----
 
-Basic Block Modules
-*******************
+General Block Modules
+*********************
 
 .. autoclass:: neuralogic.nn.module.linear::Linear
    :members:

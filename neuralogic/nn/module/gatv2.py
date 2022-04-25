@@ -5,6 +5,30 @@ from neuralogic.nn.module.module import Module
 
 
 class GATv2Conv(Module):
+    r"""
+    GATv2 layer from `"How Attentive are Graph Attention Networks?" <https://arxiv.org/abs/2105.14491>`_.
+
+    Parameters
+    ----------
+
+    in_channels : int
+        Input feature size.
+    out_channels : int
+        Output feature size.
+    output_name : str
+        Output (head) predicate name of the module.
+    feature_name : str
+        Feature predicate name to get features from.
+    edge_name : str
+        Edge predicate name to use for neighborhood relations.
+    share_weights : bool
+        Share weights in attention. Default: ``False``
+    activation : Activation
+        Activation function of the output.
+        Default: ``Activation.IDENTITY``
+
+    """
+
     def __init__(
         self,
         in_channels: int,
