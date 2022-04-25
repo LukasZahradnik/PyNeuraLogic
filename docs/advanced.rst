@@ -10,6 +10,7 @@ Advanced Usage
     eval_inference_engine
     modifiers
     visualization
+    recursive_xor
     java_settings_and_debugging
 
 
@@ -27,6 +28,9 @@ Advanced Usage
 
 * | :doc:`visualization`
   | Having a visual representation of your model can help you get a better insight. Learn how to utilize prepared tools to visualize your models/templates and samples.
+
+* | :doc:`recursive_xor`
+  | Learn how recursive templates can be defined and utilized!
 
 * | :doc:`java_settings_and_debugging`
   | In this section, we go through all the different settings of the backend engine, such as using its logging, debugging, passing additional JVM arguments, etc.

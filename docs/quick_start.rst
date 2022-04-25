@@ -1,5 +1,5 @@
-Quick Start
-===========
+🚀 Quick Start
+==============
 
 The PyNeuraLogic library serves for learning on structured data. This quick start guide will showcase one of its uses on
 graph structures. Nevertheless, the library is directly applicable to more complex structures, such as relational databases.
