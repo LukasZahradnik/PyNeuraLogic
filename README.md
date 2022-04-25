@@ -129,7 +129,7 @@ It contains, for example, predefined modules for:
 - GINConv
 - RGCNConv
 - TAGConv
-- GATv2CONV
+- GATv2Conv
 - SGConv
 - [...and more!](https://pyneuralogic.readthedocs.io/en/latest/zoo.html)
 
