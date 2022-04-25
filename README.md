@@ -79,7 +79,7 @@ We hope you'll find the framework useful in designing _your own_ deep **relation
 Please let us know if you need some guidance or would like to cooperate!
 
 
-## Getting started
+## 💡 Getting started
 
 
 ### Prerequisites
@@ -99,7 +99,7 @@ To install PyNeuraLogic's latest release from the PyPI repository, use the follo
 $ pip install neuralogic
 ```
 
-## Examples
+## 🔬 Examples
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb) [Simple XOR example](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb)
 <br />
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/Mutagenesis.ipynb) [Molecular GNNs](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Mutagenesis.ipynb)
@@ -113,7 +113,7 @@ $ pip install neuralogic
 
 <br />
 
-## Papers
+## 📝 Papers
 
 [Beyond Graph Neural Networks with Lifted Relational Neural Networks](https://arxiv.org/abs/2007.06286) Machine Learning Journal, 2021
 
