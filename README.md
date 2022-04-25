@@ -117,6 +117,22 @@ $ pip install neuralogic
 
 <br />
 
+
+## 🦓 Predefined Modules
+
+PyNeuraLogic has a set of predefined modules to get you quickly started with your experimenting!
+
+It contains, for example, predefined modules for:
+
+- GCNConv
+- SAGEConv
+- GINConv
+- RGCNConv
+- TAGConv
+- GATv2CONV
+- SGConv
+- [...and more!](https://pyneuralogic.readthedocs.io/en/latest/zoo.html)
+
 ## 📝 Papers
 
 [Beyond Graph Neural Networks with Lifted Relational Neural Networks](https://arxiv.org/abs/2007.06286) Machine Learning Journal, 2021
