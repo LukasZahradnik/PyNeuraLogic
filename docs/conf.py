@@ -37,10 +37,13 @@ extensions = [
     "sphinx_tabs.tabs",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
+    "sphinx_copybutton",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
+
+copybutton_remove_prompts = True
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

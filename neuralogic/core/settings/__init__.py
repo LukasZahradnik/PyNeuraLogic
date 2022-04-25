@@ -1,9 +1,10 @@
 from typing import Any, Optional
 import weakref
 
-from neuralogic.core.error_function import MSE, ErrorFunction
+from neuralogic.nn.init import Initializer, Uniform
+from neuralogic.nn.loss import MSE, ErrorFunction
 from neuralogic.core.settings.settings_proxy import SettingsProxy
-from neuralogic.core.enums import Optimizer, Initializer, Activation
+from neuralogic.core.enums import Optimizer, Activation
 
 
 class Settings:
@@ -14,11 +15,9 @@ class Settings:
         learning_rate: Optional[float] = None,
         epochs: int = 3000,
         error_function: ErrorFunction = MSE(),
-        initializer: Initializer = Initializer.UNIFORM,
-        initializer_const: float = 0.1,
-        initializer_uniform_scale: float = 2.0,
-        rule_neuron_activation: Activation = Activation.TANH,
-        relation_neuron_activation: Activation = Activation.TANH,
+        initializer: Initializer = Uniform(),
+        rule_activation: Activation = Activation.TANH,
+        relation_activation: Activation = Activation.TANH,
         iso_value_compression: bool = True,
         chain_pruning: bool = True,
     ):
@@ -46,14 +45,6 @@ class Settings:
         self._update("chain_pruning", chain_pruning)
 
     @property
-    def seed(self) -> int:
-        return self.params["seed"]
-
-    @seed.setter
-    def seed(self, seed: int):
-        self._update("seed", seed)
-
-    @property
     def learning_rate(self) -> float:
         return self.params["learning_rate"]
 
@@ -68,22 +59,6 @@ class Settings:
     @optimizer.setter
     def optimizer(self, optimizer: Optimizer):
         self._update("optimizer", optimizer)
-
-    @property
-    def initializer_const(self) -> float:
-        return self.params["initializer_const"]
-
-    @initializer_const.setter
-    def initializer_const(self, value: float):
-        self._update("initializer_const", value)
-
-    @property
-    def initializer_uniform_scale(self) -> float:
-        return self.params["initializer_uniform_scale"]
-
-    @initializer_uniform_scale.setter
-    def initializer_uniform_scale(self, value: float):
-        self._update("initializer_uniform_scale", value)
 
     @property
     def error_function(self) -> ErrorFunction:
@@ -110,20 +85,20 @@ class Settings:
         self._update("initializer", initializer)
 
     @property
-    def relation_neuron_activation(self) -> Activation:
-        return self.params["relation_neuron_activation"]
+    def relation_activation(self) -> Activation:
+        return self.params["relation_activation"]
 
-    @relation_neuron_activation.setter
-    def relation_neuron_activation(self, value: Activation):
-        self._update("relation_neuron_activation", value)
+    @relation_activation.setter
+    def relation_activation(self, value: Activation):
+        self._update("relation_activation", value)
 
     @property
-    def rule_neuron_activation(self) -> Activation:
-        return self.params["rule_neuron_activation"]
+    def rule_activation(self) -> Activation:
+        return self.params["rule_activation"]
 
-    @rule_neuron_activation.setter
-    def rule_neuron_activation(self, value: Activation):
-        self._update("rule_neuron_activation", value)
+    @rule_activation.setter
+    def rule_activation(self, value: Activation):
+        self._update("rule_activation", value)
 
     def create_proxy(self) -> SettingsProxy:
         proxy = SettingsProxy(**self.params)

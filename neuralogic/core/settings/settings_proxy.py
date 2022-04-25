@@ -1,8 +1,10 @@
 import jpype
 
+import neuralogic
 from neuralogic import is_initialized, initialize
-from neuralogic.core.enums import Optimizer, Initializer, Activation
-from neuralogic.core.error_function import MSE, SoftEntropy, CrossEntropy, ErrorFunction
+from neuralogic.core.enums import Optimizer, Activation
+from neuralogic.nn.init import Initializer
+from neuralogic.nn.loss import MSE, SoftEntropy, CrossEntropy, ErrorFunction
 
 
 class SettingsProxy:
@@ -14,10 +16,8 @@ class SettingsProxy:
         epochs: int,
         error_function: ErrorFunction,
         initializer: Initializer,
-        initializer_const: float,
-        initializer_uniform_scale: float,
-        rule_neuron_activation: Activation,
-        relation_neuron_activation: Activation,
+        rule_activation: Activation,
+        relation_activation: Activation,
         iso_value_compression: bool,
         chain_pruning: bool,
     ):
@@ -37,6 +37,13 @@ class SettingsProxy:
         self.settings.exportBlocks = []
 
         self.settings.infer()
+        self._setup_random_generator()
+
+    def _setup_random_generator(self):
+        if neuralogic._rnd_generator is None:
+            neuralogic._rnd_generator = self.settings.random
+            self.settings.random.setSeed(neuralogic._seed)
+        self.settings.random = neuralogic._rnd_generator
 
     @property
     def iso_value_compression(self) -> bool:
@@ -53,14 +60,6 @@ class SettingsProxy:
     @chain_pruning.setter
     def chain_pruning(self, chain_pruning: bool):
         self.settings.chainPruning = chain_pruning
-
-    @property
-    def seed(self) -> int:
-        return self.settings.seed
-
-    @seed.setter
-    def seed(self, seed: int):
-        self.settings.seed = seed
 
     @property
     def learning_rate(self) -> float:
@@ -146,40 +145,35 @@ class SettingsProxy:
 
     @initializer.setter
     def initializer(self, initializer: Initializer):
-        if initializer == Initializer.HE:
-            self.settings.initializer = self.settings_class.InitSet.HE
-            return
-        if initializer == Initializer.GLOROT:
-            self.settings.initializer = self.settings_class.InitSet.GLOROT
-            return
+        if not isinstance(initializer, Initializer):
+            raise TypeError()
 
-        if initializer == Initializer.NORMAL:
-            init_dist = self.settings_class.InitDistribution.NORMAL
-        elif initializer == Initializer.UNIFORM:
-            init_dist = self.settings_class.InitDistribution.UNIFORM
-        elif initializer == Initializer.CONSTANT:
-            init_dist = self.settings_class.InitDistribution.CONSTANT
-        elif initializer == Initializer.LONGTAIL:
-            init_dist = self.settings_class.InitDistribution.LONGTAIL
+        settings = initializer.get_settings()
+        init_name = settings.pop("initializer")
+
+        if initializer.is_simple():
+            self.settings.initializer = self.settings_class.InitSet.SIMPLE
+            self.settings.initDistribution = getattr(self.settings_class.InitDistribution, init_name)
         else:
-            raise NotImplementedError
-        self.settings.initDistribution = init_dist
-        self.settings.initializer = self.settings_class.InitSet.SIMPLE
+            self.settings.initializer = getattr(self.settings_class.InitSet, init_name)
+
+        for key, value in settings.items():
+            self.__setattr__(key, value)
 
     @property
-    def relation_neuron_activation(self) -> Activation:
+    def relation_activation(self) -> Activation:
         return self.settings.atomNeuronActivation
 
-    @relation_neuron_activation.setter
-    def relation_neuron_activation(self, value: Activation):
+    @relation_activation.setter
+    def relation_activation(self, value: Activation):
         self.settings.atomNeuronActivation = self.get_activation_function(value)
 
     @property
-    def rule_neuron_activation(self) -> Activation:
+    def rule_activation(self) -> Activation:
         return self.settings.ruleNeuronActivation
 
-    @rule_neuron_activation.setter
-    def rule_neuron_activation(self, value: Activation):
+    @rule_activation.setter
+    def rule_activation(self, value: Activation):
         self.settings.ruleNeuronActivation = self.get_activation_function(value)
 
     @property

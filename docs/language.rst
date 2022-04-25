@@ -22,7 +22,7 @@ with the "arity" (number of terms) the relation forms its unique signature.
 
 .. image:: _static/atom.svg
     :width: 500
-    :alt: Atom structure
+    :alt: Relation structure
     :align: center
 
 |
@@ -187,7 +187,7 @@ These properties can be modified, per rule, by attaching a :py:class:`~neuralogi
 
 
     (Relation.h <= (Relation.b_one, Relation.b_n)) | Metadata(activation=Activation.RELU, aggregation=Aggregation.AVG)
-    
+
     # or, for short, just
     (Relation.h <= (Relation.b_one, Relation.b_n)) | [Activation.RELU, Aggregation.AVG]
 

@@ -5,6 +5,45 @@ from neuralogic.nn.module.module import Module
 
 
 class SAGEConv(Module):
+    r"""
+    GraphSAGE layer from `"Inductive Representation Learning on Large Graphs" <https://arxiv.org/abs/1706.02216>`_.
+    Which can be expressed as:
+
+    .. math::
+        \mathbf{x}^{\prime}_i = act(\mathbf{W}_1 \mathbf{x}_i + \mathbf{W}_2 \cdot
+         {agg}_{j \in \mathcal{N}(i)}(\mathbf{x}_j)))
+
+    Where *act* is an activation function, *agg* aggregation function and *W*'s are learnable parameters. This equation is
+    translated into the logic form as:
+
+    .. code:: logtalk
+
+         (R.<output_name>(V.I)[<W1>] <= (R.<feature_name>(V.J), R.<edge_name>(V.J, V.I))) | [<aggregation>, Activation.IDENTITY]
+         (R.<output_name>(V.I)[<W2>] <= R.<feature_name>(V.I)) | [Activation.IDENTITY]
+         R.<output_name> / 1 | [<activation>]
+
+    Parameters
+    ----------
+
+    in_channels : int
+        Input feature size.
+    out_channels : int
+        Output feature size.
+    output_name : str
+        Output (head) predicate name of the module.
+    feature_name : str
+        Feature predicate name to get features from.
+    edge_name : str
+        Edge predicate name to use for neighborhood relations.
+    activation : Activation
+        Activation function of the output.
+        Default: ``Activation.IDENTITY``
+    aggregation : Aggregation
+        Aggregation function of nodes' neighbors.
+        Default: ``Aggregation.AVG``
+
+    """
+
     def __init__(
         self,
         in_channels: int,
@@ -13,7 +52,7 @@ class SAGEConv(Module):
         feature_name: str,
         edge_name: str,
         activation: Activation = Activation.IDENTITY,
-        aggregation: Aggregation = Aggregation.SUM,
+        aggregation: Aggregation = Aggregation.AVG,
     ):
         self.output_name = output_name
         self.feature_name = feature_name

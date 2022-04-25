@@ -3,8 +3,10 @@ import itertools
 
 import pytest
 
+from neuralogic import manual_seed
 from neuralogic.nn import get_evaluator
-from neuralogic.core import Backend, Settings, Optimizer, Dataset, R, V, Template, Activation
+from neuralogic.core import Backend, Settings, Optimizer, R, V, Template, Activation
+from neuralogic.dataset import Dataset
 
 
 @pytest.mark.parametrize(
@@ -17,6 +19,7 @@ from neuralogic.core import Backend, Settings, Optimizer, Dataset, R, V, Templat
     ],
 )
 def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
+    manual_seed(0)
     max_number_of_max_vars = 20
 
     dataset = Dataset()
@@ -36,10 +39,10 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
     )
 
     settings = Settings(
-        epochs=5000, rule_neuron_activation=Activation.TANH, relation_neuron_activation=Activation.IDENTITY
+        epochs=5000, rule_activation=Activation.TANH, relation_activation=Activation.IDENTITY
     )
 
-    evaluator = get_evaluator(template, Backend.JAVA, settings)
+    evaluator = get_evaluator(template, settings, Backend.JAVA)
     evaluator.train(dataset, generator=False)
 
     # build the dataset for n inputs
@@ -64,7 +67,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
 def test_xor_generalization(n: int, expected: List[int]) -> None:
     """Tests xor generalization"""
     # fmt: off
-
+    manual_seed(0)
     template = Template()
 
     # We have three weights in total named "a", "b" and "c"
@@ -102,7 +105,7 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
     ])
 
     settings = Settings(optimizer=Optimizer.SGD, epochs=300)
-    neuralogic_evaluator = get_evaluator(template, Backend.JAVA, settings)
+    neuralogic_evaluator = get_evaluator(template, settings, Backend.JAVA)
 
     # Train on the dataset with two var input
     neuralogic_evaluator.train(dataset, generator=False)

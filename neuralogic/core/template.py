@@ -22,32 +22,25 @@ class Template:
     def __init__(
         self,
         *,
-        module_list: Optional = None,
         template_file: Optional[str] = None,
     ):
         self.template: List[TemplateEntries] = []
         self.template_file = template_file
 
         self.counter = 0
-        self.module_list = None
-
-        if module_list is not None and template_file is None:
-            self.module_list = module_list
-            module_list.build(self)
-
         self.hooks: Dict[str, Set] = {}
 
-    def add_hook(self, atom: Union[BaseAtom, str], callback: Callable[[Any], None]) -> None:
-        """Hooks the callable to be called with the atom's value as an argument when the value of
-        the atom is being calculated.
+    def add_hook(self, relation: Union[BaseAtom, str], callback: Callable[[Any], None]) -> None:
+        """Hooks the callable to be called with the relation's value as an argument when the value of
+        the relation is being calculated.
 
-        :param atom:
+        :param relation:
         :param callback:
         :return:
         """
-        name = str(atom)
+        name = str(relation)
 
-        if isinstance(atom, BaseAtom):
+        if isinstance(relation, BaseAtom):
             name = name[:-1]
 
         if name not in self.hooks:
@@ -55,16 +48,16 @@ class Template:
         else:
             self.hooks[name].add(callback)
 
-    def remove_hook(self, atom: Union[BaseAtom, str], callback):
-        """Removes the callable from the atom's hooks
+    def remove_hook(self, relation: Union[BaseAtom, str], callback):
+        """Removes the callable from the relation's hooks
 
-        :param atom:
+        :param relation:
         :param callback:
         :return:
         """
-        name = str(atom)
+        name = str(relation)
 
-        if isinstance(atom, BaseAtom):
+        if isinstance(relation, BaseAtom):
             name = name[:-1]
 
         if name not in self.hooks:
@@ -128,11 +121,8 @@ class Template:
 
         return template
 
-    def build(self, backend: Backend, settings: Settings):
+    def build(self, settings: Settings, backend: Backend = Backend.JAVA):
         from neuralogic.nn import get_neuralogic_layer
-
-        if backend == Backend.PYG:
-            return get_neuralogic_layer(backend)(self.module_list)
 
         java_factory = JavaFactory()
         settings_proxy = settings.create_proxy()
