@@ -27,7 +27,7 @@ The encoding is almost the same, except for added values to each connection, tha
 .. code-block:: Python
 
     from neuralogic.core import Template, R, V, T, Metadata, Aggregation, Activation, ActivationAgg
-    from neuralogic.core.evaluation_inference_engine import EvaluationInferenceEngine
+    from neuralogic.inference.evaluation_inference_engine import EvaluationInferenceEngine
 
 
     template = Template()
