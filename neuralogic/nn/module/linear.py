@@ -31,7 +31,7 @@ class Linear(Module):
         (R.h1(V.X0)[2, 1] <= R.h0(V.X0)) | [Activation.IDENTITY]
         R.h1 / 1 | [Activation.IDENTITY]
 
-    Module parametrized as :code:`Linear(1, 2, "h1", "h0", Activation.SIGMOID.MAX, 2)` translates into:
+    Module parametrized as :code:`Linear(1, 2, "h1", "h0", Activation.SIGMOID, 2)` translates into:
 
     .. code:: logtalk
 
