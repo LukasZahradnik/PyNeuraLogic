@@ -16,6 +16,7 @@ class Dataset(BaseDataset):
     * Query: A logic fact to mark the output of a model and optionally target label.
 
     Examples and queries in the dataset can be paired in the following ways:
+
     * N:N - Dataset contains N examples and N queries. They will be paired by their index.
 
     .. code:: python
