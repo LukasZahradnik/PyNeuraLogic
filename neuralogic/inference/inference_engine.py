@@ -3,7 +3,7 @@ from typing import List, Union, Optional
 import jpype
 
 from neuralogic import is_initialized, initialize
-from neuralogic.core import Template, JavaFactory, Settings
+from neuralogic.core import Template, JavaFactory, Settings, R
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core.constructs.atom import AtomType
 from neuralogic.core.constructs.rule import Rule
@@ -39,6 +39,30 @@ class InferenceEngine:
 
     def set_knowledge(self, examples: List[Union[AtomType, Rule]]) -> None:
         self.examples = examples
+
+    def get_queries(self, examples: Optional[List[Union[AtomType, Rule]]] = None):
+        if examples is None:
+            examples = self.examples
+
+        examples_builder = self.examples_builder(self.settings.settings)
+
+        self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
+        examples = self.dataset_builder.build_examples([examples], examples_builder)[0]
+
+        sample = examples[0]
+        gs = self.grounding_sample(sample, self.parsed_template)
+
+        lifted_example = gs.query.evidence
+        template = gs.template
+
+        ground_template = self.grounder.groundRulesAndFacts(lifted_example, template)
+
+        ground_rules = ground_template.groundRules.values()
+        for ground_rule in ground_rules:
+            for head in ground_rule.keys():
+                ground_head = head.groundHead
+
+                yield R.get(str(ground_head.predicateName()))([str(term.name()) for term in ground_head.arguments()])
 
     def q(self, query: AtomType, examples: Optional[List[Union[AtomType, Rule]]] = None):
         return self.query(query, examples)
