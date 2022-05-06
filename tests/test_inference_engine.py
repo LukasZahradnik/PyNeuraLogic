@@ -100,3 +100,33 @@ def test_inference_engine_london() -> None:
     assert substitutions[1]["X"] == "tottenham_court_road"
     assert substitutions[1]["Z"] == "northern"
     assert len(substitutions) == 2 and len(substitutions[0]) == 2 and len(substitutions[1]) == 2
+
+
+def test_listing_all_queries() -> None:
+    template = Template()
+
+    template += R.h(V.X) <= R.edge(V.Y, V.X)
+    template += R.h1(V.X) <= (R.h(V.Y), R.edge(V.Y, V.X))
+    template += R.q <= R.h1(V.X)
+
+    template += R.edge(1, 2)
+    template += R.edge(2, 3)
+    template += R.edge(3, 1)
+
+    inference_engine = InferenceEngine(template)
+
+    queries = list(inference_engine.get_queries())
+
+    expected_queries = sorted(["h(2).", "h(3).", "h(1).", "h1(1).", "h1(2).", "h1(3).", "q."])
+    str_queries = sorted([str(query) for query in queries])
+
+    for a, b in zip(expected_queries, str_queries):
+        assert a == b
+
+    queries = list(inference_engine.get_queries([R.edge(1, 4)]))
+
+    expected_queries = sorted(["h(2).", "h(3).", "h(1).", "h(4).", "h1(1).", "h1(2).", "h1(3).", "h1(4).", "q."])
+    str_queries = sorted([str(query) for query in queries])
+
+    for a, b in zip(expected_queries, str_queries):
+        assert a == b
