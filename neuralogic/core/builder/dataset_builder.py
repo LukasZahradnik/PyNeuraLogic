@@ -117,6 +117,9 @@ class DatasetBuilder:
         :param file_mode:
         :return:
         """
+        if isinstance(dataset, datasets.CSVDataset):
+            return self.build_dataset(dataset.to_dataset(), backend, settings, False)
+
         if isinstance(dataset, datasets.TensorDataset):
             if not file_mode:
                 return self.build_dataset(dataset.to_dataset(), backend, settings, False)

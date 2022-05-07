@@ -1,0 +1,160 @@
+import enum
+from pathlib import Path
+from typing import Optional, List, Union, TextIO
+
+from neuralogic.core.constructs.factories import R
+from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
+from neuralogic.core.constructs.rule import Rule
+from neuralogic.dataset import Dataset
+from neuralogic.dataset.base import BaseDataset
+
+DatasetEntries = Union[BaseAtom, WeightedAtom, Rule]
+
+
+class CSVMode(enum.Enum):
+    ONE_EXAMPLE = "one"
+    EXAMPLE_PER_SOURCE = "example_per_source"
+    ZIP = "zip"
+
+
+class CSVFile:
+    def __init__(
+        self,
+        relation_name: str,
+        csv_source: Union[TextIO, Path],
+        sep=",",
+        value_column: Optional[Union[str, int]] = None,
+        default_value: Optional[Union[float, int]] = None,
+        use_columns: Optional[List[Union[str, int]]] = None,
+        header: bool = False,
+        skip_rows: int = 0,
+        n_rows: Optional[int] = None,
+        replace_empty_column: Union[str, float, int] = 0,
+    ):
+        self.relation_name = relation_name
+        self.csv_source = csv_source
+        self.sep = sep
+        self.value_column = value_column
+        self.default_value = default_value
+        self.use_columns = use_columns
+        self.header = header
+        self.skip_rows = skip_rows
+        self.n_rows = n_rows
+        self.replace_empty_column = replace_empty_column
+
+    @staticmethod
+    def _find_index_in_header(header, value) -> int:
+        for index, header_value in enumerate(header):
+            if value == header_value:
+                return index
+        raise ValueError(f"Value {value} not found in the header {header}")
+
+    def _get_column_indices(self, header) -> Optional[List[int]]:
+        if self.use_columns is None:
+            return None
+        new_columns = []
+
+        for col_value in self.use_columns:
+            new_columns.append(CSVFile._find_index_in_header(header, col_value))
+        return new_columns
+
+    def _to_logic(self, fp: TextIO) -> List[DatasetEntries]:
+        example = []
+
+        use_columns = self.use_columns
+        value_column = self.value_column
+        default_value = self.default_value
+        relation = R.get(self.relation_name)
+        replace_empty = self.replace_empty_column
+        read_lines = 0
+
+        if self.header:
+            header = fp.readline()
+            if not header:
+                return example
+            header = header.strip().split(self.sep)
+
+            value_column = None if value_column is None else CSVFile._find_index_in_header(header, value_column)
+            use_columns = self._get_column_indices(header)
+
+        for _ in range(self.skip_rows):
+            fp.readline()
+
+        while True:
+            line = fp.readline()
+
+            if not line or not line.strip():
+                break
+
+            terms = line.strip().split(self.sep)
+            if use_columns is None:
+                line_relation = relation([(term.strip() if len(term.strip()) else replace_empty) for term in terms])
+            else:
+                line_relation = relation([
+                    (terms[i].strip() if len(terms[i].strip()) else replace_empty) for i in use_columns
+                ])
+
+            if value_column is None:
+                if default_value is not None:
+                    line_relation = line_relation[float(default_value)]
+            else:
+                value = terms[value_column].strip()
+                if not len(value):
+                    value = default_value if default_value is not None else replace_empty
+                line_relation = line_relation[float(value)]
+
+            example.append(line_relation)
+            read_lines += 1
+            if read_lines == self.n_rows:
+                break
+        return example
+
+    def to_logic_form(self) -> List[DatasetEntries]:
+        if isinstance(self.csv_source, (str, Path)):
+            with open(self.csv_source, "r") as fp:
+                return self._to_logic(fp)
+        return self._to_logic(self.csv_source)
+
+
+class CSVDataset(BaseDataset):
+    def __init__(
+        self,
+        csv_files: Optional[Union[List[CSVFile], CSVFile]] = None,
+        queries: Optional[List[Union[List[DatasetEntries], DatasetEntries]]] = None,
+        mode: CSVMode = CSVMode.ONE_EXAMPLE,
+    ):
+        self.queries: List[Union[List[DatasetEntries], DatasetEntries]] = queries if queries is not None else []
+        self.csv_files = [csv_files] if isinstance(csv_files, CSVFile) else csv_files
+        self.mode = mode
+
+    def add_csv_file(self, file: CSVFile):
+        self.csv_files.append(file)
+
+    def add_query(self, query):
+        self.add_queries([query])
+
+    def add_queries(self, queries: List):
+        self.queries.extend(queries)
+
+    def set_queries(self, queries: List):
+        self.queries = queries
+
+    def to_dataset(self) -> Dataset:
+        examples = []
+        dataset = Dataset(examples, self.queries)
+
+        if self.mode == CSVMode.ONE_EXAMPLE:
+            example = []
+
+            for source in self.csv_files:
+                example.extend(source.to_logic_form())
+            examples.append(example)
+        elif self.mode == CSVMode.ZIP:
+            logic_examples = [source.to_logic_form() for source in self.csv_files]
+
+            for zipped_example in zip(*logic_examples):
+                examples.append(zipped_example)
+        elif self.mode == CSVMode.EXAMPLE_PER_SOURCE:
+            for source in self.csv_files:
+                examples.append(source.to_logic_form())
+        return dataset
