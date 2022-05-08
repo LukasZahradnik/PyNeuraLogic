@@ -5,13 +5,23 @@ from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.dataset.logic import Dataset
 from neuralogic.dataset.csv import CSVDataset, CSVFile, Mode
-from neuralogic.dataset.base import BaseDataset
+from neuralogic.dataset.base import ConvertableDataset
 
 DatasetEntries = Union[BaseRelation, WeightedRelation, Rule]
 
 
 class DBSource:
-    __slots__ = "relation_name", "table_name", "term_columns", "value_column", "sep", "default_value", "skip_rows", "n_rows", "replace_empty_column"
+    __slots__ = (
+        "relation_name",
+        "table_name",
+        "term_columns",
+        "value_column",
+        "sep",
+        "default_value",
+        "skip_rows",
+        "n_rows",
+        "replace_empty_column",
+    )
 
     def __init__(
         self,
@@ -53,39 +63,43 @@ class DBSource:
         source.seek(0)
 
         return CSVFile(
-            self.relation_name, source, self.sep, value_column, self.default_value,
-            term_columns, False, self.skip_rows, self.n_rows, self.replace_empty_column
+            self.relation_name,
+            source,
+            self.sep,
+            value_column,
+            self.default_value,
+            term_columns,
+            False,
+            self.skip_rows,
+            self.n_rows,
+            self.replace_empty_column,
         )
 
 
-class DBDataset(BaseDataset):
+class DBDataset(ConvertableDataset):
     def __init__(
         self,
         connection,
         db_sources: Union[List[DBSource], DBSource],
-        queries: Optional[List[Union[List[DatasetEntries], DatasetEntries]]] = None,
+        queries_db_source: Optional[DBSource] = None,
         mode: Mode = Mode.ONE_EXAMPLE,
     ):
         self.connection = connection
         self.db_sources = [db_sources] if isinstance(db_sources, DBSource) else db_sources
-        self.queries: List[Union[List[DatasetEntries], DatasetEntries]] = queries if queries is not None else []
+        self.queries_db_source = queries_db_source
         self.mode = mode
 
     def add_db_source(self, db_source: DBSource):
         self.db_sources.append(db_source)
 
-    def add_query(self, query):
-        self.add_queries([query])
-
-    def add_queries(self, queries: List):
-        self.queries.extend(queries)
-
-    def set_queries(self, queries: List):
-        self.queries = queries
+    def set_queries(self, db_source: DBSource):
+        self.queries_db_source = db_source
 
     def to_dataset(self) -> Dataset:
         with self.connection.cursor() as cur:
             csv_files = [db_source.to_csv(cur) for db_source in self.db_sources]
-        csv_dataset = CSVDataset(csv_files, self.queries, self.mode)
+            csv_queries = None if self.queries_db_source is None else self.queries_db_source.to_csv(cur)
+
+        csv_dataset = CSVDataset(csv_files, csv_queries, self.mode)
 
         return csv_dataset.to_dataset()

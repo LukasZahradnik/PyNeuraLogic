@@ -6,7 +6,7 @@ from neuralogic.core.constructs.factories import R
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.dataset import Dataset
-from neuralogic.dataset.base import BaseDataset
+from neuralogic.dataset.base import ConvertableDataset
 
 DatasetEntries = Union[BaseRelation, WeightedRelation, Rule]
 
@@ -18,7 +18,18 @@ class Mode(enum.Enum):
 
 
 class CSVFile:
-    __slots__ = "relation_name", "csv_source", "sep", "value_column", "default_value", "term_columns", "header", "skip_rows", "n_rows", "replace_empty_column"
+    __slots__ = (
+        "relation_name",
+        "csv_source",
+        "sep",
+        "value_column",
+        "default_value",
+        "term_columns",
+        "header",
+        "skip_rows",
+        "n_rows",
+        "replace_empty_column",
+    )
 
     def __init__(
         self,
@@ -92,9 +103,9 @@ class CSVFile:
             if use_columns is None:
                 line_relation = relation([(term.strip() if len(term.strip()) else replace_empty) for term in terms])
             else:
-                line_relation = relation([
-                    (terms[i].strip() if len(terms[i].strip()) else replace_empty) for i in use_columns
-                ])
+                line_relation = relation(
+                    [(terms[i].strip() if len(terms[i].strip()) else replace_empty) for i in use_columns]
+                )
 
             if value_column is None:
                 if default_value is not None:
@@ -118,32 +129,27 @@ class CSVFile:
         return self._to_logic(self.csv_source)
 
 
-class CSVDataset(BaseDataset):
+class CSVDataset(ConvertableDataset):
     def __init__(
         self,
-        csv_files: Optional[Union[List[CSVFile], CSVFile]] = None,
-        queries: Optional[List[Union[List[DatasetEntries], DatasetEntries]]] = None,
+        csv_files: Union[List[CSVFile], CSVFile],
+        csv_queries: Optional[CSVFile] = None,
         mode: Mode = Mode.ONE_EXAMPLE,
     ):
-        self.queries: List[Union[List[DatasetEntries], DatasetEntries]] = queries if queries is not None else []
+        self.csv_queries = csv_queries
         self.csv_files = [csv_files] if isinstance(csv_files, CSVFile) else csv_files
         self.mode = mode
 
     def add_csv_file(self, file: CSVFile):
         self.csv_files.append(file)
 
-    def add_query(self, query):
-        self.add_queries([query])
-
-    def add_queries(self, queries: List):
-        self.queries.extend(queries)
-
-    def set_queries(self, queries: List):
-        self.queries = queries
+    def set_query_csv_file(self, file: CSVFile):
+        self.csv_queries = file
 
     def to_dataset(self) -> Dataset:
         examples = []
-        dataset = Dataset(examples, self.queries)
+        queries = self.csv_queries.to_logic_form() if self.csv_queries else []
+        dataset = Dataset(examples, queries)
 
         if self.mode == Mode.ONE_EXAMPLE:
             example = []
