@@ -3,7 +3,7 @@ from typing import List
 
 import pytest
 
-from neuralogic.dataset import CSVFile, CSVDataset, CSVMode
+from neuralogic.dataset import CSVFile, CSVDataset, Mode
 
 
 def test_csv_file_index_in_header() -> None:
@@ -46,7 +46,7 @@ def tests_csv_file() -> None:
     assert [str(e) for e in examples] == expected
 
     source = io.StringIO(csv_string_source)
-    csv_file = CSVFile("my_rel", source, default_value=1.0, use_columns=[1, 2], skip_rows=1, n_rows=3)
+    csv_file = CSVFile("my_rel", source, default_value=1.0, term_columns=[1, 2], skip_rows=1, n_rows=3)
     examples = csv_file.to_logic_form()
 
     expected = [
@@ -59,7 +59,7 @@ def tests_csv_file() -> None:
     assert [str(e) for e in examples] == expected
 
     source = io.StringIO(csv_string_source)
-    csv_file = CSVFile("my_rel", source, value_column="a", use_columns=["b", "c"], skip_rows=1, header=True, n_rows=2)
+    csv_file = CSVFile("my_rel", source, value_column="a", term_columns=["b", "c"], skip_rows=1, header=True, n_rows=2)
     examples = csv_file.to_logic_form()
 
     expected = [
@@ -73,8 +73,8 @@ def tests_csv_file() -> None:
 
 @pytest.mark.parametrize("mode,expected", [
     (
-        CSVMode.ONE_EXAMPLE,
-        [[
+            Mode.ONE_EXAMPLE,
+            [[
             "rel_a(1, 2, 3).",
             "rel_a(4, 5, 6).",
             "rel_a(7, 8, 9).",
@@ -87,16 +87,16 @@ def tests_csv_file() -> None:
         ]]
     ),
     (
-        CSVMode.ZIP,
-        [
+            Mode.ZIP,
+            [
             ["rel_a(1, 2, 3).", "rel_b(1, 2, 3).", "rel_c(1, 2, 3)."],
             ["rel_a(4, 5, 6).", "rel_b(4, 5, 6).", "rel_c(4, 5, 6)."],
             ["rel_a(7, 8, 9).", "rel_b(7, 8, 9).", "rel_c(7, 8, 9)."]
         ]
     ),
     (
-        CSVMode.EXAMPLE_PER_SOURCE,
-        [
+            Mode.EXAMPLE_PER_SOURCE,
+            [
             [
                 "rel_a(1, 2, 3).",
                 "rel_a(4, 5, 6).",
@@ -114,7 +114,7 @@ def tests_csv_file() -> None:
     ),
 
 ])
-def test_csv_dataset(mode: CSVMode, expected: List[List[str]]) -> None:
+def test_csv_dataset(mode: Mode, expected: List[List[str]]) -> None:
     csv_string_source = """1,2,3
     4,5,6
     7,8,9

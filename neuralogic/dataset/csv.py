@@ -11,13 +11,15 @@ from neuralogic.dataset.base import BaseDataset
 DatasetEntries = Union[BaseAtom, WeightedAtom, Rule]
 
 
-class CSVMode(enum.Enum):
+class Mode(enum.Enum):
     ONE_EXAMPLE = "one"
     EXAMPLE_PER_SOURCE = "example_per_source"
     ZIP = "zip"
 
 
 class CSVFile:
+    __slots__ = "relation_name", "csv_source", "sep", "value_column", "default_value", "term_columns", "header", "skip_rows", "n_rows", "replace_empty_column"
+
     def __init__(
         self,
         relation_name: str,
@@ -25,7 +27,7 @@ class CSVFile:
         sep=",",
         value_column: Optional[Union[str, int]] = None,
         default_value: Optional[Union[float, int]] = None,
-        use_columns: Optional[List[Union[str, int]]] = None,
+        term_columns: Optional[List[Union[str, int]]] = None,
         header: bool = False,
         skip_rows: int = 0,
         n_rows: Optional[int] = None,
@@ -36,7 +38,7 @@ class CSVFile:
         self.sep = sep
         self.value_column = value_column
         self.default_value = default_value
-        self.use_columns = use_columns
+        self.term_columns = term_columns
         self.header = header
         self.skip_rows = skip_rows
         self.n_rows = n_rows
@@ -50,18 +52,18 @@ class CSVFile:
         raise ValueError(f"Value {value} not found in the header {header}")
 
     def _get_column_indices(self, header) -> Optional[List[int]]:
-        if self.use_columns is None:
+        if self.term_columns is None:
             return None
         new_columns = []
 
-        for col_value in self.use_columns:
+        for col_value in self.term_columns:
             new_columns.append(CSVFile._find_index_in_header(header, col_value))
         return new_columns
 
     def _to_logic(self, fp: TextIO) -> List[DatasetEntries]:
         example = []
 
-        use_columns = self.use_columns
+        use_columns = self.term_columns
         value_column = self.value_column
         default_value = self.default_value
         relation = R.get(self.relation_name)
@@ -121,7 +123,7 @@ class CSVDataset(BaseDataset):
         self,
         csv_files: Optional[Union[List[CSVFile], CSVFile]] = None,
         queries: Optional[List[Union[List[DatasetEntries], DatasetEntries]]] = None,
-        mode: CSVMode = CSVMode.ONE_EXAMPLE,
+        mode: Mode = Mode.ONE_EXAMPLE,
     ):
         self.queries: List[Union[List[DatasetEntries], DatasetEntries]] = queries if queries is not None else []
         self.csv_files = [csv_files] if isinstance(csv_files, CSVFile) else csv_files
@@ -143,18 +145,18 @@ class CSVDataset(BaseDataset):
         examples = []
         dataset = Dataset(examples, self.queries)
 
-        if self.mode == CSVMode.ONE_EXAMPLE:
+        if self.mode == Mode.ONE_EXAMPLE:
             example = []
 
             for source in self.csv_files:
                 example.extend(source.to_logic_form())
             examples.append(example)
-        elif self.mode == CSVMode.ZIP:
+        elif self.mode == Mode.ZIP:
             logic_examples = [source.to_logic_form() for source in self.csv_files]
 
             for zipped_example in zip(*logic_examples):
                 examples.append(zipped_example)
-        elif self.mode == CSVMode.EXAMPLE_PER_SOURCE:
+        elif self.mode == Mode.EXAMPLE_PER_SOURCE:
             for source in self.csv_files:
                 examples.append(source.to_logic_form())
         return dataset
