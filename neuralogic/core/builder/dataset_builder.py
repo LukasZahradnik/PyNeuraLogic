@@ -8,14 +8,14 @@ from neuralogic import is_initialized, initialize
 from neuralogic.core.builder.builder import Builder
 from neuralogic.core.builder.components import BuiltDataset
 from neuralogic.core.enums import Backend
-from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
+from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
 
 
-TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
+TemplateEntries = Union[BaseRelation, WeightedRelation, Rule]
 
 
 class DatasetBuilder:

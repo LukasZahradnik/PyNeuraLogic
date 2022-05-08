@@ -1,6 +1,6 @@
 import copy
 
-from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
+from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core import R, Activation, Aggregation, Metadata, ActivationAgg, V
 from neuralogic.core.constructs.rule import Rule
 
@@ -93,20 +93,20 @@ def test_relation_creation() -> None:
     """Test relation creation related operations and properties"""
     relation = R.my_atom
     assert len(relation.terms) == 0
-    assert isinstance(relation, BaseAtom)
+    assert isinstance(relation, BaseRelation)
 
     relation = relation("a", "b")
     assert len(relation.terms) == 2
-    assert isinstance(relation, BaseAtom)
+    assert isinstance(relation, BaseRelation)
 
     relation = relation[1, 2]
     assert len(relation.terms) == 2
-    assert isinstance(relation, WeightedAtom)
+    assert isinstance(relation, WeightedRelation)
     assert relation.weight == (1, 2)
 
     relation = R.my_atom["abc":1, 2]
     assert len(relation.terms) == 0
-    assert isinstance(relation, WeightedAtom)
+    assert isinstance(relation, WeightedRelation)
     assert relation.weight == (1, 2)
     assert relation.weight_name == "abc"
 

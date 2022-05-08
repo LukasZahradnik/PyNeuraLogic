@@ -5,7 +5,7 @@ from neuralogic.core.constructs.metadata import Metadata
 
 
 class Predicate:
-    """WeightedPredicate"""
+    __slots__ = "name", "arity", "hidden", "special"
 
     def __init__(self, name, arity, hidden=False, special=False):
         if name.startswith("_"):
@@ -49,6 +49,8 @@ class Predicate:
 
 
 class PredicateMetadata:
+    __slots__ = "predicate", "metadata"
+
     def __init__(self, predicate: Predicate, metadata: Metadata):
         if metadata.aggregation is not None or metadata.learnable is not None:
             raise NotImplementedError

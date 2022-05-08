@@ -5,7 +5,7 @@ import jpype
 from neuralogic import is_initialized, initialize
 from neuralogic.core import Template, JavaFactory, Settings, R
 from neuralogic.core.builder import DatasetBuilder
-from neuralogic.core.constructs.atom import AtomType
+from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.rule import Rule
 
 
@@ -22,7 +22,7 @@ class InferenceEngine:
         self.parsed_template = template.get_parsed_template(self.settings, self.java_factory)
         self.dataset_builder = DatasetBuilder(self.parsed_template, self.java_factory)
 
-        self.examples: List[Union[AtomType, Rule]] = []
+        self.examples: List[Union[BaseRelation, Rule]] = []
 
         self.grounder = jpype.JClass("cz.cvut.fel.ida.logic.grounding.Grounder").getGrounder(self.settings.settings)
         field = self.grounder.getClass().getDeclaredField("herbrandModel")
@@ -37,10 +37,10 @@ class InferenceEngine:
 
         self.empty_example = jpype.JClass("cz.cvut.fel.ida.logic.constructs.example.LiftedExample")()
 
-    def set_knowledge(self, examples: List[Union[AtomType, Rule]]) -> None:
+    def set_knowledge(self, examples: List[Union[BaseRelation, Rule]]) -> None:
         self.examples = examples
 
-    def get_queries(self, examples: Optional[List[Union[AtomType, Rule]]] = None):
+    def get_queries(self, examples: Optional[List[Union[BaseRelation, Rule]]] = None):
         if examples is None:
             examples = self.examples
 
@@ -64,10 +64,10 @@ class InferenceEngine:
 
                 yield R.get(str(ground_head.predicateName()))([str(term.name()) for term in ground_head.arguments()])
 
-    def q(self, query: AtomType, examples: Optional[List[Union[AtomType, Rule]]] = None):
+    def q(self, query: BaseRelation, examples: Optional[List[Union[BaseRelation, Rule]]] = None):
         return self.query(query, examples)
 
-    def query(self, query: AtomType, examples: Optional[List[Union[AtomType, Rule]]] = None):
+    def query(self, query: BaseRelation, examples: Optional[List[Union[BaseRelation, Rule]]] = None):
         if examples is None:
             examples = self.examples
 

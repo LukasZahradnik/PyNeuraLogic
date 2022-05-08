@@ -1,10 +1,10 @@
 from typing import Optional, List, Union
 
-from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
+from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.dataset.base import BaseDataset
 
-DatasetEntries = Union[BaseAtom, WeightedAtom, Rule]
+DatasetEntries = Union[BaseRelation, WeightedRelation, Rule]
 
 
 class Dataset(BaseDataset):
