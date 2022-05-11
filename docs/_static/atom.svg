@@ -954,7 +954,7 @@
            style="font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
            id="tspan7001">5</tspan></tspan></text>
     <g
-       aria-label="Atom.modifiers.name(Var.X, Term.Y)[W]"
+       aria-label="Relation.modifiers.name(Var.X, Term.Y)[W]"
        transform="matrix(0.24127411,0,0,0.24127411,-7.232601,-28.495072)"
        id="text57619"
        style="font-size:40px;line-height:1.25;font-family:'Ubuntu Mono';-inkscape-font-specification:'Ubuntu Mono';white-space:pre;shape-inside:url(#rect57645)">

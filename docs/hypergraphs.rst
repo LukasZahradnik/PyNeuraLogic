@@ -8,7 +8,7 @@ and :math:`E` is a set of edges (hyperedges) connecting an arbitrary number of v
 Representation of hyperedges
 ############################
 
-When we encode input data (graph) in the form of logic data format (i.e., ground atoms),
+When we encode input data (graph) in the form of logic data format (i.e., ground relations),
 we can represent regular edges, for example, as :code:`Relation.edge(1, 2)`.
 
 

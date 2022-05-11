@@ -3,7 +3,7 @@ from typing import Optional, Dict, Union
 import torch
 import torch.nn.functional
 
-from neuralogic.core.error_function import ErrorFunctionNames
+from neuralogic.nn.loss import ErrorFunctionNames
 from neuralogic.dataset.base import BaseDataset
 from neuralogic.nn.base import AbstractEvaluator
 

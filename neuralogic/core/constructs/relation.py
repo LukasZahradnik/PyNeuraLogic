@@ -6,14 +6,9 @@ from neuralogic.core.constructs.predicate import Predicate
 from neuralogic.core.constructs import rule, factories
 
 
-AtomType = Union["BaseAtom", "WeightedAtom"]
-BodyAtomType = Union["BaseAtom", "WeightedAtom"]
+class BaseRelation:
+    __slots__ = "predicate", "negated", "terms"
 
-Head = AtomType
-Body = Union[Iterable[BodyAtomType], BodyAtomType]
-
-
-class BaseAtom:
     def __init__(self, predicate: Predicate, terms=None, negated=False):
         self.predicate = predicate
         self.negated = negated
@@ -24,11 +19,11 @@ class BaseAtom:
         elif not isinstance(self.terms, Iterable):
             self.terms = [self.terms]
 
-    def __neg__(self) -> "BaseAtom":
+    def __neg__(self) -> "BaseRelation":
         return self.__invert__()
 
-    def __invert__(self) -> "BaseAtom":
-        return BaseAtom(self.predicate, self.terms, not self.negated)
+    def __invert__(self) -> "BaseRelation":
+        return BaseRelation(self.predicate, self.terms, not self.negated)
 
     def __truediv__(self, other):
         if not isinstance(other, int) or self.predicate.arity != 0 or other < 0:
@@ -37,7 +32,7 @@ class BaseAtom:
         name, hidden, special = self.predicate.name, self.predicate.hidden, self.predicate.special
         return factories.AtomFactory.Predicate.get_predicate(name, other, hidden, special)
 
-    def __call__(self, *args) -> "BaseAtom":
+    def __call__(self, *args) -> "BaseRelation":
         if self.terms:
             raise Exception
 
@@ -50,12 +45,12 @@ class BaseAtom:
         name, hidden, special = self.predicate.name, self.predicate.hidden, self.predicate.special
         predicate = factories.AtomFactory.Predicate.get_predicate(name, arity, hidden, special)
 
-        return BaseAtom(predicate, terms, self.negated)
+        return BaseRelation(predicate, terms, self.negated)
 
-    def __getitem__(self, item) -> "WeightedAtom":
-        return WeightedAtom(self, item)
+    def __getitem__(self, item) -> "WeightedRelation":
+        return WeightedRelation(item, self.predicate, False, self.terms, self.negated)
 
-    def __le__(self, other: Body) -> rule.Rule:
+    def __le__(self, other: Union[Iterable["BaseRelation"], "BaseRelation"]) -> rule.Rule:
         return rule.Rule(self, other)
 
     def to_str(self, end=False) -> str:
@@ -71,15 +66,19 @@ class BaseAtom:
         return self.to_str(True)
 
     def __copy__(self):
-        atom = BaseAtom.__new__(BaseAtom)
+        atom = BaseRelation.__new__(BaseRelation)
         atom.negated = self.negated
         atom.terms = self.terms
         atom.predicate = self.predicate
 
+        return atom
 
-class WeightedAtom:  # todo gusta: mozna dedeni namisto kompozice?
-    def __init__(self, atom: BaseAtom, weight, fixed=False):
-        self.atom = atom
+
+class WeightedRelation(BaseRelation):
+    __slots__ = "weight", "weight_name", "is_fixed"
+
+    def __init__(self, weight, predicate: Predicate, fixed=False, terms=None, negated=False):
+        super().__init__(predicate, terms, negated)
 
         self.weight = weight
         self.weight_name = None
@@ -97,31 +96,16 @@ class WeightedAtom:  # todo gusta: mozna dedeni namisto kompozice?
         elif isinstance(weight, Iterable) and not isinstance(weight, tuple):
             self.weight = list(weight)
 
-    def fixed(self) -> "WeightedAtom":
+    def fixed(self) -> "WeightedRelation":
         if self.is_fixed:
-            raise Exception
-        return WeightedAtom(self.atom, self.weight, True)
+            raise Exception(f"Weighted relation is already fixed")
+        return WeightedRelation(self.weight, self.predicate, True, self.terms, self.negated)
 
-    @property
-    def negated(self):
-        return self.atom.negated
+    def __invert__(self) -> "WeightedRelation":
+        return WeightedRelation(self.weight, self.predicate, self.is_fixed, self.terms, not self.negated)
 
-    @property
-    def predicate(self):
-        return self.atom.predicate
-
-    @property
-    def terms(self):  # todo gusta: ...tim bys usetril toto volani atp.
-        return self.atom.terms
-
-    def __invert__(self) -> "WeightedAtom":
-        return WeightedAtom(~self.atom, self.weight, self.is_fixed)
-
-    def __neg__(self) -> "WeightedAtom":
+    def __neg__(self) -> "WeightedRelation":
         return self.__invert__()
-
-    def __le__(self, other: Body) -> rule.Rule:
-        return rule.Rule(self, other)
 
     def to_str(self, end=False):
         if isinstance(self.weight, tuple):
@@ -132,14 +116,25 @@ class WeightedAtom:  # todo gusta: mozna dedeni namisto kompozice?
             weight = f"${self.weight_name}={weight}"
 
         if self.is_fixed:
-            return f"<{weight}> {self.atom.to_str(end)}"
-        return f"{weight} {self.atom.to_str(end)}"
+            return f"<{weight}> {super().to_str(end)}"
+        return f"{weight} {super().to_str(end)}"
 
     def __str__(self):
         return self.to_str(True)
 
+    def __call__(self, *args) -> None:
+        raise NotImplementedError(f"Cannot assign terms to weighted relation {self.predicate}")
+
+    def __getitem__(self, item) -> None:
+        raise NotImplementedError(f"Cannot assign weight to weighted relation {self.predicate}")
+
     def __copy__(self):
-        atom = WeightedAtom.__new__(WeightedAtom)
-        atom.atom = self.atom
-        atom.weight = self.weight
-        atom.is_fixed = self.is_fixed
+        relation = WeightedRelation.__new__(WeightedRelation)
+
+        relation.predicate = self.predicate
+        relation.negated = self.negated
+        relation.terms = self.terms
+        relation.weight = self.weight
+        relation.is_fixed = self.is_fixed
+
+        return relation

@@ -8,7 +8,7 @@
 [![Documentation Status](https://readthedocs.org/projects/pyneuralogic/badge/?version=latest)](https://pyneuralogic.readthedocs.io/en/latest/?badge=latest)
 
 
-[Documentation](https://pyneuralogic.readthedocs.io/en/latest/) | [Examples](#Examples) | [Papers](#Papers)
+[Documentation](https://pyneuralogic.readthedocs.io/en/latest/) | [Examples](#-examples) | [Papers](#-papers)
 
 PyNeuraLogic lets you use Python to write **Differentiable Logic Programs**
 
@@ -29,13 +29,13 @@ Many things! For instance - ever heard of [Graph Neural Networks](https://distil
 
 Or, a bit more 'formally':
 
-```
+```logtalk
 Relation.message2(Var.X) <= (Relation.message1(Var.Y), Relation.edge(Var.Y, Var.X))
 ```
 
 ...and that's the actual _code_! Now for a classic learnable GNN layer, you'll want to add some weights, such as
 
-```
+```logtalk
 Relation.message2(Var.X)[5,10] <= (Relation.message1(Var.Y)[10,20], Relation.edge(Var.Y, Var.X))
 ```
 
@@ -43,7 +43,7 @@ to project your `[1,20]` input node embeddings ('message1') through a learnable 
 
 If you don't like the default settings, you can of course [specify](https://pyneuralogic.readthedocs.io/en/latest/language.html) various additional details, such as the particular aggregation and activation functions
 
-```
+```logtalk
 R.message2(V.X)[5,10] <= (R.message1(V.Y)[10,20], R.edge(V.Y, V.X)) | [Activation.RELU, Aggregation.AVG]
 ```
 
@@ -79,7 +79,7 @@ We hope you'll find the framework useful in designing _your own_ deep **relation
 Please let us know if you need some guidance or would like to cooperate!
 
 
-## Getting started
+## 💡 Getting started
 
 
 ### Prerequisites
@@ -99,10 +99,14 @@ To install PyNeuraLogic's latest release from the PyPI repository, use the follo
 $ pip install neuralogic
 ```
 
-## Examples
+## 🔬 Examples
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb) [Simple XOR example](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb)
 <br />
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/Mutagenesis.ipynb) [Molecular GNNs](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Mutagenesis.ipynb)
+<br />
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/RecursiveXORGeneralization.ipynb) [Recursive XOR generalization](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/RecursiveXORGeneralization.ipynb)
+<br />
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/Visualization.ipynb) [Visualization](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Visualization.ipynb)
 <br />
 <br />
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/PatternMatching.ipynb) [Subgraph Patterns](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/PatternMatching.ipynb)
@@ -113,7 +117,23 @@ $ pip install neuralogic
 
 <br />
 
-## Papers
+
+## 🦓 Predefined Modules
+
+PyNeuraLogic has a set of predefined modules to get you quickly started with your experimenting!
+
+It contains, for example, predefined modules for:
+
+- GCNConv
+- SAGEConv
+- GINConv
+- RGCNConv
+- TAGConv
+- GATv2Conv
+- SGConv
+- [...and more!](https://pyneuralogic.readthedocs.io/en/latest/zoo.html)
+
+## 📝 Papers
 
 [Beyond Graph Neural Networks with Lifted Relational Neural Networks](https://arxiv.org/abs/2007.06286) Machine Learning Journal, 2021
 

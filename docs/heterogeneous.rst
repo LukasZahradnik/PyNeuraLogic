@@ -15,7 +15,7 @@ and edges' classes out of the box.
 |
 
 Let's consider the graph in the above figure, where nodes' color represents their type (either *Blue* or *Pink*).
-We can represent introduced nodes' types in the input examples, for example, as the following list of ground atoms:
+We can represent introduced nodes' types in the input examples, for example, as the following list of ground relations:
 
 .. code-block:: Python
 
@@ -52,7 +52,7 @@ rule for the aggregation of neighbor nodes of the central node with the same typ
     )
 
 
-Since types are just regular constructs (atoms) in PyNeuraLogic, we are able to manipulate them as anything else.
+Since types are just regular constructs (relations) in PyNeuraLogic, we are able to manipulate them as anything else.
 We can, for example, create hierarchies of types or, as is shown in the following example, attach features to types in
 input examples and then utilize them in the aggregation.
 

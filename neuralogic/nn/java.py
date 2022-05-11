@@ -9,7 +9,7 @@ from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.enums import Backend
 
 
-class Loss:
+class LossResult:
     def __init__(self, loss, number_format):
         self.loss = loss
         self.number_format = number_format
@@ -28,15 +28,6 @@ class Loss:
 
 
 class NeuraLogic(AbstractNeuraLogic):
-    @jpype.JImplements(jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler"))
-    class HookHandler:
-        def __init__(self, module: "NeuraLogic"):
-            self.module = module
-
-        @jpype.JOverride
-        def handleHook(self, hook, value):
-            self.module.run_hook(hook, json.loads(value))
-
     def __init__(self, model, dataset_builder, template, settings: SettingsProxy):
         super().__init__(Backend.JAVA, dataset_builder, template, settings)
 
@@ -54,7 +45,18 @@ class NeuraLogic(AbstractNeuraLogic):
         self.strategy = python_strategy(settings.settings, model)
         self.samples_len = 0
 
-        self.hook_handler = NeuraLogic.HookHandler(self)
+        @jpype.JImplements(
+            jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler")
+        )
+        class HookHandler:
+            def __init__(self, module: "NeuraLogic"):
+                self.module = module
+
+            @jpype.JOverride
+            def handleHook(self, hook, value):
+                self.module.run_hook(hook, json.loads(value))
+
+        self.hook_handler = HookHandler(self)
         self.reset_parameters()
 
     def reset_parameters(self):
@@ -91,7 +93,7 @@ class NeuraLogic(AbstractNeuraLogic):
                     result = self.strategy.learnSample(samples.java_sample)
                     return json.loads(str(result)), 1
             result = self.strategy.evaluateSample(samples.java_sample)
-            return Loss(result, self.settings.settings_class.superDetailedNumberFormat)
+            return LossResult(result, self.settings.settings_class.superDetailedNumberFormat)
 
         if self.do_train:
             results = self.strategy.learnSamples(
@@ -107,6 +109,7 @@ class NeuraLogic(AbstractNeuraLogic):
     def state_dict(self) -> Dict:
         weights = self.neural_model.getAllWeights()
         weights_dict = {}
+        weight_names = {}
 
         for weight in weights:
             if weight.isLearnable:
@@ -115,16 +118,15 @@ class NeuraLogic(AbstractNeuraLogic):
                 size = list(value.size())
 
                 if len(size) == 0 or size[0] == 0:
-                    try:
-                        weights_dict[weight.index] = value.value
-                    except Exception:
-                        weights_dict[weight.index] = 1.0
+                    weights_dict[weight.index] = value.get(0)
                 elif len(size) == 1 or size[0] == 1 or size[1] == 1:
                     weights_dict[weight.index] = list(value.values)
                 else:
-                    weights_dict[weight.index] = json.loads(value.toString())
+                    weights_dict[weight.index] = [list(value) for value in value.values]
+                weight_names[weight.index] = weight.name
         return {
             "weights": weights_dict,
+            "weight_names": weight_names,
         }
 
     def load_state_dict(self, state_dict: Dict):

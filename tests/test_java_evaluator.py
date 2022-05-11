@@ -1,5 +1,6 @@
 from typing import List
 
+from neuralogic import manual_seed
 from neuralogic.core import Settings, Optimizer, Template, Backend
 from neuralogic.dataset.base import BaseDataset
 from neuralogic.nn import get_evaluator
@@ -245,9 +246,10 @@ import pytest
 )
 def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expected_results: List[float]) -> None:
     """Tests for running java evaluator on files"""
+    manual_seed(0)
     settings = Settings(optimizer=Optimizer.SGD, learning_rate=0.1, epochs=50)
 
-    evaluator = get_evaluator(template, Backend.JAVA, settings)
+    evaluator = get_evaluator(template, settings, Backend.JAVA)
 
     built_dataset = evaluator.build_dataset(dataset)
     evaluator.train(built_dataset, generator=False)
@@ -350,9 +352,10 @@ def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expect
 )
 def test_evaluator_run_on_rules(template: Template, dataset: BaseDataset, expected_results: List[float]) -> None:
     """Tests for running java evaluator on rules"""
+    manual_seed(0)
     settings = Settings(optimizer=Optimizer.SGD, learning_rate=0.1, epochs=300)
 
-    evaluator = get_evaluator(template, Backend.JAVA, settings)
+    evaluator = get_evaluator(template, settings, Backend.JAVA)
 
     built_dataset = evaluator.build_dataset(dataset)
     evaluator.train(built_dataset, generator=False)
@@ -377,7 +380,7 @@ def test_evaluator_state_loading(template: Template, dataset: BaseDataset) -> No
     """Tests for loading state"""
     settings = Settings(optimizer=Optimizer.SGD, learning_rate=0.1, epochs=20)
 
-    evaluator = get_evaluator(template, Backend.JAVA, settings)
+    evaluator = get_evaluator(template, settings, Backend.JAVA)
     built_dataset = evaluator.build_dataset(dataset)
     evaluator.train(built_dataset, generator=False)
 
@@ -385,7 +388,7 @@ def test_evaluator_state_loading(template: Template, dataset: BaseDataset) -> No
     for _, predicted in evaluator.test(built_dataset):
         results.append(round(predicted, 5))
 
-    second_evaluator = get_evaluator(template, Backend.JAVA, settings)
+    second_evaluator = get_evaluator(template, settings, Backend.JAVA)
     built_dataset = second_evaluator.build_dataset(dataset)
 
     second_results = []

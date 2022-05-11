@@ -7,11 +7,19 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   neuralogic.nn.evaluators
-   neuralogic.nn.native
+   neuralogic.nn.evaluator
 
 Submodules
 ----------
+
+
+neuralogic.nn.init module
+-------------------------
+
+.. automodule:: neuralogic.nn.init
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 neuralogic.nn.base module
 -------------------------

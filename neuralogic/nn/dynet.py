@@ -4,7 +4,8 @@ import numpy as np
 
 from neuralogic.core.builder import Sample, Weight, Neuron
 from neuralogic.core.settings import SettingsProxy
-from neuralogic.core.enums import Initializer, Backend
+from neuralogic.core.enums import Backend
+from neuralogic.nn.init import InitializerNames
 from neuralogic.nn.base import AbstractNeuraLogic
 
 
@@ -29,16 +30,16 @@ class NeuraLogic(AbstractNeuraLogic):
     }
 
     initializers = {
-        Initializer.HE: lambda model, weight, _: model.add_parameters(weight.dimensions, init="he"),
-        Initializer.GLOROT: lambda model, weight, _: model.add_parameters(weight.dimensions, init="glorot"),
-        Initializer.NORMAL: lambda model, weight, _: model.add_parameters(weight.dimensions, init="normal"),
-        Initializer.UNIFORM: lambda model, weight, settings: model.add_parameters(
+        InitializerNames.HE: lambda model, weight, _: model.add_parameters(weight.dimensions, init="he"),
+        InitializerNames.GLOROT: lambda model, weight, _: model.add_parameters(weight.dimensions, init="glorot"),
+        InitializerNames.NORMAL: lambda model, weight, _: model.add_parameters(weight.dimensions, init="normal"),
+        InitializerNames.UNIFORM: lambda model, weight, settings: model.add_parameters(
             weight.dimensions, init="uniform", scale=settings.initializer_uniform_scale
         ),
-        Initializer.CONSTANT: lambda model, weight, settings: model.add_parameters(
+        InitializerNames.CONSTANT: lambda model, weight, settings: model.add_parameters(
             weight.dimensions, init=settings.initializer_const
         ),
-        Initializer.LONGTAIL: longtail,
+        InitializerNames.LONGTAIL: longtail,
     }
 
     def __init__(self, model: List[Weight], dataset_builder, template, settings: Optional[SettingsProxy] = None):
@@ -51,7 +52,7 @@ class NeuraLogic(AbstractNeuraLogic):
         self.reset_parameters()
 
     def reset_parameters(self):
-        initializer = Initializer[str(self.settings.initializer)]
+        initializer = str(self.settings.initializer)
 
         if initializer not in NeuraLogic.initializers:
             raise NotImplementedError

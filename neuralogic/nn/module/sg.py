@@ -31,14 +31,14 @@ class SGConv(Module):
 
     .. code:: logtalk
 
-        (R.h1(V.I0)[2, 3] <= (R.h0(V.I2), R._edge(V.I1, V.I0), R._edge(V.I2, V.I1))) | [Activation.IDENTITY, Aggregation.SUM]
+        (R.h1(V.I0)[3, 2] <= (R.h0(V.I2), R._edge(V.I1, V.I0), R._edge(V.I2, V.I1))) | [Activation.IDENTITY, Aggregation.SUM]
         R.h1 / 1 | [Activation.IDENTITY]
 
     Module parametrized as :code:`SGConv(2, 3, "h1", "h0", "_edge", 1)` translates into:
 
     .. code:: logtalk
 
-        (R.h1(V.I0)[2, 3] <= (R.h0(V.I1), R._edge(V.I1, V.I0))) | [Activation.IDENTITY, Aggregation.SUM]
+        (R.h1(V.I0)[3, 2] <= (R.h0(V.I1), R._edge(V.I1, V.I0))) | [Activation.IDENTITY, Aggregation.SUM]
         R.h1 / 1 | [Activation.IDENTITY]
 
 

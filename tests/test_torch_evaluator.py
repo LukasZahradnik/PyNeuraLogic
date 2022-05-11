@@ -1,5 +1,6 @@
 from typing import List
 
+from neuralogic import manual_seed
 from neuralogic.core import Settings, Optimizer, Template, Backend
 from neuralogic.dataset.base import BaseDataset
 from neuralogic.nn import get_evaluator
@@ -53,10 +54,11 @@ import pytest
 def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expected_results: List[float]) -> None:
     """Tests for running torch evaluator on files"""
     torch.manual_seed(1)
+    manual_seed(0)
 
     settings = Settings(optimizer=Optimizer.SGD, learning_rate=0.1, epochs=50)
 
-    evaluator = get_evaluator(template, Backend.TORCH, settings)
+    evaluator = get_evaluator(template, settings, Backend.TORCH)
 
     built_dataset = evaluator.build_dataset(dataset)
     evaluator.train(built_dataset, generator=False)
@@ -162,10 +164,11 @@ def test_evaluator_run_on_rules(
 ) -> None:
     """Tests for running torch evaluator on rules"""
     torch.manual_seed(seed)
+    manual_seed(0)
 
     settings = Settings(optimizer=Optimizer.SGD, epochs=100)
 
-    evaluator = get_evaluator(template, Backend.TORCH, settings)
+    evaluator = get_evaluator(template, settings, Backend.TORCH)
 
     built_dataset = evaluator.build_dataset(dataset)
     evaluator.train(built_dataset, generator=False)
@@ -191,7 +194,7 @@ def test_evaluator_state_loading(template: Template, dataset: BaseDataset, seed:
     torch.manual_seed(seed)
     settings = Settings(optimizer=Optimizer.SGD, learning_rate=0.1, epochs=20)
 
-    evaluator = get_evaluator(template, Backend.TORCH, settings)
+    evaluator = get_evaluator(template, settings, Backend.TORCH)
     built_dataset = evaluator.build_dataset(dataset)
     evaluator.train(built_dataset, generator=False)
 
@@ -200,7 +203,7 @@ def test_evaluator_state_loading(template: Template, dataset: BaseDataset, seed:
     for _, predicted in evaluator.test(built_dataset):
         results.append(round(predicted, 3))
 
-    second_evaluator = get_evaluator(template, Backend.TORCH, settings)
+    second_evaluator = get_evaluator(template, settings, Backend.TORCH)
     built_dataset = second_evaluator.build_dataset(dataset)
 
     second_results = []

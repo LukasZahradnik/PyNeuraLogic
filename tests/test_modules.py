@@ -45,8 +45,8 @@ def test_sageconv():
     template += SAGEConv(1, 2, "h1", "h0", "_edge")
     template_str = str(template).split("\n")
 
-    assert template_str[0] == "{2, 1} h1(I) :- h0(J), *edge(J, I). [activation=identity, aggregation=sum]"
-    assert template_str[1] == "{2, 1} h1(I) :- h0(I). [activation=identity, aggregation=sum]"
+    assert template_str[0] == "{2, 1} h1(I) :- h0(J), *edge(J, I). [activation=identity, aggregation=avg]"
+    assert template_str[1] == "{2, 1} h1(I) :- h0(I). [activation=identity, aggregation=avg]"
     assert template_str[2] == "h1/1 [activation=identity]"
 
 

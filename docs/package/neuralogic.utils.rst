@@ -8,7 +8,6 @@ Subpackages
    :maxdepth: 4
 
    neuralogic.utils.data
-   neuralogic.utils.templates
    neuralogic.utils.visualize
 
 Module contents

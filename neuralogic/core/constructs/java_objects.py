@@ -10,7 +10,7 @@ from neuralogic.core.settings import SettingsProxy, Settings
 class JavaFactory:
     def __init__(self, settings: Optional[SettingsProxy] = None):
         from neuralogic.core.constructs.rule import Rule
-        from neuralogic.core.constructs.atom import WeightedAtom
+        from neuralogic.core.constructs.relation import WeightedRelation
 
         if not is_initialized():
             initialize()
@@ -19,7 +19,7 @@ class JavaFactory:
             settings = Settings().create_proxy()
         self.settings = settings
 
-        self.weighted_atom_type = WeightedAtom
+        self.weighted_atom_type = WeightedRelation
         self.rule_type = Rule
 
         self.predicate_metadata = jpype.JClass("cz.cvut.fel.ida.logic.constructs.template.metadata.PredicateMetadata")

@@ -38,7 +38,7 @@ def test_draw_model_from_template():
 def test_draw_model_from_evaluator():
     template, dataset = XOR_Vectorized()
 
-    evaluator = get_evaluator(template, Backend.JAVA)
+    evaluator = get_evaluator(template)
     result = evaluator.draw(draw_ipython=False)
 
     assert isinstance(result, bytes)
