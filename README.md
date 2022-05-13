@@ -82,6 +82,15 @@ Please let us know if you need some guidance or would like to cooperate!
 ## 💡 Getting started
 
 
+### Installation
+
+To install PyNeuraLogic's latest release from the PyPI repository, use the following command:
+
+```commandline
+$ pip install neuralogic
+```
+
+
 ### Prerequisites
 
 To use PyNeuraLogic, you need to install the following prerequisites:
@@ -91,13 +100,7 @@ Python >= 3.7
 Java >= 1.8
 ```
 
-### Installation
-
-To install PyNeuraLogic's latest release from the PyPI repository, use the following command:
-
-```commandline
-$ pip install neuralogic
-```
+In case you want to use visualization provided in the library, it is required to have [Graphviz](https://graphviz.org/download/) installed.
 
 ## 🔬 Examples
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb) [Simple XOR example](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb)
