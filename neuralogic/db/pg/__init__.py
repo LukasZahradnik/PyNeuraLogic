@@ -124,14 +124,14 @@ $$ LANGUAGE SQL STABLE;
         inner_value_select = []
         from_clause = []
 
-        for index, term in enumerate(rule.head.terms):
+        for term_idx, term in enumerate(rule.head.terms):
             if Convertor._is_var(term):
-                term_name = f"t{index}"
+                term_name = f"t{term_idx}"
                 vars_mapping[str(term)] = term_name
 
                 select.append(f"out.{term_name} as {term_name}")
             else:
-                select.append(f"'{term}' as t{index}")
+                select.append(f"'{term}' as t{term_idx}")
 
         for t_index, (relation, weight_id) in enumerate(zip(rule.body, weight_indices[1:])):
             join_on = []
@@ -148,11 +148,11 @@ $$ LANGUAGE SQL STABLE;
             if len(inner_value_select) == 2:
                 inner_value_select = [f"pynelo_sum({', '.join(inner_value_select)})"]
 
-            for index, term in enumerate(relation.terms):
+            for term_idx, term in enumerate(relation.terms):
                 if relation_mapping is None:
-                    field = f"t{index}"
+                    field = f"t{term_idx}"
                 else:
-                    field = relation_mapping.term_columns[index]
+                    field = relation_mapping.term_columns[term_idx]
 
                 if not self._is_var(term):
                     where.append(f"s{t_index}.{field} = '{str(term)}'")

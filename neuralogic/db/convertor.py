@@ -123,7 +123,7 @@ class Convertor:
 
                 sql_source.append(self.get_relation_interface_sql_function(name, arity))
 
-        self.std_functions = "\n".join(self.get_helpers(used_functions))
+        self.std_functions = self.get_helpers(used_functions)
         self.sql_source = "\n".join(sql_source)
 
     def get_relation_interface_sql_function(self, relation: str, arity: int) -> str:
@@ -146,6 +146,9 @@ class Convertor:
         raise NotImplementedError
 
     def get_std_functions(self) -> str:
+        if self.sql_source is None:
+            self._convert()
+
         return self.std_functions
 
     def to_sql(self) -> str:
