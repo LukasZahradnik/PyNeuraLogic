@@ -28,8 +28,8 @@ class LossResult:
 
 
 class NeuraLogic(AbstractNeuraLogic):
-    def __init__(self, model, template, settings: SettingsProxy):
-        super().__init__(Backend.JAVA, template, settings)
+    def __init__(self, model, dataset_builder, template, settings: SettingsProxy):
+        super().__init__(Backend.JAVA, dataset_builder, template, settings)
 
         if not is_initialized():
             initialize()
@@ -46,7 +46,8 @@ class NeuraLogic(AbstractNeuraLogic):
         self.samples_len = 0
 
         @jpype.JImplements(
-            jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler"))
+            jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler")
+        )
         class HookHandler:
             def __init__(self, module: "NeuraLogic"):
                 self.module = module

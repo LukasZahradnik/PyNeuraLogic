@@ -9,9 +9,10 @@ from neuralogic.utils.visualize import draw_model
 
 
 class AbstractNeuraLogic:
-    def __init__(self, backend: Backend, dataset_builder: DatasetBuilder, settings: SettingsProxy):
+    def __init__(self, backend: Backend, dataset_builder: DatasetBuilder, template: Template, settings: SettingsProxy):
         self.need_sync = True
 
+        self.source_template = [rule for rule in template.template]
         self.template = dataset_builder.parsed_template
         self.dataset_builder = dataset_builder
 

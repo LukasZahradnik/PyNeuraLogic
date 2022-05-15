@@ -41,8 +41,8 @@ class NeuraLogic(AbstractNeuraLogic):
         InitializerNames.HE: lambda tensor, _: torch.nn.init.kaiming_uniform_(tensor),
     }
 
-    def __init__(self, model: List[Weight], template, settings: Optional[SettingsProxy] = None):
-        super().__init__(Backend.TORCH, template, settings)
+    def __init__(self, model: List[Weight], dataset_builder, template, settings: Optional[SettingsProxy] = None):
+        super().__init__(Backend.TORCH, dataset_builder, template, settings)
 
         self.model: Optional[torch.nn.ParameterList] = None
         self.weights_meta = model

@@ -42,8 +42,8 @@ class NeuraLogic(AbstractNeuraLogic):
         InitializerNames.LONGTAIL: longtail,
     }
 
-    def __init__(self, model: List[Weight], template, settings: Optional[SettingsProxy] = None):
-        super().__init__(Backend.DYNET, template, settings)
+    def __init__(self, model: List[Weight], dataset_builder, template, settings: Optional[SettingsProxy] = None):
+        super().__init__(Backend.DYNET, dataset_builder, template, settings)
 
         self.model: Optional[dy.ParameterCollection] = None
         self.weights_meta = model
