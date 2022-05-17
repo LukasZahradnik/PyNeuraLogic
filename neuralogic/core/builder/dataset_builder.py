@@ -8,14 +8,14 @@ from neuralogic import is_initialized, initialize
 from neuralogic.core.builder.builder import Builder
 from neuralogic.core.builder.components import BuiltDataset
 from neuralogic.core.enums import Backend
-from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
+from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
 
 
-TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
+TemplateEntries = Union[BaseRelation, WeightedRelation, Rule]
 
 
 class DatasetBuilder:
@@ -118,17 +118,19 @@ class DatasetBuilder:
         :return:
         """
         if isinstance(dataset, datasets.TensorDataset):
-            if not file_mode:
-                return self.build_dataset(dataset.to_dataset(), backend, settings, False)
+            if file_mode:
+                with tempfile.NamedTemporaryFile(mode="w", suffix=".txt") as q_tf, tempfile.NamedTemporaryFile(
+                    mode="w", suffix=".txt"
+                ) as e_tf:
+                    dataset.dump(q_tf, e_tf)
 
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".txt") as q_tf,\
-                    tempfile.NamedTemporaryFile(mode="w", suffix=".txt") as e_tf:
-                dataset.dump(q_tf, e_tf)
+                    q_tf.flush()
+                    e_tf.flush()
 
-                q_tf.flush()
-                e_tf.flush()
+                    return self.build_dataset(datasets.FileDataset(e_tf.name, q_tf.name), backend, settings, False)
 
-                return self.build_dataset(datasets.FileDataset(e_tf.name, q_tf.name), backend, settings, False)
+        if isinstance(dataset, datasets.ConvertableDataset):
+            return self.build_dataset(dataset.to_dataset(), backend, settings, False)
 
         if isinstance(dataset, datasets.Dataset):
             self.examples_counter = 0

@@ -1,6 +1,6 @@
 from typing import Dict
 from neuralogic.core.constructs.predicate import Predicate
-from neuralogic.core.constructs import atom
+from neuralogic.core.constructs import relation
 
 
 class AtomFactory:
@@ -22,19 +22,19 @@ class AtomFactory:
             return Predicate(name, arity, hidden, special)
 
         def __getattr__(self, item):
-            return atom.BaseAtom(Predicate(item, 0, self.is_hidden, self.is_special))
+            return relation.BaseRelation(Predicate(item, 0, self.is_hidden, self.is_special))
 
     def __init__(self):
-        self.instances: Dict[str, Dict[int, atom.BaseAtom]] = {}
+        self.instances: Dict[str, Dict[int, relation.BaseRelation]] = {}
 
         self.special = AtomFactory.Predicate(special=True)
         self.hidden = AtomFactory.Predicate(hidden=True)
 
-    def get(self, name: str) -> atom.BaseAtom:
-        return atom.BaseAtom(Predicate(name, 0, False, False))
+    def get(self, name: str) -> relation.BaseRelation:
+        return relation.BaseRelation(Predicate(name, 0, False, False))
 
-    def __getattr__(self, item) -> atom.BaseAtom:
-        return atom.BaseAtom(Predicate(item, 0, False, False))
+    def __getattr__(self, item) -> relation.BaseRelation:
+        return relation.BaseRelation(Predicate(item, 0, False, False))
 
 
 class VariableFactory:

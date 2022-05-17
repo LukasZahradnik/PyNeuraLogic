@@ -4,6 +4,8 @@ from typing import Iterable, Optional
 
 
 class Rule:
+    __slots__ = "head", "body", "metadata"
+
     def __init__(self, head, body):
         from neuralogic.core import Relation
 
