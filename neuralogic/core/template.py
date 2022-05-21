@@ -149,7 +149,9 @@ class Template:
 
         parsed_template = self.get_parsed_template(settings_proxy, java_factory)
         model = Builder(settings_proxy).build_model(parsed_template, Backend.JAVA, settings_proxy)
-        layer = get_neuralogic_layer(Backend.JAVA)(model, DatasetBuilder(parsed_template, java_factory), settings_proxy)
+        layer = get_neuralogic_layer(Backend.JAVA)(
+            model, DatasetBuilder(parsed_template, java_factory), self, settings_proxy
+        )
 
         return draw_model(layer, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs)
 
