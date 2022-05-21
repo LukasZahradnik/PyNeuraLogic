@@ -107,7 +107,6 @@ class ResGatedGraphConv(Module):
         return [
             (gate(V.I, V.J) <= (feature(V.I)[w], feature(V.J)[w])) | [Activation.IDENTITY],
             gate / 2 | Metadata(activation=self.gating_activation),
-
             (head <= feature(V.I)[w]) | [Activation.IDENTITY],
             (head <= (gate(V.I, V.J), feature(V.J)[w], R.get(self.edge_name)(V.J, V.I))) | prod_metadata,
             R.get(self.output_name) / 1 | Metadata(activation=self.activation),

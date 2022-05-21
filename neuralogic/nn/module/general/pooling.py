@@ -109,6 +109,7 @@ class MaxPooling(Pooling):
     input_arity : int
         Arity of the input predicate ``input_name``. Default: ``1``
     """
+
     def __init__(self, output_name: str, input_name: str, input_arity: int = 1):
         super().__init__(output_name, input_name, Aggregation.MAX, input_arity)
 
@@ -146,6 +147,7 @@ class AvgPooling(Pooling):
     input_arity : int
         Arity of the input predicate ``input_name``. Default: ``1``
     """
+
     def __init__(self, output_name: str, input_name: str, input_arity: int = 1):
         super().__init__(output_name, input_name, Aggregation.AVG, input_arity)
 
