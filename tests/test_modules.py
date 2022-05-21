@@ -1,6 +1,15 @@
 from neuralogic.core import Template, Activation, Aggregation
-from neuralogic.nn.module import RGCNConv, SAGEConv, GCNConv, GINConv, TAGConv, GATv2Conv, SGConv, APPNPConv, \
-    ResGatedGraphConv
+from neuralogic.nn.module import (
+    RGCNConv,
+    SAGEConv,
+    GCNConv,
+    GINConv,
+    TAGConv,
+    GATv2Conv,
+    SGConv,
+    APPNPConv,
+    ResGatedGraphConv,
+)
 
 
 def test_rgcnconv():
@@ -164,6 +173,3 @@ def test_res_gated():
     assert template_str[2] == "h1(I) :- {2, 1} h0(I). [activation=identity]"
     assert template_str[3] == rule
     assert template_str[4] == "h1/1 [activation=identity]"
-
-    print()
-    print(template)

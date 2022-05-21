@@ -1,3 +1,5 @@
+from typing import Union
+
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.enums import Activation
 from neuralogic.core.constructs.factories import R, V
@@ -20,6 +22,8 @@ class RNNCell(Module):
         hidden_input_name: str,
         activation: Activation = Activation.TANH,
         arity: int = 1,
+        step: Union[str, int] = V.Y,
+        next_name: str = "_rnn_next",
     ):
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -30,21 +34,25 @@ class RNNCell(Module):
 
         self.activation = activation
         self.arity = arity
+        self.step = step
+        self.next_name = next_name
 
     def __call__(self):
         terms = [f"X{i}" for i in range(self.arity)]
         output = R.get(self.output_name)
 
+        rnn_rule = output([*terms, self.step]) <= (
+            R.get(self.input_name)([*terms, self.step])[self.hidden_size, self.input_size],
+            R.get(self.hidden_input_name)(terms)[self.hidden_size, self.hidden_size],
+        )
+
+        if self.step != 1:
+            rnn_rule.body[-1].terms.append(V.Z)
+            rnn_rule.body.append(R.get(self.next_name)(V.Z, self.step))
+
         return [
-            (
-                output(terms)
-                <= (
-                    R.get(self.input_name)(terms)[self.hidden_size, self.input_size],
-                    R.get(self.hidden_input_name)(terms)[self.hidden_size, self.hidden_size],
-                )
-            )
-            | [Activation.IDENTITY],
-            output / (self.arity) | Metadata(activation=self.activation),
+            rnn_rule | [Activation.IDENTITY],
+            output / (self.arity + 1) | Metadata(activation=self.activation),
         ]
 
 
@@ -81,9 +89,10 @@ class RNN(Module):
             self.hidden_size,
             self.output_name,
             self.input_name,
-            self.input_name,
+            self.output_name,
             self.activation,
             self.arity,
+            next_name=self.next_name,
         )
         input_cell = RNNCell(
             self.input_size,
@@ -93,23 +102,22 @@ class RNN(Module):
             self.hidden_0_name,
             self.activation,
             self.arity,
+            step=1,
         )
 
         rec_rules = recursive_cell()
         input_rules = input_cell()
 
-        rec_rules[0].head.terms.append(V.Y)
-        rec_rules[0].body.append(R.get(self.next_name)(V.Z, V.Y))
-        rec_rules[0].body[1].terms.append(V.Z)
-
-        input_rules[0].head.terms.append(1)
-        input_rules[1].predicate.arity += 1
-
         next_relation = R.get(self.next_name)
+        terms = [f"X{i}" for i in range(self.arity)]
+
+        output_relation = R.get(self.output_name)
 
         return [
-            *[next_relation(i, i + 1) for i in range(self.num_layers - 1)],
+            *[next_relation(i, i + 1) for i in range(1, self.num_layers)],
             rec_rules[0],
             input_rules[0],
             input_rules[1],
+            (output_relation(terms) <= output_relation([*terms, self.num_layers])) | [Activation.IDENTITY],
+            output_relation / self.arity | [Activation.IDENTITY],
         ]
