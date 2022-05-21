@@ -4,9 +4,10 @@ from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.enums import Activation
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
+from neuralogic.nn.module.general.rnn import RNNCell
 
 
-class RNNCell(Module):
+class GRUCell(Module):
     r"""
 
     Parameters
@@ -61,25 +62,87 @@ class RNNCell(Module):
 
     def __call__(self):
         terms = [f"X{i}" for i in range(self.arity)]
-        output = R.get(self.output_name)
-
         input_terms = terms
+
+        p_terms = [*terms, V.Z]
+        h_terms = [*terms, V.Y]
+
         if self.input_time_step:
             input_terms = [*input_terms, V.Y]
 
-        rnn_rule = output([*terms, V.Y]) <= (
-            R.get(self.input_name)(input_terms)[self.hidden_size, self.input_size],
-            R.get(self.hidden_input_name)([*terms, V.Z])[self.hidden_size, self.hidden_size],
-            R.get(self.next_name)(V.Z, V.Y),
+        r_name = f"{self.output_name}__r"
+        z_name = f"{self.output_name}__z"
+        n_name = f"{self.output_name}__n"
+        n_helper_name = f"{self.output_name}__n_helper"
+
+        z_minus_name = f"{self.output_name}__mz"
+        h_left_name = f"{self.output_name}__left"
+        h_right_name = f"{self.output_name}__right"
+
+        next_rel = R.get(self.next_name)(V.Z, V.Y)
+
+        r = RNNCell(
+            self.input_size,
+            self.hidden_size,
+            r_name,
+            self.input_name,
+            self.hidden_input_name,
+            Activation.SIGMOID,
+            self.arity,
+            self.input_time_step,
+            self.next_name,
+        )
+        z = RNNCell(
+            self.input_size,
+            self.hidden_size,
+            z_name,
+            self.input_name,
+            self.hidden_input_name,
+            Activation.SIGMOID,
+            self.arity,
+            self.input_time_step,
+            self.next_name,
         )
 
+        h_weight = self.hidden_size, self.hidden_size
+        n_helper = R.get(n_helper_name)(h_terms) <= (
+            R.get(r_name)(h_terms),
+            R.get(self.hidden_input_name)(p_terms)[h_weight],
+            next_rel,
+        )
+
+        i_weight = self.hidden_size, self.input_size
+        n = R.get(n_name)(terms) <= (R.get(self.input_name)(input_terms)[i_weight], R.get(n_helper_name)(h_terms))
+
+        z_minus = R.get(z_minus_name)(h_terms) <= (R.special.true[1.0].fixed(), R.get(z_name)(h_terms)[-1].fixed())
+        h_left = R.get(h_left_name)(h_terms) <= (R.get(z_minus_name)(h_terms), R.get(n_name)(h_terms))
+        h_right = R.get(h_right_name)(h_terms) <= (
+            R.get(z_name)(h_terms),
+            R.get(self.hidden_input_name)(p_terms),
+            next_rel,
+        )
+
+        h = R.get(self.output_name)(h_terms) <= (R.get(h_left_name)(h_terms), R.get(h_right_name)(h_terms))
+
         return [
-            rnn_rule | [Activation.IDENTITY],
-            output / (self.arity + 1) | Metadata(activation=self.activation),
+            *r(),
+            *z(),
+            n_helper | Metadata(activation="elementproduct-identity"),
+            n_helper.head.predicate | [Activation.IDENTITY],
+            n | [Activation.IDENTITY],
+            n.head.predicate | [Activation.TANH],
+            z_minus | [Activation.IDENTITY],
+            z_minus.head.predicate | [Activation.IDENTITY],
+            h_left | Metadata(activation="elementproduct-identity"),
+            h_left.head.predicate | [Activation.IDENTITY],
+            h_right | Metadata(activation="elementproduct-identity"),
+            h_right.head.predicate | [Activation.IDENTITY],
+            h | [Activation.IDENTITY],
+            h.head.predicate | [Activation.IDENTITY],
         ]
 
 
-class RNN(Module):
+class GRU(Module):
     r"""
 
     Parameters
@@ -137,9 +200,9 @@ class RNN(Module):
         self.input_time_step = input_time_step
 
     def __call__(self):
-        temp_output_name = f"{self.output_name}__rnn_cell"
+        temp_output_name = f"{self.output_name}__gru_cell"
 
-        recursive_cell = RNNCell(
+        recursive_cell = GRUCell(
             self.input_size,
             self.hidden_size,
             temp_output_name,
