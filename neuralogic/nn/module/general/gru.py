@@ -1,5 +1,3 @@
-from typing import Union
-
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.enums import Activation
 from neuralogic.core.constructs.factories import R, V
@@ -23,14 +21,8 @@ class GRUCell(Module):
         Input feature predicate name to get features from.
     hidden_input_name : str
         Predicate name to get hidden state from.
-    activation : Activation
-        Activation function.
-        Default: ``Activation.TANH``
     arity : int
         Arity of the input and output predicate. Default: ``1``
-    input_time_step : bool
-        Include the time/iteration step as extra (last) term in the input predicate.
-        Default: ``True``
     next_name : str
         Predicate name to get positive integer sequence from.
         Default: ``_next__positive``
@@ -43,9 +35,7 @@ class GRUCell(Module):
         output_name: str,
         input_name: str,
         hidden_input_name: str,
-        activation: Activation = Activation.TANH,
         arity: int = 1,
-        input_time_step: bool = True,
         next_name: str = "_next__positive",
     ):
         self.input_size = input_size
@@ -55,20 +45,14 @@ class GRUCell(Module):
         self.input_name = input_name
         self.hidden_input_name = hidden_input_name
 
-        self.activation = activation
         self.arity = arity
         self.next_name = next_name
-        self.input_time_step = input_time_step
 
     def __call__(self):
         terms = [f"X{i}" for i in range(self.arity)]
-        input_terms = terms
-
         p_terms = [*terms, V.Z]
-        h_terms = [*terms, V.Y]
-
-        if self.input_time_step:
-            input_terms = [*input_terms, V.Y]
+        h_terms = [*terms, V.T]
+        input_terms = [*terms, V.T]
 
         r_name = f"{self.output_name}__r"
         z_name = f"{self.output_name}__z"
@@ -79,7 +63,7 @@ class GRUCell(Module):
         h_left_name = f"{self.output_name}__left"
         h_right_name = f"{self.output_name}__right"
 
-        next_rel = R.get(self.next_name)(V.Z, V.Y)
+        next_rel = R.get(self.next_name)(V.Z, V.T)
 
         r = RNNCell(
             self.input_size,
@@ -89,7 +73,6 @@ class GRUCell(Module):
             self.hidden_input_name,
             Activation.SIGMOID,
             self.arity,
-            self.input_time_step,
             self.next_name,
         )
         z = RNNCell(
@@ -100,7 +83,6 @@ class GRUCell(Module):
             self.hidden_input_name,
             Activation.SIGMOID,
             self.arity,
-            self.input_time_step,
             self.next_name,
         )
 
@@ -112,9 +94,11 @@ class GRUCell(Module):
         )
 
         i_weight = self.hidden_size, self.input_size
-        n = R.get(n_name)(terms) <= (R.get(self.input_name)(input_terms)[i_weight], R.get(n_helper_name)(h_terms))
+        n = R.get(n_name)(h_terms) <= (R.get(self.input_name)(input_terms)[i_weight], R.get(n_helper_name)(h_terms))
+        true = R.get(f"{self.output_name}__true")
 
-        z_minus = R.get(z_minus_name)(h_terms) <= (R.special.true[1.0].fixed(), R.get(z_name)(h_terms)[-1].fixed())
+        ones = [1.0] * self.input_size
+        z_minus = R.get(z_minus_name)(h_terms) <= (true[ones].fixed(), R.get(z_name)(h_terms)[-1].fixed())
         h_left = R.get(h_left_name)(h_terms) <= (R.get(z_minus_name)(h_terms), R.get(n_name)(h_terms))
         h_right = R.get(h_right_name)(h_terms) <= (
             R.get(z_name)(h_terms),
@@ -125,12 +109,13 @@ class GRUCell(Module):
         h = R.get(self.output_name)(h_terms) <= (R.get(h_left_name)(h_terms), R.get(h_right_name)(h_terms))
 
         return [
+            true,
             *r(),
             *z(),
             n_helper | Metadata(activation="elementproduct-identity"),
             n_helper.head.predicate | [Activation.IDENTITY],
-            n | [Activation.IDENTITY],
-            n.head.predicate | [Activation.TANH],
+            n | [Activation.TANH],
+            n.head.predicate | [Activation.IDENTITY],
             z_minus | [Activation.IDENTITY],
             z_minus.head.predicate | [Activation.IDENTITY],
             h_left | Metadata(activation="elementproduct-identity"),
@@ -144,6 +129,108 @@ class GRUCell(Module):
 
 class GRU(Module):
     r"""
+    One-layer Gated Recurrent Unit (GRU) module which is computed as:
+
+    .. math::
+
+        r_t = \sigma(\mathbf{W}_{xr} \mathbf{x}_t + \mathbf{W}_{hr} \mathbf{h}_{t-1}) \\
+
+    .. math::
+
+        z_t = \sigma(\mathbf{W}_{xz} \mathbf{x}_t + \mathbf{W}_{hz} \mathbf{h}_{t-1}) \\
+
+    .. math::
+
+        n_t = \tanh(\mathbf{W}_{xn} \mathbf{x}_t + r_t * (\mathbf{W}_{hn} \mathbf{h}_{t-1})) \\
+
+    .. math::
+
+        h_t = (1 - z_t) * n_t + z_t * h_{t-1}
+
+    where :math:`t \in (1, sequence\_length + 1)` is a time step.
+    In the template, the :math:`t` is referred to as :code:`V.T`, and :math:`t - 1` is referred to as :code:`V.Z`.
+    This module expresses the first equation as:
+
+    .. code:: logtalk
+
+        (R.<output_name>__r(<...terms>, V.T) <= (
+            R.<input_name>(<...terms>, V.T)[<hidden_size>, <input_size>],
+            R.<hidden_input_name>(<...terms>, V.Z)[<hidden_size>, <hidden_size>],
+            R.<next_name>(V.Z, V.T),
+        )) | [Activation.SIGMOID]
+
+        R.<output_name>__r / <arity> + 1 | [Activation.IDENTITY]
+
+    The second equation is expressed in the same, except for a different head predicate name. The third equation is
+    split into two rules. The first one computes the element-wise product -
+    :math:`r_t * (\mathbf{W}_{hn} \mathbf{h}_{t-1})`.
+
+    .. code:: logtalk
+
+        (R.<output_name>__n_helper(<...terms>, V.T) <= (
+            R.<output_name>__r(<..terms>, V.T),
+            R.<hidden_input_name>(<...terms>, V.Z)[<hidden_size>, <hidden_size>],
+            R.<next_name>(V.Z, V.T),
+        )) | Metadata(activation="elementproduct-identity"),
+
+        R.<output_name>__n_helper / (<arity> + 1) | [Activation.IDENTITY],
+
+    The second one computes the sum and applies the :math:`tanh` activation function.
+
+    .. code:: logtalk
+
+        (R.<output_name>__n(<...terms>, V.T) <= (
+            R.<input_name>(<...terms>, V.T)[<hidden_size>, <input_size>],
+            R.<output_name>__n_helper(<...terms>, V.T)
+        )) | [Activation.TANH]
+        R.<output_name>__n / (<arity> + 1) | [Activation.IDENTITY],
+
+    The last equation is computed via four rules. The first rule computes :math:`1 - z_t`. That is:
+
+    .. code:: logtalk
+
+        (R.<output_name>__mz(<...terms>, V.T) <= (
+            R.<output_name>__true[[1.0] * <input_size>].fixed(), R.<output_name>__z(<...terms>, V.T)[-1].fixed()
+        )) | [Activation.IDENTITY]
+        R.<output_name>__mz / <arity> + 1 | [Activation.IDENTITY],
+
+    Then we compute element-wise products.
+
+    .. code:: logtalk
+
+        (R.<output_name>__left(<...terms>, V.T) <= (
+            R.<output_name>__mz(<...terms>, V.T), R.<output_name>__n(<...terms>, V.T)
+        )) | Metadata(activation="elementproduct-identity")
+
+        (R.<output_name>__right(<...terms>, V.T) <= (
+            R.<output_name>__z(<...terms>, V.T), R.<hidden_input_name>(<...terms>, V.Z), R.<next_name>(V.Z, V.T),,
+        )) | Metadata(activation="elementproduct-identity")
+
+        R.<output_name>__left / <arity> + 1 | [Activation.IDENTITY]
+        R.<output_name>__right / <arity> + 1 | [Activation.IDENTITY]
+
+    .. code:: logtalk
+
+        (R.<output_name>__mz(<...terms>, V.T) <= (
+            R.<output_name>__true[[1.0] * <input_size>].fixed(), R.<output_name>__z(<...terms>, V.T)[-1].fixed()
+        )) | [Activation.IDENTITY]
+        R.<output_name>__mz / <arity> + 1 | [Activation.IDENTITY],
+
+    The last output rule sums up the element-wise products.
+
+    .. code:: logtalk
+
+        (R.<output_name>(<...terms>, V.T) <= (
+            R.<output_name>__left(<...terms>, V.T), R.<output_name>__right(<...terms>, V.T)
+        )) | [Activation.IDENTITY]
+        R.<output_name> / <arity> + 1 | [Activation.IDENTITY],
+
+    Additionally, we define rules for the recursion purpose
+    (the positive integer sequence :code:`R.<next_name>(V.Z, V.T)`) and the "stop condition", that is:
+
+    .. code:: logtalk
+
+        (R.<output_name>(<...terms>, 0) <= R.<hidden_0_name>(<...terms>)) | [Activation.IDENTITY]
 
     Parameters
     ----------
@@ -152,22 +239,16 @@ class GRU(Module):
         Input feature size.
     hidden_size : int
         Output and hidden feature size.
-    num_layers : int
-        Number of hidden layers.
+    sequence_length : int
+        Sequence length.
     output_name : str
         Output (head) predicate name of the module.
     input_name : str
         Input feature predicate name to get features from.
     hidden_0_name : str
         Predicate name to get initial hidden state from.
-    activation : Activation
-        Activation function.
-        Default: ``Activation.TANH``
     arity : int
         Arity of the input and output predicate. Default: ``1``
-    input_time_step : bool
-        Include the time/iteration step as extra (last) term in the input predicate.
-        Default: ``True``
     next_name : str
         Predicate name to get positive integer sequence from.
         Default: ``_next__positive``
@@ -177,52 +258,40 @@ class GRU(Module):
         self,
         input_size: int,
         hidden_size: int,
-        num_layers: int,
+        sequence_length: int,
         output_name: str,
         input_name: str,
         hidden_0_name: str,
-        activation: Activation = Activation.TANH,
         arity: int = 1,
-        input_time_step: bool = True,
         next_name: str = "_next__positive",
     ):
         self.input_size = input_size
         self.hidden_size = hidden_size
-        self.num_layers = num_layers
+        self.sequence_length = sequence_length
 
         self.output_name = output_name
         self.input_name = input_name
         self.hidden_0_name = hidden_0_name
 
-        self.activation = activation
         self.arity = arity
         self.next_name = next_name
-        self.input_time_step = input_time_step
 
     def __call__(self):
-        temp_output_name = f"{self.output_name}__gru_cell"
-
         recursive_cell = GRUCell(
             self.input_size,
             self.hidden_size,
-            temp_output_name,
+            self.output_name,
             self.input_name,
-            temp_output_name,
-            self.activation,
+            self.output_name,
             self.arity,
-            self.input_time_step,
             self.next_name,
         )
 
         next_relation = R.get(self.next_name)
         terms = [f"X{i}" for i in range(self.arity)]
 
-        output_relation = R.get(self.output_name)
-
         return [
-            *[next_relation(i, i + 1) for i in range(0, self.num_layers)],
-            (R.get(temp_output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Activation.IDENTITY],
+            *[next_relation(i, i + 1) for i in range(0, self.sequence_length)],
+            (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Activation.IDENTITY],
             *recursive_cell(),
-            (output_relation(terms) <= R.get(temp_output_name)([*terms, self.num_layers])) | [Activation.IDENTITY],
-            output_relation / self.arity | [Activation.IDENTITY],
         ]

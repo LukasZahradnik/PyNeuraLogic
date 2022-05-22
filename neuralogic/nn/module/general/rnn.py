@@ -27,9 +27,6 @@ class RNNCell(Module):
         Default: ``Activation.TANH``
     arity : int
         Arity of the input and output predicate. Default: ``1``
-    input_time_step : bool
-        Include the time/iteration step as extra (last) term in the input predicate.
-        Default: ``True``
     next_name : str
         Predicate name to get positive integer sequence from.
         Default: ``_next__positive``
@@ -44,7 +41,6 @@ class RNNCell(Module):
         hidden_input_name: str,
         activation: Activation = Activation.TANH,
         arity: int = 1,
-        input_time_step: bool = True,
         next_name: str = "_next__positive",
     ):
         self.input_size = input_size
@@ -57,30 +53,53 @@ class RNNCell(Module):
         self.activation = activation
         self.arity = arity
         self.next_name = next_name
-        self.input_time_step = input_time_step
 
     def __call__(self):
         terms = [f"X{i}" for i in range(self.arity)]
         output = R.get(self.output_name)
+        input_terms = [*terms, V.T]
 
-        input_terms = terms
-        if self.input_time_step:
-            input_terms = [*input_terms, V.Y]
-
-        rnn_rule = output([*terms, V.Y]) <= (
+        rnn_rule = output([*terms, V.T]) <= (
             R.get(self.input_name)(input_terms)[self.hidden_size, self.input_size],
             R.get(self.hidden_input_name)([*terms, V.Z])[self.hidden_size, self.hidden_size],
-            R.get(self.next_name)(V.Z, V.Y),
+            R.get(self.next_name)(V.Z, V.T),
         )
 
         return [
-            rnn_rule | [Activation.IDENTITY],
-            output / (self.arity + 1) | Metadata(activation=self.activation),
+            rnn_rule | Metadata(activation=self.activation),
+            output / (self.arity + 1) | [Activation.IDENTITY],
         ]
 
 
 class RNN(Module):
     r"""
+    One-layer Recurrent Neural Network (RNN) module which is computed as:
+
+    .. math::
+
+        h_t = act(\mathbf{W}_{ih} \mathbf{x}_t + \mathbf{W}_{hh} \mathbf{h}_{t-1})
+
+    where :math:`t \in (1, sequence\_length + 1)` is a time step.
+    In the template, the :math:`t` is referred to as :code:`V.T`, and :math:`t - 1` is referred to as :code:`V.Z`.
+    This module expresses the first equation as:
+
+    .. code:: logtalk
+
+        (R.<output_name>(<...terms>, V.T) <= (
+            R.<input_name>(<...terms>, V.T)[<hidden_size>, <input_size>],
+            R.<hidden_input_name>(<...terms>, V.Z)[<hidden_size>, <hidden_size>],
+            R.<next_name>(V.Z, V.T),
+        )) | [<activation>]
+
+        R.<output_name> / <arity> + 1 | [Activation.IDENTITY]
+
+    Additionally, we define rules for the recursion purpose
+    (the positive integer sequence :code:`R.<next_name>(V.Z, V.T)`) and the "stop condition", that is:
+
+    .. code:: logtalk
+
+        (R.<output_name>(<...terms>, 0) <= R.<hidden_0_name>(<...terms>)) | [Activation.IDENTITY]
+
 
     Parameters
     ----------
@@ -89,8 +108,8 @@ class RNN(Module):
         Input feature size.
     hidden_size : int
         Output and hidden feature size.
-    num_layers : int
-        Number of hidden layers.
+    sequence_length : int
+        Sequence length.
     output_name : str
         Output (head) predicate name of the module.
     input_name : str
@@ -102,9 +121,6 @@ class RNN(Module):
         Default: ``Activation.TANH``
     arity : int
         Arity of the input and output predicate. Default: ``1``
-    input_time_step : bool
-        Include the time/iteration step as extra (last) term in the input predicate.
-        Default: ``True``
     next_name : str
         Predicate name to get positive integer sequence from.
         Default: ``_next__positive``
@@ -114,18 +130,17 @@ class RNN(Module):
         self,
         input_size: int,
         hidden_size: int,
-        num_layers: int,
+        sequence_length: int,
         output_name: str,
         input_name: str,
         hidden_0_name: str,
         activation: Activation = Activation.TANH,
         arity: int = 1,
-        input_time_step: bool = True,
         next_name: str = "_next__positive",
     ):
         self.input_size = input_size
         self.hidden_size = hidden_size
-        self.num_layers = num_layers
+        self.sequence_length = sequence_length
 
         self.output_name = output_name
         self.input_name = input_name
@@ -134,32 +149,24 @@ class RNN(Module):
         self.activation = activation
         self.arity = arity
         self.next_name = next_name
-        self.input_time_step = input_time_step
 
     def __call__(self):
-        temp_output_name = f"{self.output_name}__rnn_cell"
-
         recursive_cell = RNNCell(
             self.input_size,
             self.hidden_size,
-            temp_output_name,
+            self.output_name,
             self.input_name,
-            temp_output_name,
+            self.output_name,
             self.activation,
             self.arity,
-            self.input_time_step,
             self.next_name,
         )
 
         next_relation = R.get(self.next_name)
         terms = [f"X{i}" for i in range(self.arity)]
 
-        output_relation = R.get(self.output_name)
-
         return [
-            *[next_relation(i, i + 1) for i in range(0, self.num_layers)],
-            (R.get(temp_output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Activation.IDENTITY],
+            *[next_relation(i, i + 1) for i in range(0, self.sequence_length)],
+            (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Activation.IDENTITY],
             *recursive_cell(),
-            (output_relation(terms) <= R.get(temp_output_name)([*terms, self.num_layers])) | [Activation.IDENTITY],
-            output_relation / self.arity | [Activation.IDENTITY],
         ]
