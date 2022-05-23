@@ -90,11 +90,9 @@ class LSTMCell(Module):
         cell_args[2] = o_name
         o = RNNCell(*cell_args)
 
-        g = R.get(g_name)(t_terms) <= (
-            R.get(self.input_name)(t_terms)[i_weight],
-            R.get(self.hidden_input_name)(z_terms)[h_weight],
-            next_rel,
-        )
+        cell_args[2] = g_name
+        cell_args[-3] = Activation.TANH
+        g = RNNCell(*cell_args)
 
         c_left = R.get(c_left_name)(t_terms) <= (R.get(f_name)(t_terms), R.get(c_name)(z_terms), next_rel)
         c_right = R.get(c_right_name)(t_terms) <= (R.get(i_name)(t_terms), R.get(g_name)(t_terms))
@@ -106,8 +104,7 @@ class LSTMCell(Module):
             *i(),
             *f(),
             *o(),
-            g | [Activation.TANH],
-            g.head.predicate | [Activation.IDENTITY],
+            *g(),
             c_left | Metadata(activation="elementproduct-identity"),
             c_right | Metadata(activation="elementproduct-identity"),
             c_left.head.predicate | [Activation.IDENTITY],
