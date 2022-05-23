@@ -76,6 +76,8 @@ Pre-defined Modules
               -
             * - :class:`~neuralogic.nn.module.general.gru.GRU`
               -
+            * - :class:`~neuralogic.nn.module.general.lstm.LSTM`
+              -
 
         .. list-table::
             :widths: 99 1
@@ -141,6 +143,9 @@ General Block Modules
    :members:
 
 .. autoclass:: neuralogic.nn.module.general.gru::GRU
+   :members:
+
+.. autoclass:: neuralogic.nn.module.general.lstm::LSTM
    :members:
 
 .. autoclass:: neuralogic.nn.module.general.pooling::Pooling

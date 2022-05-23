@@ -141,11 +141,11 @@ class GRU(Module):
 
     .. math::
 
-        n_t = \tanh(\mathbf{W}_{xn} \mathbf{x}_t + r_t * (\mathbf{W}_{hn} \mathbf{h}_{t-1})) \\
+        n_t = \tanh(\mathbf{W}_{xn} \mathbf{x}_t + r_t \odot (\mathbf{W}_{hn} \mathbf{h}_{t-1})) \\
 
     .. math::
 
-        h_t = (1 - z_t) * n_t + z_t * h_{t-1}
+        h_t = (1 - z_t) \odot n_t + z_t \odot h_{t-1}
 
     where :math:`t \in (1, sequence\_length + 1)` is a time step.
     In the template, the :math:`t` is referred to as :code:`V.T`, and :math:`t - 1` is referred to as :code:`V.Z`.
@@ -161,7 +161,7 @@ class GRU(Module):
 
         R.<output_name>__r / <arity> + 1 | [Activation.IDENTITY]
 
-    The second equation is expressed in the same, except for a different head predicate name. The third equation is
+    The second equation is expressed in the same way, except for a different head predicate name. The third equation is
     split into two rules. The first one computes the element-wise product -
     :math:`r_t * (\mathbf{W}_{hn} \mathbf{h}_{t-1})`.
 
