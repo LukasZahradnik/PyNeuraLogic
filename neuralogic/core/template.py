@@ -121,6 +121,20 @@ class Template:
 
         return template
 
+    def remove_duplicates(self):
+        """Remove duplicates from the template"""
+        entries = set()
+        deduplicated_template: List[TemplateEntries] = []
+
+        for entry in self.template:
+            entry_str = str(entry)
+
+            if entry_str in entries:
+                continue
+            entries.add(entry_str)
+            deduplicated_template.append(entry)
+        self.template = deduplicated_template
+
     def build(self, settings: Settings, backend: Backend = Backend.JAVA):
         from neuralogic.nn import get_neuralogic_layer
 
