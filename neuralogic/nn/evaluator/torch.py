@@ -89,11 +89,11 @@ class TorchEvaluator(AbstractEvaluator):
                     graph_output = self.neuralogic_model(sample)
 
                     if graph_output.size() == (1,):
-                        yield sample.target, graph_output[0].item()
+                        yield graph_output[0].item()
                     elif not graph_output.size():
-                        yield sample.target, graph_output.item()
+                        yield graph_output.item()
                     else:
-                        yield sample.target, graph_output
+                        yield graph_output
 
         if generator:
             return _test()

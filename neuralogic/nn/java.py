@@ -44,6 +44,7 @@ class NeuraLogic(AbstractNeuraLogic):
         self.neural_model = model
         self.strategy = python_strategy(settings.settings, model)
         self.samples_len = 0
+        self.number_format = self.settings.settings_class.superDetailedNumberFormat
 
         @jpype.JImplements(
             jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler")
@@ -92,8 +93,11 @@ class NeuraLogic(AbstractNeuraLogic):
                 if auto_backprop:
                     result = self.strategy.learnSample(samples.java_sample)
                     return json.loads(str(result)), 1
-            result = self.strategy.evaluateSample(samples.java_sample)
-            return LossResult(result, self.settings.settings_class.superDetailedNumberFormat)
+                result = self.strategy.evaluateSample(samples.java_sample)
+                return LossResult(result, self.number_format)
+
+            result = self.strategy.evaluateSample(samples.java_sample).getOutput()
+            return json.loads(str(result.toString(self.number_format)))
 
         if self.do_train:
             results = self.strategy.learnSamples(

@@ -49,6 +49,6 @@ class EvaluationInferenceEngine:
                 sub_query = sub_query.split("(")[1].strip()[:-1]
 
                 substitutions = sub_query.split(",")
-                yield result[1], {label: substitutions[position].strip() for label, position in variables}
+                yield result, {label: substitutions[position].strip() for label, position in variables}
 
         return generator()

@@ -68,8 +68,6 @@ class LSTMCell(Module):
         c_tanh_name = f"{self.output_name}__ctanh"
 
         next_rel = R.get(self.next_name)(V.Z, V.T)
-        h_weight = self.hidden_size, self.hidden_size
-        i_weight = self.hidden_size, self.input_size
 
         cell_args = [
             self.input_size,
