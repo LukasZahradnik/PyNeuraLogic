@@ -80,7 +80,7 @@ class RvNN(Module):
         body = []
         parent_terms = [V.P]
 
-        for i in range(1, self.max_children):
+        for i in range(1, self.max_children + 1):
             term = f"C{i}"
             body.append(output_rel([*terms, term])[f"{self.output_name}__rvnn_{i}" : self.input_size, self.input_size])
             parent_terms.append(term)
