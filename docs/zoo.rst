@@ -69,9 +69,11 @@ Pre-defined Modules
             :widths: 99 1
             :header-rows: 1
 
-            * - Recurrent module
+            * - Recurrent/Recursive module
               -
 
+            * - :class:`~neuralogic.nn.module.general.rvnn.RvNN`
+              -
             * - :class:`~neuralogic.nn.module.general.rnn.RNN`
               -
             * - :class:`~neuralogic.nn.module.general.gru.GRU`
@@ -137,6 +139,9 @@ General Block Modules
    :members:
 
 .. autoclass:: neuralogic.nn.module.general.mlp::MLP
+   :members:
+
+.. autoclass:: neuralogic.nn.module.general.rvnn::RvNN
    :members:
 
 .. autoclass:: neuralogic.nn.module.general.rnn::RNN

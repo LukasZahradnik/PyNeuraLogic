@@ -15,4 +15,5 @@ from neuralogic.nn.module.general.linear import Linear
 from neuralogic.nn.module.general.rnn import RNN
 from neuralogic.nn.module.general.gru import GRU
 from neuralogic.nn.module.general.lstm import LSTM
+from neuralogic.nn.module.general.rvnn import RvNN
 from neuralogic.nn.module.general.pooling import Pooling, AvgPooling, SumPooling, MaxPooling
