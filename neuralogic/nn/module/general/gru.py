@@ -58,6 +58,7 @@ class GRUCell(Module):
         z_name = f"{self.output_name}__z"
         n_name = f"{self.output_name}__n"
         n_helper_name = f"{self.output_name}__n_helper"
+        n_helper_weighted_name = f"{self.output_name}__n_helper_w"
 
         z_minus_name = f"{self.output_name}__mz"
         h_left_name = f"{self.output_name}__left"
@@ -89,6 +90,10 @@ class GRUCell(Module):
         h_weight = self.hidden_size, self.hidden_size
         n_helper = R.get(n_helper_name)(h_terms) <= (
             R.get(r_name)(h_terms),
+            R.get(n_helper_weighted_name)(h_terms),
+        )
+
+        n_helper_weighted = R.get(n_helper_weighted_name)(h_terms) <= (
             R.get(self.hidden_input_name)(p_terms)[h_weight],
             next_rel,
         )
@@ -114,6 +119,8 @@ class GRUCell(Module):
             *z(),
             n_helper | Metadata(activation="elementproduct-identity"),
             n_helper.head.predicate | [Activation.IDENTITY],
+            n_helper_weighted | [Activation.IDENTITY],
+            n_helper_weighted.head.predicate | [Activation.IDENTITY],
             n | [Activation.TANH],
             n.head.predicate | [Activation.IDENTITY],
             z_minus | [Activation.IDENTITY],
@@ -162,20 +169,23 @@ class GRU(Module):
         R.<output_name>__r / <arity> + 1 | [Activation.IDENTITY]
 
     The second equation is expressed in the same way, except for a different head predicate name. The third equation is
-    split into two rules. The first one computes the element-wise product -
+    split into three rules. The first two computes the element-wise product -
     :math:`r_t * (\mathbf{W}_{hn} \mathbf{h}_{t-1})`.
 
     .. code:: logtalk
+        (R.<output_name>__n_helper_weighted(<...terms>, V.T) <= (
+            R.<hidden_input_name>(<...terms>, V.Z)[<hidden_size>, <hidden_size>], R.<next_name>(V.Z, V.T),
+        )) | [Activation.IDENTITY],
+
+        R.<output_name>__n_helper_weighted / (<arity> + 1) | [Activation.IDENTITY],
 
         (R.<output_name>__n_helper(<...terms>, V.T) <= (
-            R.<output_name>__r(<..terms>, V.T),
-            R.<hidden_input_name>(<...terms>, V.Z)[<hidden_size>, <hidden_size>],
-            R.<next_name>(V.Z, V.T),
+            R.<output_name>__r(<..terms>, V.T), R.<>__n_helper_weighted(<...terms>, V.T)
         )) | Metadata(activation="elementproduct-identity"),
 
         R.<output_name>__n_helper / (<arity> + 1) | [Activation.IDENTITY],
 
-    The second one computes the sum and applies the :math:`tanh` activation function.
+    The third one computes the sum and applies the :math:`tanh` activation function.
 
     .. code:: logtalk
 
