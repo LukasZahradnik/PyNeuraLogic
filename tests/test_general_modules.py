@@ -1,0 +1,43 @@
+import pytest
+
+import torch
+
+from neuralogic.core import Template, R, Settings
+from neuralogic.nn.module import Linear
+from neuralogic.dataset import Dataset
+
+
+@pytest.mark.parametrize(
+    "feature_size, output_size, num_of_inputs",
+    (
+        (2, 3, 5),
+        (3, 2, 2),
+        (3, 3, 1),
+    ),
+)
+def test_linear_module(feature_size: int, output_size: int, num_of_inputs: int):
+    """Test that PyNeuraLogic linear layer computes the same as pytorch linear layer"""
+    linear_input = torch.rand((num_of_inputs, feature_size))
+    linear = torch.nn.Linear(feature_size, output_size, bias=False)
+    linear_output = linear(linear_input)
+
+    template = Template()
+    template += Linear(feature_size, output_size, "h", "f")
+    model = template.build(Settings())
+
+    state = model.state_dict()
+    state["weights"][0] = list(linear.parameters())[0].detach().numpy()
+    model.load_state_dict(state)
+
+    examples = [R.f(index)[row.detach().numpy()] for index, row in enumerate(linear_input)]
+    queries = [R.h(index) for index, _ in enumerate(linear_input)]
+
+    built_dataset = model.build_dataset(Dataset(examples, queries))
+
+    for sample, row in zip(built_dataset.samples, linear_output):
+        results = model(sample, train=False)
+
+        assert len(results) == len(row)
+
+        for a, b in zip(results, row):
+            assert round(a, 3) == round(float(b), 3)
