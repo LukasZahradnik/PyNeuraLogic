@@ -95,9 +95,7 @@ class NeuraLogic(AbstractNeuraLogic):
                     return json.loads(str(result)), 1
                 result = self.strategy.evaluateSample(samples.java_sample)
                 return LossResult(result, self.number_format)
-
-            result = self.strategy.evaluateSample(samples.java_sample).getOutput()
-            return json.loads(str(result.toString(self.number_format)))
+            return json.loads(str(self.strategy.evaluateSample(samples.java_sample)))
 
         if self.do_train:
             results = self.strategy.learnSamples(

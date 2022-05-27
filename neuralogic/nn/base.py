@@ -58,11 +58,11 @@ class AbstractNeuraLogic:
                     weight_value.set(i, float(val))
                 continue
 
-            rows = len(value)
+            cols = len(value[0])
 
             for i, values in enumerate(value):
                 for j, val in enumerate(values):
-                    weight_value.set(i * rows + j, float(val))
+                    weight_value.set(i * cols + j, float(val))
 
     def parameters(self) -> Dict:
         return self.state_dict()
