@@ -73,6 +73,8 @@ class Convertor:
         default_aggregation = str(Aggregation.AVG.value).lower()
 
         batched_relations, predicates_metadata = self._process_template_entries()
+
+        sql_source_headers = []
         sql_source = []
 
         for name, arities in batched_relations.items():
@@ -93,10 +95,12 @@ class Convertor:
                         used_functions.add(act)
                         used_functions.add(agg)
 
-                        sql_fun = self.get_rule_sql_function(relation, index, act, agg, weight_indices, weights)
+                        sql_funcs = self.get_rule_sql_function(relation, index, act, agg, weight_indices, weights)
                     else:
-                        sql_fun = self.get_fact_sql_function(relation, index, weight_indices, weights)
-                    sql_source.append(sql_fun)
+                        sql_funcs = self.get_fact_sql_function(relation, index, weight_indices, weights)
+
+                    sql_source_headers.append(sql_funcs[0])
+                    sql_source.append(sql_funcs[1])
 
                 activation = relation_default_activation
                 aggregation = default_aggregation
@@ -111,30 +115,37 @@ class Convertor:
                 used_functions.add(activation)
                 used_functions.add(aggregation)
 
-                sql_source.append(
-                    self.get_rule_aggregation_function(
-                        name,
-                        arity,
-                        len(relations_by_arity),
-                        activation,
-                        aggregation,
-                    )
+                sql_funcs = self.get_rule_aggregation_function(
+                    name,
+                    arity,
+                    len(relations_by_arity),
+                    activation,
+                    aggregation,
                 )
 
-                sql_source.append(self.get_relation_interface_sql_function(name, arity))
+                sql_source_headers.append(sql_funcs[0])
+                sql_source.append(sql_funcs[1])
+
+                sql_funcs = self.get_relation_interface_sql_function(name, arity)
+                sql_source_headers.append(sql_funcs[0])
+                sql_source.append(sql_funcs[1])
 
         self.std_functions = self.get_helpers(used_functions)
-        self.sql_source = "\n".join(sql_source)
 
-    def get_relation_interface_sql_function(self, relation: str, arity: int) -> str:
+        sql_source_headers.extend(sql_source)
+        self.sql_source = "\n".join(sql_source_headers)
+
+    def get_relation_interface_sql_function(self, relation: str, arity: int) -> Tuple[str, str]:
         raise NotImplementedError
 
     def get_rule_sql_function(
         self, rule: Rule, index: int, activation: str, aggregation: str, weight_indices: List[int], weights
-    ) -> str:
+    ) -> Tuple[str, str]:
         raise NotImplementedError
 
-    def get_fact_sql_function(self, relation: BaseRelation, index: int, weight_indices: List[int], weights) -> str:
+    def get_fact_sql_function(
+        self, relation: BaseRelation, index: int, weight_indices: List[int], weights
+    ) -> Tuple[str, str]:
         raise NotImplementedError
 
     def get_helpers(self, functions: Set[str]) -> str:
@@ -142,7 +153,7 @@ class Convertor:
 
     def get_rule_aggregation_function(
         self, name: str, arity: int, number_of_rules: int, activation: str, aggregation: str
-    ) -> str:
+    ) -> Tuple[str, str]:
         raise NotImplementedError
 
     def get_std_functions(self) -> str:
