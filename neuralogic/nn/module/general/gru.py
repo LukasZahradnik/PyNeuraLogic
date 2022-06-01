@@ -173,6 +173,7 @@ class GRU(Module):
     :math:`r_t * (\mathbf{W}_{hn} \mathbf{h}_{t-1})`.
 
     .. code:: logtalk
+
         (R.<output_name>__n_helper_weighted(<...terms>, V.T) <= (
             R.<hidden_input_name>(<...terms>, V.Z)[<hidden_size>, <hidden_size>], R.<next_name>(V.Z, V.T),
         )) | [Activation.IDENTITY],

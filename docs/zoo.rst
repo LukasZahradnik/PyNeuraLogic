@@ -97,6 +97,17 @@ Pre-defined Modules
             * - :class:`~neuralogic.nn.module.general.pooling.MaxPooling`
               -
 
+    .. tab:: Meta
+
+        .. list-table::
+            :widths: 99 1
+            :header-rows: 1
+
+            * - Module
+              -
+
+            * - :class:`~neuralogic.nn.module.meta.meta.MetaConv`
+              -
 
 ----
 
@@ -163,4 +174,7 @@ General Block Modules
    :members:
 
 .. autoclass:: neuralogic.nn.module.general.pooling::MaxPooling
+   :members:
+
+.. autoclass:: neuralogic.nn.module.meta.meta::MetaConv
    :members:
