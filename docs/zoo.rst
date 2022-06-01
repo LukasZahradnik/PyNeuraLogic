@@ -176,5 +176,10 @@ General Block Modules
 .. autoclass:: neuralogic.nn.module.general.pooling::MaxPooling
    :members:
 
+-----
+
+Meta Modules
+*********************
+
 .. autoclass:: neuralogic.nn.module.meta.meta::MetaConv
    :members:
