@@ -1,5 +1,6 @@
+import csv
 import io
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Callable
 
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
@@ -16,11 +17,12 @@ class DBSource:
         "table_name",
         "term_columns",
         "value_column",
-        "sep",
         "default_value",
+        "value_mapper",
         "skip_rows",
         "n_rows",
         "replace_empty_column",
+        "sep",
     )
 
     def __init__(
@@ -30,6 +32,7 @@ class DBSource:
         term_columns: List[str],
         value_column: Optional[str] = None,
         default_value: Union[float, int] = 1.0,
+        value_mapper: Optional[Callable] = None,
         skip_rows: int = 0,
         n_rows: Optional[int] = None,
         replace_empty_column: Union[str, float, int] = 0,
@@ -40,6 +43,7 @@ class DBSource:
         self.sep = sep
         self.value_column = value_column
         self.default_value = default_value
+        self.value_mapper = value_mapper
         self.term_columns = term_columns
         self.skip_rows = skip_rows
         self.n_rows = n_rows
@@ -59,7 +63,15 @@ class DBSource:
             columns.append(self.value_column)
             value_column = len(columns) - 1
 
-        cursor.copy_to(source, self.table_name, sep=self.sep, null="", columns=columns)
+        if hasattr(cursor, "copy_to"):
+            cursor.copy_to(source, self.table_name, sep=self.sep, null="", columns=columns)
+        else:
+            cursor.execute(f"SELECT {','.join(columns)} FROM {self.table_name}")
+            results = cursor.fetchall()
+
+            csv_writer = csv.writer(source, lineterminator="\n")
+            csv_writer.writerows(results)
+
         source.seek(0)
 
         return CSVFile(
@@ -68,6 +80,7 @@ class DBSource:
             self.sep,
             value_column,
             self.default_value,
+            self.value_mapper,
             term_columns,
             False,
             self.skip_rows,

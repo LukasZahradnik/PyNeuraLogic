@@ -1,6 +1,6 @@
 import enum
 from pathlib import Path
-from typing import Optional, List, Union, TextIO
+from typing import Optional, List, Union, TextIO, Callable
 
 from neuralogic.core.constructs.factories import R
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
@@ -24,6 +24,7 @@ class CSVFile:
         "sep",
         "value_column",
         "default_value",
+        "value_mapper",
         "term_columns",
         "header",
         "skip_rows",
@@ -38,6 +39,7 @@ class CSVFile:
         sep=",",
         value_column: Optional[Union[str, int]] = None,
         default_value: Optional[Union[float, int]] = None,
+        value_mapper: Optional[Callable] = None,
         term_columns: Optional[List[Union[str, int]]] = None,
         header: bool = False,
         skip_rows: int = 0,
@@ -49,6 +51,7 @@ class CSVFile:
         self.sep = sep
         self.value_column = value_column
         self.default_value = default_value
+        self.value_mapper = value_mapper
         self.term_columns = term_columns
         self.header = header
         self.skip_rows = skip_rows
@@ -77,6 +80,7 @@ class CSVFile:
         use_columns = self.term_columns
         value_column = self.value_column
         default_value = self.default_value
+        value_mapper = self.value_mapper
         relation = R.get(self.relation_name)
         replace_empty = self.replace_empty_column
         read_lines = 0
@@ -114,7 +118,10 @@ class CSVFile:
                 value = terms[value_column].strip()
                 if not len(value):
                     value = default_value if default_value is not None else replace_empty
-                line_relation = line_relation[float(value)]
+                if value_mapper is None:
+                    line_relation = line_relation[float(value)]
+                else:
+                    line_relation = line_relation[value_mapper(value)]
 
             example.append(line_relation)
             read_lines += 1
