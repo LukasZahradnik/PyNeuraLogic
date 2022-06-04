@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Sized, Union, List
+from typing import Dict, Sized
 
 import jpype
 
@@ -7,24 +7,6 @@ from neuralogic import is_initialized, initialize
 from neuralogic.nn.base import AbstractNeuraLogic
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.enums import Backend
-
-
-class LossResult:
-    def __init__(self, loss, number_format):
-        self.loss = loss
-        self.number_format = number_format
-
-    def backward(self):
-        self.loss.backward()
-
-    def value(self) -> float:
-        return json.loads(str(self.loss.getError().toString(self.number_format)))
-
-    def output(self) -> Union[List[float], float]:
-        return json.loads(str(self.loss.getOutput().toString(self.number_format)))
-
-    def target(self) -> Union[List[float], float]:
-        return json.loads(str(self.loss.getTarget().toString(self.number_format)))
 
 
 class NeuraLogic(AbstractNeuraLogic):
@@ -73,7 +55,7 @@ class NeuraLogic(AbstractNeuraLogic):
         self.samples_len = len(samples)
         self.strategy.setSamples(jpype.java.util.ArrayList(samples))
 
-    def __call__(self, samples=None, train: bool = None, auto_backprop: bool = False, epochs: int = 1):
+    def __call__(self, samples=None, train: bool = None, epochs: int = 1):
         self.hooks_set = len(self.hooks) != 0
 
         if self.hooks_set:
@@ -90,20 +72,16 @@ class NeuraLogic(AbstractNeuraLogic):
 
         if not isinstance(samples, Sized):
             if self.do_train:
-                if auto_backprop:
-                    result = self.strategy.learnSample(samples.java_sample)
-                    return json.loads(str(result)), 1
-                result = self.strategy.evaluateSample(samples.java_sample)
-                return LossResult(result, self.number_format)
+                result = self.strategy.learnSample(samples.java_sample)
+                return json.loads(str(result)), 1
             return json.loads(str(self.strategy.evaluateSample(samples.java_sample)))
 
         if self.do_train:
             results = self.strategy.learnSamples(
                 jpype.java.util.ArrayList([sample.java_sample for sample in samples]), epochs
             )
-            deserialized_results = json.loads(str(results))
 
-            return deserialized_results, len(samples)
+            return json.loads(str(results)), len(samples)
 
         results = self.strategy.evaluateSamples(jpype.java.util.ArrayList([sample.java_sample for sample in samples]))
         return json.loads(str(results))

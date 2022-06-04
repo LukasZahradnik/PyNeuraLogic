@@ -221,7 +221,7 @@ class JavaFactory:
         return self.weight_factory.construct(name, value, fixed, initialized)
 
     def get_value(self, weight):
-        if isinstance(weight, (int, float, np.number)):
+        if np.ndim(weight) == 0:
             value = self.scalar_value(float(weight))
             initialized = True
         elif isinstance(weight, tuple):
@@ -242,7 +242,7 @@ class JavaFactory:
             else:
                 raise NotImplementedError
             initialized = False
-        elif isinstance(weight, Sequence):
+        elif isinstance(weight, (Sequence, np.ndarray)):
             initialized = True
             if len(weight) == 0:
                 raise NotImplementedError
