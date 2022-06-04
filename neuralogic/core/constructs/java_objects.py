@@ -67,10 +67,10 @@ class JavaFactory:
             elif term[0].isupper():
                 return variable_factory.construct(term)
             else:
-                raise NotImplementedError
+                raise ValueError(f"Invalid term {term}")
         if isinstance(term, (int, float)):
             return self.constant_factory.construct(str(term))
-        raise NotImplementedError
+        raise ValueError(f"Invalid term {term}")
 
     def atom_to_clause(self, atom):
         terms = [self.get_term(term, self.variable_factory) for term in atom.terms]
