@@ -42,15 +42,15 @@ class VariableFactory:
         return item.upper()
 
 
-class TermFactory:
+class ConstantFactory:
     def __getattr__(self, item) -> str:
         return item.lower()
 
 
 Var = VariableFactory()
 Relation = AtomFactory()
-Term = TermFactory()
+Constant = ConstantFactory()
 
 V = Var
-T = Term
+C = Constant
 R = Relation
