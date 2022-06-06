@@ -67,7 +67,7 @@ Now we can ask the inference engine to get all sorts of different information, s
 
 .. code-block:: Python
 
-    from neuralogic.core.inference_engine import InferenceEngine
+    from neuralogic.inference.inference_engine import InferenceEngine
 
 
     engine = InferenceEngine(template)

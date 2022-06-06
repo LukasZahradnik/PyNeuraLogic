@@ -15,3 +15,8 @@ class BaseDataset:
     ):
         with open(queries_filename, "w") as queries_fp, open(examples_filename, "w") as examples_fp:
             self.dump(queries_fp, examples_fp, sep)
+
+
+class ConvertableDataset(BaseDataset):
+    def to_dataset(self):
+        raise NotImplementedError

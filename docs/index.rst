@@ -12,7 +12,7 @@ PyNeuraLogic
     custom_model
     rules_mapping
     evaluation
-    cookbook
+    zoo
     advanced
     examples
     benchmarks
@@ -24,19 +24,17 @@ PyNeuraLogic
 
     hypergraphs
     heterophily
-    pattern_propagation
-    tree_gnns
-    tabnet
 
 
 .. toctree::
     :caption: Package Reference
     :hidden:
 
-    neuralogic
-    neuralogic.core
-    neuralogic.nn
-    neuralogic.utils
+    package/neuralogic
+    package/neuralogic.core
+    package/neuralogic.dataset
+    package/neuralogic.nn
+    package/neuralogic.utils
 
 
 
@@ -119,8 +117,8 @@ Models defined in PyNeuraLogic can be built for and evaluated in different backe
 the following backends, which, except for the Java backend, have to be additionally installed:
 
 - Java
+- `PyTorch <https://github.com/pytorch/pytorch>`_
 - `DyNet <https://github.com/clab/dynet>`_
-- `PyTorch Geometric <https://github.com/rusty1s/pytorch_geometric>`_
 
 
 Examples
@@ -133,6 +131,14 @@ Examples
 .. |xorcolab| image:: https://colab.research.google.com/assets/colab-badge.svg
                 :alt: Open in Colab
                 :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb
+
+.. |recxorcolab| image:: https://colab.research.google.com/assets/colab-badge.svg
+                :alt: Open in Colab
+                :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/RecursiveXORGeneralization.ipynb
+
+.. |visual| image:: https://colab.research.google.com/assets/colab-badge.svg
+                :alt: Open in Colab
+                :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/Visualization.ipynb
 
 .. |patterncolab| image:: https://colab.research.google.com/assets/colab-badge.svg
                 :alt: Open in Colab
@@ -149,6 +155,8 @@ Examples
 
 - |mutagcolab| `Mutagenesis <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Mutagenesis.ipynb>`_
 - |xorcolab| `XOR Example <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb>`_
+- |recxorcolab| `Recursive XOR Generalization <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/RecursiveXORGeneralization.ipynb>`_
+- |visual| `Visualization <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Visualization.ipynb>`_
 
 - |patterncolab| `Pattern Matching <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/PatternMatching.ipynb>`_
 - |kregularcolab| `Distinguishing k-regular graphs <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingKRegularGraphs.ipynb>`_

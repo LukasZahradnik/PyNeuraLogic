@@ -4,6 +4,8 @@ from neuralogic.core.enums import Activation, Aggregation, ActivationAgg, Activa
 
 
 class Metadata:
+    __slots__ = "offset", "learnable", "activation", "aggregation", "duplicit_grounding"
+
     def __init__(
         self,
         offset=None,

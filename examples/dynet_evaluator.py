@@ -5,7 +5,7 @@ from neuralogic.core import Backend, Settings, Optimizer
 
 
 settings = Settings(optimizer=Optimizer.SGD, epochs=300)
-neuralogic_evaluator = get_evaluator(template, Backend.DYNET, settings)
+neuralogic_evaluator = get_evaluator(template, settings, Backend.DYNET)
 
 printouts = 10
 

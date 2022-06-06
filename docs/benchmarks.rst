@@ -1,5 +1,5 @@
-Benchmarks
-==========
+⏱️ Benchmarks
+==============
 
 
 .. |pyg| raw:: html
@@ -36,7 +36,7 @@ The benchmarks report comparison of the average training time per epoch of three
 Datasets are picked from the common |tudataset| and are loaded into PyNeuraLogic, DGL, and PyG via PyG's |pygloader|.
 Spektral benchmark uses Spektral's |spektralloader|.
 
-We compare the frameworks in a binary graph classification task with only node's features. This is merely for the sake of 
+We compare the frameworks in a binary graph classification task with only node's features. This is merely for the sake of
 simple reusability of the introduced architectures over the frameworks. Statistics of each dataset can be seen down below.
 
 Due to its declarative nature, PyNeuraLogic has to transform each dataset into a logic form and then into a computation graph.

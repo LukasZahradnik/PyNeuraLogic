@@ -10,7 +10,7 @@ from neuralogic.core.settings import SettingsProxy, Settings
 class JavaFactory:
     def __init__(self, settings: Optional[SettingsProxy] = None):
         from neuralogic.core.constructs.rule import Rule
-        from neuralogic.core.constructs.atom import WeightedAtom
+        from neuralogic.core.constructs.relation import WeightedRelation
 
         if not is_initialized():
             initialize()
@@ -19,7 +19,7 @@ class JavaFactory:
             settings = Settings().create_proxy()
         self.settings = settings
 
-        self.weighted_atom_type = WeightedAtom
+        self.weighted_atom_type = WeightedRelation
         self.rule_type = Rule
 
         self.predicate_metadata = jpype.JClass("cz.cvut.fel.ida.logic.constructs.template.metadata.PredicateMetadata")
@@ -67,10 +67,10 @@ class JavaFactory:
             elif term[0].isupper():
                 return variable_factory.construct(term)
             else:
-                raise NotImplementedError
+                raise ValueError(f"Invalid term {term}")
         if isinstance(term, (int, float)):
             return self.constant_factory.construct(str(term))
-        raise NotImplementedError
+        raise ValueError(f"Invalid term {term}")
 
     def atom_to_clause(self, atom):
         terms = [self.get_term(term, self.variable_factory) for term in atom.terms]
@@ -221,7 +221,7 @@ class JavaFactory:
         return self.weight_factory.construct(name, value, fixed, initialized)
 
     def get_value(self, weight):
-        if isinstance(weight, (int, float, np.number)):
+        if np.ndim(weight) == 0:
             value = self.scalar_value(float(weight))
             initialized = True
         elif isinstance(weight, tuple):
@@ -242,7 +242,7 @@ class JavaFactory:
             else:
                 raise NotImplementedError
             initialized = False
-        elif isinstance(weight, Sequence):
+        elif isinstance(weight, (Sequence, np.ndarray)):
             initialized = True
             if len(weight) == 0:
                 raise NotImplementedError

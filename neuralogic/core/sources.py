@@ -22,6 +22,8 @@ class Sources:
 
         runner = jpype.JClass("cz.cvut.fel.ida.neuralogic.cli.utils.Runner")
         sources = runner.getSources(args, settings.settings)
+        settings._setup_random_generator()
+
         return Sources(sources)
 
     def __init__(self, sources):

@@ -1,7 +1,7 @@
 from typing import List
 from examples.datasets.data.train_example_data import train_example_data
 
-from neuralogic.core import Relation, Template, Var, Term
+from neuralogic.core import Relation, Template, Var, Constant
 from neuralogic.dataset import Dataset
 
 
@@ -12,9 +12,9 @@ template = Template()
 
 # fmt: off
 
-shapes = [Term.ellipse, Term.rectangle, Term.bucket, Term.hexagon, Term.u_shaped]
-roofs = [Term.jagged, Term.arc, Term.none, Term.flat, Term.peaked]
-loadshapes = [Term.hexagon, Term.triangle, Term.diamond, Term.rectangle, Term.circle]
+shapes = [Constant.ellipse, Constant.rectangle, Constant.bucket, Constant.hexagon, Constant.u_shaped]
+roofs = [Constant.jagged, Constant.arc, Constant.none, Constant.flat, Constant.peaked]
+loadshapes = [Constant.hexagon, Constant.triangle, Constant.diamond, Constant.rectangle, Constant.circle]
 vagon_atoms = [Relation.shape, Relation.length, Relation.sides, Relation.wheels, Relation.loadnum, Relation.loadshape, Relation.roof]
 
 Y = Var.Y
@@ -22,8 +22,8 @@ Y = Var.Y
 template.add_rules(
     [
         *[Relation.shape(Y) <= Relation.shape(Y, s)[1,] for s in shapes],
-        *[Relation.length(Y) <= Relation.length(Y, s)[1,] for s in [Term.short, Term.long]],
-        *[Relation.sides(Y) <= Relation.sides(Y, s)[1,] for s in [Term.not_double, Term.double]],
+        *[Relation.length(Y) <= Relation.length(Y, s)[1,] for s in [Constant.short, Constant.long]],
+        *[Relation.sides(Y) <= Relation.sides(Y, s)[1,] for s in [Constant.not_double, Constant.double]],
         *[Relation.roof(Y) <= Relation.roof(Y, s)[1,] for s in roofs],
         *[Relation.wheels(Y) <= Relation.wheels(Y, s)[1,] for s in [2, 3]],
         *[Relation.loadnum(Y) <= Relation.loadnum(Y, s)[1,] for s in [0, 1, 2, 3]],

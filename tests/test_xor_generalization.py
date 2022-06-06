@@ -3,6 +3,7 @@ import itertools
 
 import pytest
 
+from neuralogic import manual_seed
 from neuralogic.nn import get_evaluator
 from neuralogic.core import Backend, Settings, Optimizer, R, V, Template, Activation
 from neuralogic.dataset import Dataset
@@ -18,6 +19,7 @@ from neuralogic.dataset import Dataset
     ],
 )
 def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
+    manual_seed(0)
     max_number_of_max_vars = 20
 
     dataset = Dataset()
@@ -36,11 +38,9 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
         ]
     )
 
-    settings = Settings(
-        epochs=5000, rule_activation=Activation.TANH, relation_activation=Activation.IDENTITY
-    )
+    settings = Settings(epochs=5000, rule_activation=Activation.TANH, relation_activation=Activation.IDENTITY)
 
-    evaluator = get_evaluator(template, Backend.JAVA, settings)
+    evaluator = get_evaluator(template, settings, Backend.JAVA)
     evaluator.train(dataset, generator=False)
 
     # build the dataset for n inputs
@@ -50,7 +50,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
     for example in products:
         n_dataset.add_example(R.xor_at(n - 1)[0] <= (R.val_at(i)[int(val)] for i, val in enumerate(example)))
 
-    for expected_value, (_, predicted) in zip(expected, evaluator.test(n_dataset)):
+    for expected_value, predicted in zip(expected, evaluator.test(n_dataset)):
         assert expected_value == predicted
 
 
@@ -65,7 +65,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
 def test_xor_generalization(n: int, expected: List[int]) -> None:
     """Tests xor generalization"""
     # fmt: off
-
+    manual_seed(0)
     template = Template()
 
     # We have three weights in total named "a", "b" and "c"
@@ -103,7 +103,7 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
     ])
 
     settings = Settings(optimizer=Optimizer.SGD, epochs=300)
-    neuralogic_evaluator = get_evaluator(template, Backend.JAVA, settings)
+    neuralogic_evaluator = get_evaluator(template, settings, Backend.JAVA)
 
     # Train on the dataset with two var input
     neuralogic_evaluator.train(dataset, generator=False)
@@ -128,5 +128,5 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
         n_dataset.add_query(R.xor)
 
     # Check that we predicted correct values for n inputs for model trained on 2 inputs
-    for expected_value, (_, predicted) in zip(expected, neuralogic_evaluator.test(n_dataset)):
+    for expected_value, predicted in zip(expected, neuralogic_evaluator.test(n_dataset)):
         assert expected_value == round(predicted)
