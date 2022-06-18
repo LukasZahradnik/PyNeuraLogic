@@ -82,6 +82,8 @@ class Convertor:
                 if f"{name}/{arity}" in self.table_mappings:
                     raise Exception
 
+                is_fact = False
+
                 for index, (relation, weight_indices) in enumerate(relations_by_arity):
                     if isinstance(relation, Rule):
                         act, agg = rule_default_activation, default_aggregation
@@ -97,6 +99,7 @@ class Convertor:
 
                         sql_func = self.get_rule_sql_function(relation, index, act, agg, weight_indices, weights)
                     else:
+                        is_fact = True
                         sql_func = self.get_fact_sql_function(relation, index, weight_indices, weights)
                     sql_source.append(sql_func)
 
@@ -119,6 +122,7 @@ class Convertor:
                     len(relations_by_arity),
                     activation,
                     aggregation,
+                    is_fact,
                 )
 
                 sql_source.append(sql_func)
@@ -144,7 +148,7 @@ class Convertor:
         raise NotImplementedError
 
     def get_rule_aggregation_function(
-        self, name: str, arity: int, number_of_rules: int, activation: str, aggregation: str
+        self, name: str, arity: int, number_of_rules: int, activation: str, aggregation: str, is_fact: bool = False
     ) -> str:
         raise NotImplementedError
 

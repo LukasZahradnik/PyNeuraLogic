@@ -9,7 +9,7 @@ from neuralogic.db.pg.helpers import helpers
 FUNCTION_TEMPLATE = """
 CREATE OR REPLACE FUNCTION {name}({params}) RETURNS {return_type} AS $$
 {body}
-$$ LANGUAGE SQL STABLE;
+$$ LANGUAGE {language} STABLE;
 """.strip()
 
 
@@ -28,9 +28,13 @@ FUNCTION_MAP = {
 
 class PostgresConvertor(Convertor):
     @staticmethod
-    def get_function(name: str, params: List[str], return_type: List[str], body: str) -> str:
+    def get_function(name: str, params: List[str], return_type: List[str], body: str, language: str = "SQL") -> str:
         return FUNCTION_TEMPLATE.format(
-            name=name, params=",".join(params), return_type=f"Table({','.join(return_type)})", body=body
+            name=name,
+            params=",".join(params),
+            return_type=f"Table({','.join(return_type)})",
+            body=body,
+            language=language,
         )
 
     @staticmethod
@@ -60,12 +64,18 @@ class PostgresConvertor(Convertor):
         """Generate a SQL function for a ground fact"""
         value = 1 if weight_indices[0] is None else weights[weight_indices[0]]
 
-        return_type = ["value NUMERIC", *(f"t{i}" for i in range(len(relation.terms)))]
+        parameters = [f"p{i} TEXT" for i in range(len(relation.terms))]
+        return_type = ["value NUMERIC", *(f"t{i} TEXT" for i in range(len(relation.terms)))]
         select = [f"{value} as value", *(f"'{term}' as t{i}" for i, term in enumerate(relation.terms))]
 
         name = f"neuralogic._{relation.predicate.name}_{relation.predicate.arity}_{index}"
+        body = f"SELECT {','.join(select)}"
+        condition = " AND ".join(f"(p{i} = '{term}' OR p{i} IS NULL)" for i, term in enumerate(relation.terms))
 
-        return self.get_function(name, [], return_type, f"SELECT {select}")
+        if condition:
+            body = f"{body} WHERE {condition}"
+
+        return self.get_function(name, parameters, return_type, body)
 
     def get_relation_interface_sql_function(self, relation: str, arity: int) -> Tuple[str, str]:
         """Return the SQL function that should by used by the end users"""
@@ -82,7 +92,7 @@ class PostgresConvertor(Convertor):
         )
 
     def get_rule_aggregation_function(
-        self, name: str, arity: int, number_of_rules: int, activation: str, aggregation: str
+        self, name: str, arity: int, number_of_rules: int, activation: str, aggregation: str, is_fact: bool = False
     ) -> str:
         """
         Generete SQL function which aggregates rule functions (something like the aggregation neuron)
@@ -94,7 +104,6 @@ class PostgresConvertor(Convertor):
             selects = (f"s{index}.t{i}" for index in range(number_of_rules))
             inner_select.append(f"COALESCE({','.join(selects)}) as t{i}")
 
-        # inner_select = [f"s0.t{i} as t{i}" for i in range(arity)]
         inner_value_select = []
         from_clause = []
 
@@ -115,7 +124,10 @@ class PostgresConvertor(Convertor):
                 )
 
         if len(inner_value_select) == 1:
-            inner_select.append(f"{FUNCTION_MAP[activation]}({inner_value_select[0]}) as value")
+            if is_fact:
+                inner_select.append(f"{inner_value_select[0]} as value")
+            else:
+                inner_select.append(f"{FUNCTION_MAP[activation]}({inner_value_select[0]}) as value")
 
         select = [f"{FUNCTION_MAP[aggregation]}(out.value) as value"]
         select.extend(f"out.t{i}" for i in range(arity))
@@ -167,17 +179,19 @@ class PostgresConvertor(Convertor):
         for t_index, (relation, weight_id) in enumerate(zip(rule.body, weight_indices[1:])):
             join_on = []
 
-            relation_mapping = self.table_mappings.get(str(relation.predicate), None)
-            value = "value" if relation_mapping is None else relation_mapping.value_column
-            selected_value = "1" if value is None else f"s{t_index}.{value}"
+            relation_mapping = self.table_mappings.get(str(relation.predicate).replace("*", "_"), None)
 
-            if weight_id is None:
-                inner_value_select.append(selected_value)
-            else:
-                inner_value_select.append(f"{FUNCTION_MAP['mul']}({weights[weight_id]}, {selected_value})")
+            if not relation.predicate.hidden:
+                value = "value" if relation_mapping is None else f"{relation_mapping.value_column}::NUMERIC"
+                selected_value = "1" if value is None else f"s{t_index}.{value}"
 
-            if len(inner_value_select) == 2:
-                inner_value_select = [f"{FUNCTION_MAP['sum']}({', '.join(inner_value_select)})"]
+                if weight_id is None:
+                    inner_value_select.append(selected_value)
+                else:
+                    inner_value_select.append(f"{FUNCTION_MAP['mul']}({weights[weight_id]}, {selected_value})")
+
+                if len(inner_value_select) == 2:
+                    inner_value_select = [f"{FUNCTION_MAP['sum']}({', '.join(inner_value_select)})"]
 
             from_function_parameters = []
             for term_idx, term in enumerate(relation.terms):
