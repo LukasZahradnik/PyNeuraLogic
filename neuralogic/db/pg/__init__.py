@@ -205,6 +205,8 @@ class PostgresConvertor(Convertor):
 
                     if str(term) in join_vars_mapping:
                         join_on.append(f"s{t_index}.{field} = {vars_body_mapping[str(term)]}")
+                    else:
+                        vars_body_mapping[str(term)] = f"s{t_index}.{field}"
                     continue
 
                 from_function_parameters.append("NULL")
