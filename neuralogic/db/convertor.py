@@ -95,12 +95,10 @@ class Convertor:
                         used_functions.add(act)
                         used_functions.add(agg)
 
-                        sql_funcs = self.get_rule_sql_function(relation, index, act, agg, weight_indices, weights)
+                        sql_func = self.get_rule_sql_function(relation, index, act, agg, weight_indices, weights)
                     else:
-                        sql_funcs = self.get_fact_sql_function(relation, index, weight_indices, weights)
-
-                    sql_source_headers.append(sql_funcs[0])
-                    sql_source.append(sql_funcs[1])
+                        sql_func = self.get_fact_sql_function(relation, index, weight_indices, weights)
+                    sql_source.append(sql_func)
 
                 activation = relation_default_activation
                 aggregation = default_aggregation
@@ -115,7 +113,7 @@ class Convertor:
                 used_functions.add(activation)
                 used_functions.add(aggregation)
 
-                sql_funcs = self.get_rule_aggregation_function(
+                sql_func = self.get_rule_aggregation_function(
                     name,
                     arity,
                     len(relations_by_arity),
@@ -123,8 +121,7 @@ class Convertor:
                     aggregation,
                 )
 
-                sql_source_headers.append(sql_funcs[0])
-                sql_source.append(sql_funcs[1])
+                sql_source.append(sql_func)
 
                 sql_funcs = self.get_relation_interface_sql_function(name, arity)
                 sql_source_headers.append(sql_funcs[0])
@@ -140,20 +137,18 @@ class Convertor:
 
     def get_rule_sql_function(
         self, rule: Rule, index: int, activation: str, aggregation: str, weight_indices: List[int], weights
-    ) -> Tuple[str, str]:
+    ) -> str:
         raise NotImplementedError
 
-    def get_fact_sql_function(
-        self, relation: BaseRelation, index: int, weight_indices: List[int], weights
-    ) -> Tuple[str, str]:
-        raise NotImplementedError
-
-    def get_helpers(self, functions: Set[str]) -> str:
+    def get_fact_sql_function(self, relation: BaseRelation, index: int, weight_indices: List[int], weights) -> str:
         raise NotImplementedError
 
     def get_rule_aggregation_function(
         self, name: str, arity: int, number_of_rules: int, activation: str, aggregation: str
-    ) -> Tuple[str, str]:
+    ) -> str:
+        raise NotImplementedError
+
+    def get_helpers(self, functions: Set[str]) -> str:
         raise NotImplementedError
 
     def get_std_functions(self) -> str:

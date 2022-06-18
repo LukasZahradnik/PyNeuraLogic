@@ -56,9 +56,7 @@ class PostgresConvertor(Convertor):
                 function_sources.append(helpers[fun].strip())
         return "\n".join(function_sources)
 
-    def get_fact_sql_function(
-        self, relation: BaseRelation, index: int, weight_indices: List[int], weights
-    ) -> Tuple[str, str]:
+    def get_fact_sql_function(self, relation: BaseRelation, index: int, weight_indices: List[int], weights) -> str:
         """Generate a SQL function for a ground fact"""
         value = 1 if weight_indices[0] is None else weights[weight_indices[0]]
 
@@ -67,10 +65,7 @@ class PostgresConvertor(Convertor):
 
         name = f"neuralogic._{relation.predicate.name}_{relation.predicate.arity}_{index}"
 
-        return (
-            self.get_empty_function(name, [], return_type),
-            self.get_function(name, [], return_type, f"SELECT {select}"),
-        )
+        return self.get_function(name, [], return_type, f"SELECT {select}")
 
     def get_relation_interface_sql_function(self, relation: str, arity: int) -> Tuple[str, str]:
         """Return the SQL function that should by used by the end users"""
@@ -89,7 +84,7 @@ class PostgresConvertor(Convertor):
 
     def get_rule_aggregation_function(
         self, name: str, arity: int, number_of_rules: int, activation: str, aggregation: str
-    ) -> Tuple[str, str]:
+    ) -> str:
         """
         Generete SQL function which aggregates rule functions (something like the aggregation neuron)
         """
@@ -133,14 +128,11 @@ class PostgresConvertor(Convertor):
         name = f"neuralogic._{name}_{arity}"
         body = f"SELECT {select} FROM ({from_clause}) AS out{'' if arity == 0 else group_by_clause}"
 
-        return (
-            self.get_empty_function(name, [], return_type),
-            self.get_function(name, [], return_type, body),
-        )
+        return self.get_function(name, [], return_type, body)
 
     def get_rule_sql_function(
         self, rule: Rule, index: int, activation: str, aggregation: str, weight_indices: List[int], weights
-    ) -> Tuple[str, str]:
+    ) -> str:
         """Return the SQL function of one rule"""
         if weight_indices[0] is None:
             select = [f"{FUNCTION_MAP[aggregation]}(out.value) as value"]
@@ -223,7 +215,4 @@ class PostgresConvertor(Convertor):
         name = f"neuralogic._{rule.head.predicate.name}_{rule.head.predicate.arity}_{index}"
         body = f"SELECT {', '.join(select)} FROM ({from_clause}) AS out{'' if not vars_mapping else group_by_clause}"
 
-        return (
-            self.get_empty_function(name, [], return_type),
-            self.get_function(name, [], return_type, body),
-        )
+        return self.get_function(name, [], return_type, body)
