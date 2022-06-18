@@ -69,13 +69,12 @@ class PostgresConvertor(Convertor):
 
     def get_relation_interface_sql_function(self, relation: str, arity: int) -> Tuple[str, str]:
         """Return the SQL function that should by used by the end users"""
-        params = [f"p{i} TEXT" for i in range(arity)]
-        where = [f"out.t{i} = p{i}" for i in range(arity)]
-        where_clause = f" WHERE {' AND '.join(where)}"
+        function_parameters = [f"p{i}" for i in range(arity)]
+        params = [f"{name} TEXT" for name in function_parameters]
 
         name = f"neuralogic.{relation}"
-        return_type = ["value NUMERIC"]
-        body = f"SELECT out.value FROM neuralogic._{relation}_{arity}() as out{'' if not where else where_clause}"
+        return_type = ["value NUMERIC", *(f"t{i} TEXT" for i in range(arity))]
+        body = f"SELECT * FROM neuralogic._{relation}_{arity}({','.join(function_parameters)}) as out"
 
         return (
             self.get_empty_function(name, params, return_type),
@@ -88,6 +87,8 @@ class PostgresConvertor(Convertor):
         """
         Generete SQL function which aggregates rule functions (something like the aggregation neuron)
         """
+        function_parameters = [f"p{i}" for i in range(arity)]
+
         inner_select = []
         for i in range(arity):
             selects = (f"s{index}.t{i}" for index in range(number_of_rules))
@@ -104,7 +105,7 @@ class PostgresConvertor(Convertor):
             if len(inner_value_select) == 2:
                 inner_value_select = [f"{FUNCTION_MAP['sum']}({', '.join(inner_value_select)})"]
 
-            function_name = f"neuralogic._{name}_{arity}_{index}()"
+            function_name = f"neuralogic._{name}_{arity}_{index}({','.join(function_parameters)})"
 
             if not from_clause:
                 from_clause.append(f"{function_name} as s{index}")
@@ -128,12 +129,14 @@ class PostgresConvertor(Convertor):
         name = f"neuralogic._{name}_{arity}"
         body = f"SELECT {select} FROM ({from_clause}) AS out{'' if arity == 0 else group_by_clause}"
 
-        return self.get_function(name, [], return_type, body)
+        return self.get_function(name, [f"{name} TEXT" for name in function_parameters], return_type, body)
 
     def get_rule_sql_function(
         self, rule: Rule, index: int, activation: str, aggregation: str, weight_indices: List[int], weights
     ) -> str:
         """Return the SQL function of one rule"""
+        function_parameters = [f"p{i}" for i in range(rule.head.predicate.arity)]
+
         if weight_indices[0] is None:
             select = [f"{FUNCTION_MAP[aggregation]}(out.value) as value"]
         else:
@@ -145,7 +148,9 @@ class PostgresConvertor(Convertor):
         vars_mapping = {}
         where = []
         vars_body_mapping = {}
-        inner_select = []
+        join_vars_mapping = {}
+        inner_select = set()
+        inner_selected_terms = set()
         inner_value_select = []
         from_clause = []
 
@@ -153,8 +158,9 @@ class PostgresConvertor(Convertor):
             if Convertor._is_var(term):
                 term_name = f"t{term_idx}"
                 vars_mapping[str(term)] = term_name
+                vars_body_mapping[str(term)] = f"p{term_idx}"
 
-                select.append(f"out.{term_name} as {term_name}")
+                select.append(f"out.{term_name}")
             else:
                 select.append(f"'{term}' as t{term_idx}")
 
@@ -163,7 +169,7 @@ class PostgresConvertor(Convertor):
 
             relation_mapping = self.table_mappings.get(str(relation.predicate), None)
             value = "value" if relation_mapping is None else relation_mapping.value_column
-            selected_value = 1 if value is None else f"s{t_index}.{value}"
+            selected_value = "1" if value is None else f"s{t_index}.{value}"
 
             if weight_id is None:
                 inner_value_select.append(selected_value)
@@ -173,6 +179,7 @@ class PostgresConvertor(Convertor):
             if len(inner_value_select) == 2:
                 inner_value_select = [f"{FUNCTION_MAP['sum']}({', '.join(inner_value_select)})"]
 
+            from_function_parameters = []
             for term_idx, term in enumerate(relation.terms):
                 if relation_mapping is None:
                     field = f"t{term_idx}"
@@ -180,17 +187,34 @@ class PostgresConvertor(Convertor):
                     field = relation_mapping.term_columns[term_idx]
 
                 if not self._is_var(term):
-                    where.append(f"s{t_index}.{field} = '{str(term)}'")
+                    if relation_mapping is None:
+                        from_function_parameters.append(f"'{term}'")
+                    else:
+                        where.append(f"s{t_index}.{field} = '{str(term)}'")
                     continue
+
+                if str(term) in vars_mapping and str(term) not in inner_selected_terms:
+                    inner_select.add(f"s{t_index}.{field} AS {vars_mapping[str(term)]}")
+                    inner_selected_terms.add(str(term))
+
                 if str(term) in vars_body_mapping:
-                    join_on.append(f"s{t_index}.{field} = {vars_body_mapping[str(term)]}")
+                    if relation_mapping is None:
+                        from_function_parameters.append(vars_body_mapping[str(term)])
+                    else:
+                        where.append(f"s{t_index}.{field}::TEXT LIKE COALESCE({vars_body_mapping[str(term)]}, '%')")
+
+                    if str(term) in join_vars_mapping:
+                        join_on.append(f"s{t_index}.{field} = {vars_body_mapping[str(term)]}")
                     continue
+
+                from_function_parameters.append("NULL")
+
+                join_vars_mapping[str(term)] = f"s{t_index}.{field}"
                 vars_body_mapping[str(term)] = f"s{t_index}.{field}"
-                if str(term) in vars_mapping:
-                    inner_select.append(f"s{t_index}.{field} AS {vars_mapping[str(term)]}")
 
             if relation_mapping is None:
-                function_name = f"neuralogic._{relation.predicate.name}_{relation.predicate.arity}()"
+                params = ",".join(from_function_parameters)
+                function_name = f"neuralogic.{relation.predicate.name}({params})"
             else:
                 function_name = relation_mapping.table_name
 
@@ -206,7 +230,7 @@ class PostgresConvertor(Convertor):
         group_by_clause = f" GROUP BY {', '.join('out.' + v for v in vars_mapping.values())}"
 
         if len(inner_value_select) == 1:
-            inner_select.append(f"{FUNCTION_MAP[activation]}({inner_value_select[0]}) as value")
+            inner_select.add(f"{FUNCTION_MAP[activation]}({inner_value_select[0]}) as value")
 
         from_clause = f"SELECT {', '.join(inner_select)} FROM {from_clause}{'' if not where else where_clause}"
 
@@ -215,4 +239,4 @@ class PostgresConvertor(Convertor):
         name = f"neuralogic._{rule.head.predicate.name}_{rule.head.predicate.arity}_{index}"
         body = f"SELECT {', '.join(select)} FROM ({from_clause}) AS out{'' if not vars_mapping else group_by_clause}"
 
-        return self.get_function(name, [], return_type, body)
+        return self.get_function(name, [f"{name} TEXT" for name in function_parameters], return_type, body)
