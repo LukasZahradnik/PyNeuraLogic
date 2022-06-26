@@ -2,14 +2,14 @@ from typing import List, Set, Tuple
 
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.rule import Rule
-from neuralogic.db.convertor import Convertor
+from neuralogic.db.converter import Converter
 from neuralogic.db.pg.helpers import helpers
 
 
 FUNCTION_TEMPLATE = """
 CREATE OR REPLACE FUNCTION {name}({params}) RETURNS {return_type} AS $$
 {body}
-$$ LANGUAGE {language} STABLE;
+$$ LANGUAGE {language} {volatility};
 """.strip()
 
 
@@ -26,15 +26,23 @@ FUNCTION_MAP = {
 }
 
 
-class PostgresConvertor(Convertor):
+class PostgresConverter(Converter):
     @staticmethod
-    def get_function(name: str, params: List[str], return_type: List[str], body: str, language: str = "SQL") -> str:
+    def get_function(
+        name: str,
+        params: List[str],
+        return_type: List[str],
+        body: str,
+        language: str = "SQL",
+        volatility: str = "STABLE",
+    ) -> str:
         return FUNCTION_TEMPLATE.format(
             name=name,
             params=",".join(params),
             return_type=f"Table({','.join(return_type)})",
             body=body,
             language=language,
+            volatility=volatility,
         )
 
     @staticmethod
@@ -46,7 +54,7 @@ class PostgresConvertor(Convertor):
         for _ in return_type[1:]:
             select.append("'1'")
 
-        return PostgresConvertor.get_function(name, params, return_type, f"SELECT {','.join(select)}")
+        return PostgresConverter.get_function(name, params, return_type, f"SELECT {','.join(select)}")
 
     def get_helpers(self, functions: Set[str]) -> str:
         used_functions = {fun for fun in functions}
@@ -75,7 +83,7 @@ class PostgresConvertor(Convertor):
         if condition:
             body = f"{body} WHERE {condition}"
 
-        return self.get_function(name, parameters, return_type, body)
+        return self.get_function(name, parameters, return_type, body, volatility="IMMUTABLE")
 
     def get_relation_interface_sql_function(self, relation: str, arity: int) -> Tuple[str, str]:
         """Return the SQL function that should by used by the end users"""
@@ -100,46 +108,30 @@ class PostgresConvertor(Convertor):
         function_parameters = [f"p{i}" for i in range(arity)]
 
         inner_select = []
-        for i in range(arity):
-            selects = (f"s{index}.t{i}" for index in range(number_of_rules))
-            inner_select.append(f"COALESCE({','.join(selects)}) as t{i}")
-
-        inner_value_select = []
-        from_clause = []
 
         for index in range(number_of_rules):
-            join_on = [f"s{index}.t{i} = s{index - 1}.t{i}" for i in range(arity)]
-            inner_value_select.append(f"COALESCE(s{index}.value, 0)")
+            function_name = f"neuralogic._{name}_{arity}_{index}({','.join(function_parameters)}) as s{index}"
+            selects = []
 
-            if len(inner_value_select) == 2:
-                inner_value_select = [f"{FUNCTION_MAP['sum']}({', '.join(inner_value_select)})"]
-
-            function_name = f"neuralogic._{name}_{arity}_{index}({','.join(function_parameters)})"
-
-            if not from_clause:
-                from_clause.append(f"{function_name} as s{index}")
-            else:
-                from_clause.append(
-                    f"{function_name} AS s{index} ON {'1 = 1' if not join_on else ' AND '.join(join_on)}"
-                )
-
-        if len(inner_value_select) == 1:
             if is_fact:
-                inner_select.append(f"{inner_value_select[0]} as value")
+                selects.append(f"s{index}.value as value")
             else:
-                inner_select.append(f"{FUNCTION_MAP[activation]}({inner_value_select[0]}) as value")
+                selects.append(f"{FUNCTION_MAP[activation]}(s{index}.value) as value")
+
+            selects.extend(f"s{index}.t{i}" for i in range(arity))
+            selects = ", ".join(selects)
+            inner_select.append(f"SELECT {selects} FROM {function_name}")
 
         select = [f"{FUNCTION_MAP[aggregation]}(out.value) as value"]
         select.extend(f"out.t{i}" for i in range(arity))
         select = ", ".join(select)
 
-        from_clause = f"{' FULL OUTER JOIN '.join(from_clause)}"
         group_by_clause = f" GROUP BY {', '.join('out.t' + str(v) for v in range(arity))}"
-        from_clause = f"SELECT {', '.join(inner_select)} FROM {from_clause}"
+        select_from = " UNION ".join(inner_select)
 
         return_type = ["value NUMERIC", *(f"t{i} TEXT" for i in range(arity))]
         name = f"neuralogic._{name}_{arity}"
-        body = f"SELECT {select} FROM ({from_clause}) AS out{'' if arity == 0 else group_by_clause}"
+        body = f"SELECT {select} FROM ({select_from}) AS out{'' if arity == 0 else group_by_clause}"
 
         return self.get_function(name, [f"{name} TEXT" for name in function_parameters], return_type, body)
 
@@ -167,7 +159,7 @@ class PostgresConvertor(Convertor):
         from_clause = []
 
         for term_idx, term in enumerate(rule.head.terms):
-            if Convertor._is_var(term):
+            if Converter._is_var(term):
                 term_name = f"t{term_idx}"
                 vars_mapping[str(term)] = term_name
                 vars_body_mapping[str(term)] = f"p{term_idx}"
@@ -198,7 +190,7 @@ class PostgresConvertor(Convertor):
                 if relation_mapping is None:
                     field = f"t{term_idx}"
                 else:
-                    field = relation_mapping.term_columns[term_idx]
+                    field = f"{relation_mapping.term_columns[term_idx]}::TEXT"
 
                 if not self._is_var(term):
                     if relation_mapping is None:
@@ -215,7 +207,7 @@ class PostgresConvertor(Convertor):
                     if relation_mapping is None:
                         from_function_parameters.append(vars_body_mapping[str(term)])
                     else:
-                        where.append(f"s{t_index}.{field}::TEXT LIKE COALESCE({vars_body_mapping[str(term)]}, '%')")
+                        where.append(f"s{t_index}.{field} LIKE COALESCE({vars_body_mapping[str(term)]}, '%')")
 
                     if str(term) in join_vars_mapping:
                         join_on.append(f"s{t_index}.{field} = {vars_body_mapping[str(term)]}")
@@ -241,7 +233,7 @@ class PostgresConvertor(Convertor):
                     f"{function_name} AS s{t_index} ON {'1 = 1' if not join_on else ' AND '.join(join_on)}"
                 )
 
-        from_clause = f"{' INNER JOIN '.join(from_clause)}"
+        from_clause = f"{' LEFT JOIN '.join(from_clause)}"
         where_clause = f" WHERE {' AND '.join(where)}"
         group_by_clause = f" GROUP BY {', '.join('out.' + v for v in vars_mapping.values())}"
 

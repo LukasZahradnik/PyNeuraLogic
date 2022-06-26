@@ -1,2 +1,2 @@
-from neuralogic.db.convertor import Convertor, TableMapping
-from neuralogic.db.pg import PostgresConvertor
+from neuralogic.db.converter import Converter, TableMapping
+from neuralogic.db.pg import PostgresConverter

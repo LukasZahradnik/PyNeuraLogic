@@ -17,7 +17,7 @@ class TableMapping:
     value_column: Optional[str] = None
 
 
-class Convertor:
+class Converter:
     def __init__(self, model, table_mappings: List[TableMapping], settings: Settings):
         self.table_mappings: Dict[str, TableMapping] = {
             f"{mapping.relation_name}/{len(mapping.term_columns)}": mapping for mapping in table_mappings
