@@ -9,7 +9,7 @@ from neuralogic.db.pg.helpers import helpers
 FUNCTION_TEMPLATE = """
 CREATE OR REPLACE FUNCTION {name}({params}) RETURNS {return_type} AS $$
 {body}
-$$ LANGUAGE {language} {volatility};
+$$ LANGUAGE {language} {volatility} PARALLEL SAFE;
 """.strip()
 
 
@@ -46,7 +46,13 @@ class PostgresConverter(Converter):
         )
 
     @staticmethod
-    def get_empty_function(name: str, params: List[str], return_type: List[str]) -> str:
+    def get_empty_function(
+        name: str,
+        params: List[str],
+        return_type: List[str],
+        language: str = "SQL",
+        volatility: str = "STABLE",
+    ) -> str:
         if len(return_type) == 0:
             raise NotImplementedError
 
@@ -54,7 +60,9 @@ class PostgresConverter(Converter):
         for _ in return_type[1:]:
             select.append("'1'")
 
-        return PostgresConverter.get_function(name, params, return_type, f"SELECT {','.join(select)}")
+        return PostgresConverter.get_function(
+            name, params, return_type, f"SELECT {','.join(select)}", language, volatility
+        )
 
     def get_helpers(self, functions: Set[str]) -> str:
         used_functions = {fun for fun in functions}
@@ -92,11 +100,23 @@ class PostgresConverter(Converter):
 
         name = f"neuralogic.{relation}"
         return_type = ["value NUMERIC", *(f"t{i} TEXT" for i in range(arity))]
-        body = f"SELECT * FROM neuralogic._{relation}_{arity}({','.join(function_parameters)}) as out"
+        function_name = f"neuralogic._{relation}_{arity}({','.join('NULL' for _ in range(arity))})"
+        tmp_table_name = f"__neuralogic___tmp_{relation}_{arity}"
+        conditions = " AND ".join(f"out.t{i} LIKE COALESCE(p{i}, '%')" for i in range(arity))
+
+        if conditions:
+            return_select = f"RETURN QUERY SELECT * FROM {tmp_table_name} as out WHERE {conditions}"
+        else:
+            return_select = f"RETURN QUERY SELECT * FROM {tmp_table_name} as out"
+
+        body = (
+            f"BEGIN CREATE TEMPORARY TABLE IF NOT EXISTS {tmp_table_name} ON COMMIT DROP AS "
+            f"SELECT * FROM {function_name}; {return_select}; RETURN; END;"
+        )
 
         return (
-            self.get_empty_function(name, params, return_type),
-            self.get_function(name, params, return_type, body),
+            self.get_empty_function(name, params, return_type, "SQL", "VOLATILE"),
+            self.get_function(name, params, return_type, body, "plpgsql", "VOLATILE"),
         )
 
     def get_rule_aggregation_function(
@@ -187,6 +207,8 @@ class PostgresConverter(Converter):
 
             from_function_parameters = []
             for term_idx, term in enumerate(relation.terms):
+                from_function_parameters.append("NULL")
+
                 if relation_mapping is None:
                     field = f"t{term_idx}"
                 else:
@@ -204,18 +226,13 @@ class PostgresConverter(Converter):
                     inner_selected_terms.add(str(term))
 
                 if str(term) in vars_body_mapping:
-                    if relation_mapping is None:
-                        from_function_parameters.append(vars_body_mapping[str(term)])
-                    else:
-                        where.append(f"s{t_index}.{field} LIKE COALESCE({vars_body_mapping[str(term)]}, '%')")
+                    where.append(f"s{t_index}.{field} LIKE COALESCE({vars_body_mapping[str(term)]}, '%')")
 
                     if str(term) in join_vars_mapping:
-                        join_on.append(f"s{t_index}.{field} = {vars_body_mapping[str(term)]}")
+                        join_on.append(f"{vars_body_mapping[str(term)]} = s{t_index}.{field}")
                     else:
                         vars_body_mapping[str(term)] = f"s{t_index}.{field}"
                     continue
-
-                from_function_parameters.append("NULL")
 
                 join_vars_mapping[str(term)] = f"s{t_index}.{field}"
                 vars_body_mapping[str(term)] = f"s{t_index}.{field}"
@@ -233,7 +250,7 @@ class PostgresConverter(Converter):
                     f"{function_name} AS s{t_index} ON {'1 = 1' if not join_on else ' AND '.join(join_on)}"
                 )
 
-        from_clause = f"{' LEFT JOIN '.join(from_clause)}"
+        from_clause = f"{' INNER JOIN '.join(from_clause)}"
         where_clause = f" WHERE {' AND '.join(where)}"
         group_by_clause = f" GROUP BY {', '.join('out.' + v for v in vars_mapping.values())}"
 
