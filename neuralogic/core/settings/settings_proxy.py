@@ -105,6 +105,8 @@ class SettingsProxy:
 
     @error_function.setter
     def error_function(self, error_function: ErrorFunction):
+        self.settings.inferOutputNeuronFcn = True
+
         if isinstance(error_function, MSE):
             self.settings.squishLastLayer = False
             self.settings.trainOnlineResultsType = self.settings_class.ResultsType.REGRESSION
@@ -120,6 +122,7 @@ class SettingsProxy:
                 self.settings.squishLastLayer = True
                 java_error_function = self.settings_class.ErrorFcn.SOFTENTROPY
             else:
+                self.settings.inferOutputNeuronFcn = False
                 self.settings.squishLastLayer = False
                 java_error_function = self.settings_class.ErrorFcn.CROSSENTROPY
         else:
