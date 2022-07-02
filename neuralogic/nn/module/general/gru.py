@@ -60,7 +60,6 @@ class GRUCell(Module):
         n_helper_name = f"{self.output_name}__n_helper"
         n_helper_weighted_name = f"{self.output_name}__n_helper_w"
 
-        z_minus_name = f"{self.output_name}__mz"
         h_left_name = f"{self.output_name}__left"
         h_right_name = f"{self.output_name}__right"
 
@@ -100,11 +99,8 @@ class GRUCell(Module):
 
         i_weight = self.hidden_size, self.input_size
         n = R.get(n_name)(h_terms) <= (R.get(self.input_name)(input_terms)[i_weight], R.get(n_helper_name)(h_terms))
-        true = R.get(f"{self.output_name}__true")
 
-        ones = [1.0] * self.input_size
-        z_minus = R.get(z_minus_name)(h_terms) <= (true[ones].fixed(), R.get(z_name)(h_terms)[-1].fixed())
-        h_left = R.get(h_left_name)(h_terms) <= (R.get(z_minus_name)(h_terms), R.get(n_name)(h_terms))
+        h_left = R.get(h_left_name)(h_terms) <= (-R.get(z_name)(h_terms), R.get(n_name)(h_terms))
         h_right = R.get(h_right_name)(h_terms) <= (
             R.get(z_name)(h_terms),
             R.get(self.hidden_input_name)(p_terms),
@@ -114,7 +110,6 @@ class GRUCell(Module):
         h = R.get(self.output_name)(h_terms) <= (R.get(h_left_name)(h_terms), R.get(h_right_name)(h_terms))
 
         return [
-            true,
             *r(),
             *z(),
             n_helper | Metadata(activation="elementproduct-identity"),
@@ -123,8 +118,6 @@ class GRUCell(Module):
             n_helper_weighted.head.predicate | [Activation.IDENTITY],
             n | [Activation.TANH],
             n.head.predicate | [Activation.IDENTITY],
-            z_minus | [Activation.IDENTITY],
-            z_minus.head.predicate | [Activation.IDENTITY],
             h_left | Metadata(activation="elementproduct-identity"),
             h_left.head.predicate | [Activation.IDENTITY],
             h_right | Metadata(activation="elementproduct-identity"),
@@ -196,21 +189,12 @@ class GRU(Module):
         )) | [Activation.TANH]
         R.<output_name>__n / (<arity> + 1) | [Activation.IDENTITY],
 
-    The last equation is computed via four rules. The first rule computes :math:`1 - z_t`. That is:
-
-    .. code:: logtalk
-
-        (R.<output_name>__mz(<...terms>, V.T) <= (
-            R.<output_name>__true[[1.0] * <input_size>].fixed(), R.<output_name>__z(<...terms>, V.T)[-1].fixed()
-        )) | [Activation.IDENTITY]
-        R.<output_name>__mz / <arity> + 1 | [Activation.IDENTITY],
-
-    Then we compute element-wise products.
+    The last equation is computed via three rules. The first two rules computes element-wise products. That is:
 
     .. code:: logtalk
 
         (R.<output_name>__left(<...terms>, V.T) <= (
-            R.<output_name>__mz(<...terms>, V.T), R.<output_name>__n(<...terms>, V.T)
+            R.<output_name>__z(<...terms>, V.T), R.<output_name>__n(<...terms>, V.T)
         )) | Metadata(activation="elementproduct-identity")
 
         (R.<output_name>__right(<...terms>, V.T) <= (
@@ -219,13 +203,6 @@ class GRU(Module):
 
         R.<output_name>__left / <arity> + 1 | [Activation.IDENTITY]
         R.<output_name>__right / <arity> + 1 | [Activation.IDENTITY]
-
-    .. code:: logtalk
-
-        (R.<output_name>__mz(<...terms>, V.T) <= (
-            R.<output_name>__true[[1.0] * <input_size>].fixed(), R.<output_name>__z(<...terms>, V.T)[-1].fixed()
-        )) | [Activation.IDENTITY]
-        R.<output_name>__mz / <arity> + 1 | [Activation.IDENTITY],
 
     The last output rule sums up the element-wise products.
 
