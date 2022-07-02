@@ -95,11 +95,11 @@ LANGUAGE SQL IMMUTABLE;
 
 
 helpers = {
-    "mul": MUL,
-    "sum": SUM,
-    "tanh": TANH,
-    "sigmoid": SIGMOID,
-    "relu": RELU,
+    "mul": MUL.replace("\n\n", "\n"),
+    "sum": SUM.replace("\n\n", "\n"),
+    "tanh": TANH.replace("\n\n", "\n"),
+    "sigmoid": SIGMOID.replace("\n\n", "\n"),
+    "relu": RELU.replace("\n\n", "\n"),
     "identity": None,
     "avg": None,
     "max": None,

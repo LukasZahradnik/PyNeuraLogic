@@ -131,23 +131,22 @@ class PostgresConverter(Converter):
 
         for index in range(number_of_rules):
             function_name = f"neuralogic._{name}_{arity}_{index}({','.join(function_parameters)}) as s{index}"
-            selects = []
-
-            if is_fact:
-                selects.append(f"s{index}.value as value")
-            else:
-                selects.append(f"{FUNCTION_MAP[activation]}(s{index}.value) as value")
-
+            selects = [f"s{index}.value as value"]
             selects.extend(f"s{index}.t{i}" for i in range(arity))
+
             selects = ", ".join(selects)
             inner_select.append(f"SELECT {selects} FROM {function_name}")
 
-        select = [f"{FUNCTION_MAP[aggregation]}(out.value) as value"]
+        if is_fact:
+            select = [f"SUM(out.value) as value"]
+        else:
+            select = [f"{FUNCTION_MAP[activation]}(SUM(out.value)) as value"]
+
         select.extend(f"out.t{i}" for i in range(arity))
         select = ", ".join(select)
 
         group_by_clause = f" GROUP BY {', '.join('out.t' + str(v) for v in range(arity))}"
-        select_from = " UNION ".join(inner_select)
+        select_from = " UNION ALL ".join(inner_select)
 
         return_type = ["value NUMERIC", *(f"t{i} TEXT" for i in range(arity))]
         name = f"neuralogic._{name}_{arity}"
@@ -162,11 +161,11 @@ class PostgresConverter(Converter):
         function_parameters = [f"p{i}" for i in range(rule.head.predicate.arity)]
 
         if weight_indices[0] is None:
-            select = [f"{FUNCTION_MAP[aggregation]}(out.value) as value"]
+            select = [f"{FUNCTION_MAP[aggregation]}({FUNCTION_MAP[activation]}(out.value)) as value"]
         else:
             select = [
-                f"{FUNCTION_MAP[aggregation]}({FUNCTION_MAP['mul']}"
-                f"({weights[weight_indices[0]]}, out.value)) as value"
+                f"{FUNCTION_MAP['mul']}({weights[weight_indices[0]]}, "
+                f"{FUNCTION_MAP[aggregation]}({FUNCTION_MAP[activation]}(out.value))) as value"
             ]
 
         vars_mapping = {}
@@ -194,7 +193,11 @@ class PostgresConverter(Converter):
             relation_mapping = self.table_mappings.get(str(relation.predicate).replace("*", "_"), None)
 
             if not relation.predicate.hidden:
-                value = "value" if relation_mapping is None else f"{relation_mapping.value_column}::NUMERIC"
+                if relation_mapping is None:
+                    value = "value"
+                else:
+                    value_column = relation_mapping.value_column
+                    value = None if value_column is None else f"{value_column}::NUMERIC"
                 selected_value = "1" if value is None else f"s{t_index}.{value}"
 
                 if weight_id is None:
@@ -207,8 +210,6 @@ class PostgresConverter(Converter):
 
             from_function_parameters = []
             for term_idx, term in enumerate(relation.terms):
-                from_function_parameters.append("NULL")
-
                 if relation_mapping is None:
                     field = f"t{term_idx}"
                 else:
@@ -221,6 +222,8 @@ class PostgresConverter(Converter):
                         where.append(f"s{t_index}.{field} = '{str(term)}'")
                     continue
 
+                from_function_parameters.append("NULL")
+
                 if str(term) in vars_mapping and str(term) not in inner_selected_terms:
                     inner_select.add(f"s{t_index}.{field} AS {vars_mapping[str(term)]}")
                     inner_selected_terms.add(str(term))
@@ -232,6 +235,7 @@ class PostgresConverter(Converter):
                         join_on.append(f"{vars_body_mapping[str(term)]} = s{t_index}.{field}")
                     else:
                         vars_body_mapping[str(term)] = f"s{t_index}.{field}"
+                        join_vars_mapping[str(term)] = f"s{t_index}.{field}"
                     continue
 
                 join_vars_mapping[str(term)] = f"s{t_index}.{field}"
@@ -255,7 +259,7 @@ class PostgresConverter(Converter):
         group_by_clause = f" GROUP BY {', '.join('out.' + v for v in vars_mapping.values())}"
 
         if len(inner_value_select) == 1:
-            inner_select.add(f"{FUNCTION_MAP[activation]}({inner_value_select[0]}) as value")
+            inner_select.add(f"{inner_value_select[0]} as value")
 
         from_clause = f"SELECT {', '.join(inner_select)} FROM {from_clause}{'' if not where else where_clause}"
 
