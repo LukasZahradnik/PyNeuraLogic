@@ -9,7 +9,7 @@ from neuralogic.db.pg.helpers import helpers
 FUNCTION_TEMPLATE = """
 CREATE OR REPLACE FUNCTION {name}({params}) RETURNS {return_type} AS $$
 {body}
-$$ LANGUAGE {language} {volatility} PARALLEL SAFE;
+$$ LANGUAGE {language} {volatility};
 """.strip()
 
 
