@@ -15,6 +15,12 @@
     display: none;
 }
 
+.outline-only {
+    border-style: solid;
+    border-color: #e7f2fa;
+    background-color: #00000000 !important;
+}
+
 .sphinx-tabs-tab {
     padding: 0.7rem 0.8rem !important;
 }
