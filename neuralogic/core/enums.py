@@ -7,13 +7,20 @@ class Optimizer(str, Enum):
 
 
 class Activation(str, Enum):
+    LUKASIEWICZ = "LUKASIEWICZ"
     SIGMOID = "SIGMOID"
-    TANH = "TANH"
     SIGNUM = "SIGNUM"
     RELU = "RELU"
     LEAKY_RELU = "LEAKYRELU"
     IDENTITY = "IDENTITY"
-    LUKASIEWICZ = "LUKASIEWICZ"
+    TANH = "TANH"
+    EXP = ("EXP",)
+    TRANSP = ("TRANSP",)
+    T = ("TRANSP",)
+    NORM = ("NORM",)
+    SQRT = ("SQRT",)
+    INVERSE = "INVERSE"
+    REVERSE = "REVERSE"
     SOFTMAX = "SOFTMAX"
     SPARSEMAX = "SPARSEMAX"
 
