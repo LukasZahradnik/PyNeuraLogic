@@ -5,7 +5,7 @@ repos:
     - id: trailing-whitespace
     - id: end-of-file-fixer
 -   repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 22.6.0
     hooks:
     - id: black
       entry: bash -c 'black "$@"; git add -u' --
