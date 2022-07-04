@@ -6,14 +6,16 @@ from neuralogic.nn.module.module import Module
 
 class APPNPConv(Module):
     r"""
-    Approximate Personalized Propagation of Neural Predictions layer from `"Predict then Propagate: Graph Neural Networks meet Personalized PageRank" <https://arxiv.org/abs/1810.05997>`_.
+    Approximate Personalized Propagation of Neural Predictions layer from
+    `"Predict then Propagate: Graph Neural Networks meet Personalized PageRank" <https://arxiv.org/abs/1810.05997>`_.
     Which can be expressed as:
 
     .. math::
         \mathbf{x}^{0}_i = \mathbf{x}_i
 
     .. math::
-        \mathbf{x}^{k}_i = \alpha \cdot \mathbf{x}^0_i + (1 - \alpha) \cdot {agg}_{j \in \mathcal{N}(i)}(\mathbf{x}^{k - 1}_j)
+        \mathbf{x}^{k}_i = \alpha \cdot \mathbf{x}^0_i + (1 - \alpha) \cdot
+        {agg}_{j \in \mathcal{N}(i)}(\mathbf{x}^{k - 1}_j)
 
     .. math::
         \mathbf{x}^{\prime}_i = act(\mathbf{x}^{K}_i)
@@ -21,13 +23,15 @@ class APPNPConv(Module):
     Where *act* is an activation function and *agg* aggregation function.
 
 
-    The first part of the second equation that is ":math:`\alpha \cdot \mathbf{x}^0_i`" is expressed in the logic form as:
+    The first part of the second equation that is ":math:`\alpha \cdot \mathbf{x}^0_i`" is expressed
+    in the logic form as:
 
     .. code-block:: logtalk
 
         R.<output_name>__<k>(V.I) <= R.<feature_name>(V.I)[<alpha>].fixed()
 
-    The second part of the second equation that is ":math:`(1 - \alpha) \cdot {agg}_{j \in \mathcal{N}(i)}(\mathbf{x}^{k - 1}_j)`" is expressed as:
+    The second part of the second equation that is
+    ":math:`(1 - \alpha) \cdot {agg}_{j \in \mathcal{N}(i)}(\mathbf{x}^{k - 1}_j)`" is expressed as:
 
     .. code-block:: logtalk
 
@@ -36,7 +40,8 @@ class APPNPConv(Module):
     Examples
     --------
 
-    The whole computation of this module (parametrized as :code:`APPNPConv("h1", "h0", "_edge", 3, 0.1, Activation.SIGMOID)`) is as follows:
+    The whole computation of this module
+    (parametrized as :code:`APPNPConv("h1", "h0", "_edge", 3, 0.1, Activation.SIGMOID)`) is as follows:
 
     .. code:: logtalk
 

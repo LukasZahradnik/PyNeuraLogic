@@ -12,7 +12,8 @@ class SGConv(Module):
     .. math::
         \mathbf{x}^{\prime}_i = act(\mathbf{W} \cdot {agg}_{j \in \mathcal{N}^k(i)}(\mathbf{x}_j))
 
-    Where *act* is an activation function, *agg* aggregation function, *W* is a learnable parameter and :math:`\mathcal{N}^k(i)` denotes nodes that are *k* hops away from the node *i*.
+    Where *act* is an activation function, *agg* aggregation function, *W* is a learnable parameter
+    and :math:`\mathcal{N}^k(i)` denotes nodes that are *k* hops away from the node *i*.
     This equation is translated into the logic form as:
 
     .. code:: logtalk

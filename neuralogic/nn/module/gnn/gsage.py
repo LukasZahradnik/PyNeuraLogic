@@ -13,8 +13,8 @@ class SAGEConv(Module):
         \mathbf{x}^{\prime}_i = act(\mathbf{W}_1 \mathbf{x}_i + \mathbf{W}_2 \cdot
          {agg}_{j \in \mathcal{N}(i)}(\mathbf{x}_j)))
 
-    Where *act* is an activation function, *agg* aggregation function and *W*'s are learnable parameters. This equation is
-    translated into the logic form as:
+    Where *act* is an activation function, *agg* aggregation function and *W*'s are learnable parameters.
+    This equation is translated into the logic form as:
 
     .. code:: logtalk
 

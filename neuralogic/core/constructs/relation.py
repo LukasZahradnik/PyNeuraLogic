@@ -98,7 +98,7 @@ class WeightedRelation(BaseRelation):
 
     def fixed(self) -> "WeightedRelation":
         if self.is_fixed:
-            raise Exception(f"Weighted relation is already fixed")
+            raise Exception(f"Weighted relation {self} is already fixed")
         return WeightedRelation(self.weight, self.predicate, True, self.terms, self.negated)
 
     def __invert__(self) -> "WeightedRelation":

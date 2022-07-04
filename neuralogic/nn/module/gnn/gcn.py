@@ -6,7 +6,8 @@ from neuralogic.nn.module.module import Module
 
 class GCNConv(Module):
     r"""
-    Graph Convolutional layer from `"Semi-supervised Classification with Graph Convolutional Networks" <https://arxiv.org/abs/1609.02907>`_.
+    Graph Convolutional layer from
+    `"Semi-supervised Classification with Graph Convolutional Networks" <https://arxiv.org/abs/1609.02907>`_.
     Which can be expressed as:
 
     .. math::

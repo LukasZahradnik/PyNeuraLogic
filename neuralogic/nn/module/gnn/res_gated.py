@@ -18,8 +18,8 @@ class ResGatedGraphConv(Module):
 
         \mathbf{\eta}_{i,j} = gating\_act(\mathbf{W}_3 \mathbf{x}_i + \mathbf{W}_4 \mathbf{x}_j)
 
-    Where *act* is an activation function, *agg* aggregation function, *gating_act* is a gating activation function and :math:`W_n` are learnable parameters. This equation is
-    translated into the logic form as:
+    Where *act* is an activation function, *agg* aggregation function, *gating_act* is a gating activation function and
+    :math:`W_n` are learnable parameters. This equation is translated into the logic form as:
 
     .. code:: logtalk
 
@@ -36,7 +36,8 @@ class ResGatedGraphConv(Module):
     Examples
     --------
 
-    The whole computation of this module (parametrized as :code:`ResGatedGraphConv(1, 2, "h1", "h0", "_edge")`) is as follows:
+    The whole computation of this module (parametrized as :code:`ResGatedGraphConv(1, 2, "h1", "h0", "_edge")`)
+    is as follows:
 
     .. code:: logtalk
 

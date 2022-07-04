@@ -17,8 +17,8 @@ class MetaConv(Module):
         \sum_{k \in \mathcal{K}}
         (\mathbf{W_k} \cdot \mathbf{x}_j))
 
-    Where *act* is an activation function, *agg* aggregation function (by default average), :math:`W_0` is a learnable root parameter
-    and :math:`W_k` is a learnable parameter for each role.
+    Where *act* is an activation function, *agg* aggregation function (by default average), :math:`W_0` is a learnable
+    root parameter and :math:`W_k` is a learnable parameter for each role.
 
     Parameters
     ----------

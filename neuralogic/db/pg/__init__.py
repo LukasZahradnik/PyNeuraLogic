@@ -138,7 +138,7 @@ class PostgresConverter(Converter):
             inner_select.append(f"SELECT {selects} FROM {function_name}")
 
         if is_fact:
-            select = [f"SUM(out.value) as value"]
+            select = ["SUM(out.value) as value"]
         else:
             select = [f"{FUNCTION_MAP[activation]}(SUM(out.value)) as value"]
 

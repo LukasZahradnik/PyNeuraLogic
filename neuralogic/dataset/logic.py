@@ -9,7 +9,8 @@ DatasetEntries = Union[BaseRelation, WeightedRelation, Rule]
 
 class Dataset(BaseDataset):
     r"""
-    Dataset encapsulating (learning) samples in the form of logic format, allowing users to fully take advantage of the PyNeuraLogic library.
+    Dataset encapsulating (learning) samples in the form of logic format, allowing users to fully take advantage of the
+    PyNeuraLogic library.
 
     One learning sample consists of:
     * Example: A list of logic facts and rules representing some instance (e.g., a graph)
@@ -51,7 +52,8 @@ class Dataset(BaseDataset):
         dataset.add_query([first_query_0, first_query_1])
         dataset.add_query(second_query)
 
-        # Learning samples: [first_example, first_query_0], [first_example, first_query_1], [second_example, second_query]
+        # Learning samples:
+        #   [first_example, first_query_0], [first_example, first_query_1], [second_example, second_query]
 
     Parameters
     ----------
@@ -62,10 +64,11 @@ class Dataset(BaseDataset):
         List of queries. Default: ``None``
 
     """
+
     def __init__(
         self,
         examples: Optional[List[List[DatasetEntries]]] = None,
-        queries: Optional[List[Union[List[DatasetEntries], DatasetEntries]]] = None
+        queries: Optional[List[Union[List[DatasetEntries], DatasetEntries]]] = None,
     ):
         self.examples: List[List[DatasetEntries]] = examples if examples is not None else []
         self.queries: List[Union[List[DatasetEntries], DatasetEntries]] = queries if queries is not None else []

@@ -1,5 +1,3 @@
-from typing import Union
-
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.enums import Activation
 from neuralogic.core.constructs.factories import R, V

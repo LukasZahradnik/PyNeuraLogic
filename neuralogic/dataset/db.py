@@ -50,7 +50,7 @@ class DBSource:
         self.replace_empty_column = replace_empty_column
 
         if len(term_columns) == 0:
-            raise NotImplementedError(f"Cannot create DBSource with zero terms")
+            raise NotImplementedError("Cannot create DBSource with zero terms")
 
     def to_csv(self, cursor) -> CSVFile:
         source = io.StringIO()

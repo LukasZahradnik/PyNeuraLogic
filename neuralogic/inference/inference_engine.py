@@ -91,7 +91,7 @@ class InferenceEngine:
         lifted_example = gs.query.evidence
         template = gs.template
 
-        ground_template = self.grounder.groundRulesAndFacts(lifted_example, template)
+        self.grounder.groundRulesAndFacts(lifted_example, template)
 
         clause = self.java_factory.atom_to_clause(query)
         horn_clause = self.horn_clause(clause)

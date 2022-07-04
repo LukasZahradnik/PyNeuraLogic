@@ -1,5 +1,3 @@
-from typing import Optional
-
 from neuralogic.core.enums import Backend
 
 
@@ -20,7 +18,7 @@ def get_neuralogic_layer(backend: Backend = Backend.JAVA):
 
 
 def get_evaluator(
-    template: "Template",
+    template,
     settings=None,
     backend: Backend = Backend.JAVA,
 ):
