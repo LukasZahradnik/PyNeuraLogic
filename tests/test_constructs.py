@@ -73,7 +73,7 @@ def test_predicate_creation() -> None:
     assert predicate_metadata.metadata.aggregation is None
     assert predicate_metadata.metadata.activation == Activation.SIGMOID
 
-    predicate_metadata = R.shortest / 2 | [Activation.SIGMOID + ActivationAgg.MAX]
+    predicate_metadata = R.shortest / 2 | [Activation.SIGMOID(ActivationAgg.MAX)]
     assert predicate_metadata.metadata is not None
     assert predicate_metadata.metadata.aggregation is None
     assert str(predicate_metadata.metadata.activation) == "max-sigmoid"
@@ -83,7 +83,7 @@ def test_predicate_creation() -> None:
     assert predicate_metadata.metadata.aggregation is None
     assert str(predicate_metadata.metadata.activation) == "min-identity"
 
-    predicate_metadata = R.shortest / 2 | Metadata(activation=ActivationAgg.MAX + Activation.TANH)
+    predicate_metadata = R.shortest / 2 | Metadata(activation=ActivationAgg.MAX(Activation.TANH))
     assert predicate_metadata.metadata is not None
     assert predicate_metadata.metadata.aggregation == None
     assert str(predicate_metadata.metadata.activation) == "max-tanh"
@@ -112,13 +112,16 @@ def test_relation_creation() -> None:
 
     relation = relation.fixed()
     assert relation.is_fixed is True
-    assert relation.negated is False
 
+    relation = R.my_atom
     neg_relation = -relation
-    assert neg_relation.negated is True
+    assert neg_relation.function is Activation.REVERSE
 
     neg_relation = ~relation
-    assert neg_relation.negated is True
+    assert neg_relation.function is Activation.REVERSE
+
+    t_relation = relation.T
+    assert t_relation.function is Activation.TRANSP
 
 
 def test_rule_metadata():
@@ -137,7 +140,7 @@ def test_rule_metadata():
     rule = R.a <= R.b
     assert rule.metadata is None
 
-    rule = (R.a <= R.b) | [ActivationAgg.MAX + Activation.SIGMOID, Aggregation.AVG]
+    rule = (R.a <= R.b) | [ActivationAgg.MAX(Activation.SIGMOID), Aggregation.AVG]
 
     assert rule.metadata is not None
     assert rule.metadata.aggregation == Aggregation.AVG

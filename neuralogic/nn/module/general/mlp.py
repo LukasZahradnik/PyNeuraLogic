@@ -1,7 +1,7 @@
 from typing import List, Union
 
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.enums import Activation
+from neuralogic.core.constructs.function import Activation, Function
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 
@@ -18,7 +18,7 @@ class MLP(Module):
         Output (head) predicate name of the module.
     input_name : str
         Input name.
-    activation : Union[Activation, List[Activation]]
+    activation : Union[Function, List[Function]]
         Activation function of all layers or list of activations for each layer.
         Default: ``Activation.RELU``
     """
@@ -28,13 +28,13 @@ class MLP(Module):
         units: List[int],
         output_name: str,
         input_name: str,
-        activation: Union[Activation, List[Activation]] = Activation.RELU,
+        activation: Union[Function, List[Function]] = Activation.RELU,
     ):
         self.output_name = output_name
         self.input_name = input_name
 
         self.units = units
-        self.activation: Union[Activation, List[Activation]] = activation
+        self.activation: Union[Function, List[Function]] = activation
 
     def __call__(self):
         layers = []

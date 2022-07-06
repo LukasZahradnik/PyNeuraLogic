@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.enums import Activation
+from neuralogic.core.constructs.function import Activation, Function
 from neuralogic.core.constructs.factories import R
 from neuralogic.nn.module.module import Module
 
@@ -49,7 +49,7 @@ class Linear(Module):
         Output (head) predicate name of the module.
     input_name : str
         Input name.
-    activation : Activation
+    activation : Function
         Activation function of the output.
         Default: ``Activation.IDENTITY``
     arity : int
@@ -62,7 +62,7 @@ class Linear(Module):
         out_channels: int,
         output_name: str,
         input_name: str,
-        activation: Activation = Activation.IDENTITY,
+        activation: Function = Activation.IDENTITY,
         arity: int = 1,
     ):
         self.output_name = output_name

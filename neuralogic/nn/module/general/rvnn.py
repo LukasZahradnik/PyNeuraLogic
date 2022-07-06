@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.enums import Activation, Aggregation
+from neuralogic.core.constructs.function import Activation, Aggregation, Function
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 
@@ -30,10 +30,10 @@ class RvNN(Module):
     max_children : int
         Maximum number of children (specify which <max_children>-ary tree will be considered).
         Default: ``2``
-    activation : Activation
+    activation : Function
         Activation function of all layers.
         Default: ``Activation.TANH``
-    aggregation : Aggregation
+    aggregation : Function
         Aggregation function of a layer.
         Default: ``Activation.SUM``
     arity : int
@@ -47,8 +47,8 @@ class RvNN(Module):
         input_name: str,
         parent_map_name: str,
         max_children: int = 2,
-        activation: Activation = Activation.TANH,
-        aggregation: Aggregation = Aggregation.SUM,
+        activation: Function = Activation.TANH,
+        aggregation: Function = Aggregation.SUM,
         arity: int = 1,
     ):
         self.input_size = input_size

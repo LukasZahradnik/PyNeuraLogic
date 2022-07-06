@@ -52,7 +52,7 @@ class JavaFactory:
         self.vector_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.VectorValue")
         self.matrix_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.MatrixValue")
 
-        self.activation_singletons = jpype.JClass("cz.cvut.fel.ida.algebra.functions.Activation.Singletons")
+        self.activation = jpype.JClass("cz.cvut.fel.ida.algebra.functions.Activation")
 
         self.pair = jpype.JClass("cz.cvut.fel.ida.utils.generic.Pair")
 
@@ -78,7 +78,7 @@ class JavaFactory:
         terms = [self.get_term(term, self.variable_factory) for term in atom.terms]
 
         predicate_name = f"@{atom.predicate.name}" if atom.predicate.special else atom.predicate.name
-        literal = self.literal(predicate_name, atom.negated, terms)
+        literal = self.literal(predicate_name, False, terms)
         literal_array = self.literal[1]
         literal_array[0] = literal
 
@@ -100,8 +100,8 @@ class JavaFactory:
             j_term_list.add(x)
 
         if relation_class == self.body_atom:
-            negation = self.activation_singletons.reverse if relation.negated else None
-            java_relation = relation_class(predicate, j_term_list, False, negation, weight)
+            function = self.activation.parseActivation(str(relation.function)) if relation.function else None
+            java_relation = relation_class(predicate, j_term_list, False, function, weight)
         else:
             java_relation = relation_class(predicate, j_term_list, False, weight)
         java_relation.originalString = relation.to_str()
@@ -123,9 +123,9 @@ class JavaFactory:
         map = jpype.JClass("java.util.LinkedHashMap")()
 
         if metadata.aggregation is not None:
-            map.put("aggregation", self.string_value(metadata.aggregation.value.lower()))
+            map.put("aggregation", self.string_value(str(metadata.aggregation).lower()))
         if metadata.activation is not None:
-            map.put("activation", self.string_value(metadata.activation.lower()))
+            map.put("activation", self.string_value(str(metadata.activation).lower()))
         # if metadata.offset is not None:
         #     _, value = self.get_value(metadata.offset)
         #     map.put("offset", self.weight_factory.construct(value))

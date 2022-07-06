@@ -1,6 +1,5 @@
 from typing import Sequence
 
-from neuralogic.core.enums import Activation, Aggregation, ActivationAggregation, ActivationAgg
 from neuralogic.core.constructs.metadata import Metadata
 
 
@@ -33,16 +32,7 @@ class Predicate:
 
     def __or__(self, other) -> "PredicateMetadata":
         if isinstance(other, Sequence):
-            metadata = Metadata()
-
-            for entry in other:
-                if isinstance(entry, (Activation, ActivationAgg, ActivationAggregation)):
-                    metadata.activation = entry
-                elif isinstance(entry, Aggregation):
-                    metadata.aggregation = entry
-                else:
-                    raise NotImplementedError
-            other = metadata
+            other = Metadata.from_iterable(other)
         elif not isinstance(other, Metadata):
             raise NotImplementedError
         return PredicateMetadata(self, other)

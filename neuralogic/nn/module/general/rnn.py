@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.enums import Activation
+from neuralogic.core.constructs.function import Activation, Function
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 
@@ -20,7 +20,7 @@ class RNNCell(Module):
         Input feature predicate name to get features from.
     hidden_input_name : str
         Predicate name to get hidden state from.
-    activation : Activation
+    activation : Function
         Activation function.
         Default: ``Activation.TANH``
     arity : int
@@ -37,7 +37,7 @@ class RNNCell(Module):
         output_name: str,
         input_name: str,
         hidden_input_name: str,
-        activation: Activation = Activation.TANH,
+        activation: Function = Activation.TANH,
         arity: int = 1,
         next_name: str = "_next__positive",
     ):
@@ -114,7 +114,7 @@ class RNN(Module):
         Input feature predicate name to get features from.
     hidden_0_name : str
         Predicate name to get initial hidden state from.
-    activation : Activation
+    activation : Function
         Activation function.
         Default: ``Activation.TANH``
     arity : int
@@ -132,7 +132,7 @@ class RNN(Module):
         output_name: str,
         input_name: str,
         hidden_0_name: str,
-        activation: Activation = Activation.TANH,
+        activation: Function = Activation.TANH,
         arity: int = 1,
         next_name: str = "_next__positive",
     ):

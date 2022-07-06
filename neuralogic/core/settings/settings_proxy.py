@@ -2,7 +2,8 @@ import jpype
 
 import neuralogic
 from neuralogic import is_initialized, initialize
-from neuralogic.core.enums import Optimizer, Activation
+from neuralogic.core.constructs.function import Activation
+from neuralogic.core.enums import Optimizer
 from neuralogic.nn.init import Initializer
 from neuralogic.nn.loss import MSE, SoftEntropy, CrossEntropy, ErrorFunction
 
@@ -165,7 +166,7 @@ class SettingsProxy:
 
     @property
     def relation_activation(self) -> Activation:
-        return self.settings.atomNeuronActivation
+        return Activation(str(self.settings.atomNeuronActivation))
 
     @relation_activation.setter
     def relation_activation(self, value: Activation):
@@ -173,7 +174,7 @@ class SettingsProxy:
 
     @property
     def rule_activation(self) -> Activation:
-        return self.settings.ruleNeuronActivation
+        return Activation(str(self.settings.ruleNeuronActivation))
 
     @rule_activation.setter
     def rule_activation(self, value: Activation):
@@ -196,21 +197,23 @@ class SettingsProxy:
         self.settings.defaultFactValue = value
 
     def get_activation_function(self, activation: Activation):
-        if activation == Activation.SIGMOID:
+        activation = str(activation)
+
+        if activation == str(Activation.SIGMOID):
             return self.settings_class.ActivationFcn.SIGMOID
-        if activation == Activation.TANH:
+        if activation == str(Activation.TANH):
             return self.settings_class.ActivationFcn.TANH
-        if activation == Activation.SIGNUM:
+        if activation == str(Activation.SIGNUM):
             return self.settings_class.ActivationFcn.SIGNUM
-        if activation == Activation.RELU:
+        if activation == str(Activation.RELU):
             return self.settings_class.ActivationFcn.RELU
-        if activation == Activation.IDENTITY:
+        if activation == str(Activation.IDENTITY):
             return self.settings_class.ActivationFcn.IDENTITY
-        if activation == Activation.LUKASIEWICZ:
+        if activation == str(Activation.LUKASIEWICZ):
             return self.settings_class.ActivationFcn.LUKASIEWICZ
-        if activation == Activation.SOFTMAX:
+        if activation == str(Activation.SOFTMAX):
             return self.settings_class.ActivationFcn.SOFTMAX
-        if activation == Activation.SPARSEMAX:
+        if activation == str(Activation.SPARSEMAX):
             return self.settings_class.ActivationFcn.SPARSEMAX
         raise NotImplementedError
 
