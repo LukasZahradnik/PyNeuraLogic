@@ -28,7 +28,8 @@ class BaseRelation:
 
     @property
     def T(self) -> "BaseRelation":
-        return self.attach_activation_function(Activation.TRANSP)
+        raise NotImplementedError(f"Transposing body relation is not currently supported.")
+        # return self.attach_activation_function(Activation.TRANSP)
 
     def attach_activation_function(self, function: Union[Activation, ActivationAgg]):
         if self.function:
