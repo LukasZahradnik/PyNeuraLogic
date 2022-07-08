@@ -120,8 +120,8 @@ def test_relation_creation() -> None:
     neg_relation = ~relation
     assert neg_relation.function is Activation.REVERSE
 
-    t_relation = relation.T
-    assert t_relation.function is Activation.TRANSP
+    # t_relation = relation.T
+    # assert t_relation.function is Activation.TRANSP
 
 
 def test_rule_metadata():
