@@ -200,6 +200,12 @@ class PostgresConverter(Converter):
                     value = None if value_column is None else f"{value_column}::NUMERIC"
                 selected_value = "1" if value is None else f"s{t_index}.{value}"
 
+                if relation.function is not None:
+                    function = str(relation.function).lower()
+                    selected_value = f"{FUNCTION_MAP[function]}({selected_value})"
+
+                    self._used_functions.add(function)
+
                 if weight_id is None:
                     inner_value_select.append(selected_value)
                 else:

@@ -26,6 +26,8 @@ class Converter:
         self.model = model
         self.settings = settings
 
+        self._used_functions = set()
+
         self.sql_source = None
         self.std_functions = None
 
@@ -66,11 +68,10 @@ class Converter:
 
     def _convert(self):
         weights = self.model.state_dict()["weights"]
-        used_functions = set()
 
         rule_default_activation = str(self.settings.rule_activation).lower()
         relation_default_activation = str(self.settings.relation_activation).lower()
-        default_aggregation = str(Aggregation.AVG.value).lower()
+        default_aggregation = str(Aggregation.AVG).lower()
 
         batched_relations, predicates_metadata = self._process_template_entries()
 
@@ -90,12 +91,12 @@ class Converter:
 
                         if relation.metadata is not None:
                             if relation.metadata.activation is not None:
-                                act = str(relation.metadata.activation.value).lower()
+                                act = str(relation.metadata.activation).lower()
                             if relation.metadata.aggregation is not None:
-                                agg = str(relation.metadata.aggregation.value).lower()
+                                agg = str(relation.metadata.aggregation).lower()
 
-                        used_functions.add(act)
-                        used_functions.add(agg)
+                        self._used_functions.add(act)
+                        self._used_functions.add(agg)
 
                         sql_func = self.get_rule_sql_function(relation, index, act, agg, weight_indices, weights)
                     else:
@@ -109,12 +110,12 @@ class Converter:
 
                 if predicate_metadata is not None:
                     if predicate_metadata.activation is not None:
-                        activation = str(predicate_metadata.activation.value).lower()
+                        activation = str(predicate_metadata.activation).lower()
                     if predicate_metadata.aggregation is not None:
-                        aggregation = str(predicate_metadata.aggregation.value).lower()
+                        aggregation = str(predicate_metadata.aggregation).lower()
 
-                used_functions.add(activation)
-                used_functions.add(aggregation)
+                self._used_functions.add(activation)
+                self._used_functions.add(aggregation)
 
                 sql_func = self.get_rule_aggregation_function(
                     name,
@@ -131,7 +132,7 @@ class Converter:
                 sql_source_headers.append(sql_funcs[0])
                 sql_source.append(sql_funcs[1])
 
-        self.std_functions = self.get_helpers(used_functions)
+        self.std_functions = self.get_helpers(self._used_functions)
 
         sql_source_headers.extend(sql_source)
         self.sql_source = "\n".join(sql_source_headers)
