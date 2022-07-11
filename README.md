@@ -6,6 +6,7 @@
 [![License](https://img.shields.io/pypi/l/neuralogic)](https://badge.fury.io/py/neuralogic)
 [![Tests Status](https://github.com/LukasZahradnik/PyNeuraLogic/actions/workflows/tests.yml/badge.svg)](https://github.com/LukasZahradnik/PyNeuraLogic/actions/workflows/tests.yml)
 [![Documentation Status](https://readthedocs.org/projects/pyneuralogic/badge/?version=latest)](https://pyneuralogic.readthedocs.io/en/latest/?badge=latest)
+[![Tweet](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2FLukasZahradnik%2FPyNeuraLogic)](https://twitter.com/intent/tweet?text=Check%20out:&url=https%3A%2F%2Fgithub.com%2FLukasZahradnik%2FPyNeuraLogic)
 
 
 [Documentation](https://pyneuralogic.readthedocs.io/en/latest/) | [Examples](#-examples) | [Papers](#-papers)
