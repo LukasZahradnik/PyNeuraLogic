@@ -1,6 +1,6 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.enums import Activation, Aggregation
-from neuralogic.core.constructs.factories import R, V
+from neuralogic.core.constructs.function import Activation, Aggregation, Function
+from neuralogic.core.constructs.factories import R
 from neuralogic.nn.module.module import Module
 
 
@@ -48,7 +48,7 @@ class Pooling(Module):
         Output (head) predicate name of the module.
     input_name : str
         Input name.
-    aggregation : Aggregation
+    aggregation : Function
         Aggregation function.
     input_arity : int
         Arity of the input predicate ``input_name``. Default: ``1``
@@ -58,7 +58,7 @@ class Pooling(Module):
         self,
         output_name: str,
         input_name: str,
-        aggregation: Aggregation,
+        aggregation: Function,
         input_arity: int = 1,
     ):
         self.output_name = output_name
@@ -109,6 +109,7 @@ class MaxPooling(Pooling):
     input_arity : int
         Arity of the input predicate ``input_name``. Default: ``1``
     """
+
     def __init__(self, output_name: str, input_name: str, input_arity: int = 1):
         super().__init__(output_name, input_name, Aggregation.MAX, input_arity)
 
@@ -146,6 +147,7 @@ class AvgPooling(Pooling):
     input_arity : int
         Arity of the input predicate ``input_name``. Default: ``1``
     """
+
     def __init__(self, output_name: str, input_name: str, input_arity: int = 1):
         super().__init__(output_name, input_name, Aggregation.AVG, input_arity)
 

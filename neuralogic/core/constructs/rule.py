@@ -1,13 +1,17 @@
-from neuralogic.core.enums import Activation, Aggregation, ActivationAgg, ActivationAggregation
 from neuralogic.core.constructs.metadata import Metadata
 from typing import Iterable, Optional
 
 
 class Rule:
+    __slots__ = "head", "body", "metadata"
+
     def __init__(self, head, body):
         from neuralogic.core import Relation
 
         self.head = head
+
+        if head.function is not None:
+            raise NotImplementedError(f"Rule head {head} cannot have a function attached")
 
         if not isinstance(body, Iterable):
             body = [body]
@@ -66,16 +70,7 @@ class Rule:
 
     def __or__(self, other) -> "Rule":
         if isinstance(other, Iterable):
-            metadata = Metadata()
-
-            for entry in other:
-                if isinstance(entry, (Activation, ActivationAgg, ActivationAggregation)):
-                    metadata.activation = entry
-                elif isinstance(entry, Aggregation):
-                    metadata.aggregation = entry
-                else:
-                    raise NotImplementedError
-            other = metadata
+            other = Metadata.from_iterable(other)
         elif not isinstance(other, Metadata):
             raise NotImplementedError
         self.metadata = other

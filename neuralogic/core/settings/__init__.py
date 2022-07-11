@@ -4,7 +4,8 @@ import weakref
 from neuralogic.nn.init import Initializer, Uniform
 from neuralogic.nn.loss import MSE, ErrorFunction
 from neuralogic.core.settings.settings_proxy import SettingsProxy
-from neuralogic.core.enums import Optimizer, Activation
+from neuralogic.core.enums import Optimizer
+from neuralogic.core.constructs.function import Activation
 
 
 class Settings:

@@ -1,19 +1,21 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.enums import Activation, Aggregation
+from neuralogic.core.constructs.function import Activation, Aggregation
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 
 
 class TAGConv(Module):
     r"""
-    Topology Adaptive Graph Convolutional layer from `"Topology Adaptive Graph Convolutional Networks" <https://arxiv.org/abs/1710.10370>`_.
+    Topology Adaptive Graph Convolutional layer from
+    `"Topology Adaptive Graph Convolutional Networks" <https://arxiv.org/abs/1710.10370>`_.
     Which can be expressed as:
 
     .. math::
         \mathbf{x}^{\prime}_i = act(\sum_{k=0}^K \mathbf{W}_k \cdot {agg}_{j \in \mathcal{N}^k(i)}(\mathbf{x}_j))
 
-    Where *act* is an activation function, *agg* aggregation function, *Wk* are learnable parameters and :math:`\mathcal{N}^k(i)` denotes nodes that are *k* hops away from the node *i*.
-    This equation is translated into the logic form as:
+    Where *act* is an activation function, *agg* aggregation function, *Wk* are learnable parameters and
+    :math:`\mathcal{N}^k(i)` denotes nodes that are *k* hops away from the node *i*. This equation is translated into
+    the logic form as:
 
     This equation is translated into the logic form as:
 

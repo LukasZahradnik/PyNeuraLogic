@@ -5,7 +5,7 @@ import jpype
 from neuralogic import is_initialized, initialize
 from neuralogic.core.builder import Builder, DatasetBuilder
 from neuralogic.core.enums import Backend
-from neuralogic.core.constructs.atom import BaseAtom, WeightedAtom
+from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.predicate import PredicateMetadata
 from neuralogic.core.constructs.java_objects import JavaFactory
@@ -15,7 +15,7 @@ from neuralogic.nn.module.module import Module
 from neuralogic.utils.visualize import draw_model
 
 
-TemplateEntries = Union[BaseAtom, WeightedAtom, Rule]
+TemplateEntries = Union[BaseRelation, WeightedRelation, Rule]
 
 
 class Template:
@@ -30,7 +30,7 @@ class Template:
         self.counter = 0
         self.hooks: Dict[str, Set] = {}
 
-    def add_hook(self, relation: Union[BaseAtom, str], callback: Callable[[Any], None]) -> None:
+    def add_hook(self, relation: Union[BaseRelation, str], callback: Callable[[Any], None]) -> None:
         """Hooks the callable to be called with the relation's value as an argument when the value of
         the relation is being calculated.
 
@@ -40,7 +40,7 @@ class Template:
         """
         name = str(relation)
 
-        if isinstance(relation, BaseAtom):
+        if isinstance(relation, BaseRelation):
             name = name[:-1]
 
         if name not in self.hooks:
@@ -48,7 +48,7 @@ class Template:
         else:
             self.hooks[name].add(callback)
 
-    def remove_hook(self, relation: Union[BaseAtom, str], callback):
+    def remove_hook(self, relation: Union[BaseRelation, str], callback):
         """Removes the callable from the relation's hooks
 
         :param relation:
@@ -57,7 +57,7 @@ class Template:
         """
         name = str(relation)
 
-        if isinstance(relation, BaseAtom):
+        if isinstance(relation, BaseRelation):
             name = name[:-1]
 
         if name not in self.hooks:
@@ -104,7 +104,7 @@ class Template:
                 predicate_metadata.append(java_factory.get_predicate_metadata_pair(rule))
             elif isinstance(rule, Rule):
                 weighted_rules.append(java_factory.get_rule(rule))
-            elif isinstance(rule, (WeightedAtom, BaseAtom)):
+            elif isinstance(rule, (WeightedRelation, BaseRelation)):
                 valued_facts.append(java_factory.get_valued_fact(rule, java_factory.get_variable_factory()))
 
         parsed_template = jpype.JClass("cz.cvut.fel.ida.logic.constructs.template.types.ParsedTemplate")
@@ -121,6 +121,20 @@ class Template:
 
         return template
 
+    def remove_duplicates(self):
+        """Remove duplicates from the template"""
+        entries = set()
+        deduplicated_template: List[TemplateEntries] = []
+
+        for entry in self.template:
+            entry_str = str(entry)
+
+            if entry_str in entries:
+                continue
+            entries.add(entry_str)
+            deduplicated_template.append(entry)
+        self.template = deduplicated_template
+
     def build(self, settings: Settings, backend: Backend = Backend.JAVA):
         from neuralogic.nn import get_neuralogic_layer
 
@@ -130,7 +144,7 @@ class Template:
         parsed_template = self.get_parsed_template(settings_proxy, java_factory)
         model = Builder(settings_proxy).build_model(parsed_template, backend, settings_proxy)
 
-        return get_neuralogic_layer(backend)(model, DatasetBuilder(parsed_template, java_factory), settings_proxy)
+        return get_neuralogic_layer(backend)(model, DatasetBuilder(parsed_template, java_factory), self, settings_proxy)
 
     def draw(
         self,
@@ -149,7 +163,9 @@ class Template:
 
         parsed_template = self.get_parsed_template(settings_proxy, java_factory)
         model = Builder(settings_proxy).build_model(parsed_template, Backend.JAVA, settings_proxy)
-        layer = get_neuralogic_layer(Backend.JAVA)(model, DatasetBuilder(parsed_template, java_factory), settings_proxy)
+        layer = get_neuralogic_layer(Backend.JAVA)(
+            model, DatasetBuilder(parsed_template, java_factory), self, settings_proxy
+        )
 
         return draw_model(layer, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs)
 

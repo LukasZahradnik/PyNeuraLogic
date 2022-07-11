@@ -1,11 +1,10 @@
 from typing import Sequence
 
-from neuralogic.core.enums import Activation, Aggregation, ActivationAggregation, ActivationAgg
 from neuralogic.core.constructs.metadata import Metadata
 
 
 class Predicate:
-    """WeightedPredicate"""
+    __slots__ = "name", "arity", "hidden", "special"
 
     def __init__(self, name, arity, hidden=False, special=False):
         if name.startswith("_"):
@@ -33,22 +32,15 @@ class Predicate:
 
     def __or__(self, other) -> "PredicateMetadata":
         if isinstance(other, Sequence):
-            metadata = Metadata()
-
-            for entry in other:
-                if isinstance(entry, (Activation, ActivationAgg, ActivationAggregation)):
-                    metadata.activation = entry
-                elif isinstance(entry, Aggregation):
-                    metadata.aggregation = entry
-                else:
-                    raise NotImplementedError
-            other = metadata
+            other = Metadata.from_iterable(other)
         elif not isinstance(other, Metadata):
             raise NotImplementedError
         return PredicateMetadata(self, other)
 
 
 class PredicateMetadata:
+    __slots__ = "predicate", "metadata"
+
     def __init__(self, predicate: Predicate, metadata: Metadata):
         if metadata.aggregation is not None or metadata.learnable is not None:
             raise NotImplementedError

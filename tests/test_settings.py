@@ -1,6 +1,7 @@
 from typing import Dict, Any
 
 from neuralogic.core import Settings, Optimizer, Activation
+from neuralogic.core.constructs.function import Function
 from neuralogic.nn.init import Normal, Initializer, Uniform
 from neuralogic.nn.loss import SoftEntropy, ErrorFunction
 
@@ -34,7 +35,7 @@ def test_settings_proxy_properties_setting(parameters: Dict[str, Any]) -> None:
 
         if isinstance(value, (int, float)):
             assert settings.__getattribute__(key) == settings_proxy.__getattribute__(key)
-        elif isinstance(settings.__getattribute__(key), (ErrorFunction, Initializer)):
+        elif isinstance(settings.__getattribute__(key), (ErrorFunction, Initializer, Function)):
             assert str(settings.__getattribute__(key)) == str(settings_proxy.__getattribute__(key))
         else:
             assert settings.__getattribute__(key) == str(settings_proxy.__getattribute__(key))
@@ -49,7 +50,7 @@ def test_settings_proxy_properties_setting(parameters: Dict[str, Any]) -> None:
 
         if isinstance(value, (int, float)):
             assert settings.__getattribute__(key) == settings_proxy.__getattribute__(key)
-        elif isinstance(settings.__getattribute__(key), (ErrorFunction, Initializer)):
+        elif isinstance(settings.__getattribute__(key), (ErrorFunction, Initializer, Function)):
             assert str(settings.__getattribute__(key)) == str(settings_proxy.__getattribute__(key))
         else:
             assert settings.__getattribute__(key) == str(settings_proxy.__getattribute__(key))

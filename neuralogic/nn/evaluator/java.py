@@ -66,12 +66,11 @@ class JavaEvaluator(AbstractEvaluator):
 
         def _test():
             for sample in dataset.samples:
-                result = self.neuralogic_model(sample, False)
-                yield result.target(), result.output()
+                yield self.neuralogic_model(sample, False)
 
         if generator:
             return _test()
-        return [(label, output) for label, output, _ in self.neuralogic_model(dataset.samples, False)]
+        return self.neuralogic_model(dataset.samples, False)
 
     def state_dict(self) -> Dict:
         return self.neuralogic_model.state_dict()

@@ -1,4 +1,4 @@
-from neuralogic.core import Relation, Template, Var, Term
+from neuralogic.core import Relation, Template, Var, Constant
 from neuralogic.dataset import Dataset
 
 
@@ -17,18 +17,18 @@ template.add_rules(
 
 dataset.add_example(
     [
-        Relation.horse(Term.aida)[1.0],
-        Relation.horse(Term.cheyenne)[1.0],
-        Relation.horse(Term.dakotta)[1.0],
-        Relation.parent(Term.star, Term.cheyenne)[1.0],
-        Relation.parent(Term.star, Term.aida)[1.0],
-        Relation.parent(Term.star, Term.dakotta)[1.0],
+        Relation.horse(Constant.aida)[1.0],
+        Relation.horse(Constant.cheyenne)[1.0],
+        Relation.horse(Constant.dakotta)[1.0],
+        Relation.parent(Constant.star, Constant.cheyenne)[1.0],
+        Relation.parent(Constant.star, Constant.aida)[1.0],
+        Relation.parent(Constant.star, Constant.dakotta)[1.0],
     ]
 )
 
 dataset.add_queries(
     [
-        Relation.foal(Term.star)[1.0],
-        Relation.negFoal(Term.star)[0.0],
+        Relation.foal(Constant.star)[1.0],
+        Relation.negFoal(Constant.star)[0.0],
     ]
 )

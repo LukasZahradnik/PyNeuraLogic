@@ -29,26 +29,26 @@ Pre-defined Modules
             :widths: 10 90
             :header-rows: 1
 
-            * - Name
+            * - Module
               - Edge formats
 
-            * - :class:`~neuralogic.nn.module.gcn.GCNConv`
+            * - :class:`~neuralogic.nn.module.gnn.gcn.GCNConv`
               - :code:`R.<edge_name>(<source>, <target>)`
-            * - :class:`~neuralogic.nn.module.gsage.SAGEConv`
+            * - :class:`~neuralogic.nn.module.gnn.gsage.SAGEConv`
               - :code:`R.<edge_name>(<source>, <target>)`
-            * - :class:`~neuralogic.nn.module.gin.GINConv`
+            * - :class:`~neuralogic.nn.module.gnn.gin.GINConv`
               - :code:`R.<edge_name>(<source>, <target>)`
-            * - :class:`~neuralogic.nn.module.rgcn.RGCNConv`
+            * - :class:`~neuralogic.nn.module.gnn.rgcn.RGCNConv`
               - :code:`R.<edge_name>(<source>, <relation>, <target>)` or :code:`R.<relation>(<source>, <target>)`
-            * - :class:`~neuralogic.nn.module.tag.TAGConv`
+            * - :class:`~neuralogic.nn.module.gnn.tag.TAGConv`
               - :code:`R.<edge_name>(<source>, <target>)`
-            * - :class:`~neuralogic.nn.module.gatv2.GATv2Conv`
+            * - :class:`~neuralogic.nn.module.gnn.gatv2.GATv2Conv`
               - :code:`R.<edge_name>(<source>, <target>)`
-            * - :class:`~neuralogic.nn.module.sg.SGConv`
+            * - :class:`~neuralogic.nn.module.gnn.sg.SGConv`
               - :code:`R.<edge_name>(<source>, <target>)`
-            * - :class:`~neuralogic.nn.module.appnp.APPNPConv`
+            * - :class:`~neuralogic.nn.module.gnn.appnp.APPNPConv`
               - :code:`R.<edge_name>(<source>, <target>)`
-            * - :class:`~neuralogic.nn.module.res_gated.ResGatedGraphConv`
+            * - :class:`~neuralogic.nn.module.gnn.res_gated.ResGatedGraphConv`
               - :code:`R.<edge_name>(<source>, <target>)`
 
     .. tab:: General Blocks
@@ -57,20 +57,60 @@ Pre-defined Modules
             :widths: 99 1
             :header-rows: 1
 
-            * - Name
+            * - Module
               -
 
-            * - :class:`~neuralogic.nn.module.linear.Linear`
+            * - :class:`~neuralogic.nn.module.general.linear.Linear`
               -
-            * - :class:`~neuralogic.nn.module.mlp.MLP`
+            * - :class:`~neuralogic.nn.module.general.mlp.MLP`
               -
-            * - :class:`~neuralogic.nn.module.pooling.Pooling`
+
+        .. list-table::
+            :widths: 99 1
+            :header-rows: 1
+
+            * - Recurrent/Recursive module
               -
-            * - :class:`~neuralogic.nn.module.pooling.SumPooling`
+
+            * - :class:`~neuralogic.nn.module.general.rvnn.RvNN`
               -
-            * - :class:`~neuralogic.nn.module.pooling.AvgPooling`
+            * - :class:`~neuralogic.nn.module.general.rnn.RNN`
               -
-            * - :class:`~neuralogic.nn.module.pooling.MaxPooling`
+            * - :class:`~neuralogic.nn.module.general.gru.GRU`
+              -
+            * - :class:`~neuralogic.nn.module.general.lstm.LSTM`
+              -
+
+        .. list-table::
+            :widths: 99 1
+            :header-rows: 1
+
+            * - Pooling module
+              -
+
+            * - :class:`~neuralogic.nn.module.general.pooling.Pooling`
+              -
+            * - :class:`~neuralogic.nn.module.general.pooling.SumPooling`
+              -
+            * - :class:`~neuralogic.nn.module.general.pooling.AvgPooling`
+              -
+            * - :class:`~neuralogic.nn.module.general.pooling.MaxPooling`
+              -
+
+    .. tab:: Meta
+
+        .. list-table::
+            :widths: 99 1
+            :header-rows: 1
+
+            * - Module
+              -
+
+            * - :class:`~neuralogic.nn.module.meta.meta.MetaConv`
+              -
+            * - :class:`~neuralogic.nn.module.meta.magnn.MAGNNMean`
+              -
+            * - :class:`~neuralogic.nn.module.meta.magnn.MAGNNLinear`
               -
 
 ----
@@ -78,31 +118,31 @@ Pre-defined Modules
 GNN Modules
 ***********
 
-.. autoclass:: neuralogic.nn.module.gcn::GCNConv
+.. autoclass:: neuralogic.nn.module.gnn.gcn::GCNConv
    :members:
 
-.. autoclass:: neuralogic.nn.module.gsage::SAGEConv
+.. autoclass:: neuralogic.nn.module.gnn.gsage::SAGEConv
    :members:
 
-.. autoclass:: neuralogic.nn.module.gin::GINConv
+.. autoclass:: neuralogic.nn.module.gnn.gin::GINConv
    :members:
 
-.. autoclass:: neuralogic.nn.module.rgcn::RGCNConv
+.. autoclass:: neuralogic.nn.module.gnn.rgcn::RGCNConv
    :members:
 
-.. autoclass:: neuralogic.nn.module.tag::TAGConv
+.. autoclass:: neuralogic.nn.module.gnn.tag::TAGConv
    :members:
 
-.. autoclass:: neuralogic.nn.module.gatv2::GATv2Conv
+.. autoclass:: neuralogic.nn.module.gnn.gatv2::GATv2Conv
    :members:
 
-.. autoclass:: neuralogic.nn.module.sg::SGConv
+.. autoclass:: neuralogic.nn.module.gnn.sg::SGConv
    :members:
 
-.. autoclass:: neuralogic.nn.module.appnp::APPNPConv
+.. autoclass:: neuralogic.nn.module.gnn.appnp::APPNPConv
    :members:
 
-.. autoclass:: neuralogic.nn.module.res_gated::ResGatedGraphConv
+.. autoclass:: neuralogic.nn.module.gnn.res_gated::ResGatedGraphConv
    :members:
 
 -----
@@ -110,20 +150,46 @@ GNN Modules
 General Block Modules
 *********************
 
-.. autoclass:: neuralogic.nn.module.linear::Linear
+.. autoclass:: neuralogic.nn.module.general.linear::Linear
    :members:
 
-.. autoclass:: neuralogic.nn.module.mlp::MLP
+.. autoclass:: neuralogic.nn.module.general.mlp::MLP
    :members:
 
-.. autoclass:: neuralogic.nn.module.pooling::Pooling
+.. autoclass:: neuralogic.nn.module.general.rvnn::RvNN
    :members:
 
-.. autoclass:: neuralogic.nn.module.pooling::SumPooling
+.. autoclass:: neuralogic.nn.module.general.rnn::RNN
    :members:
 
-.. autoclass:: neuralogic.nn.module.pooling::AvgPooling
+.. autoclass:: neuralogic.nn.module.general.gru::GRU
    :members:
 
-.. autoclass:: neuralogic.nn.module.pooling::MaxPooling
+.. autoclass:: neuralogic.nn.module.general.lstm::LSTM
+   :members:
+
+.. autoclass:: neuralogic.nn.module.general.pooling::Pooling
+   :members:
+
+.. autoclass:: neuralogic.nn.module.general.pooling::SumPooling
+   :members:
+
+.. autoclass:: neuralogic.nn.module.general.pooling::AvgPooling
+   :members:
+
+.. autoclass:: neuralogic.nn.module.general.pooling::MaxPooling
+   :members:
+
+-----
+
+Meta Modules
+*********************
+
+.. autoclass:: neuralogic.nn.module.meta.meta::MetaConv
+   :members:
+
+.. autoclass:: neuralogic.nn.module.meta.magnn::MAGNNMean
+   :members:
+
+.. autoclass:: neuralogic.nn.module.meta.magnn::MAGNNLinear
    :members:

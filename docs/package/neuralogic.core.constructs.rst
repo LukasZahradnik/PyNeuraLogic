@@ -4,13 +4,6 @@ neuralogic.core.constructs package
 Submodules
 ----------
 
-neuralogic.core.constructs.atom module
---------------------------------------
-
-.. automodule:: neuralogic.core.constructs.atom
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 neuralogic.core.constructs.factories module
 -------------------------------------------

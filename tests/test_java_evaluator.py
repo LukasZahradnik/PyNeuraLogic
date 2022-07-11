@@ -255,7 +255,7 @@ def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expect
     evaluator.train(built_dataset, generator=False)
 
     results = []
-    for _, predicted in evaluator.test(built_dataset):
+    for predicted in evaluator.test(built_dataset):
         results.append(round(predicted, 3))
 
     assert len(results) == len(expected_results)
@@ -361,7 +361,7 @@ def test_evaluator_run_on_rules(template: Template, dataset: BaseDataset, expect
     evaluator.train(built_dataset, generator=False)
 
     results = []
-    for _, predicted in evaluator.test(built_dataset):
+    for predicted in evaluator.test(built_dataset):
         results.append(round(predicted, 3))
 
     assert len(results) == len(expected_results)
@@ -385,14 +385,14 @@ def test_evaluator_state_loading(template: Template, dataset: BaseDataset) -> No
     evaluator.train(built_dataset, generator=False)
 
     results = []
-    for _, predicted in evaluator.test(built_dataset):
+    for predicted in evaluator.test(built_dataset):
         results.append(round(predicted, 5))
 
     second_evaluator = get_evaluator(template, settings, Backend.JAVA)
     built_dataset = second_evaluator.build_dataset(dataset)
 
     second_results = []
-    for _, predicted in second_evaluator.test(built_dataset):
+    for predicted in second_evaluator.test(built_dataset):
         second_results.append(round(predicted, 5))
 
     assert len(results) == len(second_results)
@@ -401,7 +401,7 @@ def test_evaluator_state_loading(template: Template, dataset: BaseDataset) -> No
     second_evaluator.load_state_dict(evaluator.state_dict())
 
     second_results = []
-    for _, predicted in second_evaluator.test(built_dataset):
+    for predicted in second_evaluator.test(built_dataset):
         second_results.append(round(predicted, 5))
 
     assert len(results) == len(second_results)

@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.enums import Activation, Aggregation
+from neuralogic.core.constructs.function import Activation, Aggregation
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 
@@ -18,8 +18,8 @@ class ResGatedGraphConv(Module):
 
         \mathbf{\eta}_{i,j} = gating\_act(\mathbf{W}_3 \mathbf{x}_i + \mathbf{W}_4 \mathbf{x}_j)
 
-    Where *act* is an activation function, *agg* aggregation function, *gating_act* is a gating activation function and :math:`W_n` are learnable parameters. This equation is
-    translated into the logic form as:
+    Where *act* is an activation function, *agg* aggregation function, *gating_act* is a gating activation function and
+    :math:`W_n` are learnable parameters. This equation is translated into the logic form as:
 
     .. code:: logtalk
 
@@ -36,7 +36,8 @@ class ResGatedGraphConv(Module):
     Examples
     --------
 
-    The whole computation of this module (parametrized as :code:`ResGatedGraphConv(1, 2, "h1", "h0", "_edge")`) is as follows:
+    The whole computation of this module (parametrized as :code:`ResGatedGraphConv(1, 2, "h1", "h0", "_edge")`)
+    is as follows:
 
     .. code:: logtalk
 
@@ -107,7 +108,6 @@ class ResGatedGraphConv(Module):
         return [
             (gate(V.I, V.J) <= (feature(V.I)[w], feature(V.J)[w])) | [Activation.IDENTITY],
             gate / 2 | Metadata(activation=self.gating_activation),
-
             (head <= feature(V.I)[w]) | [Activation.IDENTITY],
             (head <= (gate(V.I, V.J), feature(V.J)[w], R.get(self.edge_name)(V.J, V.I))) | prod_metadata,
             R.get(self.output_name) / 1 | Metadata(activation=self.activation),

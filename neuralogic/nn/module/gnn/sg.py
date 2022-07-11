@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.enums import Activation, Aggregation
+from neuralogic.core.constructs.function import Activation, Aggregation
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 
@@ -12,7 +12,8 @@ class SGConv(Module):
     .. math::
         \mathbf{x}^{\prime}_i = act(\mathbf{W} \cdot {agg}_{j \in \mathcal{N}^k(i)}(\mathbf{x}_j))
 
-    Where *act* is an activation function, *agg* aggregation function, *W* is a learnable parameter and :math:`\mathcal{N}^k(i)` denotes nodes that are *k* hops away from the node *i*.
+    Where *act* is an activation function, *agg* aggregation function, *W* is a learnable parameter
+    and :math:`\mathcal{N}^k(i)` denotes nodes that are *k* hops away from the node *i*.
     This equation is translated into the logic form as:
 
     .. code:: logtalk

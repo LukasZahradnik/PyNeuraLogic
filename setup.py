@@ -32,8 +32,12 @@ except FileNotFoundError:
     long_description = DESCRIPTION
 
 about: Dict = {}
-with open(os.path.join(here, NAME, "__version__.py")) as f:  # type: ignore
-    exec(f.read(), about)
+
+try:
+    with open(os.path.join(here, NAME, "__version__.py")) as f:  # type: ignore
+        exec(f.read(), about)
+except Exception:
+    about["__version__"] = "0.0.0"  # development
 
 setup(
     name=NAME,

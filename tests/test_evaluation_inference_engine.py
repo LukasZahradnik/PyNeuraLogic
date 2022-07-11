@@ -1,4 +1,4 @@
-from neuralogic.core import Template, R, V, T, Metadata, Aggregation, Activation
+from neuralogic.core import Template, R, V, C, Metadata, Aggregation, Activation
 
 from neuralogic.inference.evaluation_inference_engine import EvaluationInferenceEngine
 
@@ -12,17 +12,17 @@ def test_eval_inference_engine_london_reachable() -> None:
 
     template.add_rules(
         [
-            R.connected(T.bond_street, T.oxford_circus, T.central),
-            R.connected(T.oxford_circus, T.tottenham_court_road, T.central),
-            R.connected(T.bond_street, T.green_park, T.jubilee),
-            R.connected(T.green_park, T.charing_cross, T.jubilee),
-            R.connected(T.green_park, T.piccadilly_circus, T.piccadilly),
-            R.connected(T.piccadilly_circus, T.leicester_square, T.piccadilly),
-            R.connected(T.green_park, T.oxford_circus, T.victoria),
-            R.connected(T.oxford_circus, T.piccadilly_circus, T.bakerloo),
-            R.connected(T.piccadilly_circus, T.charing_cross, T.bakerloo),
-            R.connected(T.tottenham_court_road, T.leicester_square, T.northern),
-            R.connected(T.leicester_square, T.charing_cross, T.northern),
+            R.connected(C.bond_street, C.oxford_circus, C.central),
+            R.connected(C.oxford_circus, C.tottenham_court_road, C.central),
+            R.connected(C.bond_street, C.green_park, C.jubilee),
+            R.connected(C.green_park, C.charing_cross, C.jubilee),
+            R.connected(C.green_park, C.piccadilly_circus, C.piccadilly),
+            R.connected(C.piccadilly_circus, C.leicester_square, C.piccadilly),
+            R.connected(C.green_park, C.oxford_circus, C.victoria),
+            R.connected(C.oxford_circus, C.piccadilly_circus, C.bakerloo),
+            R.connected(C.piccadilly_circus, C.charing_cross, C.bakerloo),
+            R.connected(C.tottenham_court_road, C.leicester_square, C.northern),
+            R.connected(C.leicester_square, C.charing_cross, C.northern),
             R.reachable(V.X, V.Y) <= R.connected(V.X, V.Y, V.L),
             R.reachable(V.X, V.Y) <= (R.connected(V.X, V.Z, V.L), R.reachable(V.Z, V.Y)),
         ]
@@ -31,12 +31,12 @@ def test_eval_inference_engine_london_reachable() -> None:
     engine = EvaluationInferenceEngine(template)
 
     # ask if tottenham_court_road can be reached from green_park
-    assert engine.query(R.reachable(T.green_park, T.tottenham_court_road))
+    assert engine.query(R.reachable(C.green_park, C.tottenham_court_road))
 
     # green_park cannot be reached from charing_cross
     # random_place does not exist in the dataset (cannot be reached from anywhere)
-    assert not engine.query(R.reachable(T.charing_cross, T.green_park))
-    assert not engine.q(R.reachable(T.charing_cross, T.random_place))
+    assert not engine.query(R.reachable(C.charing_cross, C.green_park))
+    assert not engine.q(R.reachable(C.charing_cross, C.random_place))
 
 
 def test_evaluation_inference_engine_london() -> None:
@@ -47,17 +47,17 @@ def test_evaluation_inference_engine_london() -> None:
     template = Template()
 
     knowledge = [
-        R.connected(T.bond_street, T.oxford_circus, T.central),
-        R.connected(T.oxford_circus, T.tottenham_court_road, T.central),
-        R.connected(T.bond_street, T.green_park, T.jubilee),
-        R.connected(T.green_park, T.charing_cross, T.jubilee),
-        R.connected(T.green_park, T.piccadilly_circus, T.piccadilly),
-        R.connected(T.piccadilly_circus, T.leicester_square, T.piccadilly),
-        R.connected(T.green_park, T.oxford_circus, T.victoria),
-        R.connected(T.oxford_circus, T.piccadilly_circus, T.bakerloo),
-        R.connected(T.piccadilly_circus, T.charing_cross, T.bakerloo),
-        R.connected(T.tottenham_court_road, T.leicester_square, T.northern),
-        R.connected(T.leicester_square, T.charing_cross, T.northern),
+        R.connected(C.bond_street, C.oxford_circus, C.central),
+        R.connected(C.oxford_circus, C.tottenham_court_road, C.central),
+        R.connected(C.bond_street, C.green_park, C.jubilee),
+        R.connected(C.green_park, C.charing_cross, C.jubilee),
+        R.connected(C.green_park, C.piccadilly_circus, C.piccadilly),
+        R.connected(C.piccadilly_circus, C.leicester_square, C.piccadilly),
+        R.connected(C.green_park, C.oxford_circus, C.victoria),
+        R.connected(C.oxford_circus, C.piccadilly_circus, C.bakerloo),
+        R.connected(C.piccadilly_circus, C.charing_cross, C.bakerloo),
+        R.connected(C.tottenham_court_road, C.leicester_square, C.northern),
+        R.connected(C.leicester_square, C.charing_cross, C.northern),
     ]
 
     template.add_rules(
@@ -72,7 +72,7 @@ def test_evaluation_inference_engine_london() -> None:
 
     # Run query for nearby(X, oxford_circus)
     # Should yield two substitutions for x (green_park and bond_street)
-    substitutions = list(engine.q(R.nearby(V.X, T.oxford_circus)))
+    substitutions = list(engine.q(R.nearby(V.X, C.oxford_circus)))
     assert len(substitutions) == 2 and len(substitutions[0][1]) == 1 and len(substitutions[1][1]) == 1
 
     variable_subs = {substitutions[i][1]["X"] for i in range(2)}
@@ -81,7 +81,7 @@ def test_evaluation_inference_engine_london() -> None:
     assert "bond_street" in variable_subs
 
     # Run query for nearby(X, tottenham_court_road)
-    substitutions = list(engine.q(R.nearby(V.X, T.charing_cross)))
+    substitutions = list(engine.q(R.nearby(V.X, C.charing_cross)))
 
     assert len(substitutions) == 6 and len(substitutions[0][1]) == 1 and len(substitutions[1][1]) == 1
 
@@ -122,24 +122,24 @@ def test_evaluation_inference_engine_london_shortest_path() -> None:
     template = Template()
 
     knowledge = [
-        R.connected(T.bond_street, T.oxford_circus, T.central)[-7],
-        R.connected(T.oxford_circus, T.tottenham_court_road, T.central)[-9],
-        R.connected(T.bond_street, T.green_park, T.jubilee)[-14],
-        R.connected(T.green_park, T.charing_cross, T.jubilee)[-21],
-        R.connected(T.green_park, T.piccadilly_circus, T.piccadilly)[-8],
-        R.connected(T.piccadilly_circus, T.leicester_square, T.piccadilly)[-6],
-        R.connected(T.green_park, T.oxford_circus, T.victoria)[-15],
-        R.connected(T.oxford_circus, T.piccadilly_circus, T.bakerloo)[-12],
-        R.connected(T.piccadilly_circus, T.charing_cross, T.bakerloo)[-11],
-        R.connected(T.tottenham_court_road, T.leicester_square, T.northern)[-8],
-        R.connected(T.leicester_square, T.charing_cross, T.northern)[-7],
+        R.connected(C.bond_street, C.oxford_circus, C.central)[-7],
+        R.connected(C.oxford_circus, C.tottenham_court_road, C.central)[-9],
+        R.connected(C.bond_street, C.green_park, C.jubilee)[-14],
+        R.connected(C.green_park, C.charing_cross, C.jubilee)[-21],
+        R.connected(C.green_park, C.piccadilly_circus, C.piccadilly)[-8],
+        R.connected(C.piccadilly_circus, C.leicester_square, C.piccadilly)[-6],
+        R.connected(C.green_park, C.oxford_circus, C.victoria)[-15],
+        R.connected(C.oxford_circus, C.piccadilly_circus, C.bakerloo)[-12],
+        R.connected(C.piccadilly_circus, C.charing_cross, C.bakerloo)[-11],
+        R.connected(C.tottenham_court_road, C.leicester_square, C.northern)[-8],
+        R.connected(C.leicester_square, C.charing_cross, C.northern)[-7],
     ]
 
     metadata = Metadata(aggregation=Aggregation.MAX, activation=Activation.IDENTITY)
 
     template += [
-        (R.shortest(V.X, V.Y, T.first) <= R.connected(V.X, V.Y, V.L)) | metadata,
-        (R.shortest(V.X, V.Y, T.second) <= (R.connected(V.X, V.Z, V.L), R.shortest(V.Z, V.Y, V.D))) | metadata,
+        (R.shortest(V.X, V.Y, C.first) <= R.connected(V.X, V.Y, V.L)) | metadata,
+        (R.shortest(V.X, V.Y, C.second) <= (R.connected(V.X, V.Z, V.L), R.shortest(V.Z, V.Y, V.D))) | metadata,
         (R.shortest_path(V.X, V.Y) <= R.shortest(V.X, V.Y, V.D)) | metadata,
         R.shortest / 3 | Metadata(activation=Activation.IDENTITY),
         R.connected / 3 | Metadata(activation=Activation.IDENTITY),
@@ -150,19 +150,19 @@ def test_evaluation_inference_engine_london_shortest_path() -> None:
     engine.set_knowledge(knowledge)
 
     # The shortest path from Bond Street to Oxford Street is 7
-    substitutions = list(engine.q(R.shortest_path(T.bond_street, T.oxford_circus)))
+    substitutions = list(engine.q(R.shortest_path(C.bond_street, C.oxford_circus)))
     assert len(substitutions) == 1
     assert len(substitutions[0][1]) == 0
     assert substitutions[0][0] == -7
 
     # The shortest path from Bond Street to Oxford Street is 24 (Bond Street -> Oxford Circus -> Tottenham -> Leicester)
-    substitutions = list(engine.q(R.shortest_path(T.bond_street, T.leicester_square)))
+    substitutions = list(engine.q(R.shortest_path(C.bond_street, C.leicester_square)))
     assert len(substitutions) == 1
     assert len(substitutions[0][1]) == 0
     assert substitutions[0][0] == -24
 
     # Shortest paths from Green Park to every reachable station
-    substitutions = list(engine.q(R.shortest_path(T.green_park, V.X)))
+    substitutions = list(engine.q(R.shortest_path(C.green_park, V.X)))
     assert len(substitutions) == 5
 
     expected_results = {

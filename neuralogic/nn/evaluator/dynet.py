@@ -1,11 +1,12 @@
 from typing import Optional, Dict, Union
 
 import dynet as dy
-from neuralogic.nn.error_function import ErrorFunctionNames
+from neuralogic.nn.loss import ErrorFunctionNames
 
 from neuralogic.nn.base import AbstractEvaluator
 
-from neuralogic.core import Template, BuiltDataset, Dataset
+from neuralogic.core import Template, BuiltDataset
+from neuralogic.dataset import BaseDataset
 from neuralogic.core.settings import Settings
 from neuralogic.core.enums import Backend, Optimizer
 
@@ -29,7 +30,7 @@ class DynetEvaluator(AbstractEvaluator):
     ):
         super().__init__(Backend.DYNET, template, settings)
 
-    def train(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
+    def train(self, dataset: Optional[Union[BaseDataset, BuiltDataset]] = None, *, generator: bool = True):
         dataset = self.dataset if dataset is None else self.build_dataset(dataset)
 
         epochs = self.settings.epochs
@@ -75,7 +76,7 @@ class DynetEvaluator(AbstractEvaluator):
             pass
         return stats
 
-    def test(self, dataset: Optional[Union[Dataset, BuiltDataset]] = None, *, generator: bool = True):
+    def test(self, dataset: Optional[Union[BaseDataset, BuiltDataset]] = None, *, generator: bool = True):
         dataset = self.dataset if dataset is None else self.build_dataset(dataset)
 
         def _test():
@@ -83,13 +84,7 @@ class DynetEvaluator(AbstractEvaluator):
                 dy.renew_cg(immediate_compute=False, check_validity=False)
 
                 graph_output = self.neuralogic_model(sample)
-                if isinstance(sample.target, list):
-                    label = dy.inputTensor(sample.target)
-                else:
-                    label = dy.scalarInput(sample.target)
-
-                results = (label.value(), graph_output.value())
-                yield results
+                yield graph_output.value()
 
         if generator:
             return _test()

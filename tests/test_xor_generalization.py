@@ -38,9 +38,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
         ]
     )
 
-    settings = Settings(
-        epochs=5000, rule_activation=Activation.TANH, relation_activation=Activation.IDENTITY
-    )
+    settings = Settings(epochs=5000, rule_activation=Activation.TANH, relation_activation=Activation.IDENTITY)
 
     evaluator = get_evaluator(template, settings, Backend.JAVA)
     evaluator.train(dataset, generator=False)
@@ -52,7 +50,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
     for example in products:
         n_dataset.add_example(R.xor_at(n - 1)[0] <= (R.val_at(i)[int(val)] for i, val in enumerate(example)))
 
-    for expected_value, (_, predicted) in zip(expected, evaluator.test(n_dataset)):
+    for expected_value, predicted in zip(expected, evaluator.test(n_dataset)):
         assert expected_value == predicted
 
 
@@ -130,5 +128,5 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
         n_dataset.add_query(R.xor)
 
     # Check that we predicted correct values for n inputs for model trained on 2 inputs
-    for expected_value, (_, predicted) in zip(expected, neuralogic_evaluator.test(n_dataset)):
+    for expected_value, predicted in zip(expected, neuralogic_evaluator.test(n_dataset)):
         assert expected_value == round(predicted)

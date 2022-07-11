@@ -33,13 +33,10 @@ Saving and Loading Model
 ########################
 
 When our model is trained, or we want to persist the model's state (e.g., make a checkpoint),
-we can utilize the model instance method :py:meth:`~neuralogic.nn.base.AbstractNeuraLogic.state_dict`. The method puts all parameters' values into a dictionary that can be later saved (e.g., in JSON or in binary) or somehow manipulated.
+we can utilize the model instance method :py:meth:`~neuralogic.nn.base.AbstractNeuraLogic.state_dict` (or :py:meth:`~neuralogic.nn.base.AbstractNeuraLogic.parameters`).
+The method puts all parameters' values into a dictionary that can be later saved (e.g., in JSON or in binary) or somehow manipulated.
 
 When we want to load a state into our model, we can then simply pass the state into :py:meth:`~neuralogic.nn.base.AbstractNeuraLogic.load_state_dict` method.
-
-.. Warning::
-
-    The compatibility between backends for loading model state is ensured only for the **DyNet** and **Java** backends.
 
 .. note::
 

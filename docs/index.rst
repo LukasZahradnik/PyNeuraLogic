@@ -117,8 +117,8 @@ Models defined in PyNeuraLogic can be built for and evaluated in different backe
 the following backends, which, except for the Java backend, have to be additionally installed:
 
 - Java
+- `PyTorch <https://github.com/pytorch/pytorch>`_
 - `DyNet <https://github.com/clab/dynet>`_
-- `PyTorch Geometric <https://github.com/rusty1s/pytorch_geometric>`_
 
 
 Examples

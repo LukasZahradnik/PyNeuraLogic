@@ -1,6 +1,15 @@
 from neuralogic.core import Template, Activation, Aggregation
-from neuralogic.nn.module import RGCNConv, SAGEConv, GCNConv, GINConv, TAGConv, GATv2Conv, SGConv, APPNPConv, \
-    ResGatedGraphConv
+from neuralogic.nn.module import (
+    RGCNConv,
+    SAGEConv,
+    GCNConv,
+    GINConv,
+    TAGConv,
+    GATv2Conv,
+    SGConv,
+    APPNPConv,
+    ResGatedGraphConv,
+)
 
 
 def test_rgcnconv():

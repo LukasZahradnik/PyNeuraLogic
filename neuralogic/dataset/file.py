@@ -5,7 +5,9 @@ from neuralogic.dataset.base import BaseDataset
 
 
 class FileDataset(BaseDataset):
-    r"""``FileDataset`` represents samples stored in files in the `NeuraLogic <https://github.com/GustikS/NeuraLogic>`_ (logic) format.
+    r"""
+    ``FileDataset`` represents samples stored in files in the `NeuraLogic <https://github.com/GustikS/NeuraLogic>`_
+    (logic) format.
 
     Parameters
     ----------
@@ -16,6 +18,7 @@ class FileDataset(BaseDataset):
         Path to the queries file. Default: ``None``
 
     """
+
     def __init__(
         self,
         examples_file: Optional[str] = None,
