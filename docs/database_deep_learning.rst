@@ -87,14 +87,14 @@ that maps the original value from a table to some arbitrary numeric value.
 .. code-block:: python
 
     queries = DBSource(
-        "is_mutagenic",
+        "mutagenic",
         "molecule",
         ["molecule_id"],
         value_column="mutagenic",
         value_mapper=lambda value: 1 if value == "yes" else 0
     )
 
-Since our task is to determine the mutagenicity, let's give our queries proper naming, i.e., *is_mutagenic*,
+Since our task is to determine the mutagenicity, let's give our queries proper naming, i.e., *mutagenic*,
 that is more self-explaining (and can be more understandable by other team members). Let's put everything together and
 create a connection with some compatible driver (such as psycopg2 or MariaDB) and create a logic dataset.
 With just those few lines of code, we have managed to create a dataset in the logic representation (relations)
