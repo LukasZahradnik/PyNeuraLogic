@@ -74,7 +74,7 @@ We will utilize only data from *bond* and *atom* tables in our example set to ke
 
 .. code-block:: python
 
-    from neuralogic.dataset.db import DBSource
+    from neuralogic.dataset.db import DBSource, DBDataset
 
     atoms = DBSource("atom", "atom", ["atom_id", "molecule_id"], value_column="charge")
     bonds = DBSource("bond", "bond", ["atom1_id", "atom2_id", "type"], default_value=1)
