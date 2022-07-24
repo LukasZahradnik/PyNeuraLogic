@@ -166,13 +166,16 @@ class Data:
         data_list = []
 
         if hasattr(data, "train_mask"):
-            data_list.append(Data(data.x, data.edge_index, data.edge_attr, data.train_mask, data.y))
+            train_mask_index = data.train_mask.nonzero(as_tuple=False).view(-1)
+            data_list.append(Data(data.x, data.edge_index, data.y, data.edge_attr, train_mask_index))
         if hasattr(data, "test_mask"):
-            data_list.append(Data(data.x, data.edge_index, data.edge_attr, data.test_mask, data.y))
+            test_mask_index = data.test_mask.nonzero(as_tuple=False).view(-1)
+            data_list.append(Data(data.x, data.edge_index, data.y, data.edge_attr, test_mask_index))
         if hasattr(data, "val_mask"):
-            data_list.append(Data(data.x, data.edge_index, data.edge_attr, data.val_mask, data.y))
+            val_mask_index = data.val_mask.nonzero(as_tuple=False).view(-1)
+            data_list.append(Data(data.x, data.edge_index, data.y, data.edge_attr, val_mask_index))
         if len(data_list) == 0:
-            data_list.append(Data(data.x, data.edge_index, data.edge_attr, None, data.y))
+            data_list.append(Data(data.x, data.edge_index, data.y, data.edge_attr, None))
 
         return data_list
 
