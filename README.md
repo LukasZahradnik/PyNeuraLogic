@@ -24,6 +24,13 @@ Logic programming is a declarative coding paradigm in which you declare your log
 
 PyNeuralogic, through its [**NeuraLogic**](https://github.com/GustikS/NeuraLogic) backend, then makes this inference process _differentiable_ which, in turn, makes it equivalent to forward propagation in deep learning. This lets you learn numeric parameters that can be associated with the rules, just like you learn weights in neural networks.
 
+<p align="center">
+    <a href="https://pyneuralogic.readthedocs.io/en/latest/database_deep_learning.html">
+        <img src="https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/docs/_static/sql_banner.svg" alt="SQL tutorial" title="SQL tutorial"/>
+    </a>
+</p>
+
+
 ### What is this good for?
 
 Many things! For instance - ever heard of [Graph Neural Networks](https://distill.pub/2021/gnn-intro/) (GNNs)? Well, a _graph_ happens to be a special case of a logical relation - a binary one to be more exact. Now, at the heart of any GNN model there is a so-called _propagation rule_ for passing 'messages' between the neighboring nodes. Particularly, the representation ('message') of a node `X` is calculated by aggregating the previous representations of adjacent nodes `Y`, i.e. those with an `edge` between `X` and `Y`.
