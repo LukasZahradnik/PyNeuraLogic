@@ -1,97 +1,117 @@
 from typing import Union
 
 from neuralogic.core.constructs.relation import BaseRelation
-from neuralogic.core.constructs.function import Activation, ActivationAgg, Function, Aggregation
+from neuralogic.core.constructs.function import Transformation, Combination, Function, Aggregation
 
 
-# Activations
-
-
-def lukasiewicz(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.LUKASIEWICZ(entity)
+# Transformation
 
 
 def sigmoid(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.SIGMOID(entity)
-
-
-def signum(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.SIGNUM(entity)
-
-
-def relu(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.RELU(entity)
-
-
-def leaky_relu(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.LEAKY_RELU(entity)
-
-
-def identity(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.IDENTITY(entity)
+    return Transformation.SIGMOID(entity)
 
 
 def tanh(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.TANH(entity)
+    return Transformation.TANH(entity)
+
+
+def signum(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Transformation.SIGNUM(entity)
+
+
+def relu(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Transformation.RELU(entity)
+
+
+def leaky_relu(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Transformation.LEAKY_RELU(entity)
+
+
+def lukasiewicz(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Transformation.LUKASIEWICZ(entity)
 
 
 def exp(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.EXP(entity)
-
-
-def transp(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.TRANSP(entity)
-
-
-def norm(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.NORM(entity)
+    return Transformation.EXP(entity)
 
 
 def sqrt(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.SQRT(entity)
+    return Transformation.SQRT(entity)
 
 
 def inverse(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.INVERSE(entity)
+    return Transformation.INVERSE(entity)
 
 
 def reverse(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.REVERSE(entity)
+    return Transformation.REVERSE(entity)
+
+
+def identity(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Transformation.IDENTITY(entity)
+
+
+def transp(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Transformation.TRANSP(entity)
 
 
 def softmax(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.SOFTMAX(entity)
+    return Transformation.SOFTMAX(entity)
 
 
 def sparsemax(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Activation.SPARSEMAX(entity)
+    return Transformation.SPARSEMAX(entity)
 
 
-# Activation-Aggregations
+# Combination
 
 
-def crossum(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return ActivationAgg.CROSSUM(entity)
+def max_comb(entity: BaseRelation = None) -> Union[BaseRelation, Function]:
+    return Combination.MAX(entity)
 
 
-def elementproduct(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return ActivationAgg.ELEMENTPRODUCT(entity)
+def min_comb(entity: BaseRelation = None) -> Union[BaseRelation, Function]:
+    return Combination.MIN(entity)
 
 
-def product(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return ActivationAgg.PRODUCT(entity)
+def avg_comb(entity: BaseRelation = None) -> Union[BaseRelation, Function]:
+    return Combination.AVG(entity)
 
 
-def concat(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return ActivationAgg.CONCAT(entity)
+def sum_comb(entity: BaseRelation = None) -> Union[BaseRelation, Function]:
+    return Combination.SUM(entity)
 
 
-def max_act(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return ActivationAgg.MAX(entity)
+def count_comb(entity: BaseRelation = None) -> Union[BaseRelation, Function]:
+    return Combination.COUNT(entity)
 
 
-def min_act(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return ActivationAgg.MIN(entity)
+def product_comb(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Combination.PRODUCT(entity)
+
+
+def elproduct_comb(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Combination.ELPRODUCT(entity)
+
+
+def softmax_comb(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Combination.SOFTMAX(entity)
+
+
+def sparsemax_comb(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Combination.SPARSEMAX(entity)
+
+
+def crosssum_comb(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Combination.CROSSSUM(entity)
+
+
+def concat_comb(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Combination.CONCAT(entity)
+
+
+def cossim_comb(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Combination.COSSIM(entity)
 
 
 # Aggregations
@@ -111,3 +131,7 @@ def avg(entity: BaseRelation = None) -> Union[BaseRelation, Function]:
 
 def sum(entity: BaseRelation = None) -> Union[BaseRelation, Function]:
     return Aggregation.SUM(entity)
+
+
+def count(entity: BaseRelation = None) -> Union[BaseRelation, Function]:
+    return Aggregation.COUNT(entity)

@@ -52,9 +52,10 @@ class JavaFactory:
         self.vector_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.VectorValue")
         self.matrix_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.MatrixValue")
 
-        self.activation = jpype.JClass("cz.cvut.fel.ida.algebra.functions.Activation")
+        self.transformation = jpype.JClass("cz.cvut.fel.ida.algebra.functions.Transformation")
 
         self.pair = jpype.JClass("cz.cvut.fel.ida.utils.generic.Pair")
+        self.settings_class = settings.settings_class
 
         self.unit_weight = jpype.JClass("cz.cvut.fel.ida.algebra.weights.Weight").unitWeight
         self.variable_factory = self.get_variable_factory()
@@ -100,8 +101,10 @@ class JavaFactory:
             j_term_list.add(x)
 
         if relation_class == self.body_atom:
-            function = self.activation.parseActivation(str(relation.function)) if relation.function else None
-            java_relation = relation_class(predicate, j_term_list, False, function, weight)
+            function = self.settings_class.parseTransformation(str(relation.function)) if relation.function else None
+            transformation_function = self.transformation.getFunction(function) if function is not None else None
+
+            java_relation = relation_class(predicate, j_term_list, False, transformation_function, weight)
         else:
             java_relation = relation_class(predicate, j_term_list, False, weight)
         java_relation.originalString = relation.to_str()
@@ -114,8 +117,8 @@ class JavaFactory:
 
         if (
             metadata.aggregation is None
-            and metadata.activation is None
-            and metadata.offset is None
+            and metadata.transformation is None
+            and metadata.combination is None
             and metadata.learnable is None
         ):
             return None
@@ -124,11 +127,10 @@ class JavaFactory:
 
         if metadata.aggregation is not None:
             map.put("aggregation", self.string_value(str(metadata.aggregation).lower()))
-        if metadata.activation is not None:
-            map.put("activation", self.string_value(str(metadata.activation).lower()))
-        # if metadata.offset is not None:
-        #     _, value = self.get_value(metadata.offset)
-        #     map.put("offset", self.weight_factory.construct(value))
+        if metadata.transformation is not None:
+            map.put("transformation", self.string_value(str(metadata.transformation).lower()))
+        if metadata.combination is not None:
+            map.put("combination", self.string_value(str(metadata.combination).lower()))
         if metadata.learnable is not None:
             map.put("learnable", self.string_value(str(metadata.learnable).lower()))
 

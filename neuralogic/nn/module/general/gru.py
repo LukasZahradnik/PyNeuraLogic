@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.constructs.function import Activation
+from neuralogic.core.constructs.function import Transformation, Combination
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 from neuralogic.nn.module.general.rnn import RNNCell
@@ -71,7 +71,7 @@ class GRUCell(Module):
             r_name,
             self.input_name,
             self.hidden_input_name,
-            Activation.SIGMOID,
+            Transformation.SIGMOID,
             self.arity,
             self.next_name,
         )
@@ -81,7 +81,7 @@ class GRUCell(Module):
             z_name,
             self.input_name,
             self.hidden_input_name,
-            Activation.SIGMOID,
+            Transformation.SIGMOID,
             self.arity,
             self.next_name,
         )
@@ -112,18 +112,18 @@ class GRUCell(Module):
         return [
             *r(),
             *z(),
-            n_helper | Metadata(activation="elementproduct-identity"),
-            n_helper.head.predicate | [Activation.IDENTITY],
-            n_helper_weighted | [Activation.IDENTITY],
-            n_helper_weighted.head.predicate | [Activation.IDENTITY],
-            n | [Activation.TANH],
-            n.head.predicate | [Activation.IDENTITY],
-            h_left | Metadata(activation="elementproduct-identity"),
-            h_left.head.predicate | [Activation.IDENTITY],
-            h_right | Metadata(activation="elementproduct-identity"),
-            h_right.head.predicate | [Activation.IDENTITY],
-            h | [Activation.IDENTITY],
-            h.head.predicate | [Activation.IDENTITY],
+            n_helper | [Transformation.IDENTITY, Combination.ELPRODUCT],
+            n_helper.head.predicate | [Transformation.IDENTITY],
+            n_helper_weighted | [Transformation.IDENTITY],
+            n_helper_weighted.head.predicate | [Transformation.IDENTITY],
+            n | [Transformation.TANH],
+            n.head.predicate | [Transformation.IDENTITY],
+            h_left | [Transformation.IDENTITY, Combination.ELPRODUCT],
+            h_left.head.predicate | [Transformation.IDENTITY],
+            h_right | [Transformation.IDENTITY, Combination.ELPRODUCT],
+            h_right.head.predicate | [Transformation.IDENTITY],
+            h | [Transformation.IDENTITY],
+            h.head.predicate | [Transformation.IDENTITY],
         ]
 
 
@@ -157,9 +157,9 @@ class GRU(Module):
             R.<input_name>(<...terms>, V.T)[<hidden_size>, <input_size>],
             R.<hidden_input_name>(<...terms>, V.Z)[<hidden_size>, <hidden_size>],
             R.<next_name>(V.Z, V.T),
-        )) | [Activation.SIGMOID]
+        )) | [Transformation.SIGMOID]
 
-        R.<output_name>__r / <arity> + 1 | [Activation.IDENTITY]
+        R.<output_name>__r / <arity> + 1 | [Transformation.IDENTITY]
 
     The second equation is expressed in the same way, except for a different head predicate name. The third equation is
     split into three rules. The first two computes the element-wise product -
@@ -169,15 +169,15 @@ class GRU(Module):
 
         (R.<output_name>__n_helper_weighted(<...terms>, V.T) <= (
             R.<hidden_input_name>(<...terms>, V.Z)[<hidden_size>, <hidden_size>], R.<next_name>(V.Z, V.T),
-        )) | [Activation.IDENTITY],
+        )) | [Transformation.IDENTITY],
 
-        R.<output_name>__n_helper_weighted / (<arity> + 1) | [Activation.IDENTITY],
+        R.<output_name>__n_helper_weighted / (<arity> + 1) | [Transformation.IDENTITY],
 
         (R.<output_name>__n_helper(<...terms>, V.T) <= (
             R.<output_name>__r(<..terms>, V.T), R.<>__n_helper_weighted(<...terms>, V.T)
-        )) | Metadata(activation="elementproduct-identity"),
+        )) | [Transformation.IDENTITY, Combination.ELPRODUCT],
 
-        R.<output_name>__n_helper / (<arity> + 1) | [Activation.IDENTITY],
+        R.<output_name>__n_helper / (<arity> + 1) | [Transformation.IDENTITY],
 
     The third one computes the sum and applies the :math:`tanh` activation function.
 
@@ -186,8 +186,8 @@ class GRU(Module):
         (R.<output_name>__n(<...terms>, V.T) <= (
             R.<input_name>(<...terms>, V.T)[<hidden_size>, <input_size>],
             R.<output_name>__n_helper(<...terms>, V.T)
-        )) | [Activation.TANH]
-        R.<output_name>__n / (<arity> + 1) | [Activation.IDENTITY],
+        )) | [Transformation.TANH]
+        R.<output_name>__n / (<arity> + 1) | [Transformation.IDENTITY],
 
     The last equation is computed via three rules. The first two rules computes element-wise products. That is:
 
@@ -195,14 +195,14 @@ class GRU(Module):
 
         (R.<output_name>__left(<...terms>, V.T) <= (
             R.<output_name>__z(<...terms>, V.T), R.<output_name>__n(<...terms>, V.T)
-        )) | Metadata(activation="elementproduct-identity")
+        )) | [Transformation.IDENTITY, Combination.ELPRODUCT]
 
         (R.<output_name>__right(<...terms>, V.T) <= (
             R.<output_name>__z(<...terms>, V.T), R.<hidden_input_name>(<...terms>, V.Z), R.<next_name>(V.Z, V.T),,
-        )) | Metadata(activation="elementproduct-identity")
+        )) | [Transformation.IDENTITY, Combination.ELPRODUCT]
 
-        R.<output_name>__left / <arity> + 1 | [Activation.IDENTITY]
-        R.<output_name>__right / <arity> + 1 | [Activation.IDENTITY]
+        R.<output_name>__left / <arity> + 1 | [Transformation.IDENTITY]
+        R.<output_name>__right / <arity> + 1 | [Transformation.IDENTITY]
 
     The last output rule sums up the element-wise products.
 
@@ -210,15 +210,15 @@ class GRU(Module):
 
         (R.<output_name>(<...terms>, V.T) <= (
             R.<output_name>__left(<...terms>, V.T), R.<output_name>__right(<...terms>, V.T)
-        )) | [Activation.IDENTITY]
-        R.<output_name> / <arity> + 1 | [Activation.IDENTITY],
+        )) | [Transformation.IDENTITY]
+        R.<output_name> / <arity> + 1 | [Transformation.IDENTITY],
 
     Additionally, we define rules for the recursion purpose
     (the positive integer sequence :code:`R.<next_name>(V.Z, V.T)`) and the "stop condition", that is:
 
     .. code:: logtalk
 
-        (R.<output_name>(<...terms>, 0) <= R.<hidden_0_name>(<...terms>)) | [Activation.IDENTITY]
+        (R.<output_name>(<...terms>, 0) <= R.<hidden_0_name>(<...terms>)) | [Transformation.IDENTITY]
 
     Parameters
     ----------
@@ -280,6 +280,6 @@ class GRU(Module):
 
         return [
             *[next_relation(i, i + 1) for i in range(0, self.sequence_length)],
-            (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Activation.IDENTITY],
+            (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Transformation.IDENTITY],
             *recursive_cell(),
         ]

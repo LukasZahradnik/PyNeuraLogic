@@ -54,7 +54,7 @@ class Neuron:
         self.index = index
         self.name = neuron["name"]
         self.weighted = neuron["weighted"]
-        self.activation = neuron.get("activation", None)
+        self.activation = neuron.get("transformation", None)
         self.inputs = neuron["inputs"]
         self.weights = neuron.get("weights", None)
         self.offset = neuron["offset"]

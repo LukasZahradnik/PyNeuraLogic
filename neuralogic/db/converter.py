@@ -90,8 +90,8 @@ class Converter:
                         act, agg = rule_default_activation, default_aggregation
 
                         if relation.metadata is not None:
-                            if relation.metadata.activation is not None:
-                                act = str(relation.metadata.activation).lower()
+                            if relation.metadata.transformation is not None:
+                                act = str(relation.metadata.transformation).lower()
                             if relation.metadata.aggregation is not None:
                                 agg = str(relation.metadata.aggregation).lower()
 
@@ -109,8 +109,8 @@ class Converter:
                 predicate_metadata = predicates_metadata.get(f"{name}/{arity}", None)
 
                 if predicate_metadata is not None:
-                    if predicate_metadata.activation is not None:
-                        activation = str(predicate_metadata.activation).lower()
+                    if predicate_metadata.transformation is not None:
+                        activation = str(predicate_metadata.transformation).lower()
                     if predicate_metadata.aggregation is not None:
                         aggregation = str(predicate_metadata.aggregation).lower()
 

@@ -42,8 +42,11 @@ class PredicateMetadata:
     __slots__ = "predicate", "metadata"
 
     def __init__(self, predicate: Predicate, metadata: Metadata):
-        if metadata.aggregation is not None or metadata.learnable is not None:
-            raise NotImplementedError
+        if metadata.aggregation is not None:
+            raise ValueError(f"Cannot set 'aggregation' parameter on predicate ({predicate}) metadata")
+
+        if metadata.learnable is not None:
+            raise ValueError(f"Cannot set 'learnable' parameter on predicate ({predicate}) metadata")
 
         self.predicate = predicate
         self.metadata = metadata

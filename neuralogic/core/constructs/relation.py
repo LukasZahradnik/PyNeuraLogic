@@ -4,13 +4,13 @@ import numpy as np
 
 from neuralogic.core.constructs.predicate import Predicate
 from neuralogic.core.constructs import rule, factories
-from neuralogic.core.constructs.function import Activation, ActivationAgg
+from neuralogic.core.constructs.function import Transformation, Combination
 
 
 class BaseRelation:
     __slots__ = "predicate", "function", "terms"
 
-    def __init__(self, predicate: Predicate, terms=None, function: Union[Activation, ActivationAgg] = None):
+    def __init__(self, predicate: Predicate, terms=None, function: Union[Transformation, Combination] = None):
         self.predicate = predicate
         self.function = function
         self.terms = terms
@@ -24,16 +24,13 @@ class BaseRelation:
         return self.__invert__()
 
     def __invert__(self) -> "BaseRelation":
-        return self.attach_activation_function(Activation.REVERSE)
+        return self.attach_activation_function(Transformation.REVERSE)
 
     @property
     def T(self) -> "BaseRelation":
-        return self.attach_activation_function(Activation.TRANSP)
+        return self.attach_activation_function(Transformation.TRANSP)
 
-    def attach_activation_function(self, function: Union[Activation, ActivationAgg]):
-        if self.function:
-            function = function.nest(self.function)
-
+    def attach_activation_function(self, function: Union[Transformation, Combination]):
         relation = self.__copy__()
         relation.function = function
         return relation
@@ -95,7 +92,7 @@ class WeightedRelation(BaseRelation):
     __slots__ = "weight", "weight_name", "is_fixed"
 
     def __init__(
-        self, weight, predicate: Predicate, fixed=False, terms=None, function: Union[Activation, ActivationAgg] = None
+        self, weight, predicate: Predicate, fixed=False, terms=None, function: Union[Transformation, Combination] = None
     ):
         super().__init__(predicate, terms, function)
 
@@ -141,7 +138,7 @@ class WeightedRelation(BaseRelation):
     def __getitem__(self, item) -> None:
         raise NotImplementedError(f"Cannot assign weight to weighted relation {self.predicate}")
 
-    def attach_activation_function(self, function: Union[Activation, ActivationAgg]):
+    def attach_activation_function(self, function: Union[Transformation, Combination]):
         raise NotImplementedError(
             f"Cannot attach a function to weighted relation {self}. Attach the function before adding weights."
         )

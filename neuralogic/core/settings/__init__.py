@@ -5,7 +5,7 @@ from neuralogic.nn.init import Initializer, Uniform
 from neuralogic.nn.loss import MSE, ErrorFunction
 from neuralogic.core.settings.settings_proxy import SettingsProxy
 from neuralogic.core.enums import Optimizer
-from neuralogic.core.constructs.function import Activation
+from neuralogic.core.constructs.function import Transformation
 
 
 class Settings:
@@ -17,8 +17,8 @@ class Settings:
         epochs: int = 3000,
         error_function: ErrorFunction = MSE(),
         initializer: Initializer = Uniform(),
-        rule_activation: Activation = Activation.TANH,
-        relation_activation: Activation = Activation.TANH,
+        rule_activation: Transformation = Transformation.TANH,
+        relation_activation: Transformation = Transformation.TANH,
         iso_value_compression: bool = True,
         chain_pruning: bool = True,
     ):
@@ -86,19 +86,19 @@ class Settings:
         self._update("initializer", initializer)
 
     @property
-    def relation_activation(self) -> Activation:
+    def relation_activation(self) -> Transformation:
         return self.params["relation_activation"]
 
     @relation_activation.setter
-    def relation_activation(self, value: Activation):
+    def relation_activation(self, value: Transformation):
         self._update("relation_activation", value)
 
     @property
-    def rule_activation(self) -> Activation:
+    def rule_activation(self) -> Transformation:
         return self.params["rule_activation"]
 
     @rule_activation.setter
-    def rule_activation(self, value: Activation):
+    def rule_activation(self, value: Transformation):
         self._update("rule_activation", value)
 
     def create_proxy(self) -> SettingsProxy:

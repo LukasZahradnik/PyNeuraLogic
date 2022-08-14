@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.constructs.function import Activation, Aggregation
+from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 
@@ -21,7 +21,7 @@ class SGConv(Module):
         (R.<output_name>(V.I)[<W>] <= (
             R.<feature_name>(V.I<k>),
             R.<edge_name>(V.I<1>, V.I<0>), R.<edge_name>(V.I<2>, V.I<1>), ..., R.<edge_name>(V.I<k>, V.I<k-1>),
-        )) | [<aggregation>, Activation.IDENTITY]
+        )) | [<aggregation>, Transformation.IDENTITY]
 
         R.<output_name> / 1 | [<activation>]
 
@@ -32,15 +32,15 @@ class SGConv(Module):
 
     .. code:: logtalk
 
-        (R.h1(V.I0)[3, 2] <= (R.h0(V.I2), R._edge(V.I1, V.I0), R._edge(V.I2, V.I1))) | [Activation.IDENTITY, Aggregation.SUM]
-        R.h1 / 1 | [Activation.IDENTITY]
+        (R.h1(V.I0)[3, 2] <= (R.h0(V.I2), R._edge(V.I1, V.I0), R._edge(V.I2, V.I1))) | [Transformation.IDENTITY, Aggregation.SUM]
+        R.h1 / 1 | [Transformation.IDENTITY]
 
     Module parametrized as :code:`SGConv(2, 3, "h1", "h0", "_edge", 1)` translates into:
 
     .. code:: logtalk
 
-        (R.h1(V.I0)[3, 2] <= (R.h0(V.I1), R._edge(V.I1, V.I0))) | [Activation.IDENTITY, Aggregation.SUM]
-        R.h1 / 1 | [Activation.IDENTITY]
+        (R.h1(V.I0)[3, 2] <= (R.h0(V.I1), R._edge(V.I1, V.I0))) | [Transformation.IDENTITY, Aggregation.SUM]
+        R.h1 / 1 | [Transformation.IDENTITY]
 
 
     Parameters
@@ -59,9 +59,9 @@ class SGConv(Module):
     k : int
         Number of hops.
         Default: ``1``
-    activation : Activation
+    activation : Transformation
         Activation function of the output.
-        Default: ``Activation.IDENTITY``
+        Default: ``Transformation.IDENTITY``
     aggregation : Aggregation
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.SUM``
@@ -76,7 +76,7 @@ class SGConv(Module):
         feature_name: str,
         edge_name: str,
         k: int = 1,
-        activation: Activation = Activation.IDENTITY,
+        activation: Transformation = Transformation.IDENTITY,
         aggregation: Aggregation = Aggregation.SUM,
     ):
         self.output_name = output_name
@@ -93,7 +93,9 @@ class SGConv(Module):
 
     def __call__(self):
         head = R.get(self.output_name)(V.I0)[self.out_channels, self.in_channels]
-        metadata = Metadata(activation=Activation.IDENTITY, aggregation=self.aggregation, duplicit_grounding=True)
+        metadata = Metadata(
+            transformation=Transformation.IDENTITY, aggregation=self.aggregation, duplicit_grounding=True
+        )
         edge = R.get(self.edge_name)
         feature = R.get(self.feature_name)
 
@@ -106,5 +108,5 @@ class SGConv(Module):
                 )
             )
             | metadata,
-            R.get(self.output_name) / 1 | Metadata(activation=self.activation),
+            R.get(self.output_name) / 1 | Metadata(transformation=self.activation),
         ]

@@ -2,7 +2,7 @@ import jpype
 
 import neuralogic
 from neuralogic import is_initialized, initialize
-from neuralogic.core.constructs.function import Activation
+from neuralogic.core.constructs.function import Transformation
 from neuralogic.core.enums import Optimizer
 from neuralogic.nn.init import Initializer
 from neuralogic.nn.loss import MSE, SoftEntropy, CrossEntropy, ErrorFunction
@@ -17,8 +17,8 @@ class SettingsProxy:
         epochs: int,
         error_function: ErrorFunction,
         initializer: Initializer,
-        rule_activation: Activation,
-        relation_activation: Activation,
+        rule_activation: Transformation,
+        relation_activation: Transformation,
         iso_value_compression: bool,
         chain_pruning: bool,
     ):
@@ -106,7 +106,7 @@ class SettingsProxy:
 
     @error_function.setter
     def error_function(self, error_function: ErrorFunction):
-        self.settings.inferOutputNeuronFcn = True
+        self.settings.inferOutputFcns = True
 
         if isinstance(error_function, MSE):
             self.settings.squishLastLayer = False
@@ -123,7 +123,7 @@ class SettingsProxy:
                 self.settings.squishLastLayer = True
                 java_error_function = self.settings_class.ErrorFcn.SOFTENTROPY
             else:
-                self.settings.inferOutputNeuronFcn = False
+                self.settings.inferOutputFcns = False
                 self.settings.squishLastLayer = False
                 java_error_function = self.settings_class.ErrorFcn.CROSSENTROPY
         else:
@@ -165,20 +165,20 @@ class SettingsProxy:
             self.__setattr__(key, value)
 
     @property
-    def relation_activation(self) -> Activation:
-        return Activation(str(self.settings.atomNeuronActivation))
+    def relation_activation(self) -> Transformation:
+        return Transformation(str(self.settings.atomNeuronTransformation))
 
     @relation_activation.setter
-    def relation_activation(self, value: Activation):
-        self.settings.atomNeuronActivation = self.get_activation_function(value)
+    def relation_activation(self, value: Transformation):
+        self.settings.atomNeuronTransformation = self.get_activation_function(value)
 
     @property
-    def rule_activation(self) -> Activation:
-        return Activation(str(self.settings.ruleNeuronActivation))
+    def rule_activation(self) -> Transformation:
+        return Transformation(str(self.settings.ruleNeuronTransformation))
 
     @rule_activation.setter
-    def rule_activation(self, value: Activation):
-        self.settings.ruleNeuronActivation = self.get_activation_function(value)
+    def rule_activation(self, value: Transformation):
+        self.settings.ruleNeuronTransformation = self.get_activation_function(value)
 
     @property
     def debug_exporting(self) -> bool:
@@ -196,26 +196,9 @@ class SettingsProxy:
     def default_fact_value(self, value: float):
         self.settings.defaultFactValue = value
 
-    def get_activation_function(self, activation: Activation):
+    def get_activation_function(self, activation: Transformation):
         activation = str(activation)
-
-        if activation == str(Activation.SIGMOID):
-            return self.settings_class.ActivationFcn.SIGMOID
-        if activation == str(Activation.TANH):
-            return self.settings_class.ActivationFcn.TANH
-        if activation == str(Activation.SIGNUM):
-            return self.settings_class.ActivationFcn.SIGNUM
-        if activation == str(Activation.RELU):
-            return self.settings_class.ActivationFcn.RELU
-        if activation == str(Activation.IDENTITY):
-            return self.settings_class.ActivationFcn.IDENTITY
-        if activation == str(Activation.LUKASIEWICZ):
-            return self.settings_class.ActivationFcn.LUKASIEWICZ
-        if activation == str(Activation.SOFTMAX):
-            return self.settings_class.ActivationFcn.SOFTMAX
-        if activation == str(Activation.SPARSEMAX):
-            return self.settings_class.ActivationFcn.SPARSEMAX
-        raise NotImplementedError
+        return self.settings_class.parseTransformation(activation)
 
     def to_json(self) -> str:
         return self.settings.exportToJson()

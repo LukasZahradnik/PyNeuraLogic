@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.constructs.function import Activation, Aggregation
+from neuralogic.core.constructs.function import Transformation, Aggregation, Combination
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 
@@ -23,10 +23,10 @@ class ResGatedGraphConv(Module):
 
     .. code:: logtalk
 
-        (R.<output_name>__gate(V.I, V.J) <= (R.<feature_name>(V.I)[<W>], R.<feature_name>(V.J)[<W>])) | [Activation.IDENTITY]
+        (R.<output_name>__gate(V.I, V.J) <= (R.<feature_name>(V.I)[<W>], R.<feature_name>(V.J)[<W>])) | [Transformation.IDENTITY]
         R.<output_name>__gate / 2 | [<activation>]
 
-        (R.<output_name>(V.I) <= R.<feature_name>(V.I)[<W>]) | [Activation.IDENTITY]
+        (R.<output_name>(V.I) <= R.<feature_name>(V.I)[<W>]) | [Transformation.IDENTITY]
         (R.<output_name>(V.I) <= (
             R.<output_name>__gate(V.I, V.J), R.<feature_name>(V.J)[<W>], R.<edge_name>(V.J, V.I))
         ) | Metadata(activation="elementproduct-identity", aggregation=<aggregation>)
@@ -43,12 +43,12 @@ class ResGatedGraphConv(Module):
 
         metadata = Metadata(activation="elementproduct-identity", aggregation=Aggregation.SUM)
 
-        (R.h1__gate(V.I, V.J) <= (R.h0(V.I)[2, 1], R.h0(V.J)[2, 1])) | [Activation.IDENTITY]
-        R.h1__gate / 2 | [Activation.SIGMOID]
+        (R.h1__gate(V.I, V.J) <= (R.h0(V.I)[2, 1], R.h0(V.J)[2, 1])) | [Transformation.IDENTITY]
+        R.h1__gate / 2 | [Transformation.SIGMOID]
 
-        (R.h1(V.I) <= R.h0(V.I)[2, 1]) | [Activation.IDENTITY]
+        (R.h1(V.I) <= R.h0(V.I)[2, 1]) | [Transformation.IDENTITY]
         (R.h1(V.I) <= (R.h1__gate(V.I, V.J), R.h0(V.J)[2, 1], R._edge(V.J, V.I))) | metadata
-        R.h1 / 1 | [Activation.IDENTITY]
+        R.h1 / 1 | [Transformation.IDENTITY]
 
     Parameters
     ----------
@@ -63,12 +63,12 @@ class ResGatedGraphConv(Module):
         Feature predicate name to get features from.
     edge_name : str
         Edge predicate name to use for neighborhood relations.
-    gating_activation : Activation
+    gating_activation : Transformation
         Gating activation function.
-        Default: ``Activation.SIGMOID``
-    activation : Activation
+        Default: ``Transformation.SIGMOID``
+    activation : Transformation
         Activation function of the output.
-        Default: ``Activation.IDENTITY``
+        Default: ``Transformation.IDENTITY``
     aggregation : Aggregation
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.SUM``
@@ -82,8 +82,8 @@ class ResGatedGraphConv(Module):
         output_name: str,
         feature_name: str,
         edge_name: str,
-        gating_activation: Activation = Activation.SIGMOID,
-        activation: Activation = Activation.IDENTITY,
+        gating_activation: Transformation = Transformation.SIGMOID,
+        activation: Transformation = Transformation.IDENTITY,
         aggregation: Aggregation = Aggregation.SUM,
     ):
         self.output_name = output_name
@@ -102,13 +102,15 @@ class ResGatedGraphConv(Module):
         feature = R.get(self.feature_name)
         gate = R.get(f"{self.output_name}__gate")
 
-        prod_metadata = Metadata(activation="elementproduct-identity", aggregation=self.aggregation)
         w = self.out_channels, self.in_channels
+        prod_metadata = Metadata(
+            combination=Combination.ELPRODUCT, transformation=Transformation.IDENTITY, aggregation=self.aggregation
+        )
 
         return [
-            (gate(V.I, V.J) <= (feature(V.I)[w], feature(V.J)[w])) | [Activation.IDENTITY],
-            gate / 2 | Metadata(activation=self.gating_activation),
-            (head <= feature(V.I)[w]) | [Activation.IDENTITY],
+            (gate(V.I, V.J) <= (feature(V.I)[w], feature(V.J)[w])) | [Transformation.IDENTITY],
+            gate / 2 | Metadata(transformation=self.gating_activation),
+            (head <= feature(V.I)[w]) | [Transformation.IDENTITY],
             (head <= (gate(V.I, V.J), feature(V.J)[w], R.get(self.edge_name)(V.J, V.I))) | prod_metadata,
-            R.get(self.output_name) / 1 | Metadata(activation=self.activation),
+            R.get(self.output_name) / 1 | Metadata(transformation=self.activation),
         ]

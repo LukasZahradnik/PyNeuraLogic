@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.constructs.function import Activation, Aggregation
+from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 
@@ -41,23 +41,23 @@ class APPNPConv(Module):
     --------
 
     The whole computation of this module
-    (parametrized as :code:`APPNPConv("h1", "h0", "_edge", 3, 0.1, Activation.SIGMOID)`) is as follows:
+    (parametrized as :code:`APPNPConv("h1", "h0", "_edge", 3, 0.1, Transformation.SIGMOID)`) is as follows:
 
     .. code:: logtalk
 
-        metadata = Metadata(activation=Activation.IDENTITY, aggregation=Aggregation.SUM)
+        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=Aggregation.SUM)
 
         (R.h1__1(V.I) <= R.h0(V.I)[0.1].fixed()) | metadata
         (R.h1__1(V.I) <= (R.h0(V.J)[0.9].fixed(), R._edge(V.J, V.I))) | metadata
-        R.h1__1/1 [Activation.IDENTITY]
+        R.h1__1/1 [Transformation.IDENTITY]
 
         (R.h1__2(V.I) <= <0.1> R.h0(V.I)) | metadata
         (R.h1__2(V.I) <= (<0.9> R.h1__1(V.J), R._edge(V.J, V.I))) | metadata
-        R.h1__2/1 [Activation.IDENTITY]
+        R.h1__2/1 [Transformation.IDENTITY]
 
         (R.h1(V.I) <= <0.1> R.h0(V.I)) | metadata
         (R.h1(V.I) <= (<0.9> R.h1__2(V.J), R._edge(V.J, V.I))) | metadata
-        R.h1 / 1 [Activation.SIGMOID]
+        R.h1 / 1 [Transformation.SIGMOID]
 
 
     Parameters
@@ -73,9 +73,9 @@ class APPNPConv(Module):
         Number of iterations
     alpha : float
         Teleport probability
-    activation : Activation
+    activation : Transformation
         Activation function of the output.
-        Default: ``Activation.IDENTITY``
+        Default: ``Transformation.IDENTITY``
     aggregation : Aggregation
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.SUM``
@@ -89,7 +89,7 @@ class APPNPConv(Module):
         edge_name: str,
         k: int,
         alpha: float,
-        activation: Activation = Activation.IDENTITY,
+        activation: Transformation = Transformation.IDENTITY,
         aggregation: Aggregation = Aggregation.SUM,
     ):
         self.output_name = output_name
@@ -104,7 +104,7 @@ class APPNPConv(Module):
 
     def __call__(self):
         head = R.get(self.output_name)(V.I)
-        metadata = Metadata(activation=Activation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
         edge = R.get(self.edge_name)
         feature = R.get(self.feature_name)
 
@@ -120,7 +120,7 @@ class APPNPConv(Module):
                     (k_head <= (R.get(f"{self.output_name}__{k - 1}")(V.J)[1 - self.alpha].fixed(), edge(V.J, V.I)))
                     | metadata
                 )
-            rules.append(R.get(f"{self.output_name}__{k}") / 1 | Metadata(activation=Activation.IDENTITY))
+            rules.append(R.get(f"{self.output_name}__{k}") / 1 | Metadata(transformation=Transformation.IDENTITY))
 
         if self.k == 1:
             output_rule = head <= (feature(V.J)[1 - self.alpha].fixed(), edge(V.J, V.I))
@@ -134,5 +134,5 @@ class APPNPConv(Module):
             *rules,
             (head <= feature(V.I)[self.alpha].fixed()) | metadata,
             output_rule | metadata,
-            R.get(self.output_name) / 1 | Metadata(activation=self.activation),
+            R.get(self.output_name) / 1 | Metadata(transformation=self.activation),
         ]

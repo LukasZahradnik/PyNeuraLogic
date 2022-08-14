@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.constructs.function import Activation, Function
+from neuralogic.core.constructs.function import Transformation, Function
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 
@@ -20,9 +20,9 @@ class RNNCell(Module):
         Input feature predicate name to get features from.
     hidden_input_name : str
         Predicate name to get hidden state from.
-    activation : Function
+    activation : Transformation
         Activation function.
-        Default: ``Activation.TANH``
+        Default: ``Transformation.TANH``
     arity : int
         Arity of the input and output predicate. Default: ``1``
     next_name : str
@@ -37,7 +37,7 @@ class RNNCell(Module):
         output_name: str,
         input_name: str,
         hidden_input_name: str,
-        activation: Function = Activation.TANH,
+        activation: Transformation = Transformation.TANH,
         arity: int = 1,
         next_name: str = "_next__positive",
     ):
@@ -64,8 +64,8 @@ class RNNCell(Module):
         )
 
         return [
-            rnn_rule | Metadata(activation=self.activation),
-            output / (self.arity + 1) | [Activation.IDENTITY],
+            rnn_rule | Metadata(transformation=self.activation),
+            output / (self.arity + 1) | [Transformation.IDENTITY],
         ]
 
 
@@ -89,14 +89,14 @@ class RNN(Module):
             R.<next_name>(V.Z, V.T),
         )) | [<activation>]
 
-        R.<output_name> / <arity> + 1 | [Activation.IDENTITY]
+        R.<output_name> / <arity> + 1 | [Transformation.IDENTITY]
 
     Additionally, we define rules for the recursion purpose
     (the positive integer sequence :code:`R.<next_name>(V.Z, V.T)`) and the "stop condition", that is:
 
     .. code:: logtalk
 
-        (R.<output_name>(<...terms>, 0) <= R.<hidden_0_name>(<...terms>)) | [Activation.IDENTITY]
+        (R.<output_name>(<...terms>, 0) <= R.<hidden_0_name>(<...terms>)) | [Transformation.IDENTITY]
 
 
     Parameters
@@ -114,9 +114,9 @@ class RNN(Module):
         Input feature predicate name to get features from.
     hidden_0_name : str
         Predicate name to get initial hidden state from.
-    activation : Function
+    activation : Transformation
         Activation function.
-        Default: ``Activation.TANH``
+        Default: ``Transformation.TANH``
     arity : int
         Arity of the input and output predicate. Default: ``1``
     next_name : str
@@ -132,7 +132,7 @@ class RNN(Module):
         output_name: str,
         input_name: str,
         hidden_0_name: str,
-        activation: Function = Activation.TANH,
+        activation: Transformation = Transformation.TANH,
         arity: int = 1,
         next_name: str = "_next__positive",
     ):
@@ -165,6 +165,6 @@ class RNN(Module):
 
         return [
             *[next_relation(i, i + 1) for i in range(0, self.sequence_length)],
-            (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Activation.IDENTITY],
+            (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Transformation.IDENTITY],
             *recursive_cell(),
         ]

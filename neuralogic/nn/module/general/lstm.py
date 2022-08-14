@@ -1,5 +1,4 @@
-from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.constructs.function import Activation
+from neuralogic.core.constructs.function import Transformation, Combination
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 from neuralogic.nn.module.general.rnn import RNNCell
@@ -75,7 +74,7 @@ class LSTMCell(Module):
             i_name,
             self.input_name,
             self.hidden_input_name,
-            Activation.SIGMOID,
+            Transformation.SIGMOID,
             self.arity,
             self.next_name,
         ]
@@ -89,7 +88,7 @@ class LSTMCell(Module):
         o = RNNCell(*cell_args)
 
         cell_args[2] = g_name
-        cell_args[-3] = Activation.TANH
+        cell_args[-3] = Transformation.TANH
         g = RNNCell(*cell_args)
 
         c_left = R.get(c_left_name)(t_terms) <= (R.get(f_name)(t_terms), R.get(c_name)(z_terms), next_rel)
@@ -103,17 +102,17 @@ class LSTMCell(Module):
             *f(),
             *o(),
             *g(),
-            c_left | Metadata(activation="elementproduct-identity"),
-            c_right | Metadata(activation="elementproduct-identity"),
-            c_left.head.predicate | [Activation.IDENTITY],
-            c_right.head.predicate | [Activation.IDENTITY],
-            c | [Activation.IDENTITY],
-            (R.get(c_name)([*terms, 0]) <= R.get(self.cell_state_0_name)(terms)) | [Activation.IDENTITY],
-            c.head.predicate | [Activation.IDENTITY],
-            c_tanh | [Activation.TANH],
-            c_tanh.head.predicate | [Activation.IDENTITY],
-            h | Metadata(activation="elementproduct-identity"),
-            h.head.predicate | [Activation.IDENTITY],
+            c_left | [Transformation.IDENTITY, Combination.ELPRODUCT],
+            c_right | [Transformation.IDENTITY, Combination.ELPRODUCT],
+            c_left.head.predicate | [Transformation.IDENTITY],
+            c_right.head.predicate | [Transformation.IDENTITY],
+            c | [Transformation.IDENTITY],
+            (R.get(c_name)([*terms, 0]) <= R.get(self.cell_state_0_name)(terms)) | [Transformation.IDENTITY],
+            c.head.predicate | [Transformation.IDENTITY],
+            c_tanh | [Transformation.TANH],
+            c_tanh.head.predicate | [Transformation.IDENTITY],
+            h | [Transformation.IDENTITY, Combination.ELPRODUCT],
+            h.head.predicate | [Transformation.IDENTITY],
         ]
 
 
@@ -211,6 +210,6 @@ class LSTM(Module):
 
         return [
             *[next_relation(i, i + 1) for i in range(0, self.sequence_length)],
-            (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Activation.IDENTITY],
+            (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Transformation.IDENTITY],
             *recursive_cell(),
         ]

@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.constructs.function import Activation, Aggregation
+from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 
@@ -36,9 +36,9 @@ class MAGNNMean(Module):
         Metapath type predicate name. If none, ``meta_paths`` will be used instead.
     meta_paths : List[str]
         Name of types forming a single metapath.
-    activation : Activation
+    activation : Transformation
         Activation function of the output.
-        Default: ``Activation.SIGMOID``
+        Default: ``Transformation.SIGMOID``
     """
 
     def __init__(
@@ -48,7 +48,7 @@ class MAGNNMean(Module):
         relation_name: str,
         type_name: Optional[str],
         meta_paths: List[str],
-        activation: Activation = Activation.SIGMOID,
+        activation: Transformation = Transformation.SIGMOID,
         aggregation: Aggregation = Aggregation.SUM,
     ):
         self.output_name = output_name
@@ -61,7 +61,7 @@ class MAGNNMean(Module):
         self.activation = activation
 
     def __call__(self):
-        metadata = Metadata(duplicit_grounding=True, activation=Activation.IDENTITY)
+        metadata = Metadata(duplicit_grounding=True, transformation=Transformation.IDENTITY)
         length = len(self.meta_paths)
         feature = R.get(self.feature_name)
         relation = R.get(self.relation_name)
@@ -81,7 +81,7 @@ class MAGNNMean(Module):
 
         return [
             (R.get(self.output_name)(V.V0) <= meta_paths) | metadata,
-            R.get(self.output_name) / 1 | Metadata(activation=self.activation),
+            R.get(self.output_name) / 1 | Metadata(transformation=self.activation),
         ]
 
 
@@ -119,9 +119,9 @@ class MAGNNLinear(MAGNNMean):
         Metapath type predicate name. If none, ``meta_paths`` will be used instead.
     meta_paths : List[str]
         Name of types forming a single metapath.
-    activation : Activation
+    activation : Transformation
         Activation function of the output.
-        Default: ``Activation.SIGMOID``
+        Default: ``Transformation.SIGMOID``
     """
 
     def __init__(
@@ -133,7 +133,7 @@ class MAGNNLinear(MAGNNMean):
         relation_name: str,
         type_name: Optional[str],
         meta_paths: List[str],
-        activation: Activation = Activation.SIGMOID,
+        activation: Transformation = Transformation.SIGMOID,
         aggregation: Aggregation = Aggregation.SUM,
     ):
         super().__init__(output_name, feature_name, relation_name, type_name, meta_paths, activation, aggregation)

@@ -2,7 +2,7 @@ import pytest
 
 import torch
 
-from neuralogic.core import Template, R, Settings, Activation
+from neuralogic.core import Template, R, Settings, Transformation
 from neuralogic.nn.module import Linear
 from neuralogic.dataset import Dataset
 
@@ -10,20 +10,20 @@ from neuralogic.dataset import Dataset
 @pytest.mark.parametrize(
     "feature_size, output_size, num_of_inputs, activation",
     (
-        (2, 3, 5, Activation.IDENTITY),
-        (3, 2, 2, Activation.IDENTITY),
-        (3, 3, 1, Activation.IDENTITY),
-        (3, 3, 1, Activation.TANH),
+        (2, 3, 5, Transformation.IDENTITY),
+        (3, 2, 2, Transformation.IDENTITY),
+        (3, 3, 1, Transformation.IDENTITY),
+        (3, 3, 1, Transformation.TANH),
     ),
 )
-def test_linear_module(feature_size: int, output_size: int, num_of_inputs: int, activation: Activation):
+def test_linear_module(feature_size: int, output_size: int, num_of_inputs: int, activation: Transformation):
     """Test that PyNeuraLogic linear layer computes the same as pytorch linear layer"""
     torch.manual_seed(1)
     linear_input = torch.rand((num_of_inputs, feature_size))
     linear = torch.nn.Linear(feature_size, output_size, bias=False)
     linear_output = linear(linear_input)
 
-    if activation == Activation.TANH:
+    if activation == Transformation.TANH:
         linear_output = torch.tanh_(linear_output)
 
     template = Template()
