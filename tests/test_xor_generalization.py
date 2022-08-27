@@ -38,7 +38,9 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
         ]
     )
 
-    settings = Settings(epochs=5000, rule_activation=Transformation.TANH, relation_activation=Transformation.IDENTITY)
+    settings = Settings(
+        epochs=5000, rule_transformation=Transformation.TANH, relation_transformation=Transformation.IDENTITY
+    )
 
     evaluator = get_evaluator(template, settings, Backend.JAVA)
     evaluator.train(dataset, generator=False)
