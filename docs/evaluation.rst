@@ -69,7 +69,7 @@ Settings Instance
 
 The :py:class:`~neuralogic.core.settings.Settings` instance contains all the settings used to customize the behavior of different parts of the library.
 
-Most importantly, it affects the behavior of the model building (e.g., specify default rule/relation activation functions), evaluators (e.g., error function, number of epochs, learning rate, optimizer),
+Most importantly, it affects the behavior of the model building (e.g., specify default rule/relation transformation functions), evaluators (e.g., error function, number of epochs, learning rate, optimizer),
 and the model itself (e.g., initialization of the learnable parameters).
 
 .. code-block:: Python

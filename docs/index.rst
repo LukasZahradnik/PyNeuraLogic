@@ -82,7 +82,7 @@ Or, a bit more 'formally':
     Relation.node2(Var.X)[5,10] <= (Relation.node1(Var.Y)[10,20], Relation.edge(Var.Y, Var.X))
 
 to project your :code:`[1,20]` input node embeddings through a learnable :code:`[10,20]` layer before the aggregation,
-and subsequently a :code:`[5,10]` layer after the aggregation. The particular aggregation and activation functions, as
+and subsequently a :code:`[5,10]` layer after the aggregation. The particular aggregation and transformation functions, as
 well as other details, can naturally be `specified further <https://pyneuralogic.readthedocs.io/en/latest/language.html>`_,
 but you can as well leave it default like we did here with your first, fully functional GNN layer!
 

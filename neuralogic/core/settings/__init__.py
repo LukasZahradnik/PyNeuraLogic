@@ -17,8 +17,8 @@ class Settings:
         epochs: int = 3000,
         error_function: ErrorFunction = MSE(),
         initializer: Initializer = Uniform(),
-        rule_activation: Transformation = Transformation.TANH,
-        relation_activation: Transformation = Transformation.TANH,
+        rule_transformation: Transformation = Transformation.TANH,
+        relation_transformation: Transformation = Transformation.TANH,
         iso_value_compression: bool = True,
         chain_pruning: bool = True,
     ):
@@ -86,20 +86,20 @@ class Settings:
         self._update("initializer", initializer)
 
     @property
-    def relation_activation(self) -> Transformation:
-        return self.params["relation_activation"]
+    def relation_transformation(self) -> Transformation:
+        return self.params["relation_transformation"]
 
-    @relation_activation.setter
-    def relation_activation(self, value: Transformation):
-        self._update("relation_activation", value)
+    @relation_transformation.setter
+    def relation_transformation(self, value: Transformation):
+        self._update("relation_transformation", value)
 
     @property
-    def rule_activation(self) -> Transformation:
-        return self.params["rule_activation"]
+    def rule_transformation(self) -> Transformation:
+        return self.params["rule_transformation"]
 
-    @rule_activation.setter
-    def rule_activation(self, value: Transformation):
-        self._update("rule_activation", value)
+    @rule_transformation.setter
+    def rule_transformation(self, value: Transformation):
+        self._update("rule_transformation", value)
 
     def create_proxy(self) -> SettingsProxy:
         proxy = SettingsProxy(**self.params)

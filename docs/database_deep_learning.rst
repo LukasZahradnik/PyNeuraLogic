@@ -23,7 +23,7 @@ and exporting the trained model to SQL.
 
     ⚗️ Evaluation of trained models directly in the database (conversion to SQL) is currently an experimental feature;
     therefore, it comes with a few restrictions - models cannot contain recursive rules, matrices, and vectors.
-    Also, only a limited set of activation functions is implemented.
+    Also, only a limited set of transformation functions is implemented.
 
 
 Data loading from database
@@ -123,7 +123,7 @@ value passed into a sigmoid function.
 
 .. code-block:: python
 
-    from neuralogic.core import Template, R, V, Activation
+    from neuralogic.core import Template, R, V, Transformation
 
 
     template = Template()
@@ -143,9 +143,9 @@ value passed into a sigmoid function.
 
     template += (R.mutagenic(V.M)[1,] <= (
         R.layer1(V.A)[1,], R.layer2(V.A)[1,], R.layer3(V.A)[1,], R.layer4(V.A)[1,], R.atom(V.A, V.M)[1,]
-    )) | [Activation.IDENTITY]
+    )) | [Transformation.IDENTITY]
 
-    template += R.mutagenic / 1 | [Activation.SIGMOID]
+    template += R.mutagenic / 1 | [Transformation.SIGMOID]
 
 
 Now we can build our model by passing the template into an evaluator. We then use the evaluator

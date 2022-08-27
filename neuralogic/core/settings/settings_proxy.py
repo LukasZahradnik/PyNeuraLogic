@@ -17,8 +17,8 @@ class SettingsProxy:
         epochs: int,
         error_function: ErrorFunction,
         initializer: Initializer,
-        rule_activation: Transformation,
-        relation_activation: Transformation,
+        rule_transformation: Transformation,
+        relation_transformation: Transformation,
         iso_value_compression: bool,
         chain_pruning: bool,
     ):
@@ -165,20 +165,20 @@ class SettingsProxy:
             self.__setattr__(key, value)
 
     @property
-    def relation_activation(self) -> Transformation:
+    def relation_transformation(self) -> Transformation:
         return Transformation(str(self.settings.atomNeuronTransformation))
 
-    @relation_activation.setter
-    def relation_activation(self, value: Transformation):
-        self.settings.atomNeuronTransformation = self.get_activation_function(value)
+    @relation_transformation.setter
+    def relation_transformation(self, value: Transformation):
+        self.settings.atomNeuronTransformation = self.get_transformation_function(value)
 
     @property
-    def rule_activation(self) -> Transformation:
+    def rule_transformation(self) -> Transformation:
         return Transformation(str(self.settings.ruleNeuronTransformation))
 
-    @rule_activation.setter
-    def rule_activation(self, value: Transformation):
-        self.settings.ruleNeuronTransformation = self.get_activation_function(value)
+    @rule_transformation.setter
+    def rule_transformation(self, value: Transformation):
+        self.settings.ruleNeuronTransformation = self.get_transformation_function(value)
 
     @property
     def debug_exporting(self) -> bool:
@@ -196,9 +196,9 @@ class SettingsProxy:
     def default_fact_value(self, value: float):
         self.settings.defaultFactValue = value
 
-    def get_activation_function(self, activation: Transformation):
-        activation = str(activation)
-        return self.settings_class.parseTransformation(activation)
+    def get_transformation_function(self, transformation: Transformation):
+        transformation = str(transformation)
+        return self.settings_class.parseTransformation(transformation)
 
     def to_json(self) -> str:
         return self.settings.exportToJson()

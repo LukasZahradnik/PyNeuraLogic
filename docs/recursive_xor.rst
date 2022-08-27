@@ -24,7 +24,7 @@ The template will essentially evaluate :math:`xor_n = xor(val_n, xor_{n-1})` wit
 .. code-block:: python
 
     from neuralogic.nn import get_evaluator
-    from neuralogic.core import Settings, R, V, Template, Activation
+    from neuralogic.core import Settings, R, V, Template, Transformation
     from neuralogic.dataset import Dataset
 
 Before we define rules for the actual learning, we introduce helper relations (facts) ``R._next``.
@@ -92,7 +92,10 @@ That is, we encode :math:`xor(0, 0) = 0`, :math:`xor(1, 0) = 1`, and so on as th
 .. code-block:: python
 
     settings = Settings(
-        epochs=5000, rule_activation=Activation.TANH, relation_activation=Activation.IDENTITY, iso_value_compression=False
+        epochs=5000,
+        rule_transformation=Transformation.TANH,
+        relation_transformation=Transformation.IDENTITY,
+        iso_value_compression=False,
     )
 
     evaluator = get_evaluator(template, settings)

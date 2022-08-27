@@ -26,7 +26,7 @@ The encoding is almost the same, except for added values to each connection, tha
 
 .. code-block:: Python
 
-    from neuralogic.core import Template, R, V, T, Metadata, Aggregation, Activation, ActivationAgg
+    from neuralogic.core import Template, R, V, T, Metadata, Aggregation, Transformation, Combination
     from neuralogic.inference.evaluation_inference_engine import EvaluationInferenceEngine
 
 
@@ -51,7 +51,7 @@ to get to the goal station. The second rule aggregates all possible instances an
 
 .. code-block:: Python
 
-    metadata = Metadata(aggregation=Aggregation.MIN, activation=Activation.IDENTITY)
+    metadata = Metadata(aggregation=Aggregation.MIN, transformation=Transformation.IDENTITY)
 
     template += (R.shortest(V.X, V.Y) <= R.connected(V.X, V.Y, V.L)) | metadata
     template += (R.shortest(V.X, V.Y) <= (R.connected(V.X, V.Z, V.L), R.shortest_path(V.Z, V.Y))) | metadata
@@ -59,15 +59,15 @@ to get to the goal station. The second rule aggregates all possible instances an
 
 .. attention::
 
-    Notice we are appending metadata with aggregation (Min) and activation (Identity) functions.
+    Notice we are appending metadata with aggregation (Min) and transformation (Identity) functions.
 
 
-It is also necessary to set additional activation functions to identity.
+It is also necessary to set additional transformation functions to identity.
 
 .. code-block:: Python
 
-    template += R.shortest_path / 2 | Metadata(activation=ActivationAgg.MIN + Activation.IDENTITY)
-    template += R.connected / 3 | Metadata(activation=Activation.IDENTITY)
+    template += R.shortest_path / 2 | Metadata(combination=Combination.MIN, transformation=Transformation.IDENTITY)
+    template += R.connected / 3 | Metadata(transformation=Transformation.IDENTITY)
 
 
 Evaluating Queries
