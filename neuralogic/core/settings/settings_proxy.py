@@ -2,7 +2,7 @@ import jpype
 
 import neuralogic
 from neuralogic import is_initialized, initialize
-from neuralogic.core.constructs.function import Transformation
+from neuralogic.core.constructs.function import Transformation, Combination
 from neuralogic.core.enums import Optimizer
 from neuralogic.nn.init import Initializer
 from neuralogic.nn.loss import MSE, SoftEntropy, CrossEntropy, ErrorFunction
@@ -18,7 +18,9 @@ class SettingsProxy:
         error_function: ErrorFunction,
         initializer: Initializer,
         rule_transformation: Transformation,
+        rule_combination: Combination,
         relation_transformation: Transformation,
+        relation_combination: Combination,
         iso_value_compression: bool,
         chain_pruning: bool,
     ):
@@ -173,12 +175,28 @@ class SettingsProxy:
         self.settings.atomNeuronTransformation = self.get_transformation_function(value)
 
     @property
+    def relation_combination(self) -> Combination:
+        return Combination(str(self.settings.atomNeuronCombination))
+
+    @relation_combination.setter
+    def relation_combination(self, value: Combination):
+        self.settings.atomNeuronCombination = self.get_combination_function(value)
+
+    @property
     def rule_transformation(self) -> Transformation:
         return Transformation(str(self.settings.ruleNeuronTransformation))
 
     @rule_transformation.setter
     def rule_transformation(self, value: Transformation):
         self.settings.ruleNeuronTransformation = self.get_transformation_function(value)
+
+    @property
+    def rule_combination(self) -> Combination:
+        return Combination(str(self.settings.ruleNeuronCombination))
+
+    @rule_combination.setter
+    def rule_combination(self, value: Combination):
+        self.settings.ruleNeuronCombination = self.get_combination_function(value)
 
     @property
     def debug_exporting(self) -> bool:
@@ -195,6 +213,10 @@ class SettingsProxy:
     @default_fact_value.setter
     def default_fact_value(self, value: float):
         self.settings.defaultFactValue = value
+
+    def get_combination_function(self, combination: Combination):
+        combination = str(combination)
+        return self.settings_class.parseCombination(combination)
 
     def get_transformation_function(self, transformation: Transformation):
         transformation = str(transformation)
