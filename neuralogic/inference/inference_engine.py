@@ -3,7 +3,8 @@ from typing import List, Union, Optional
 import jpype
 
 from neuralogic import is_initialized, initialize
-from neuralogic.core import Template, JavaFactory, Settings, R
+from neuralogic.core import Template, Settings, R
+from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.rule import Rule

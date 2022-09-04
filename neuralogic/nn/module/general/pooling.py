@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.constructs.function import Transformation, Aggregation, Function
+from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R
 from neuralogic.nn.module.module import Module
 
