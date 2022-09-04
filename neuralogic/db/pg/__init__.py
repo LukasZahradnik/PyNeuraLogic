@@ -72,8 +72,10 @@ class PostgresConverter(Converter):
         function_sources = ["CREATE SCHEMA IF NOT EXISTS neuralogic_std;" "CREATE SCHEMA IF NOT EXISTS neuralogic;"]
 
         for fun in used_functions:
-            if helpers[fun]:
-                function_sources.append(helpers[fun].strip())
+            helper_fun = helpers[fun]
+
+            if helper_fun is not None:
+                function_sources.append(helper_fun.strip())
         return "\n".join(function_sources)
 
     def get_fact_sql_function(self, relation: BaseRelation, index: int, weight_indices: List[int], weights) -> str:
@@ -175,7 +177,7 @@ class PostgresConverter(Converter):
         inner_select = set()
         inner_selected_terms = set()
         inner_value_select = []
-        from_clause = []
+        from_clause: List[str] = []
 
         for term_idx, term in enumerate(rule.head.terms):
             if Converter._is_var(term):

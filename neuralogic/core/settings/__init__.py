@@ -26,7 +26,7 @@ class Settings:
     ):
         self.params = locals().copy()
         self.params.pop("self")
-        self._proxies = weakref.WeakSet()
+        self._proxies: weakref.WeakSet[SettingsProxy] = weakref.WeakSet()
 
         if learning_rate is None:
             self.params["learning_rate"] = 0.1 if optimizer == Optimizer.SGD else 0.001

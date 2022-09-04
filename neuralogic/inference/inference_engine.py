@@ -48,9 +48,9 @@ class InferenceEngine:
         examples_builder = self.examples_builder(self.settings.settings)
 
         self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
-        examples = self.dataset_builder.build_examples([examples], examples_builder)[0]
+        built_examples = self.dataset_builder.build_examples([examples], examples_builder)[0]
+        sample = built_examples[0]
 
-        sample = examples[0]
         gs = self.grounding_sample(sample, self.parsed_template)
 
         lifted_example = gs.query.evidence

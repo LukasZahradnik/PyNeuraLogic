@@ -215,12 +215,12 @@ class SettingsProxy:
         self.settings.defaultFactValue = value
 
     def get_combination_function(self, combination: Combination):
-        combination = str(combination)
-        return self.settings_class.parseCombination(combination)
+        combination_name = str(combination)
+        return self.settings_class.parseCombination(combination_name)
 
     def get_transformation_function(self, transformation: Transformation):
-        transformation = str(transformation)
-        return self.settings_class.parseTransformation(transformation)
+        transformation_name = str(transformation)
+        return self.settings_class.parseTransformation(transformation_name)
 
     def to_json(self) -> str:
         return self.settings.exportToJson()

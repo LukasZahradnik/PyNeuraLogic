@@ -115,7 +115,7 @@ class Data:
         elif isinstance(self.edge_attr, (Sequence, np.ndarray)):
             example = [
                 Relation.get(edge_name)(int(u), int(v))[
-                    w if len(w) == 1 and isinstance(w[0], float, int) else w
+                    w if len(w) == 1 and isinstance(w[0], (float, int)) else w
                 ].fixed()
                 for u, v, w in zip(self.edge_index[0], self.edge_index[1], self.edge_attr)
             ]

@@ -132,10 +132,10 @@ class WeightedRelation(BaseRelation):
     def __str__(self):
         return self.to_str(True)
 
-    def __call__(self, *args) -> None:
+    def __call__(self, *args) -> BaseRelation:
         raise NotImplementedError(f"Cannot assign terms to weighted relation {self.predicate}")
 
-    def __getitem__(self, item) -> None:
+    def __getitem__(self, item) -> "WeightedRelation":
         raise NotImplementedError(f"Cannot assign weight to weighted relation {self.predicate}")
 
     def attach_activation_function(self, function: Union[Transformation, Combination]):

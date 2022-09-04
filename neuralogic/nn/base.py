@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, Callable, List
 
 from neuralogic.core.settings import Settings
 from neuralogic.core.builder import DatasetBuilder
@@ -20,12 +20,12 @@ class AbstractNeuraLogic:
         self.settings = settings
 
         self.hooks_set = False
-        self.hooks = {}
+        self.hooks: Dict[str, List[Callable]] = {}
 
     def __call__(self, sample):
         raise NotImplementedError
 
-    def build_dataset(self, dataset: Union[BaseDataset, BuiltDataset], file_mode: bool = False):
+    def build_dataset(self, dataset: BaseDataset, file_mode: bool = False):
         return self.dataset_builder.build_dataset(dataset, self.backend, self.settings, file_mode)
 
     def set_hooks(self, hooks):

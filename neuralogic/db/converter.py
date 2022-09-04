@@ -35,12 +35,12 @@ class Converter:
         template = self.model.source_template
         weight_index = 0
 
-        batched_relations = defaultdict(lambda: defaultdict(list))
+        batched_relations: defaultdict[str, defaultdict[int, List]] = defaultdict(lambda: defaultdict(list))
         predicates_metadata = {}
 
         for entry in template:
             if isinstance(entry, Rule):
-                weight_indices = []
+                weight_indices: List[Optional[int]] = []
                 if isinstance(entry.head, WeightedRelation) and entry.head.weight is not None:
                     weight_indices.append(weight_index)
                     weight_index += 1
@@ -69,8 +69,8 @@ class Converter:
     def _convert(self):
         weights = self.model.state_dict()["weights"]
 
-        rule_default_activation = str(self.settings.rule_activation).lower()
-        relation_default_activation = str(self.settings.relation_activation).lower()
+        rule_default_activation = str(self.settings.rule_transformation).lower()
+        relation_default_activation = str(self.settings.relation_transformation).lower()
         default_aggregation = str(Aggregation.AVG).lower()
 
         batched_relations, predicates_metadata = self._process_template_entries()
@@ -159,12 +159,16 @@ class Converter:
     def get_std_functions(self) -> str:
         if self.sql_source is None:
             self._convert()
+        if self.sql_source is None:
+            return ""
 
         return self.std_functions
 
     def to_sql(self) -> str:
         if self.sql_source is None:
             self._convert()
+        if self.sql_source is None:
+            return ""
 
         return self.sql_source
 

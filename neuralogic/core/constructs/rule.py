@@ -57,6 +57,9 @@ class Rule:
                     return True
         return False
 
+    def to_str(self, _: bool = False) -> str:
+        return str(self)
+
     def __str__(self):
         metadata = "" if self.metadata is None is None else f" {self.metadata}"
         return f"{self.head.to_str()} :- {', '.join(atom.to_str() for atom in self.body)}.{metadata}"

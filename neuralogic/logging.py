@@ -1,11 +1,12 @@
 import os
 from enum import Enum
+from typing import List, Tuple
 
 import jpype
 
 
 _is_logging_initialized = False
-_loggers_buffer = []
+_loggers_buffer: List[Tuple] = []
 
 
 class TextIOWrapper:

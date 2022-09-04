@@ -18,22 +18,22 @@ class Function:
 
 class Transformation(Function):
     # Element wise
-    SIGMOID: "Transformation" = None
-    TANH: "Transformation" = None
-    SIGNUM: "Transformation" = None
-    RELU: "Transformation" = None
-    LEAKY_RELU: "Transformation" = None
-    LUKASIEWICZ: "Transformation" = None
-    EXP: "Transformation" = None
-    SQRT: "Transformation" = None
-    INVERSE: "Transformation" = None
-    REVERSE: "Transformation" = None
+    SIGMOID: "Transformation"
+    TANH: "Transformation"
+    SIGNUM: "Transformation"
+    RELU: "Transformation"
+    LEAKY_RELU: "Transformation"
+    LUKASIEWICZ: "Transformation"
+    EXP: "Transformation"
+    SQRT: "Transformation"
+    INVERSE: "Transformation"
+    REVERSE: "Transformation"
 
     # Transformation
-    IDENTITY: "Transformation" = None
-    TRANSP: "Transformation" = None
-    SOFTMAX: "Transformation" = None
-    SPARSEMAX: "Transformation" = None
+    IDENTITY: "Transformation"
+    TRANSP: "Transformation"
+    SOFTMAX: "Transformation"
+    SPARSEMAX: "Transformation"
 
     def __call__(self, *args):
         from neuralogic.core.constructs import relation
@@ -55,20 +55,20 @@ for function_name in Transformation.__annotations__:
 
 class Combination(Function):
     # Aggregation
-    AVG: "Combination" = None
-    MAX: "Combination" = None
-    MIN: "Combination" = None
-    SUM: "Combination" = None
-    COUNT: "Combination" = None
+    AVG: "Combination"
+    MAX: "Combination"
+    MIN: "Combination"
+    SUM: "Combination"
+    COUNT: "Combination"
 
     # Combination
-    PRODUCT: "Combination" = None
-    ELPRODUCT: "Combination" = None
-    SOFTMAX: "Combination" = None
-    SPARSEMAX: "Combination" = None
-    CROSSSUM: "Combination" = None
-    CONCAT: "Combination" = None
-    COSSIM: "Combination" = None
+    PRODUCT: "Combination"
+    ELPRODUCT: "Combination"
+    SOFTMAX: "Combination"
+    SPARSEMAX: "Combination"
+    CROSSSUM: "Combination"
+    CONCAT: "Combination"
+    COSSIM: "Combination"
 
 
 for function_name in Combination.__annotations__:
@@ -76,11 +76,11 @@ for function_name in Combination.__annotations__:
 
 
 class Aggregation(Function):
-    AVG: "Aggregation" = None
-    MAX: "Aggregation" = None
-    MIN: "Aggregation" = None
-    SUM: "Aggregation" = None
-    COUNT: "Aggregation" = None
+    AVG: "Aggregation"
+    MAX: "Aggregation"
+    MIN: "Aggregation"
+    SUM: "Aggregation"
+    COUNT: "Aggregation"
 
 
 for function_name in Aggregation.__annotations__:
