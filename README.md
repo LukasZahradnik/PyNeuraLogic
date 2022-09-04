@@ -6,6 +6,7 @@
 [![License](https://img.shields.io/pypi/l/neuralogic)](https://badge.fury.io/py/neuralogic)
 [![Tests Status](https://github.com/LukasZahradnik/PyNeuraLogic/actions/workflows/tests.yml/badge.svg)](https://github.com/LukasZahradnik/PyNeuraLogic/actions/workflows/tests.yml)
 [![Documentation Status](https://readthedocs.org/projects/pyneuralogic/badge/?version=latest)](https://pyneuralogic.readthedocs.io/en/latest/?badge=latest)
+[![Tweet](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2FLukasZahradnik%2FPyNeuraLogic)](https://twitter.com/intent/tweet?text=Check%20out:&url=https%3A%2F%2Fgithub.com%2FLukasZahradnik%2FPyNeuraLogic)
 
 
 [Documentation](https://pyneuralogic.readthedocs.io/en/latest/) | [Examples](#-examples) | [Papers](#-papers)
@@ -22,6 +23,13 @@ PyNeuraLogic lets you use Python to write **Differentiable Logic Programs**
 Logic programming is a declarative coding paradigm in which you declare your logical _variables_ and _relations_ between them. These can be further composed into so-called _rules_ that drive the computation. Such a rule set then forms a _logic program_, and its execution is equivalent to performing logic inference with the rules.
 
 PyNeuralogic, through its [**NeuraLogic**](https://github.com/GustikS/NeuraLogic) backend, then makes this inference process _differentiable_ which, in turn, makes it equivalent to forward propagation in deep learning. This lets you learn numeric parameters that can be associated with the rules, just like you learn weights in neural networks.
+
+<p align="center">
+    <a href="https://pyneuralogic.readthedocs.io/en/latest/database_deep_learning.html">
+        <img src="https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/docs/_static/sql_banner.svg" alt="SQL tutorial" title="SQL tutorial"/>
+    </a>
+</p>
+
 
 ### What is this good for?
 
@@ -44,7 +52,7 @@ to project your `[1,20]` input node embeddings ('message1') through a learnable 
 If you don't like the default settings, you can of course [specify](https://pyneuralogic.readthedocs.io/en/latest/language.html) various additional details, such as the particular aggregation and activation functions
 
 ```logtalk
-R.message2(V.X)[5,10] <= (R.message1(V.Y)[10,20], R.edge(V.Y, V.X)) | [Activation.RELU, Aggregation.AVG]
+(R.message2(V.X)[5,10] <= (R.message1(V.Y)[10,20], R.edge(V.Y, V.X))) | [Activation.RELU, Aggregation.AVG]
 ```
 
 to instantiate the classic GCN layer specification, which you can directly train now!
@@ -103,9 +111,9 @@ Java >= 1.8
 In case you want to use visualization provided in the library, it is required to have [Graphviz](https://graphviz.org/download/) installed.
 
 ## 🔬 Examples
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb) [Simple XOR example](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/SimpleXOR.ipynb) [Simple XOR example](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/SimpleXOR.ipynb)
 <br />
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/Mutagenesis.ipynb) [Molecular GNNs](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Mutagenesis.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/MolecularGNN.ipynb) [Molecular GNNs](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/MolecularGNN.ipynb)
 <br />
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/RecursiveXORGeneralization.ipynb) [Recursive XOR generalization](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/RecursiveXORGeneralization.ipynb)
 <br />
@@ -121,20 +129,14 @@ In case you want to use visualization provided in the library, it is required to
 <br />
 
 
-## 🦓 Predefined Modules
+## 📦 Predefined Modules
 
 PyNeuraLogic has a set of predefined modules to get you quickly started with your experimenting!
-
 It contains, for example, predefined modules for:
 
-- GCNConv
-- SAGEConv
-- GINConv
-- RGCNConv
-- TAGConv
-- GATv2Conv
-- SGConv
-- [...and more!](https://pyneuralogic.readthedocs.io/en/latest/zoo.html)
+- Graph Neural Networks (GNNConv, SAGEConv, GINConv, RGCNConv, ...)
+- Meta graphs and meta paths (MetaConv, MAGNN, ...)
+- LSTM, GRU, RNN, [...and more!](https://pyneuralogic.readthedocs.io/en/latest/zoo.html)
 
 ## 📝 Papers
 

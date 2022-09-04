@@ -3,7 +3,8 @@ from typing import List, Union, Optional
 import jpype
 
 from neuralogic import is_initialized, initialize
-from neuralogic.core import Template, JavaFactory, Settings, R
+from neuralogic.core import Template, Settings, R
+from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.rule import Rule
@@ -47,9 +48,9 @@ class InferenceEngine:
         examples_builder = self.examples_builder(self.settings.settings)
 
         self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
-        examples = self.dataset_builder.build_examples([examples], examples_builder)[0]
+        built_examples = self.dataset_builder.build_examples([examples], examples_builder)[0]
+        sample = built_examples[0]
 
-        sample = examples[0]
         gs = self.grounding_sample(sample, self.parsed_template)
 
         lifted_example = gs.query.evidence
@@ -91,7 +92,7 @@ class InferenceEngine:
         lifted_example = gs.query.evidence
         template = gs.template
 
-        ground_template = self.grounder.groundRulesAndFacts(lifted_example, template)
+        self.grounder.groundRulesAndFacts(lifted_example, template)
 
         clause = self.java_factory.atom_to_clause(query)
         horn_clause = self.horn_clause(clause)

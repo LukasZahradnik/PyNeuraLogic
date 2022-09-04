@@ -1,8 +1,7 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.enums import Activation, Aggregation
+from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
-from neuralogic.nn.module.general.rnn import RNNCell
 
 
 class RvNN(Module):
@@ -31,12 +30,12 @@ class RvNN(Module):
     max_children : int
         Maximum number of children (specify which <max_children>-ary tree will be considered).
         Default: ``2``
-    activation : Activation
+    activation : Transformation
         Activation function of all layers.
-        Default: ``Activation.TANH``
+        Default: ``Transformation.TANH``
     aggregation : Aggregation
         Aggregation function of a layer.
-        Default: ``Activation.SUM``
+        Default: ``Aggregation.SUM``
     arity : int
         Arity of the input and output predicate (doesn't include the node id term). Default: ``1``
     """
@@ -48,7 +47,7 @@ class RvNN(Module):
         input_name: str,
         parent_map_name: str,
         max_children: int = 2,
-        activation: Activation = Activation.TANH,
+        activation: Transformation = Transformation.TANH,
         aggregation: Aggregation = Aggregation.SUM,
         arity: int = 1,
     ):
@@ -70,11 +69,11 @@ class RvNN(Module):
         input_rel = R.get(self.input_name)
         output_rel = R.get(self.output_name)
         parent_map_rel = R.get(self.parent_map_name)
-        metadata = Metadata(activation=self.activation, aggregation=self.aggregation)
+        metadata = Metadata(transformation=self.activation, aggregation=self.aggregation)
 
         rules = [
             (output_rel(head_terms) <= (input_rel(head_terms), parent_map_rel(V.P))) | metadata,
-            output_rel / len(head_terms) | [Activation.IDENTITY],
+            output_rel / len(head_terms) | [Transformation.IDENTITY],
         ]
 
         body = []

@@ -54,7 +54,7 @@ class Neuron:
         self.index = index
         self.name = neuron["name"]
         self.weighted = neuron["weighted"]
-        self.activation = neuron.get("activation", None)
+        self.activation = neuron.get("transformation", None)
         self.inputs = neuron["inputs"]
         self.weights = neuron.get("weights", None)
         self.offset = neuron["offset"]
@@ -73,10 +73,10 @@ class Neuron:
 
     @staticmethod
     def parse_hook_name(name: str):
-        name = name.split(" ")
+        splitted_name = name.split(" ")
 
-        if len(name) == 3:
-            return name[2]
+        if len(splitted_name) == 3:
+            return splitted_name[2]
         return None
 
 

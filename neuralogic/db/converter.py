@@ -17,7 +17,7 @@ class TableMapping:
     value_column: Optional[str] = None
 
 
-class Convertor:
+class Converter:
     def __init__(self, model, table_mappings: List[TableMapping], settings: Settings):
         self.table_mappings: Dict[str, TableMapping] = {
             f"{mapping.relation_name}/{len(mapping.term_columns)}": mapping for mapping in table_mappings
@@ -26,6 +26,8 @@ class Convertor:
         self.model = model
         self.settings = settings
 
+        self._used_functions = set()
+
         self.sql_source = None
         self.std_functions = None
 
@@ -33,12 +35,12 @@ class Convertor:
         template = self.model.source_template
         weight_index = 0
 
-        batched_relations = defaultdict(lambda: defaultdict(list))
+        batched_relations: defaultdict[str, defaultdict[int, List]] = defaultdict(lambda: defaultdict(list))
         predicates_metadata = {}
 
         for entry in template:
             if isinstance(entry, Rule):
-                weight_indices = []
+                weight_indices: List[Optional[int]] = []
                 if isinstance(entry.head, WeightedRelation) and entry.head.weight is not None:
                     weight_indices.append(weight_index)
                     weight_index += 1
@@ -66,11 +68,10 @@ class Convertor:
 
     def _convert(self):
         weights = self.model.state_dict()["weights"]
-        used_functions = set()
 
-        rule_default_activation = str(self.settings.rule_activation).lower()
-        relation_default_activation = str(self.settings.relation_activation).lower()
-        default_aggregation = str(Aggregation.AVG.value).lower()
+        rule_default_activation = str(self.settings.rule_transformation).lower()
+        relation_default_activation = str(self.settings.relation_transformation).lower()
+        default_aggregation = str(Aggregation.AVG).lower()
 
         batched_relations, predicates_metadata = self._process_template_entries()
 
@@ -82,55 +83,56 @@ class Convertor:
                 if f"{name}/{arity}" in self.table_mappings:
                     raise Exception
 
+                is_fact = False
+
                 for index, (relation, weight_indices) in enumerate(relations_by_arity):
                     if isinstance(relation, Rule):
                         act, agg = rule_default_activation, default_aggregation
 
                         if relation.metadata is not None:
-                            if relation.metadata.activation is not None:
-                                act = str(relation.metadata.activation.value).lower()
+                            if relation.metadata.transformation is not None:
+                                act = str(relation.metadata.transformation).lower()
                             if relation.metadata.aggregation is not None:
-                                agg = str(relation.metadata.aggregation.value).lower()
+                                agg = str(relation.metadata.aggregation).lower()
 
-                        used_functions.add(act)
-                        used_functions.add(agg)
+                        self._used_functions.add(act)
+                        self._used_functions.add(agg)
 
-                        sql_funcs = self.get_rule_sql_function(relation, index, act, agg, weight_indices, weights)
+                        sql_func = self.get_rule_sql_function(relation, index, act, agg, weight_indices, weights)
                     else:
-                        sql_funcs = self.get_fact_sql_function(relation, index, weight_indices, weights)
-
-                    sql_source_headers.append(sql_funcs[0])
-                    sql_source.append(sql_funcs[1])
+                        is_fact = True
+                        sql_func = self.get_fact_sql_function(relation, index, weight_indices, weights)
+                    sql_source.append(sql_func)
 
                 activation = relation_default_activation
                 aggregation = default_aggregation
                 predicate_metadata = predicates_metadata.get(f"{name}/{arity}", None)
 
                 if predicate_metadata is not None:
-                    if predicate_metadata.activation is not None:
-                        activation = str(predicate_metadata.activation.value).lower()
+                    if predicate_metadata.transformation is not None:
+                        activation = str(predicate_metadata.transformation).lower()
                     if predicate_metadata.aggregation is not None:
-                        aggregation = str(predicate_metadata.aggregation.value).lower()
+                        aggregation = str(predicate_metadata.aggregation).lower()
 
-                used_functions.add(activation)
-                used_functions.add(aggregation)
+                self._used_functions.add(activation)
+                self._used_functions.add(aggregation)
 
-                sql_funcs = self.get_rule_aggregation_function(
+                sql_func = self.get_rule_aggregation_function(
                     name,
                     arity,
                     len(relations_by_arity),
                     activation,
                     aggregation,
+                    is_fact,
                 )
 
-                sql_source_headers.append(sql_funcs[0])
-                sql_source.append(sql_funcs[1])
+                sql_source.append(sql_func)
 
                 sql_funcs = self.get_relation_interface_sql_function(name, arity)
                 sql_source_headers.append(sql_funcs[0])
                 sql_source.append(sql_funcs[1])
 
-        self.std_functions = self.get_helpers(used_functions)
+        self.std_functions = self.get_helpers(self._used_functions)
 
         sql_source_headers.extend(sql_source)
         self.sql_source = "\n".join(sql_source_headers)
@@ -140,31 +142,33 @@ class Convertor:
 
     def get_rule_sql_function(
         self, rule: Rule, index: int, activation: str, aggregation: str, weight_indices: List[int], weights
-    ) -> Tuple[str, str]:
+    ) -> str:
         raise NotImplementedError
 
-    def get_fact_sql_function(
-        self, relation: BaseRelation, index: int, weight_indices: List[int], weights
-    ) -> Tuple[str, str]:
+    def get_fact_sql_function(self, relation: BaseRelation, index: int, weight_indices: List[int], weights) -> str:
+        raise NotImplementedError
+
+    def get_rule_aggregation_function(
+        self, name: str, arity: int, number_of_rules: int, activation: str, aggregation: str, is_fact: bool = False
+    ) -> str:
         raise NotImplementedError
 
     def get_helpers(self, functions: Set[str]) -> str:
         raise NotImplementedError
 
-    def get_rule_aggregation_function(
-        self, name: str, arity: int, number_of_rules: int, activation: str, aggregation: str
-    ) -> Tuple[str, str]:
-        raise NotImplementedError
-
     def get_std_functions(self) -> str:
         if self.sql_source is None:
             self._convert()
+        if self.sql_source is None:
+            return ""
 
         return self.std_functions
 
     def to_sql(self) -> str:
         if self.sql_source is None:
             self._convert()
+        if self.sql_source is None:
+            return ""
 
         return self.sql_source
 

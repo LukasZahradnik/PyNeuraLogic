@@ -102,7 +102,7 @@ class NeuraLogic(AbstractNeuraLogic):
                 elif len(size) == 1 or size[0] == 1 or size[1] == 1:
                     weights_dict[weight.index] = list(value.values)
                 else:
-                    weights_dict[weight.index] = [list(value) for value in value.values]
+                    weights_dict[weight.index] = json.loads(str(value.toString()))
                 weight_names[weight.index] = weight.name
         return {
             "weights": weights_dict,

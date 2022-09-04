@@ -6,6 +6,7 @@ Advanced Usage
     :maxdepth: 1
 
     heterogeneous
+    database_deep_learning
     inference_engine
     eval_inference_engine
     modifiers
@@ -16,6 +17,9 @@ Advanced Usage
 
 * | :doc:`heterogeneous`
   | Learn how to represent heterogeneous graphs and possible ways to incorporate rules utilizing them into your templates.
+
+* | :doc:`database_deep_learning`
+  | Evaluate your models directly in the database. Load data from a database, train a model, and transpile the model into SQL.
 
 * | :doc:`inference_engine`
   | PyNeuraLogic offers to utilize its engine only for inference as well. This section goes through an example to showcase the usage of the inference engine, to get all possible substitutions satisfying our queries.

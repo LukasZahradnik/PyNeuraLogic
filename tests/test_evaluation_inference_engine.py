@@ -1,4 +1,4 @@
-from neuralogic.core import Template, R, V, C, Metadata, Aggregation, Activation
+from neuralogic.core import Template, R, V, C, Metadata, Aggregation, Transformation
 
 from neuralogic.inference.evaluation_inference_engine import EvaluationInferenceEngine
 
@@ -135,15 +135,15 @@ def test_evaluation_inference_engine_london_shortest_path() -> None:
         R.connected(C.leicester_square, C.charing_cross, C.northern)[-7],
     ]
 
-    metadata = Metadata(aggregation=Aggregation.MAX, activation=Activation.IDENTITY)
+    metadata = Metadata(aggregation=Aggregation.MAX, transformation=Transformation.IDENTITY)
 
     template += [
         (R.shortest(V.X, V.Y, C.first) <= R.connected(V.X, V.Y, V.L)) | metadata,
         (R.shortest(V.X, V.Y, C.second) <= (R.connected(V.X, V.Z, V.L), R.shortest(V.Z, V.Y, V.D))) | metadata,
         (R.shortest_path(V.X, V.Y) <= R.shortest(V.X, V.Y, V.D)) | metadata,
-        R.shortest / 3 | Metadata(activation=Activation.IDENTITY),
-        R.connected / 3 | Metadata(activation=Activation.IDENTITY),
-        R.shortest_path / 2 | Metadata(activation=Activation.IDENTITY),
+        R.shortest / 3 | Metadata(transformation=Transformation.IDENTITY),
+        R.connected / 3 | Metadata(transformation=Transformation.IDENTITY),
+        R.shortest_path / 2 | Metadata(transformation=Transformation.IDENTITY),
     ]
 
     engine = EvaluationInferenceEngine(template)

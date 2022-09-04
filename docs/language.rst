@@ -178,18 +178,18 @@ Such a rule can be then read as *"The relation (proposition) 'h' is implied by t
 
 Metadata
 ********
-The rules have some (default) properties that influence their translation into the computational graphs (models), such as activation and aggregation functions.
+The rules have some (default) properties that influence their translation into the computational graphs (models), such as transformation and aggregation functions.
 These properties can be modified, per rule, by attaching a :py:class:`~neuralogic.core.constructs.metadata.Metadata` instance to the rule.
 
 .. code-block:: Python
 
-    from neuralogic.core import Metadata, Activation, Aggregation
+    from neuralogic.core import Metadata, Transformation, Aggregation
 
 
-    (Relation.h <= (Relation.b_one, Relation.b_n)) | Metadata(activation=Activation.RELU, aggregation=Aggregation.AVG)
+    (Relation.h <= (Relation.b_one, Relation.b_n)) | Metadata(transformation=Transformation.RELU, aggregation=Aggregation.AVG)
 
     # or, for short, just
-    (Relation.h <= (Relation.b_one, Relation.b_n)) | [Activation.RELU, Aggregation.AVG]
+    (Relation.h <= (Relation.b_one, Relation.b_n)) | [Transformation.RELU, Aggregation.AVG]
 
 
-For example, with the construct above, we created a new rule with a specified activation function (relu) and aggregation function (avg).
+For example, with the construct above, we created a new rule with a specified transformation function (relu) and aggregation function (avg).

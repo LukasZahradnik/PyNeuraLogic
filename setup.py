@@ -32,8 +32,12 @@ except FileNotFoundError:
     long_description = DESCRIPTION
 
 about: Dict = {}
-with open(os.path.join(here, NAME, "__version__.py")) as f:  # type: ignore
-    exec(f.read(), about)
+
+try:
+    with open(os.path.join(here, NAME, "__version__.py")) as f:  # type: ignore
+        exec(f.read(), about)
+except Exception:
+    about["__version__"] = "0.0.0"  # development
 
 setup(
     name=NAME,
@@ -56,13 +60,15 @@ setup(
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
-        "Development Status :: 1 - Planning",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "Intended Audience :: Developers",
+        "Intended Audience :: Education",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
 )

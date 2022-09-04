@@ -65,7 +65,7 @@ In this case, let us focus on the only node with multiple inputs, highlighted wi
     value = AVG (value(...edge(1,2)), value(...edge(1,3)), value(...edge(1,4)))
 
 ..
-    With that knowledge, it is now hopefully clearer that this computational graph actually corresponds to what we expressed in "plain English" above. 
+    With that knowledge, it is now hopefully clearer that this computational graph actually corresponds to what we expressed in "plain English" above.
 
 Note how this functionality can be viewed as a basis for the "neighborhood aggregation" operation commonly utilized in Graph Neural Networks.
 
@@ -163,7 +163,7 @@ In this case, there are no new operations to be discussed in the computational g
     Note that the computational subgraphs for the individual nodes here will not be completely separate, i.e. the computational graph will not be a tree anymore, since the nodes share some of their neighbors in the input graph, too.
 
 
-Activation and Aggregation functions
+Transformation and Aggregation functions
 ************************************
 
 So far we focused solely on the `structure` of the computational graph, without specificying the indivudal operations/functions associated with the nodes. Let us now demonstrate how to customize these. For that, let is consider again the graph/template from the first (entry) example.
@@ -179,13 +179,13 @@ If we would like to change the `aggregation` function of the rule, i.e. how all 
 
     (R.h(V.X) <= R.edge(V.X, V.Y)) | [Aggregation.MAX]
 
-Should we want to further change the non-linear activation of the rule nodes, combining the rule body relations we would add:
+Should we want to further change the non-linear transformation of the rule nodes, combining the rule body relations we would add:
 
 .. code-block:: Python
 
-    (R.h(V.X) <= R.edge(V.X, V.Y)) | [Aggregation.MAX, Activation.SIGMOID]
+    (R.h(V.X) <= R.edge(V.X, V.Y)) | [Aggregation.MAX, Transformation.SIGMOID]
 
-Finally, to change the activation function of the `head` of the rule in the case with multiple rules with the same head:
+Finally, to change the transformation function of the `head` of the rule in the case with multiple rules with the same head:
 
 .. code-block::
 
@@ -196,8 +196,8 @@ we would append that information to the head relation itself as:
 
 .. code-block::
 
-    R.h / 1 | [Activation.SIGMOID]
+    R.h / 1 | [Transformation.SIGMOID]
 
 .. note::
 
-    The :code:`/ 1` here defines the "arity" of the relation, which is necessary to uniquely identify the relation, since we can have multiple relations of the same name with different arities (and activation functions).
+    The :code:`/ 1` here defines the "arity" of the relation, which is necessary to uniquely identify the relation, since we can have multiple relations of the same name with different arities (and transformation functions).

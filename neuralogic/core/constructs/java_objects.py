@@ -52,7 +52,10 @@ class JavaFactory:
         self.vector_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.VectorValue")
         self.matrix_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.MatrixValue")
 
+        self.transformation = jpype.JClass("cz.cvut.fel.ida.algebra.functions.Transformation")
+
         self.pair = jpype.JClass("cz.cvut.fel.ida.utils.generic.Pair")
+        self.settings_class = settings.settings_class
 
         self.unit_weight = jpype.JClass("cz.cvut.fel.ida.algebra.weights.Weight").unitWeight
         self.variable_factory = self.get_variable_factory()
@@ -76,31 +79,37 @@ class JavaFactory:
         terms = [self.get_term(term, self.variable_factory) for term in atom.terms]
 
         predicate_name = f"@{atom.predicate.name}" if atom.predicate.special else atom.predicate.name
-        literal = self.literal(predicate_name, atom.negated, terms)
+        literal = self.literal(predicate_name, False, terms)
         literal_array = self.literal[1]
         literal_array[0] = literal
 
         return self.clause(literal_array)
 
-    def get_generic_atom(self, atom_class, atom, variable_factory, default_weight=None, is_example=False):
-        predicate = self.get_predicate(atom.predicate)
+    def get_generic_relation(self, relation_class, relation, variable_factory, default_weight=None, is_example=False):
+        predicate = self.get_predicate(relation.predicate)
 
         weight = None
-        if isinstance(atom, self.weighted_atom_type):
-            weight = self.get_weight(atom.weight, atom.weight_name, atom.is_fixed or is_example)
+        if isinstance(relation, self.weighted_atom_type):
+            weight = self.get_weight(relation.weight, relation.weight_name, relation.is_fixed or is_example)
         elif default_weight is not None:
             weight = self.get_weight(default_weight, None, True)
 
-        term_list = [self.get_term(term, variable_factory) for term in atom.terms]
+        term_list = [self.get_term(term, variable_factory) for term in relation.terms]
 
         j_term_list = jpype.java.util.ArrayList()
         for x in term_list:
             j_term_list.add(x)
 
-        java_atom = atom_class(predicate, j_term_list, atom.negated, weight)
-        java_atom.originalString = atom.to_str()
+        if relation_class == self.body_atom:
+            function = self.settings_class.parseTransformation(str(relation.function)) if relation.function else None
+            transformation_function = self.transformation.getFunction(function) if function is not None else None
 
-        return java_atom
+            java_relation = relation_class(predicate, j_term_list, False, transformation_function, weight)
+        else:
+            java_relation = relation_class(predicate, j_term_list, False, weight)
+        java_relation.originalString = relation.to_str()
+
+        return java_relation
 
     def get_metadata(self, metadata, metadata_class):
         if metadata is None:
@@ -108,8 +117,8 @@ class JavaFactory:
 
         if (
             metadata.aggregation is None
-            and metadata.activation is None
-            and metadata.offset is None
+            and metadata.transformation is None
+            and metadata.combination is None
             and metadata.learnable is None
         ):
             return None
@@ -117,12 +126,11 @@ class JavaFactory:
         map = jpype.JClass("java.util.LinkedHashMap")()
 
         if metadata.aggregation is not None:
-            map.put("aggregation", self.string_value(metadata.aggregation.value.lower()))
-        if metadata.activation is not None:
-            map.put("activation", self.string_value(metadata.activation.lower()))
-        # if metadata.offset is not None:
-        #     _, value = self.get_value(metadata.offset)
-        #     map.put("offset", self.weight_factory.construct(value))
+            map.put("aggregation", self.string_value(str(metadata.aggregation).lower()))
+        if metadata.transformation is not None:
+            map.put("transformation", self.string_value(str(metadata.transformation).lower()))
+        if metadata.combination is not None:
+            map.put("combination", self.string_value(str(metadata.combination).lower()))
         if metadata.learnable is not None:
             map.put("learnable", self.string_value(str(metadata.learnable).lower()))
 
@@ -135,7 +143,7 @@ class JavaFactory:
             if not isinstance(query, Iterable):
                 query = [query]
             return None, self.get_conjunction(query, variable_factory, 1.0, True)
-        return self.get_atom(query.head, variable_factory, True), self.get_conjunction(
+        return self.get_relation(query.head, variable_factory, True), self.get_conjunction(
             query.body, variable_factory, is_example=True
         )
 
@@ -157,8 +165,10 @@ class JavaFactory:
         lifted_example = self.lifted_example(jpype.java.util.ArrayList(conjunctions), jpype.java.util.ArrayList(rules))
         return label_conjunction, lifted_example
 
-    def get_conjunction(self, atoms, variable_factory, default_weight=None, is_example=False):
-        valued_facts = [self.get_valued_fact(atom, variable_factory, default_weight, is_example) for atom in atoms]
+    def get_conjunction(self, relations, variable_factory, default_weight=None, is_example=False):
+        valued_facts = [
+            self.get_valued_fact(relation, variable_factory, default_weight, is_example) for relation in relations
+        ]
         return self.conjunction(jpype.java.util.ArrayList(valued_facts))
 
     def get_predicate_metadata_pair(self, predicate_metadata):
@@ -167,17 +177,17 @@ class JavaFactory:
             self.get_metadata(predicate_metadata.metadata, self.predicate_metadata),
         )
 
-    def get_valued_fact(self, atom, variable_factory, default_weight=None, is_example=False):
-        return self.get_generic_atom(
+    def get_valued_fact(self, relation, variable_factory, default_weight=None, is_example=False):
+        return self.get_generic_relation(
             self.valued_fact,
-            atom,
+            relation,
             variable_factory,
             default_weight,
             is_example,
         )
 
-    def get_atom(self, atom, variable_factory, is_example=False):
-        return self.get_generic_atom(self.body_atom, atom, variable_factory, is_example=is_example)
+    def get_relation(self, relation, variable_factory, is_example=False):
+        return self.get_generic_relation(self.body_atom, relation, variable_factory, is_example=is_example)
 
     def get_rule(self, rule):
         java_rule = self.weighted_rule()
@@ -185,19 +195,19 @@ class JavaFactory:
 
         variable_factory = self.get_variable_factory()
 
-        head_atom = self.get_atom(rule.head, variable_factory)
-        weight = head_atom.getConjunctWeight()
+        head_relation = self.get_relation(rule.head, variable_factory)
+        weight = head_relation.getConjunctWeight()
 
         if weight is None:
             java_rule.setWeight(self.unit_weight)
         else:
             java_rule.setWeight(weight)
 
-        body_atoms = [self.get_atom(atom, variable_factory) for atom in rule.body]
-        body_atom_list = jpype.java.util.ArrayList(body_atoms)
+        body_relation = [self.get_relation(relation, variable_factory) for relation in rule.body]
+        body_relation_list = jpype.java.util.ArrayList(body_relation)
 
-        java_rule.setHead(self.head_atom(head_atom))
-        java_rule.setBody(body_atom_list)
+        java_rule.setHead(self.head_atom(head_relation))
+        java_rule.setBody(body_relation_list)
 
         offset = None  # TODO: Implement
 

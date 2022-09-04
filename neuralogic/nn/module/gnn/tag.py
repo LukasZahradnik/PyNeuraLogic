@@ -1,29 +1,31 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.enums import Activation, Aggregation
+from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 
 
 class TAGConv(Module):
     r"""
-    Topology Adaptive Graph Convolutional layer from `"Topology Adaptive Graph Convolutional Networks" <https://arxiv.org/abs/1710.10370>`_.
+    Topology Adaptive Graph Convolutional layer from
+    `"Topology Adaptive Graph Convolutional Networks" <https://arxiv.org/abs/1710.10370>`_.
     Which can be expressed as:
 
     .. math::
         \mathbf{x}^{\prime}_i = act(\sum_{k=0}^K \mathbf{W}_k \cdot {agg}_{j \in \mathcal{N}^k(i)}(\mathbf{x}_j))
 
-    Where *act* is an activation function, *agg* aggregation function, *Wk* are learnable parameters and :math:`\mathcal{N}^k(i)` denotes nodes that are *k* hops away from the node *i*.
-    This equation is translated into the logic form as:
+    Where *act* is an activation function, *agg* aggregation function, *Wk* are learnable parameters and
+    :math:`\mathcal{N}^k(i)` denotes nodes that are *k* hops away from the node *i*. This equation is translated into
+    the logic form as:
 
     This equation is translated into the logic form as:
 
     .. code:: logtalk
 
-        (R.<output_name>(V.I0)[<W0>] <= R.<feature_name>(V.I0)) | [<aggregation>, Activation.IDENTITY]
-        (R.<output_name>(V.I0)[<W1>] <= (R.<feature_name>(V.I1), R.<edge_name>(V.I1, V.I0))) | [<aggregation>, Activation.IDENTITY]
-        (R.<output_name>(V.I0)[<W2>] <= (R.<feature_name>(V.I2), R.<edge_name>(V.I1, V.I0), R.<edge_name>(V.I2, V.I1)) | [<aggregation>, Activation.IDENTITY]
+        (R.<output_name>(V.I0)[<W0>] <= R.<feature_name>(V.I0)) | [<aggregation>, Transformation.IDENTITY]
+        (R.<output_name>(V.I0)[<W1>] <= (R.<feature_name>(V.I1), R.<edge_name>(V.I1, V.I0))) | [<aggregation>, Transformation.IDENTITY]
+        (R.<output_name>(V.I0)[<W2>] <= (R.<feature_name>(V.I2), R.<edge_name>(V.I1, V.I0), R.<edge_name>(V.I2, V.I1)) | [<aggregation>, Transformation.IDENTITY]
         ...
-        (R.<output_name>(V.I0)[<Wk>] <= (R.<feature_name>(V.I<k>), R.<edge_name>(V.I1, V.I0), ..., R.<edge_name>(V.I<k>, V.I<k-1>)) | [<aggregation>, Activation.IDENTITY]
+        (R.<output_name>(V.I0)[<Wk>] <= (R.<feature_name>(V.I<k>), R.<edge_name>(V.I1, V.I0), ..., R.<edge_name>(V.I<k>, V.I<k-1>)) | [<aggregation>, Transformation.IDENTITY]
         R.<output_name> / 1 | [<activation>]
 
     Examples
@@ -33,18 +35,18 @@ class TAGConv(Module):
 
     .. code:: logtalk
 
-        (R.h1(V.I0)[2, 2] <= R.h0(V.I0)) | [Aggregation.SUM, Activation.IDENTITY]
-        (R.h1(V.I0)[2, 1] <= (R.h0(V.I1), R._edge(V.I1, V.I0)) | [Aggregation.SUM, Activation.IDENTITY]
-        (R.h1(V.I0)[2, 1] <= (R.h0(V.I2), R._edge(V.I1, V.I0), R._edge(V.I2, V.I1)) | [Aggregation.SUM, Activation.IDENTITY]
-        R.h1 / 1 | [Activation.IDENTITY]
+        (R.h1(V.I0)[2, 2] <= R.h0(V.I0)) | [Aggregation.SUM, Transformation.IDENTITY]
+        (R.h1(V.I0)[2, 1] <= (R.h0(V.I1), R._edge(V.I1, V.I0)) | [Aggregation.SUM, Transformation.IDENTITY]
+        (R.h1(V.I0)[2, 1] <= (R.h0(V.I2), R._edge(V.I1, V.I0), R._edge(V.I2, V.I1)) | [Aggregation.SUM, Transformation.IDENTITY]
+        R.h1 / 1 | [Transformation.IDENTITY]
 
     Module parametrized as :code:`TAGConv(1, 2, "h1", "h0", "_edge", 1)` translates into:
 
     .. code:: logtalk
 
-        (R.h1(V.I0)[2, 1] <= R.h0(V.I0)) | [Aggregation.SUM, Activation.IDENTITY]
-        (R.h1(V.I0)[2, 1] <= (R.h0(V.I1), R._edge(V.I1, V.I0)) | [Aggregation.SUM, Activation.IDENTITY]
-        R.h1 / 1 | [Activation.IDENTITY]
+        (R.h1(V.I0)[2, 1] <= R.h0(V.I0)) | [Aggregation.SUM, Transformation.IDENTITY]
+        (R.h1(V.I0)[2, 1] <= (R.h0(V.I1), R._edge(V.I1, V.I0)) | [Aggregation.SUM, Transformation.IDENTITY]
+        R.h1 / 1 | [Transformation.IDENTITY]
 
     Parameters
     ----------
@@ -62,9 +64,9 @@ class TAGConv(Module):
     k : int
         Number of hops.
         Default: ``2``
-    activation : Activation
+    activation : Transformation
         Activation function of the output.
-        Default: ``Activation.IDENTITY``
+        Default: ``Transformation.IDENTITY``
     aggregation : Aggregation
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.SUM``
@@ -79,7 +81,7 @@ class TAGConv(Module):
         feature_name: str,
         edge_name: str,
         k: int = 2,
-        activation: Activation = Activation.IDENTITY,
+        activation: Transformation = Transformation.IDENTITY,
         aggregation: Aggregation = Aggregation.SUM,
     ):
         self.output_name = output_name
@@ -94,7 +96,7 @@ class TAGConv(Module):
         self.aggregation = aggregation
 
     def __call__(self):
-        metadata = Metadata(activation=Activation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
         head = R.get(self.output_name)
         feature = R.get(self.feature_name)
         edge = R.get(self.edge_name)
@@ -115,5 +117,5 @@ class TAGConv(Module):
 
         return [
             *hop_rules,
-            head / 1 | Metadata(activation=self.activation),
+            head / 1 | Metadata(transformation=self.activation),
         ]

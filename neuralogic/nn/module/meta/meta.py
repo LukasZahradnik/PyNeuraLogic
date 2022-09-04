@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.enums import Activation, Aggregation
+from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 
@@ -17,8 +17,8 @@ class MetaConv(Module):
         \sum_{k \in \mathcal{K}}
         (\mathbf{W_k} \cdot \mathbf{x}_j))
 
-    Where *act* is an activation function, *agg* aggregation function (by default average), :math:`W_0` is a learnable root parameter
-    and :math:`W_k` is a learnable parameter for each role.
+    Where *act* is an activation function, *agg* aggregation function (by default average), :math:`W_0` is a learnable
+    root parameter and :math:`W_k` is a learnable parameter for each role.
 
     Parameters
     ----------
@@ -35,9 +35,9 @@ class MetaConv(Module):
         Role predicate name to use for role relations. When :code:`None`, elements from :code:`roles` are used instead.
     roles : List[str]
         List of relations' names
-    activation : Activation
+    activation : Transformation
         Activation function of the output.
-        Default: ``Activation.SIGMOID``
+        Default: ``Transformation.SIGMOID``
     aggregation : Aggregation
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.AVG``
@@ -52,7 +52,7 @@ class MetaConv(Module):
         feature_name: str,
         role_name: Optional[str],
         roles: List[str],
-        activation: Activation = Activation.SIGMOID,
+        activation: Transformation = Transformation.SIGMOID,
         aggregation: Aggregation = Aggregation.AVG,
     ):
         self.output_name = output_name
@@ -71,17 +71,17 @@ class MetaConv(Module):
         head = R.get(self.output_name)(V.I)
         role_head = R.get(f"{self.output_name}__roles")
 
-        metadata = Metadata(activation=Activation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
         feature = R.get(self.feature_name)(V.J)[self.out_channels, self.in_channels]
 
         if self.role_name is not None:
             role_rules = [
-                ((role_head(V.I, role) <= (feature, R.get(self.role_name)(V.J, role, V.I))) | [Activation.IDENTITY])
+                ((role_head(V.I, role) <= (feature, R.get(self.role_name)(V.J, role, V.I))) | [Transformation.IDENTITY])
                 for role in self.roles
             ]
         else:
             role_rules = [
-                ((role_head(V.I, role) <= (feature, R.get(role)(V.J, V.I))) | [Activation.IDENTITY])
+                ((role_head(V.I, role) <= (feature, R.get(role)(V.J, V.I))) | [Transformation.IDENTITY])
                 for role in self.roles
             ]
 
@@ -89,6 +89,6 @@ class MetaConv(Module):
             (head <= role_head(V.I, V.R)) | metadata,
             (head <= R.get(self.feature_name)(V.I)[self.out_channels, self.in_channels]) | metadata,
             *role_rules,
-            R.get(self.output_name) / 1 | Metadata(activation=self.activation),
-            role_head / 2 | [Activation.IDENTITY],
+            R.get(self.output_name) / 1 | Metadata(transformation=self.activation),
+            role_head / 2 | [Transformation.IDENTITY],
         ]

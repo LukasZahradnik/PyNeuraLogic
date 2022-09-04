@@ -1,7 +1,7 @@
 import copy
 
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
-from neuralogic.core import R, Activation, Aggregation, Metadata, ActivationAgg, V
+from neuralogic.core import R, Transformation, Aggregation, Metadata, Combination, V
 from neuralogic.core.constructs.rule import Rule
 
 
@@ -68,25 +68,31 @@ def test_predicate_creation() -> None:
     assert predicate.special is False
     assert predicate.name == "hidden_test"
 
-    predicate_metadata = R.shortest / 2 | [Activation.SIGMOID]
+    predicate_metadata = R.shortest / 2 | [Transformation.SIGMOID]
     assert predicate_metadata.metadata is not None
     assert predicate_metadata.metadata.aggregation is None
-    assert predicate_metadata.metadata.activation == Activation.SIGMOID
+    assert predicate_metadata.metadata.transformation == Transformation.SIGMOID
 
-    predicate_metadata = R.shortest / 2 | [Activation.SIGMOID + ActivationAgg.MAX]
+    predicate_metadata = R.shortest / 2 | [Transformation.SIGMOID, Combination.MAX]
     assert predicate_metadata.metadata is not None
     assert predicate_metadata.metadata.aggregation is None
-    assert str(predicate_metadata.metadata.activation) == "max-sigmoid"
 
-    predicate_metadata = R.shortest / 2 | [ActivationAgg.MIN]
+    assert str(predicate_metadata.metadata.combination) == "max"
+    assert str(predicate_metadata.metadata.transformation) == "sigmoid"
+
+    predicate_metadata = R.shortest / 2 | [Combination.MIN]
     assert predicate_metadata.metadata is not None
     assert predicate_metadata.metadata.aggregation is None
-    assert str(predicate_metadata.metadata.activation) == "min-identity"
+    assert predicate_metadata.metadata.transformation is None
 
-    predicate_metadata = R.shortest / 2 | Metadata(activation=ActivationAgg.MAX + Activation.TANH)
+    assert str(predicate_metadata.metadata.combination) == "min"
+
+    predicate_metadata = R.shortest / 2 | Metadata(transformation=Transformation.TANH, combination=Combination.MAX)
     assert predicate_metadata.metadata is not None
     assert predicate_metadata.metadata.aggregation == None
-    assert str(predicate_metadata.metadata.activation) == "max-tanh"
+
+    assert str(predicate_metadata.metadata.combination) == "max"
+    assert str(predicate_metadata.metadata.transformation) == "tanh"
 
 
 def test_relation_creation() -> None:
@@ -112,36 +118,41 @@ def test_relation_creation() -> None:
 
     relation = relation.fixed()
     assert relation.is_fixed is True
-    assert relation.negated is False
 
+    relation = R.my_atom
     neg_relation = -relation
-    assert neg_relation.negated is True
+    assert neg_relation.function is Transformation.REVERSE
 
     neg_relation = ~relation
-    assert neg_relation.negated is True
+    assert neg_relation.function is Transformation.REVERSE
+
+    t_relation = relation.T
+    assert t_relation.function is Transformation.TRANSP
 
 
 def test_rule_metadata():
-    rule = (R.a <= R.b) | [Activation.SIGMOID, Aggregation.AVG]
+    rule = (R.a <= R.b) | [Transformation.SIGMOID, Aggregation.AVG]
 
     assert rule.metadata is not None
     assert rule.metadata.aggregation == Aggregation.AVG
-    assert rule.metadata.activation == Activation.SIGMOID
+    assert rule.metadata.transformation == Transformation.SIGMOID
 
-    rule = (R.a <= R.b) | Metadata(activation=Activation.IDENTITY, aggregation=Aggregation.MAX)
+    rule = (R.a <= R.b) | Metadata(transformation=Transformation.IDENTITY, aggregation=Aggregation.MAX)
 
     assert rule.metadata is not None
     assert rule.metadata.aggregation == Aggregation.MAX
-    assert rule.metadata.activation == Activation.IDENTITY
+    assert rule.metadata.transformation == Transformation.IDENTITY
 
     rule = R.a <= R.b
     assert rule.metadata is None
 
-    rule = (R.a <= R.b) | [ActivationAgg.MAX + Activation.SIGMOID, Aggregation.AVG]
+    rule = (R.a <= R.b) | [Combination.MAX, Transformation.SIGMOID, Aggregation.AVG]
 
     assert rule.metadata is not None
     assert rule.metadata.aggregation == Aggregation.AVG
-    assert str(rule.metadata.activation) == "max-sigmoid"
+
+    assert str(rule.metadata.combination) == "max"
+    assert str(rule.metadata.transformation) == "sigmoid"
 
 
 def test_rules():

@@ -2,7 +2,8 @@ import jpype
 
 import neuralogic
 from neuralogic import is_initialized, initialize
-from neuralogic.core.enums import Optimizer, Activation
+from neuralogic.core.constructs.function import Transformation, Combination
+from neuralogic.core.enums import Optimizer
 from neuralogic.nn.init import Initializer
 from neuralogic.nn.loss import MSE, SoftEntropy, CrossEntropy, ErrorFunction
 
@@ -16,8 +17,10 @@ class SettingsProxy:
         epochs: int,
         error_function: ErrorFunction,
         initializer: Initializer,
-        rule_activation: Activation,
-        relation_activation: Activation,
+        rule_transformation: Transformation,
+        rule_combination: Combination,
+        relation_transformation: Transformation,
+        relation_combination: Combination,
         iso_value_compression: bool,
         chain_pruning: bool,
     ):
@@ -105,6 +108,8 @@ class SettingsProxy:
 
     @error_function.setter
     def error_function(self, error_function: ErrorFunction):
+        self.settings.inferOutputFcns = True
+
         if isinstance(error_function, MSE):
             self.settings.squishLastLayer = False
             self.settings.trainOnlineResultsType = self.settings_class.ResultsType.REGRESSION
@@ -120,6 +125,7 @@ class SettingsProxy:
                 self.settings.squishLastLayer = True
                 java_error_function = self.settings_class.ErrorFcn.SOFTENTROPY
             else:
+                self.settings.inferOutputFcns = False
                 self.settings.squishLastLayer = False
                 java_error_function = self.settings_class.ErrorFcn.CROSSENTROPY
         else:
@@ -161,20 +167,36 @@ class SettingsProxy:
             self.__setattr__(key, value)
 
     @property
-    def relation_activation(self) -> Activation:
-        return self.settings.atomNeuronActivation
+    def relation_transformation(self) -> Transformation:
+        return Transformation(str(self.settings.atomNeuronTransformation))
 
-    @relation_activation.setter
-    def relation_activation(self, value: Activation):
-        self.settings.atomNeuronActivation = self.get_activation_function(value)
+    @relation_transformation.setter
+    def relation_transformation(self, value: Transformation):
+        self.settings.atomNeuronTransformation = self.get_transformation_function(value)
 
     @property
-    def rule_activation(self) -> Activation:
-        return self.settings.ruleNeuronActivation
+    def relation_combination(self) -> Combination:
+        return Combination(str(self.settings.atomNeuronCombination))
 
-    @rule_activation.setter
-    def rule_activation(self, value: Activation):
-        self.settings.ruleNeuronActivation = self.get_activation_function(value)
+    @relation_combination.setter
+    def relation_combination(self, value: Combination):
+        self.settings.atomNeuronCombination = self.get_combination_function(value)
+
+    @property
+    def rule_transformation(self) -> Transformation:
+        return Transformation(str(self.settings.ruleNeuronTransformation))
+
+    @rule_transformation.setter
+    def rule_transformation(self, value: Transformation):
+        self.settings.ruleNeuronTransformation = self.get_transformation_function(value)
+
+    @property
+    def rule_combination(self) -> Combination:
+        return Combination(str(self.settings.ruleNeuronCombination))
+
+    @rule_combination.setter
+    def rule_combination(self, value: Combination):
+        self.settings.ruleNeuronCombination = self.get_combination_function(value)
 
     @property
     def debug_exporting(self) -> bool:
@@ -192,24 +214,13 @@ class SettingsProxy:
     def default_fact_value(self, value: float):
         self.settings.defaultFactValue = value
 
-    def get_activation_function(self, activation: Activation):
-        if activation == Activation.SIGMOID:
-            return self.settings_class.ActivationFcn.SIGMOID
-        if activation == Activation.TANH:
-            return self.settings_class.ActivationFcn.TANH
-        if activation == Activation.SIGNUM:
-            return self.settings_class.ActivationFcn.SIGNUM
-        if activation == Activation.RELU:
-            return self.settings_class.ActivationFcn.RELU
-        if activation == Activation.IDENTITY:
-            return self.settings_class.ActivationFcn.IDENTITY
-        if activation == Activation.LUKASIEWICZ:
-            return self.settings_class.ActivationFcn.LUKASIEWICZ
-        if activation == Activation.SOFTMAX:
-            return self.settings_class.ActivationFcn.SOFTMAX
-        if activation == Activation.SPARSEMAX:
-            return self.settings_class.ActivationFcn.SPARSEMAX
-        raise NotImplementedError
+    def get_combination_function(self, combination: Combination):
+        combination_name = str(combination)
+        return self.settings_class.parseCombination(combination_name)
+
+    def get_transformation_function(self, transformation: Transformation):
+        transformation_name = str(transformation)
+        return self.settings_class.parseTransformation(transformation_name)
 
     def to_json(self) -> str:
         return self.settings.exportToJson()

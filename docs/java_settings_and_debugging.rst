@@ -25,8 +25,8 @@ the ``neuralogic.set_jvm_path`` function, such as:
     neuralogic.set_jvm_path("/some/path/my_jvm/")
 
 You can also make some adjustments to JVM settings via the ``neuralogic.set_jvm_options`` function.
-By default, two options are passed into the JVM - ``"-Xms1g"``, which sets the minimum amount of heap memory size
-to 1 GB, and ``"-Xmx64g"``, which sets the maximum amount of heap memory size to 64 GB.
+By default, one option is passed into the JVM - ``"-Xms1g"``, which sets the minimum amount of heap memory size
+to 1 GB. The maximum amount of the heap memory size can be set via the ``neuralogic.set_max_memory_size`` function.
 
 This function overrides already set options, so if you want to keep defaults or previously set options,you will have
 to specify them again. For example, you can inspect the garbage collector with customizing settings such as:

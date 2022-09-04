@@ -4,7 +4,8 @@ import weakref
 from neuralogic.nn.init import Initializer, Uniform
 from neuralogic.nn.loss import MSE, ErrorFunction
 from neuralogic.core.settings.settings_proxy import SettingsProxy
-from neuralogic.core.enums import Optimizer, Activation
+from neuralogic.core.enums import Optimizer
+from neuralogic.core.constructs.function import Transformation, Combination
 
 
 class Settings:
@@ -16,14 +17,16 @@ class Settings:
         epochs: int = 3000,
         error_function: ErrorFunction = MSE(),
         initializer: Initializer = Uniform(),
-        rule_activation: Activation = Activation.TANH,
-        relation_activation: Activation = Activation.TANH,
+        rule_transformation: Transformation = Transformation.TANH,
+        rule_combination: Combination = Combination.SUM,
+        relation_transformation: Transformation = Transformation.TANH,
+        relation_combination: Combination = Combination.SUM,
         iso_value_compression: bool = True,
         chain_pruning: bool = True,
     ):
         self.params = locals().copy()
         self.params.pop("self")
-        self._proxies = weakref.WeakSet()
+        self._proxies: weakref.WeakSet[SettingsProxy] = weakref.WeakSet()
 
         if learning_rate is None:
             self.params["learning_rate"] = 0.1 if optimizer == Optimizer.SGD else 0.001
@@ -85,20 +88,36 @@ class Settings:
         self._update("initializer", initializer)
 
     @property
-    def relation_activation(self) -> Activation:
-        return self.params["relation_activation"]
+    def relation_transformation(self) -> Transformation:
+        return self.params["relation_transformation"]
 
-    @relation_activation.setter
-    def relation_activation(self, value: Activation):
-        self._update("relation_activation", value)
+    @relation_transformation.setter
+    def relation_transformation(self, value: Transformation):
+        self._update("relation_transformation", value)
 
     @property
-    def rule_activation(self) -> Activation:
-        return self.params["rule_activation"]
+    def relation_combination(self) -> Combination:
+        return self.params["relation_combination"]
 
-    @rule_activation.setter
-    def rule_activation(self, value: Activation):
-        self._update("rule_activation", value)
+    @relation_combination.setter
+    def relation_combination(self, value: Combination):
+        self._update("relation_combination", value)
+
+    @property
+    def rule_transformation(self) -> Transformation:
+        return self.params["rule_transformation"]
+
+    @rule_transformation.setter
+    def rule_transformation(self, value: Transformation):
+        self._update("rule_transformation", value)
+
+    @property
+    def rule_combination(self) -> Combination:
+        return self.params["rule_combination"]
+
+    @rule_combination.setter
+    def rule_combination(self, value: Combination):
+        self._update("rule_combination", value)
 
     def create_proxy(self) -> SettingsProxy:
         proxy = SettingsProxy(**self.params)

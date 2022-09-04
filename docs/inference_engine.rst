@@ -28,22 +28,22 @@ This graph can be encoded as :code:`connected(From, To, Line)` such as:
 
 .. code-block:: Python
 
-    from neuralogic.core import Template, R, V, T
+    from neuralogic.core import Template, R, V, C
 
 
     template = Template()
     template += [
-        R.connected(T.bond_street, T.oxford_circus, T.central),
-        R.connected(T.oxford_circus, T.tottenham_court_road, T.central),
-        R.connected(T.bond_street, T.green_park, T.jubilee),
-        R.connected(T.green_park, T.charing_cross, T.jubilee),
-        R.connected(T.green_park, T.piccadilly_circus, T.piccadilly),
-        R.connected(T.piccadilly_circus, T.leicester_square, T.piccadilly),
-        R.connected(T.green_park, T.oxford_circus, T.victoria),
-        R.connected(T.oxford_circus, T.piccadilly_circus, T.bakerloo),
-        R.connected(T.piccadilly_circus, T.charing_cross, T.bakerloo),
-        R.connected(T.tottenham_court_road, T.leicester_square, T.northern),
-        R.connected(T.leicester_square, T.charing_cross, T.northern),
+        R.connected(C.bond_street, C.oxford_circus, C.central),
+        R.connected(C.oxford_circus, C.tottenham_court_road, C.central),
+        R.connected(C.bond_street, C.green_park, C.jubilee),
+        R.connected(C.green_park, C.charing_cross, C.jubilee),
+        R.connected(C.green_park, C.piccadilly_circus, C.piccadilly),
+        R.connected(C.piccadilly_circus, C.leicester_square, C.piccadilly),
+        R.connected(C.green_park, C.oxford_circus, C.victoria),
+        R.connected(C.oxford_circus, C.piccadilly_circus, C.bakerloo),
+        R.connected(C.piccadilly_circus, C.charing_cross, C.bakerloo),
+        R.connected(C.tottenham_court_road, C.leicester_square, C.northern),
+        R.connected(C.leicester_square, C.charing_cross, C.northern),
     ]
 
 
@@ -72,7 +72,7 @@ Now we can ask the inference engine to get all sorts of different information, s
 
     engine = InferenceEngine(template)
 
-    engine.q(R.nearby(T.tottenham_court_road, V.X))
+    engine.q(R.nearby(C.tottenham_court_road, V.X))
 
 Running the :code:`query` (or :code:`q`) will return a generator of dictionaries with all possible substitutions for all variables in the query.
 In this case, we have only one variable in the query (:code:`V.X`). As you can see, the inference engine found all stations that are nearby the Tottenham Court Road station (Leicester Square and Charing Cross).
@@ -105,7 +105,7 @@ Now we can ask the inference engine what stations we can reach from a station or
 
     engine = InferenceEngine(template)
 
-    if engine.query(R.reachable(T.green_park, T.tottenham_court_road)):
+    if engine.query(R.reachable(C.green_park, C.tottenham_court_road)):
         print("Yes, you can reach Tottenham Court Road from Green Park")
     else:
         print("Those two stations are reachable, so this should never be printed out")

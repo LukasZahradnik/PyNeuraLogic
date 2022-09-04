@@ -10,12 +10,19 @@ _is_initialized = False
 _seed = int.from_bytes(os.urandom(4), byteorder="big")
 _initial_seed = _seed
 _rnd_generator = None
+_max_memory_size = None
 
 jvm_params = {
     "classpath": os.path.join(os.path.abspath(os.path.dirname(__file__)), "jar", "NeuraLogic.jar"),
 }
 
-jvm_options = ["-Xms1g", "-Xmx64g"]
+jvm_options = ["-Xms1g"]
+
+
+def set_max_memory_size(size: int):
+    """Set maximum memory size that can be utilized by the backend (in gigabytes)"""
+    global _max_memory_size
+    _max_memory_size = size
 
 
 def initial_seed() -> int:
@@ -78,6 +85,11 @@ def initialize(
         raise Exception("NeuraLogic already initialized")
 
     _is_initialized = True
+    options = [*jvm_options]
+
+    if _max_memory_size is not None:
+        options.append(f"-Xmx{_max_memory_size}g")
+
     if debug_mode:
         port = int(debug_port)
         server = "y" if is_debug_server else "n"
@@ -90,7 +102,7 @@ def initialize(
             f"-Xrunjdwp:transport=dt_socket,server={server},address={port},suspend={suspend}",
         ]
 
-        jpype.startJVM(*jvm_options, *debug_params, **jvm_params)
+        jpype.startJVM(*options, *debug_params, **jvm_params)
     else:
-        jpype.startJVM(*jvm_options, **jvm_params)
+        jpype.startJVM(*options, **jvm_params)
     _init_logging()

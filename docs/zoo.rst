@@ -108,6 +108,10 @@ Pre-defined Modules
 
             * - :class:`~neuralogic.nn.module.meta.meta.MetaConv`
               -
+            * - :class:`~neuralogic.nn.module.meta.magnn.MAGNNMean`
+              -
+            * - :class:`~neuralogic.nn.module.meta.magnn.MAGNNLinear`
+              -
 
 ----
 
@@ -182,4 +186,10 @@ Meta Modules
 *********************
 
 .. autoclass:: neuralogic.nn.module.meta.meta::MetaConv
+   :members:
+
+.. autoclass:: neuralogic.nn.module.meta.magnn::MAGNNMean
+   :members:
+
+.. autoclass:: neuralogic.nn.module.meta.magnn::MAGNNLinear
    :members:

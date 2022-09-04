@@ -19,3 +19,32 @@ from neuralogic.nn.module.general.rvnn import RvNN
 from neuralogic.nn.module.general.pooling import Pooling, AvgPooling, SumPooling, MaxPooling
 
 from neuralogic.nn.module.meta.meta import MetaConv
+from neuralogic.nn.module.meta.magnn import MAGNNMean
+from neuralogic.nn.module.meta.magnn import MAGNNLinear
+
+
+__all__ = [
+    "APPNPConv",
+    "GATv2Conv",
+    "GCNConv",
+    "GINConv",
+    "SAGEConv",
+    "ResGatedGraphConv",
+    "RGCNConv",
+    "SGConv",
+    "TAGConv",
+    "MLP",
+    "Linear",
+    "RNN",
+    "GRU",
+    "LSTM",
+    "RvNN",
+    "Pooling",
+    "AvgPooling",
+    "MaxPooling",
+    "SumPooling",
+    "MetaConv",
+    "MAGNNLinear",
+    "MAGNNMean",
+    "Module",
+]

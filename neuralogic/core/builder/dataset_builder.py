@@ -149,6 +149,8 @@ class DatasetBuilder:
 
             if len(examples) == 1:
                 settings.settings.groundingMode = self.grounding_mode.GLOBAL
+            settings.settings.infer()
+            settings._setup_random_generator()
 
             self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
             examples, example_queries = self.build_examples(examples, examples_builder)

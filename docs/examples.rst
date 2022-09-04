@@ -5,11 +5,11 @@
 
 .. |mutagcolab| image:: https://colab.research.google.com/assets/colab-badge.svg
                 :alt: Open in Colab
-                :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/Mutagenesis.ipynb
+                :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/MolecularGNN.ipynb
 
 .. |xorcolab| image:: https://colab.research.google.com/assets/colab-badge.svg
                 :alt: Open in Colab
-                :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb
+                :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/SimpleXOR.ipynb
 
 .. |recxorcolab| image:: https://colab.research.google.com/assets/colab-badge.svg
                 :alt: Open in Colab
@@ -32,8 +32,8 @@
                 :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingNonRegularGraphs.ipynb
 
 
-- |mutagcolab| `Mutagenesis <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Mutagenesis.ipynb>`_
-- |xorcolab| `XOR Example <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb>`_
+- |mutagcolab| `Molecular GNNs <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/MolecularGNN.ipynb>`_
+- |xorcolab| `Simple XOR example <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/SimpleXOR.ipynb>`_
 - |recxorcolab| `Recursive XOR Generalization <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/RecursiveXORGeneralization.ipynb>`_
 - |visual| `Visualization <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Visualization.ipynb>`_
 

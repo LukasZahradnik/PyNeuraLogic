@@ -82,7 +82,7 @@ Or, a bit more 'formally':
     Relation.node2(Var.X)[5,10] <= (Relation.node1(Var.Y)[10,20], Relation.edge(Var.Y, Var.X))
 
 to project your :code:`[1,20]` input node embeddings through a learnable :code:`[10,20]` layer before the aggregation,
-and subsequently a :code:`[5,10]` layer after the aggregation. The particular aggregation and activation functions, as
+and subsequently a :code:`[5,10]` layer after the aggregation. The particular aggregation and transformation functions, as
 well as other details, can naturally be `specified further <https://pyneuralogic.readthedocs.io/en/latest/language.html>`_,
 but you can as well leave it default like we did here with your first, fully functional GNN layer!
 
@@ -126,11 +126,11 @@ Examples
 
 .. |mutagcolab| image:: https://colab.research.google.com/assets/colab-badge.svg
                 :alt: Open in Colab
-                :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/Mutagenesis.ipynb
+                :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/MolecularGNN.ipynb
 
 .. |xorcolab| image:: https://colab.research.google.com/assets/colab-badge.svg
                 :alt: Open in Colab
-                :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb
+                :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/SimpleXOR.ipynb
 
 .. |recxorcolab| image:: https://colab.research.google.com/assets/colab-badge.svg
                 :alt: Open in Colab
@@ -153,8 +153,8 @@ Examples
                 :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingNonRegularGraphs.ipynb
 
 
-- |mutagcolab| `Mutagenesis <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Mutagenesis.ipynb>`_
-- |xorcolab| `XOR Example <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb>`_
+- |mutagcolab| `Molecular GNNs <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/MolecularGNN.ipynb>`_
+- |xorcolab| `Simple XOR example <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/SimpleXOR.ipynb>`_
 - |recxorcolab| `Recursive XOR Generalization <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/RecursiveXORGeneralization.ipynb>`_
 - |visual| `Visualization <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/Visualization.ipynb>`_
 

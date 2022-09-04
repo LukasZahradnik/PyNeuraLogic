@@ -1,6 +1,6 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.enums import Activation, Aggregation
-from neuralogic.core.constructs.factories import R, V
+from neuralogic.core.constructs.function import Transformation, Aggregation
+from neuralogic.core.constructs.factories import R
 from neuralogic.nn.module.module import Module
 
 
@@ -31,15 +31,15 @@ class Pooling(Module):
 
     .. code:: logtalk
 
-        (R.h1 <= R.h0(V.X0)) | [Aggregation.AVG, Activation.IDENTITY]
-        R.h1 / 0 | [Activation.IDENTITY]
+        (R.h1 <= R.h0(V.X0)) | [Aggregation.AVG, Transformation.IDENTITY]
+        R.h1 / 0 | [Transformation.IDENTITY]
 
     Module parametrized as :code:`Pooling("h1", "h0", Aggregation.MAX, 2)` translates into:
 
     .. code:: logtalk
 
-        (R.h1 <= R.h0(V.X0, V.X1)) | [Aggregation.MAX, Activation.IDENTITY]
-        R.h1 / 0 | [Activation.IDENTITY]
+        (R.h1 <= R.h0(V.X0, V.X1)) | [Aggregation.MAX, Transformation.IDENTITY]
+        R.h1 / 0 | [Transformation.IDENTITY]
 
     Parameters
     ----------
@@ -68,11 +68,11 @@ class Pooling(Module):
         self.aggregation = aggregation
 
     def __call__(self):
-        metadata = Metadata(activation=Activation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
 
         return [
             (R.get(self.output_name) <= R.get(self.input_name)(f"X{i}" for i in range(self.input_arity))) | metadata,
-            R.get(self.output_name) / 0 | [Activation.IDENTITY],
+            R.get(self.output_name) / 0 | [Transformation.IDENTITY],
         ]
 
 
@@ -96,8 +96,8 @@ class MaxPooling(Pooling):
 
     .. code:: logtalk
 
-        (R.h1 <= R.h0(V.X0)) | [Aggregation.MAX, Activation.IDENTITY]
-        R.h1 / 0 | [Activation.IDENTITY]
+        (R.h1 <= R.h0(V.X0)) | [Aggregation.MAX, Transformation.IDENTITY]
+        R.h1 / 0 | [Transformation.IDENTITY]
 
     Parameters
     ----------
@@ -134,8 +134,8 @@ class AvgPooling(Pooling):
 
     .. code:: logtalk
 
-        (R.h1 <= R.h0(V.X0)) | [Aggregation.AVG, Activation.IDENTITY]
-        R.h1 / 0 | [Activation.IDENTITY]
+        (R.h1 <= R.h0(V.X0)) | [Aggregation.AVG, Transformation.IDENTITY]
+        R.h1 / 0 | [Transformation.IDENTITY]
 
     Parameters
     ----------
@@ -172,8 +172,8 @@ class SumPooling(Pooling):
 
     .. code:: logtalk
 
-        (R.h1 <= R.h0(V.X0)) | [Aggregation.SUM, Activation.IDENTITY]
-        R.h1 / 0 | [Activation.IDENTITY]
+        (R.h1 <= R.h0(V.X0)) | [Aggregation.SUM, Transformation.IDENTITY]
+        R.h1 / 0 | [Transformation.IDENTITY]
 
     Parameters
     ----------

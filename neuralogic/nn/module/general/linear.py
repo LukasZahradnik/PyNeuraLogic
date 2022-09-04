@@ -1,6 +1,6 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.enums import Activation
-from neuralogic.core.constructs.factories import R, V
+from neuralogic.core.constructs.function import Transformation
+from neuralogic.core.constructs.factories import R
 from neuralogic.nn.module.module import Module
 
 
@@ -28,15 +28,15 @@ class Linear(Module):
 
     .. code:: logtalk
 
-        (R.h1(V.X0)[2, 1] <= R.h0(V.X0)) | [Activation.IDENTITY]
-        R.h1 / 1 | [Activation.IDENTITY]
+        (R.h1(V.X0)[2, 1] <= R.h0(V.X0)) | [Transformation.IDENTITY]
+        R.h1 / 1 | [Transformation.IDENTITY]
 
-    Module parametrized as :code:`Linear(1, 2, "h1", "h0", Activation.SIGMOID, 2)` translates into:
+    Module parametrized as :code:`Linear(1, 2, "h1", "h0", Transformation.SIGMOID, 2)` translates into:
 
     .. code:: logtalk
 
-        (R.h1(V.X0, V.X1)[2, 1] <= R.h0(V.X0, V.X1)) | [Activation.IDENTITY]
-        R.h1 / 2 | [Activation.SIGMOID]
+        (R.h1(V.X0, V.X1)[2, 1] <= R.h0(V.X0, V.X1)) | [Transformation.IDENTITY]
+        R.h1 / 2 | [Transformation.SIGMOID]
 
     Parameters
     ----------
@@ -49,9 +49,9 @@ class Linear(Module):
         Output (head) predicate name of the module.
     input_name : str
         Input name.
-    activation : Activation
+    activation : Transformation
         Activation function of the output.
-        Default: ``Activation.IDENTITY``
+        Default: ``Transformation.IDENTITY``
     arity : int
         Arity of the input and output predicate. Default: ``1``
     """
@@ -62,7 +62,7 @@ class Linear(Module):
         out_channels: int,
         output_name: str,
         input_name: str,
-        activation: Activation = Activation.IDENTITY,
+        activation: Transformation = Transformation.IDENTITY,
         arity: int = 1,
     ):
         self.output_name = output_name
@@ -79,6 +79,6 @@ class Linear(Module):
         head = R.get(self.output_name)(terms)[self.out_channels, self.in_channels]
 
         return [
-            (head <= R.get(self.input_name)(terms)) | [Activation.IDENTITY],
-            R.get(self.output_name) / len(terms) | Metadata(activation=self.activation),
+            (head <= R.get(self.input_name)(terms)) | [Transformation.IDENTITY],
+            R.get(self.output_name) / len(terms) | Metadata(transformation=self.activation),
         ]
