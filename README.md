@@ -129,20 +129,14 @@ In case you want to use visualization provided in the library, it is required to
 <br />
 
 
-## 🦓 Predefined Modules
+## 📦 Predefined Modules
 
 PyNeuraLogic has a set of predefined modules to get you quickly started with your experimenting!
-
 It contains, for example, predefined modules for:
 
-- GCNConv
-- SAGEConv
-- GINConv
-- RGCNConv
-- TAGConv
-- GATv2Conv
-- SGConv
-- [...and more!](https://pyneuralogic.readthedocs.io/en/latest/zoo.html)
+- Graph Neural Networks (GNNConv, SAGEConv, GINConv, RGCNConv, ...)
+- Meta graphs and meta paths (MetaConv, MAGNN, ...)
+- LSTM, GRU, RNN, [...and more!](https://pyneuralogic.readthedocs.io/en/latest/zoo.html)
 
 ## 📝 Papers
 
