@@ -74,14 +74,14 @@ and the model itself (e.g., initialization of the learnable parameters).
 
 .. code-block:: Python
 
-    from neuralogic.core import Settings, Optimizer, Initializer
+    from neuralogic.core import Settings, Initializer
     from neuralogic.nn.init import Uniform
+    from neuralogic.optim import SGD
 
 
     Settings(
         initializer=Uniform(),
-        optimizer=Optimizer.SGD,
-        learning_rate=0.1,
+        optimizer=SGD(lr=0.1),
         epochs=100,
     )
 

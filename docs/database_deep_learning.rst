@@ -157,10 +157,11 @@ to train the model on our dataset.
     from neuralogic.core import Settings, Optimizer
     from neuralogic.nn.init import Glorot
     from neuralogic.nn.loss import CrossEntropy
+    from neuralogic.optim import Adam
 
 
     settings = Settings(
-        optimizer=Optimizer.ADAM, epochs=2000, initializer=Glorot(), error_function=CrossEntropy(with_logits=False)
+        optimizer=Adam(), epochs=2000, initializer=Glorot(), error_function=CrossEntropy(with_logits=False)
     )
 
     neuralogic_evaluator = get_evaluator(template, settings)

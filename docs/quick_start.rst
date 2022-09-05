@@ -141,9 +141,10 @@ We do that by calling the :code:`build` method.
 
 .. code-block:: Python
 
-    from neuralogic.core import Settings, Optimizer
+    from neuralogic.core import Settings
+    from neuralogic.optim import SGD
 
-    settings = Settings(learning_rate=0.01, optimizer=Optimizer.SGD, epochs=100)
+    settings = Settings(optimizer=SGD(lr=0.01), epochs=100)
     model = template.build(Settings())
 
 
@@ -167,10 +168,11 @@ evaluation. Evaluators can then be customized via various settings wrapped in th
 .. code-block:: Python
 
     from neuralogic.nn import get_evaluator
-    from neuralogic.core import Settings, Optimizer
+    from neuralogic.core import Settings
+    from neuralogic.optim import SGD
 
 
-    settings = Settings(learning_rate=0.01, optimizer=Optimizer.SGD, epochs=100)
+    settings = Settings(optimizer=SGD(lr=0.01), epochs=100)
     evaluator = get_evaluator(template, settings)
 
     built_dataset = evaluator.build_dataset(dataset)
