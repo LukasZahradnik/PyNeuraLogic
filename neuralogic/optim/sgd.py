@@ -18,4 +18,4 @@ class SGD(Optimizer):
         return sgd_class(lr)
 
     def __str__(self) -> str:
-        return f"SGD({self.lr=})".replace("self.", "")
+        return f"SGD(lr={self.lr})"

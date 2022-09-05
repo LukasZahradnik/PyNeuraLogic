@@ -33,4 +33,4 @@ class Adam(Optimizer):
         return self._betas == (0.9, 0.999) and self._eps == 1e-08
 
     def __str__(self) -> str:
-        return f"Adam({self.lr=}, {self.betas=}, {self.eps=})".replace("self.", "")
+        return f"Adam(lr={self.lr}, betas={self.betas}, eps={self.eps})"
