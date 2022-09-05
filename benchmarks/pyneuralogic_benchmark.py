@@ -6,7 +6,6 @@ from benchmarks.helpers import Task
 from neuralogic.core import (
     Template,
     Settings,
-    Optimizer,
     R,
     V,
     Transformation,
@@ -15,6 +14,7 @@ from neuralogic.core import (
 from neuralogic.nn.init import Glorot
 from neuralogic.nn.loss import CrossEntropy
 from neuralogic.dataset import TensorDataset, Data
+from neuralogic.optim import Adam
 
 
 def gcn(activation: Transformation, output_size: int, num_features: int, dim: int = 10):
@@ -149,7 +149,7 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
     loss_fn = CrossEntropy()
     activation = Transformation.SIGMOID
 
-    settings = Settings(optimizer=Optimizer.ADAM, error_function=loss_fn, learning_rate=1e-3, initializer=Glorot())
+    settings = Settings(optimizer=Adam(1e-3), error_function=loss_fn, initializer=Glorot())
 
     ds = TUDataset(root=dataset_loc, name=dataset)
 

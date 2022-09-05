@@ -5,8 +5,9 @@ import pytest
 
 from neuralogic import manual_seed
 from neuralogic.nn import get_evaluator
-from neuralogic.core import Backend, Settings, Optimizer, R, V, Template, Transformation
+from neuralogic.core import Backend, Settings, R, V, Template, Transformation
 from neuralogic.dataset import Dataset
+from neuralogic.optim import SGD
 
 
 @pytest.mark.parametrize(
@@ -104,7 +105,7 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
         R.xor[0.0], R.xor[1.0], R.xor[1.0], R.xor[0.0],
     ])
 
-    settings = Settings(optimizer=Optimizer.SGD, epochs=300)
+    settings = Settings(optimizer=SGD(), epochs=300)
     neuralogic_evaluator = get_evaluator(template, settings, Backend.JAVA)
 
     # Train on the dataset with two var input

@@ -25,6 +25,18 @@ class NeuraLogic(AbstractNeuraLogic):
 
         self.neural_model = model
         self.strategy = python_strategy(settings.settings, model)
+
+        optimizer = self.settings.optimizer
+
+        if not optimizer.is_default():
+            trainer_field = self.strategy.getClass().getDeclaredField("trainer")
+            trainer_field.setAccessible(True)
+            trainer = trainer_field.get(self.strategy)
+
+            optimizer_field = trainer.getClass().getSuperclass().getDeclaredField("optimizer")
+            optimizer_field.setAccessible(True)
+            optimizer_field.set(trainer, optimizer.get())
+
         self.samples_len = 0
         self.number_format = self.settings.settings_class.superDetailedNumberFormat
 

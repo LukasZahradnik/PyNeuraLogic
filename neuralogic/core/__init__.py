@@ -3,7 +3,7 @@ from neuralogic.core.template import Template
 from neuralogic.core.builder import BuiltDataset
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.settings import Settings, SettingsProxy
-from neuralogic.core.enums import Optimizer, Backend
+from neuralogic.core.enums import Backend
 from neuralogic.core.constructs.function import Transformation, Aggregation, Combination
 
 
@@ -19,7 +19,6 @@ __all__ = [
     "Transformation",
     "Aggregation",
     "Combination",
-    "Optimizer",
     "Backend",
     "Settings",
     "SettingsProxy",

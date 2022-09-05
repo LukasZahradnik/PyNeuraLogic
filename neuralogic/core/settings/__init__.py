@@ -4,15 +4,15 @@ import weakref
 from neuralogic.nn.init import Initializer, Uniform
 from neuralogic.nn.loss import MSE, ErrorFunction
 from neuralogic.core.settings.settings_proxy import SettingsProxy
-from neuralogic.core.enums import Optimizer
 from neuralogic.core.constructs.function import Transformation, Combination
+from neuralogic.optim import Optimizer, Adam
 
 
 class Settings:
     def __init__(
         self,
         *,
-        optimizer: Optimizer = Optimizer.ADAM,
+        optimizer: Optimizer = Adam(),
         learning_rate: Optional[float] = None,
         epochs: int = 3000,
         error_function: ErrorFunction = MSE(),
@@ -27,9 +27,6 @@ class Settings:
         self.params = locals().copy()
         self.params.pop("self")
         self._proxies: weakref.WeakSet[SettingsProxy] = weakref.WeakSet()
-
-        if learning_rate is None:
-            self.params["learning_rate"] = 0.1 if optimizer == Optimizer.SGD else 0.001
 
     @property
     def iso_value_compression(self) -> bool:
@@ -46,14 +43,6 @@ class Settings:
     @chain_pruning.setter
     def chain_pruning(self, chain_pruning: bool):
         self._update("chain_pruning", chain_pruning)
-
-    @property
-    def learning_rate(self) -> float:
-        return self.params["learning_rate"]
-
-    @learning_rate.setter
-    def learning_rate(self, learning_rate: float):
-        self._update("learning_rate", learning_rate)
 
     @property
     def optimizer(self) -> Optimizer:

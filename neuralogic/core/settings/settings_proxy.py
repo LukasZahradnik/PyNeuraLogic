@@ -3,9 +3,9 @@ import jpype
 import neuralogic
 from neuralogic import is_initialized, initialize
 from neuralogic.core.constructs.function import Transformation, Combination
-from neuralogic.core.enums import Optimizer
 from neuralogic.nn.init import Initializer
 from neuralogic.nn.loss import MSE, SoftEntropy, CrossEntropy, ErrorFunction
+from neuralogic.optim import Optimizer
 
 
 class SettingsProxy:
@@ -29,6 +29,8 @@ class SettingsProxy:
 
         self.settings_class = jpype.JClass("cz.cvut.fel.ida.setup.Settings")
         self.settings = self.settings_class()
+
+        self._optimizer = optimizer
 
         params = locals().copy()
         params.pop("self")
@@ -65,26 +67,21 @@ class SettingsProxy:
         self.settings.chainPruning = chain_pruning
 
     @property
-    def learning_rate(self) -> float:
-        return self.settings.initLearningRate
-
-    @learning_rate.setter
-    def learning_rate(self, learning_rate: float):
-        self.settings.initLearningRate = learning_rate
-
-    @property
-    def optimizer(self):
-        return self.settings.getOptimizer()
+    def optimizer(self) -> Optimizer:
+        return self._optimizer
 
     @optimizer.setter
     def optimizer(self, optimizer: Optimizer):
-        if optimizer == Optimizer.SGD:
+        if optimizer.name() == "SGD":
             java_optimizer = self.settings_class.OptimizerSet.SGD
-        elif optimizer == Optimizer.ADAM:
+        elif optimizer.name() == "Adam":
             java_optimizer = self.settings_class.OptimizerSet.ADAM
         else:
             raise NotImplementedError
+
+        self._optimizer = optimizer
         self.settings.setOptimizer(java_optimizer)
+        self.settings.initLearningRate = optimizer.lr
 
     @property
     def initializer_const(self):

@@ -1,10 +1,11 @@
 from examples.datasets.vectorized_xor import template, dataset
 
 from neuralogic.nn import get_evaluator
-from neuralogic.core import Backend, Settings, Optimizer
+from neuralogic.core import Backend, Settings
+from neuralogic.optim import SGD
 
 
-settings = Settings(optimizer=Optimizer.SGD, epochs=300)
+settings = Settings(optimizer=SGD(), epochs=300)
 neuralogic_evaluator = get_evaluator(template, settings, Backend.JAVA)
 
 printouts = 10
@@ -15,5 +16,5 @@ for epoch, (total_loss, seen_instances) in enumerate(neuralogic_evaluator.train(
             f"Epoch {epoch}, total loss: {total_loss}, instances: {seen_instances}, average loss {total_loss / seen_instances}"
         )
 
-for label, predicted in neuralogic_evaluator.test(dataset):
-    print(f"Label: {label}, predicted: {predicted}")
+for predicted in neuralogic_evaluator.test(dataset):
+    print(f"Predicted: {predicted}")

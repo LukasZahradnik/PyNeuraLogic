@@ -1,9 +1,10 @@
 from typing import Dict, Any
 
-from neuralogic.core import Settings, Optimizer, Transformation
+from neuralogic.core import Settings, Transformation
 from neuralogic.core.constructs.function import Function
-from neuralogic.nn.init import Normal, Initializer, Uniform
+from neuralogic.nn.init import Initializer, Uniform
 from neuralogic.nn.loss import SoftEntropy, ErrorFunction
+from neuralogic.optim import SGD, Optimizer
 
 import pytest
 
@@ -12,8 +13,7 @@ import pytest
     "parameters",
     [
         {
-            "optimizer": Optimizer.SGD,
-            "learning_rate": 0.5,
+            "optimizer": SGD(0.5),
             "epochs": 100,
             "error_function": SoftEntropy(),
             "initializer": Uniform(5.0),
@@ -35,7 +35,7 @@ def test_settings_proxy_properties_setting(parameters: Dict[str, Any]) -> None:
 
         if isinstance(value, (int, float)):
             assert settings.__getattribute__(key) == settings_proxy.__getattribute__(key)
-        elif isinstance(settings.__getattribute__(key), (ErrorFunction, Initializer, Function)):
+        elif isinstance(settings.__getattribute__(key), (ErrorFunction, Initializer, Function, Optimizer)):
             assert str(settings.__getattribute__(key)) == str(settings_proxy.__getattribute__(key))
         else:
             assert settings.__getattribute__(key) == str(settings_proxy.__getattribute__(key))
@@ -50,7 +50,7 @@ def test_settings_proxy_properties_setting(parameters: Dict[str, Any]) -> None:
 
         if isinstance(value, (int, float)):
             assert settings.__getattribute__(key) == settings_proxy.__getattribute__(key)
-        elif isinstance(settings.__getattribute__(key), (ErrorFunction, Initializer, Function)):
+        elif isinstance(settings.__getattribute__(key), (ErrorFunction, Initializer, Function, Optimizer)):
             assert str(settings.__getattribute__(key)) == str(settings_proxy.__getattribute__(key))
         else:
             assert settings.__getattribute__(key) == str(settings_proxy.__getattribute__(key))

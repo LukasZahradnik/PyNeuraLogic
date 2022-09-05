@@ -9,13 +9,15 @@ from neuralogic.nn.base import AbstractEvaluator
 
 from neuralogic.core import Template, BuiltDataset
 from neuralogic.core.settings import Settings
-from neuralogic.core.enums import Backend, Optimizer
+from neuralogic.core.enums import Backend
 
 
 class TorchEvaluator(AbstractEvaluator):
     trainers = {
-        Optimizer.SGD: lambda param, rate: torch.optim.SGD(param, lr=rate),
-        Optimizer.ADAM: lambda param, rate: torch.optim.Adam(param, lr=rate),
+        "SGD": lambda param, optimizer: torch.optim.SGD(param, lr=optimizer.lr),
+        "Adam": lambda param, optimizer: torch.optim.Adam(
+            param, lr=optimizer.lr, betas=optimizer.betas, eps=optimizer.eps
+        ),
     }
 
     error_functions = {
@@ -37,14 +39,14 @@ class TorchEvaluator(AbstractEvaluator):
 
         epochs = self.settings.epochs
         error_function = str(self.settings.error_function)
-        optimizer = Optimizer[str(self.settings.optimizer)]
+        optimizer = self.settings.optimizer
 
-        if optimizer not in TorchEvaluator.trainers:
+        if optimizer.name() not in TorchEvaluator.trainers:
             raise NotImplementedError
         if error_function not in TorchEvaluator.error_functions:
             raise NotImplementedError
 
-        trainer = TorchEvaluator.trainers[optimizer](self.neuralogic_model.model, self.settings.learning_rate)
+        trainer = TorchEvaluator.trainers[optimizer.name()](self.neuralogic_model.model, optimizer)
         error_function = TorchEvaluator.error_functions[error_function]
 
         def _train():
