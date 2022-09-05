@@ -265,9 +265,11 @@ class JavaFactory:
                     value.rowOrientation = True
                 else:
                     try:
-                        matrix = [[float(w) for w in weights] for weights in weight]
-                        value = self.matrix_value(matrix)
-                    except TypeError:
+                        matrix = [float(w) for weights in weight for w in weights]
+                        value = self.matrix_value(matrix, len(weight), len(weight[0]))
+                    except TypeError as e:
+                        print(e)
+                        print(weight)
                         value = self.vector_value([float(w) for w in weight])
             else:
                 raise NotImplementedError
