@@ -47,6 +47,10 @@ def reverse(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation,
     return Transformation.REVERSE(entity)
 
 
+def log(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Transformation.LOG(entity)
+
+
 def identity(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
     return Transformation.IDENTITY(entity)
 

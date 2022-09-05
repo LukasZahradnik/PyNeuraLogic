@@ -28,6 +28,7 @@ class Transformation(Function):
     SQRT: "Transformation"
     INVERSE: "Transformation"
     REVERSE: "Transformation"
+    LOG: "Transformation"
 
     # Transformation
     IDENTITY: "Transformation"
