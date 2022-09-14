@@ -7,6 +7,56 @@ from neuralogic import is_initialized, initialize
 from neuralogic.core.settings import SettingsProxy, Settings
 
 
+class ValueFactory:
+    def __init__(self):
+        self.scalar_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.ScalarValue")
+        self.vector_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.VectorValue")
+        self.matrix_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.MatrixValue")
+
+    def get_value(self, weight):
+        if np.ndim(weight) == 0:
+            return True, self.scalar_value(float(weight))
+
+        if isinstance(weight, tuple):
+            if len(weight) == 1:
+                if weight[0] == 1:
+                    value = self.scalar_value()
+                else:
+                    value = self.vector_value(weight[0])
+            elif len(weight) == 2:
+                if weight[0] == 1:
+                    value = self.vector_value(weight[1], True)
+                elif weight[1] == 1:
+                    value = self.vector_value(weight[0], False)
+                else:
+                    value = self.matrix_value(weight[0], weight[1])
+            else:
+                raise NotImplementedError
+            return False, value
+
+        if isinstance(weight, (Sequence, np.ndarray)):
+            if len(weight) == 0:
+                raise NotImplementedError
+
+            if isinstance(weight[0], (int, float, np.number)):
+                vector = [float(w) for w in weight]
+                return True, self.vector_value(vector)
+
+            if isinstance(weight[0], (Sequence, np.ndarray)):
+                if len(weight) == 1:
+                    value = self.vector_value([float(w) for w in weight[0]])
+                    value.rowOrientation = True
+                else:
+                    try:
+                        matrix = [float(w) for weights in weight for w in weights]
+                        value = self.matrix_value(matrix, len(weight), len(weight[0]))
+                    except TypeError:
+                        value = self.vector_value([float(w) for w in weight])
+                return True, value
+
+        raise NotImplementedError
+
+
 class JavaFactory:
     def __init__(self, settings: Optional[SettingsProxy] = None):
         from neuralogic.core.constructs.rule import Rule
@@ -17,7 +67,10 @@ class JavaFactory:
 
         if settings is None:
             settings = Settings().create_proxy()
+
         self.settings = settings
+
+        self.value_factory = ValueFactory()
 
         self.weighted_atom_type = WeightedRelation
         self.rule_type = Rule
@@ -48,9 +101,6 @@ class JavaFactory:
         self.conjunction = jpype.JClass("cz.cvut.fel.ida.logic.constructs.Conjunction")
 
         self.string_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.StringValue")
-        self.scalar_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.ScalarValue")
-        self.vector_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.VectorValue")
-        self.matrix_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.MatrixValue")
 
         self.transformation = jpype.JClass("cz.cvut.fel.ida.algebra.functions.Transformation")
 
@@ -90,7 +140,7 @@ class JavaFactory:
 
         weight = None
         if isinstance(relation, self.weighted_atom_type):
-            weight = self.get_weight(relation.weight, relation.weight_name, relation.is_fixed or is_example)
+            weight = self.get_weight(relation.weight, relation.weight_name, relation.is_fixed)
         elif default_weight is not None:
             weight = self.get_weight(default_weight, None, True)
 
@@ -224,58 +274,11 @@ class JavaFactory:
         return self.predicate_factory.construct(predicate.name, predicate.arity, predicate.special, predicate.hidden)
 
     def get_weight(self, weight, name, fixed):
-        initialized, value = self.get_value(weight)
+        initialized, value = self.value_factory.get_value(weight)
 
         if name is None:
             return self.weight_factory.construct(value, fixed, initialized)
         return self.weight_factory.construct(name, value, fixed, initialized)
-
-    def get_value(self, weight):
-        if np.ndim(weight) == 0:
-            value = self.scalar_value(float(weight))
-            initialized = True
-        elif isinstance(weight, tuple):
-            if len(weight) == 1:
-                if weight[0] == 1:
-                    value = self.scalar_value()
-                else:
-                    value = self.vector_value(weight[0])
-            elif len(weight) == 2:
-                if weight[0] == 1:
-                    value = self.vector_value(weight[1])
-                    value.rowOrientation = True
-                elif weight[1] == 1:
-                    value = self.vector_value(weight[0])
-                    value.rowOrientation = False
-                else:
-                    value = self.matrix_value(weight[0], weight[1])
-            else:
-                raise NotImplementedError
-            initialized = False
-        elif isinstance(weight, (Sequence, np.ndarray)):
-            initialized = True
-            if len(weight) == 0:
-                raise NotImplementedError
-            if isinstance(weight[0], (int, float, np.number)):
-                vector = [float(w) for w in weight]
-                value = self.vector_value(vector)
-            elif isinstance(weight[0], (Sequence, np.ndarray)):
-                if len(weight) == 1:
-                    value = self.vector_value([float(w) for w in weight[0]])
-                    value.rowOrientation = True
-                else:
-                    try:
-                        matrix = [float(w) for weights in weight for w in weights]
-                        value = self.matrix_value(matrix, len(weight), len(weight[0]))
-                    except TypeError as e:
-                        print(e)
-                        print(weight)
-                        value = self.vector_value([float(w) for w in weight])
-            else:
-                raise NotImplementedError
-        else:
-            raise NotImplementedError
-        return initialized, value
 
     def get_new_weight_factory(self):
         return self.examples_builder(self.settings.settings).weightFactory
