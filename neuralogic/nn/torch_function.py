@@ -27,14 +27,13 @@ class _NeuraLogicFunction(Function):
 
         built_dataset = model.build_dataset(dataset)
         sample = built_dataset.samples[0]
-
         ctx.sample = sample
 
         return torch.tensor(model(sample, train=False), dtype=dtype, requires_grad=True)
 
     @staticmethod
     def backward(ctx, grad_output):
-        backproper, weight_updater = ctx.model.backprop(ctx.sample, grad_output.detach().numpy())
+        backproper, weight_updater = ctx.model.backprop(ctx.sample, -grad_output.detach().numpy())
         state_index = backproper.stateIndex
 
         mapping = ctx.mapping
@@ -43,8 +42,10 @@ class _NeuraLogicFunction(Function):
         dtype = ctx.dtype
 
         gradients = tuple(
-            torch.tensor(
-                json.loads(str(sample.get_fact(fact).getComputationView(-1).getGradient().toString(number_format))),
+            -torch.tensor(
+                json.loads(
+                    str(sample.get_fact(fact).getComputationView(state_index).getGradient().toString(number_format))
+                ),
                 dtype=dtype,
             ).reshape(input.shape)
             for fact, input in zip(mapping[0], ctx.inputs)
@@ -62,8 +63,8 @@ class NeuraLogic(nn.Module):
     def __init__(self, template: Template, to_logic: Callable, settings: Settings, dtype=torch.float32):
         super(NeuraLogic, self).__init__()
 
-        # settings.iso_value_compression = False
-        # settings.chain_pruning = False
+        settings.iso_value_compression = False
+        settings.chain_pruning = False
 
         self.model = template.build(settings)
         self.number_format = self.model.settings.settings_class.superDetailedNumberFormat
