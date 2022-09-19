@@ -26,7 +26,7 @@ class Uniform(Initializer):
     ----------
 
     scale : float
-        Scale of the distribution interval [-scale / 2, scale / 2]. Default: ``2``
+        Scale of the distribution interval ``[-scale / 2, scale / 2]``. Default: ``2``
 
     """
 
@@ -89,7 +89,7 @@ class Glorot(Initializer):
     ----------
 
     scale : float
-        Scale of a uniform distribution interval [-scale / 2, scale / 2]. Default: ``2``
+        Scale of a uniform distribution interval ``[-scale / 2, scale / 2]``. Default: ``2``
 
     """
 
@@ -117,7 +117,7 @@ class He(Initializer):
     ----------
 
     scale : float
-        Scale of a uniform distribution interval [-scale / 2, scale / 2]. Default: ``2``
+        Scale of a uniform distribution interval ``[-scale / 2, scale / 2]``. Default: ``2``
 
     """
 
@@ -135,3 +135,6 @@ class He(Initializer):
 
     def __str__(self):
         return InitializerNames.HE
+
+
+__all__ = ["Normal", "Uniform", "Constant", "Longtail", "Glorot", "He", "Initializer", "InitializerNames"]

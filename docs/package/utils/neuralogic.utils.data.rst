@@ -1,8 +1,5 @@
-neuralogic.utils.data package
-=============================
-
-Module contents
----------------
+neuralogic.utils.data
+=====================
 
 .. automodule:: neuralogic.utils.data
    :members:

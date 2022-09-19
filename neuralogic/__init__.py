@@ -55,15 +55,15 @@ def manual_seed(seed: int):
         _rnd_generator.setSeed(_seed)
 
 
-def set_jvm_options(options: List[str]) -> None:
+def set_jvm_options(options: List[str]):
     """
-    Set the jvm options - by default ["-Xms1g", "-Xmx64g"],
+    Set the jvm options - by default ``["-Xms1g"]``,
     """
     global jvm_options
     jvm_options = options
 
 
-def set_jvm_path(path: Optional[str]) -> None:
+def set_jvm_path(path: Optional[str]):
     global jvm_params
 
     if path is None:
