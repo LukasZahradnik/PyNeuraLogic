@@ -1,5 +1,5 @@
 
-name: Code quality checks
+name: Code Quality
 
 on:
   push:
