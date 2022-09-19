@@ -7,7 +7,7 @@ types. In PyNeuraLogic, we can easily encode instances of such heterogeneous gra
 and edges' classes out of the box.
 
 
-.. image:: _static/hetero_graph.svg
+.. image:: ../_static/hetero_graph.svg
     :width: 300
     :alt: Heterogeneous graph
     :align: center

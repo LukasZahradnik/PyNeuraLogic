@@ -22,8 +22,8 @@ PyNeuraLogic
     :caption: Beyond GNNs
     :hidden:
 
-    hypergraphs
-    heterophily
+    beyond/hypergraphs
+    beyond/heterophily
 
 
 .. toctree::

@@ -50,7 +50,7 @@ All that is needed to visualize the model - the template with current weights' v
     model.draw()
 
 
-.. image:: _static/template_render.png
+.. image:: ../_static/template_render.png
     :height: 350
     :alt: Template Rendered Graph
     :align: center
@@ -104,7 +104,7 @@ An example of drawing samples can be seen in the code below, where we render the
     built_dataset.samples[0].draw()
 
 
-.. image:: _static/sample_render.png
+.. image:: ../_static/sample_render.png
     :height: 350
     :alt: Sample Rendered Graph
     :align: center

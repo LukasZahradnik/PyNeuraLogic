@@ -12,7 +12,7 @@ When we encode input data (graph) in the form of logic data format (i.e., ground
 we can represent regular edges, for example, as :code:`Relation.edge(1, 2)`.
 
 
-.. image:: _static/hyper_graph.svg
+.. image:: ../_static/hyper_graph.svg
     :width: 300
     :alt: Hypergraph
     :align: center

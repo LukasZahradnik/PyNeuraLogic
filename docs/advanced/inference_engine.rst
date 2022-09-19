@@ -16,7 +16,7 @@ We have a network based on a part of the London Underground encoded as a directe
 
 |
 
-.. image:: _static/london.svg
+.. image:: ../_static/london.svg
     :height: 100
     :alt: London Underground
     :align: center
