@@ -58,6 +58,8 @@ class BaseRelation:
         return BaseRelation(predicate, terms, self.function)
 
     def __getitem__(self, item) -> "WeightedRelation":
+        if self.predicate.hidden or self.predicate.special:
+            raise ValueError(f"Special/Hidden relation {self} cannot have learnable parameters.")
         return WeightedRelation(item, self.predicate, False, self.terms, self.function)
 
     def __le__(self, other: Union[Iterable["BaseRelation"], "BaseRelation"]) -> rule.Rule:
