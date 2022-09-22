@@ -1,4 +1,4 @@
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Tuple
 
 import jpype
 
@@ -26,11 +26,7 @@ class InferenceEngine:
         self.examples: List[Union[BaseRelation, Rule]] = []
 
         self.grounder = jpype.JClass("cz.cvut.fel.ida.logic.grounding.Grounder").getGrounder(self.settings.settings)
-        field = self.grounder.getClass().getDeclaredField("herbrandModel")
-        field.setAccessible(True)
-
-        self.herbrand_model = field.get(self.grounder)
-
+        self.matching = jpype.JClass("cz.cvut.fel.ida.logic.subsumption.Matching")()
         self.examples_builder = jpype.JClass("cz.cvut.fel.ida.logic.constructs.building.ExamplesBuilder")
         self.queries_builder = jpype.JClass("cz.cvut.fel.ida.logic.constructs.building.QueriesBuilder")
         self.grounding_sample = jpype.JClass("cz.cvut.fel.ida.logic.grounding.GroundingSample")
@@ -92,19 +88,30 @@ class InferenceEngine:
         lifted_example = gs.query.evidence
         template = gs.template
 
-        self.grounder.groundRulesAndFacts(lifted_example, template)
+        ground_template = self.grounder.groundRulesAndFacts(lifted_example, template)
 
         clause = self.java_factory.atom_to_clause(query)
-        horn_clause = self.horn_clause(clause)
-        substitutions = self.herbrand_model.groundingSubstitutions(horn_clause)
+        name = str(query.predicate)
+        results = []
+        variables = [(index, term) for index, term in enumerate(query.terms) if str(term)[0].isupper()]
 
-        labels = list(substitutions.r)
-        substitutions_sets = list(substitutions.s)
+        self._get_substitutions(clause, name, variables, ground_template.groundRules, results)
+        self._get_substitutions(clause, name, variables, ground_template.groundFacts, results)
 
-        def generator():
-            for substitution_set in substitutions_sets:
-                yield {str(label): str(substitution) for label, substitution in zip(labels, substitution_set)}
-
-        if len(substitutions_sets) == 0:
+        if len(results) == 0:
             return {}
-        return generator()
+
+        if len(variables) == 0:
+            return iter([])
+
+        return results
+
+    def _get_substitutions(
+        self, clause, query_signature: str, variables: List[Tuple[int, str]], literals, substitutions: List
+    ):
+        for literal in literals:
+            if str(literal.predicate().toString()) == query_signature and self.matching.subsumption(
+                clause, self.java_factory.clause(literal)
+            ):
+                terms = literal.arguments()
+                substitutions.append({str(label): str(terms[index]) for index, label in variables})
