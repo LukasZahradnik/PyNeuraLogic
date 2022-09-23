@@ -70,13 +70,13 @@ class DatasetBuilder:
             self.query_counter += 1
         return logic_samples, one_query_per_example
 
-    def build_examples(self, examples, examples_builder):
+    def build_examples(self, examples, examples_builder, learnable_facts=False):
         logic_samples = []
         one = jpype.JClass("cz.cvut.fel.ida.algebra.values.ScalarValue")(1.0)
         examples_queries = False
 
         for example in examples:
-            label, lifted_example = self.java_factory.get_lifted_example(example)
+            label, lifted_example = self.java_factory.get_lifted_example(example, learnable_facts)
             example_query = False
 
             value = one
@@ -107,7 +107,12 @@ class DatasetBuilder:
         return logic_samples, examples_queries
 
     def build_dataset(
-        self, dataset: datasets.BaseDataset, backend: Backend, settings: SettingsProxy, file_mode: bool = False
+        self,
+        dataset: datasets.BaseDataset,
+        backend: Backend,
+        settings: SettingsProxy,
+        file_mode: bool = False,
+        learnable_facts: bool = False,
     ) -> BuiltDataset:
         """Builds the dataset (does grounding and neuralization) for this template instance and the backend
 
@@ -115,6 +120,7 @@ class DatasetBuilder:
         :param backend:
         :param settings:
         :param file_mode:
+        :param learnable_facts:
         :return:
         """
         if isinstance(dataset, datasets.TensorDataset):
@@ -153,7 +159,7 @@ class DatasetBuilder:
             settings._setup_random_generator()
 
             self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
-            examples, example_queries = self.build_examples(examples, examples_builder)
+            examples, example_queries = self.build_examples(examples, examples_builder, learnable_facts)
 
             self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
             queries, one_query_per_example = self.build_queries(queries, query_builder)

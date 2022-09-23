@@ -74,7 +74,7 @@ class NeuraLogic(nn.Module):
         self.number_format = self.model.settings.settings_class.superDetailedNumberFormat
 
         dataset = Dataset([input_facts], [output_relation])
-        self.sample = self.model.build_dataset(dataset).samples[0]
+        self.sample = self.model.build_dataset(dataset, learnable_facts=True).samples[0]
         self.value_factory = ValueFactory()
 
         self.internal_weights = nn.Parameter(torch.empty((0,)))

@@ -140,7 +140,7 @@ class JavaFactory:
 
         weight = None
         if isinstance(relation, self.weighted_atom_type):
-            weight = self.get_weight(relation.weight, relation.weight_name, relation.is_fixed)
+            weight = self.get_weight(relation.weight, relation.weight_name, relation.is_fixed or is_example)
         elif default_weight is not None:
             weight = self.get_weight(default_weight, None, True)
 
@@ -197,7 +197,7 @@ class JavaFactory:
             query.body, variable_factory, is_example=True
         )
 
-    def get_lifted_example(self, example):
+    def get_lifted_example(self, example, learnable_facts=False):
         conjunctions = []
         rules = []
         label_conjunction = None
@@ -207,10 +207,10 @@ class JavaFactory:
         if not isinstance(example, self.rule_type):
             if not isinstance(example, Iterable):
                 example = [example]
-            conjunctions.append(self.get_conjunction(example, variable_factory, is_example=True))
+            conjunctions.append(self.get_conjunction(example, variable_factory, is_example=not learnable_facts))
         else:
-            label_conjunction = self.get_conjunction([example.head], variable_factory, is_example=True)
-            conjunctions.append(self.get_conjunction(example.body, variable_factory, is_example=True))
+            label_conjunction = self.get_conjunction([example.head], variable_factory, is_example=not learnable_facts)
+            conjunctions.append(self.get_conjunction(example.body, variable_factory, is_example=not learnable_facts))
 
         lifted_example = self.lifted_example(jpype.java.util.ArrayList(conjunctions), jpype.java.util.ArrayList(rules))
         return label_conjunction, lifted_example
