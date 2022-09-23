@@ -34,11 +34,11 @@ class ValueFactory:
                 raise NotImplementedError
             return False, value
 
-        if isinstance(weight, (Sequence, np.ndarray)):
+        if isinstance(weight, (Sequence, np.ndarray, Iterable)):
             if len(weight) == 0:
                 raise NotImplementedError
 
-            if isinstance(weight[0], (int, float, np.number)):
+            if np.ndim(weight[0]) == 0:
                 vector = [float(w) for w in weight]
                 return True, self.vector_value(vector)
 
