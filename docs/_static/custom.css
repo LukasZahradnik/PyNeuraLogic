@@ -101,3 +101,7 @@ dl dd {
     font-weight: normal !important;
     color: #006aff !important;
 }
+
+.sig-return-icon {
+    padding-left: 4px;
+}

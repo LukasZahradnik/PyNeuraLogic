@@ -20,18 +20,29 @@ jvm_options = ["-Xms1g"]
 
 
 def set_max_memory_size(size: int):
-    """Set maximum memory size that can be utilized by the backend (in gigabytes)"""
+    """
+    Set maximum memory size that can be utilized by the backend (in gigabytes)
+
+    Parameters
+    ----------
+    size : int
+        The maximum memory size (in gigabytes)
+    """
     global _max_memory_size
     _max_memory_size = size
 
 
 def initial_seed() -> int:
-    """Returns the initial random seed for a random number generator used in the backend"""
+    """
+    Returns the initial/current random seed for a random number generator used in the backend.
+    """
     return _initial_seed
 
 
 def seed() -> int:
-    """Sets the seed for a random number generator used in the backend to a random seed and returns the seed."""
+    """
+    Sets the seed for a random number generator used in the backend to a random seed and returns the seed.
+    """
     global _seed
 
     _seed = int.from_bytes(os.urandom(4), byteorder="big")
@@ -45,7 +56,10 @@ def manual_seed(seed: int):
     """
     Sets the seed for a random number generator used in the backend to the passed ``seed``.
 
-    :param seed:
+    Parameters
+    ----------
+    seed : int
+        The seed for the random number generator.
     """
     global _seed
 
@@ -55,15 +69,28 @@ def manual_seed(seed: int):
         _rnd_generator.setSeed(_seed)
 
 
-def set_jvm_options(options: List[str]) -> None:
+def set_jvm_options(options: List[str]):
     """
-    Set the jvm options - by default ["-Xms1g", "-Xmx64g"],
+    Set the jvm options - by default ``["-Xms1g"]``.
+
+    Parameters
+    ----------
+    options : List[str]
+        List of JVM options
     """
     global jvm_options
     jvm_options = options
 
 
-def set_jvm_path(path: Optional[str]) -> None:
+def set_jvm_path(path: Optional[str]):
+    """
+    Set the JVM path.
+
+    Parameters
+    ----------
+    path : Optional[str]
+        The JVM path
+    """
     global jvm_params
 
     if path is None:
@@ -73,12 +100,30 @@ def set_jvm_path(path: Optional[str]) -> None:
 
 
 def is_initialized() -> bool:
+    """
+    Check whether the NeuraLogic backend has been initialized
+    """
     return _is_initialized
 
 
 def initialize(
     debug_mode: bool = False, debug_port: int = 12999, is_debug_server: bool = True, debug_suspend: bool = True
 ):
+    """
+    Initialize the NeuraLogic backend. This function is called implicitly when needed and should be called
+    manually only for debugging.
+
+    Parameters
+    ----------
+    debug_mode : bool
+        Enable/Disable JVM debug mode.
+    debug_port : int
+        Port for the debugger to listen on. Default: ``12999``.
+    is_debug_server : bool
+        Act like server and listen for the debugger. Default: ``True``
+    debug_suspend : bool
+        Wait until the debugger is connected. Default: ``True``
+    """
     global _is_initialized
 
     if _is_initialized:

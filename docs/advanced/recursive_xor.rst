@@ -66,7 +66,7 @@ The recursion, together with weights mapping, can be viewed in the template grap
     template.draw()
 
 
-.. image:: _static/recursive_template.png
+.. image:: ../_static/recursive_template.png
     :alt: Recursive Template
     :align: center
 
@@ -113,7 +113,7 @@ Once we build the training dataset, we can visualize each sample. For example, t
     built_dataset.samples[0].draw()
 
 
-.. image:: _static/recursive_xor2.png
+.. image:: ../_static/recursive_xor2.png
     :alt: Recursive Template
     :align: center
 
@@ -150,7 +150,7 @@ computation graphs (trees) with shared weights across depths.
     built_test_dataset.samples[0].draw()
 
 
-.. image:: _static/recursive_xor3.png
+.. image:: ../_static/recursive_xor3.png
     :alt: Recursive sample for the input xor(0, 0, 1)
     :align: center
 
@@ -160,7 +160,7 @@ computation graphs (trees) with shared weights across depths.
     built_test_dataset.samples[1].draw()
 
 
-.. image:: _static/recursive_xor4.png
+.. image:: ../_static/recursive_xor4.png
     :alt: Recursive sample for the input xor(1, 0, 1, 0)
     :align: center
 

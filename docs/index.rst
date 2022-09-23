@@ -22,8 +22,8 @@ PyNeuraLogic
     :caption: Beyond GNNs
     :hidden:
 
-    hypergraphs
-    heterophily
+    beyond/hypergraphs
+    beyond/heterophily
 
 
 .. toctree::
@@ -31,10 +31,14 @@ PyNeuraLogic
     :hidden:
 
     package/neuralogic
-    package/neuralogic.core
+    package/core/neuralogic.core
     package/neuralogic.dataset
-    package/neuralogic.nn
-    package/neuralogic.utils
+    package/neuralogic.db
+    package/neuralogic.inference
+    package/neuralogic.logging
+    package/nn/neuralogic.nn
+    package/neuralogic.optim
+    package/utils/neuralogic.utils
 
 
 

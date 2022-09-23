@@ -31,3 +31,6 @@ class SoftEntropy(ErrorFunction):
 
     def __str__(self):
         return ErrorFunctionNames.SOFTENTROPY
+
+
+__all__ = ["MSE", "CrossEntropy", "SoftEntropy", "ErrorFunction", "ErrorFunctionNames"]

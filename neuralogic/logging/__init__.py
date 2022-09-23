@@ -56,7 +56,7 @@ def add_handler(output, level: Level = Level.FINER, formatter: Formatter = Forma
     """
     Add logger handler for an insight into the java backend
 
-    :param output: File-like object (has write(text: str) method)
+    :param output: File-like object (has ``write(text: str)`` method)
     :param level: The logging level
     :param formatter: The log formatter
     """
@@ -94,3 +94,6 @@ def clear_handlers():
 
     for handler in root_logger.getHandlers():
         root_logger.removeHandler(handler)
+
+
+__all__ = ["add_handler", "clear_handlers", "Level", "Formatter", "TextIOWrapper"]

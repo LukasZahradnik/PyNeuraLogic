@@ -52,7 +52,7 @@ The special modifier changes the relation's behavior depending on its predicate 
     Relation.h(Var.X) <= (Relation.b(Var.Y, Var.Z), Relation.special.alldiff(...))
 
 
-
+- :code:`Relation.special.next`
 
 - :code:`Relation.special.anypred`
 

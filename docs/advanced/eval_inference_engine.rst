@@ -14,7 +14,7 @@ with a slight twist - we introduce weights to connections, representing either d
 
 |
 
-.. image:: _static/weighted_london.svg
+.. image:: ../_static/weighted_london.svg
     :height: 100
     :alt: London Underground with weighted routes
     :align: center

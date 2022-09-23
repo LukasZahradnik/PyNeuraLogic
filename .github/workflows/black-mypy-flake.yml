@@ -1,7 +1,11 @@
 
-name: Run black and mypy
+name: Code Quality
 
-on: [pull_request]
+on:
+  push:
+    branches: [ master, dev ]
+  pull_request:
+    branches: [ master, dev ]
 
 jobs:
   test:
@@ -19,6 +23,7 @@ jobs:
           cd /home/runner/work/PyNeuraLogic/PyNeuraLogic/
           pip install black
           pip install mypy
+          pip install flake8
 
-      - run: black --check .
-      - run: mypy
+      - run: black --check neuralogic
+      - run: flake8 neuralogic

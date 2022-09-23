@@ -26,9 +26,10 @@ class Uniform(Initializer):
     ----------
 
     scale : float
-        Scale of the distribution interval [-scale / 2, scale / 2]. Default: ``2``
+        Scale of the distribution interval ``[-scale / 2, scale / 2]``. Default: ``2``
 
     """
+
     def __init__(self, scale: float = 2):
         self.scale = scale
 
@@ -44,6 +45,7 @@ class Uniform(Initializer):
 
 class Normal(Initializer):
     r"""Initializes learnable parameters with random samples from a normal (Gaussian) distribution"""
+
     def __str__(self):
         return InitializerNames.NORMAL
 
@@ -58,6 +60,7 @@ class Constant(Initializer):
         Value to fill weights with. Default: ``0.1``
 
     """
+
     def __init__(self, value: float = 0.1):
         self.value = value
 
@@ -73,6 +76,7 @@ class Constant(Initializer):
 
 class Longtail(Initializer):
     """Initializes learnable parameters with random samples from a long tail distribution"""
+
     def __str__(self):
         return InitializerNames.LONGTAIL
 
@@ -85,9 +89,10 @@ class Glorot(Initializer):
     ----------
 
     scale : float
-        Scale of a uniform distribution interval [-scale / 2, scale / 2]. Default: ``2``
+        Scale of a uniform distribution interval ``[-scale / 2, scale / 2]``. Default: ``2``
 
     """
+
     def __init__(self, scale: float = 2):
         self.scale = scale
 
@@ -112,9 +117,10 @@ class He(Initializer):
     ----------
 
     scale : float
-        Scale of a uniform distribution interval [-scale / 2, scale / 2]. Default: ``2``
+        Scale of a uniform distribution interval ``[-scale / 2, scale / 2]``. Default: ``2``
 
     """
+
     def __init__(self, scale: float = 2):
         self.scale = scale
 
@@ -129,3 +135,6 @@ class He(Initializer):
 
     def __str__(self):
         return InitializerNames.HE
+
+
+__all__ = ["Normal", "Uniform", "Constant", "Longtail", "Glorot", "He", "Initializer", "InitializerNames"]

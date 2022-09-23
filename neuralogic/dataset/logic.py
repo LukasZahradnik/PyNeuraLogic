@@ -13,12 +13,14 @@ class Dataset(BaseDataset):
     PyNeuraLogic library.
 
     One learning sample consists of:
+
     * Example: A list of logic facts and rules representing some instance (e.g., a graph)
+
     * Query: A logic fact to mark the output of a model and optionally target label.
 
     Examples and queries in the dataset can be paired in the following ways:
 
-    * N:N - Dataset contains N examples and N queries. They will be paired by their index.
+    * :math:`N:N` - Dataset contains :math:`N` examples and :math:`N` queries. They will be paired by their index.
 
     .. code:: python
 
@@ -30,7 +32,7 @@ class Dataset(BaseDataset):
 
         # Learning samples: [first_example, first_query], [second_example, second_query]
 
-    * 1:N - Dataset contains 1 example and N queries. All queries will be run on the example.
+    * :math:`1:N` - Dataset contains :math:`1` example and :math:`N` queries. All queries will be run on the example.
 
     .. code:: python
 
@@ -41,8 +43,9 @@ class Dataset(BaseDataset):
 
         # Learning samples: [example, first_query], [example, second_query]
 
-    * N:M - Dataset contains N examples and M queries (N <= M). It pairs queries similarly to the N: N case but also
-      allows running multiple queries on a specific example (by inserting a list of queries instead of one query).
+    * :math:`N:M` - Dataset contains :math:`N` examples and :math:`M` queries (:math:`N \leq M`).
+      It pairs queries similarly to the :math:`N:N` case but also allows running multiple queries on a specific example
+      (by inserting a list of queries instead of one query).
 
     .. code:: python
 

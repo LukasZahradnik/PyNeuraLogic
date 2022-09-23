@@ -1,5 +1,5 @@
-neuralogic.core package
-=======================
+neuralogic.core
+===============
 
 Subpackages
 -----------
@@ -15,24 +15,24 @@ Submodules
 ----------
 
 
-neuralogic.core.enums module
-----------------------------
+neuralogic.core.enums
+---------------------
 
 .. automodule:: neuralogic.core.enums
    :members:
    :undoc-members:
    :show-inheritance:
 
-neuralogic.core.sources module
-------------------------------
+neuralogic.core.sources
+-----------------------
 
 .. automodule:: neuralogic.core.sources
    :members:
    :undoc-members:
    :show-inheritance:
 
-neuralogic.core.template module
--------------------------------
+neuralogic.core.template
+------------------------
 
 .. automodule:: neuralogic.core.template
    :members:

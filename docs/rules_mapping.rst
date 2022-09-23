@@ -164,7 +164,7 @@ In this case, there are no new operations to be discussed in the computational g
 
 
 Transformation and Aggregation functions
-************************************
+****************************************
 
 So far we focused solely on the `structure` of the computational graph, without specificying the indivudal operations/functions associated with the nodes. Let us now demonstrate how to customize these. For that, let is consider again the graph/template from the first (entry) example.
 

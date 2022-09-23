@@ -79,14 +79,14 @@ def test_inference_engine_london() -> None:
     assert len(substitutions) == 2 and len(substitutions[0]) == 1 and len(substitutions[1]) == 1
 
     # Run query for nearby(X, tottenham_court_road)
-    substitutions = list(engine.q(R.nearby(V.X, C.charing_cross)))
+    substitutions = sorted(engine.q(R.nearby(V.X, C.charing_cross)), key=lambda x: x["X"])
 
-    assert substitutions[0]["X"] == "piccadilly_circus"
-    assert substitutions[1]["X"] == "leicester_square"
-    assert substitutions[2]["X"] == "tottenham_court_road"
-    assert substitutions[3]["X"] == "green_park"
-    assert substitutions[4]["X"] == "bond_street"
-    assert substitutions[5]["X"] == "oxford_circus"
+    assert substitutions[0]["X"] == "bond_street"
+    assert substitutions[1]["X"] == "green_park"
+    assert substitutions[2]["X"] == "leicester_square"
+    assert substitutions[3]["X"] == "oxford_circus"
+    assert substitutions[4]["X"] == "piccadilly_circus"
+    assert substitutions[5]["X"] == "tottenham_court_road"
     assert len(substitutions) == 6 and len(substitutions[0]) == 1 and len(substitutions[1]) == 1
 
     # Run query for connected(X, leicester_square, Z)

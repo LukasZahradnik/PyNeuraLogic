@@ -39,7 +39,7 @@ First things first, get to know the data we work with. Our example database cont
 molecule has some attributes and is formed by various numbers of atoms. Atoms also have some attributes and can be in
 bond (connected) with another atom. Therefore, our database consists of three tables - *molecule*, *atom*, and *bond*.
 
-.. figure:: _static/mutagenesis_tables.svg
+.. figure:: ../_static/mutagenesis_tables.svg
     :width: 500
     :alt: Mutagenesis DB tables
     :align: center
@@ -55,7 +55,7 @@ relations? We have to define mappings according to our needs.
 For example, we would want to map each row of the *atom* table to the relation *R.atom* with *atom_id* and *molecule_id*
 fields as the relations' terms and the *charge* field as the relations' values.
 
-.. figure:: _static/mutagenesis_table_mapping.svg
+.. figure:: ../_static/mutagenesis_table_mapping.svg
     :width: 500
     :alt: Mapping DB table to PyNeuraLogic relations
     :align: center
@@ -231,7 +231,7 @@ It is as simple as making one select statement!
     SELECT * FROM neuralogic.mutagenic('d150');
 
 
-.. image:: _static/sql_query_result.svg
+.. image:: ../_static/sql_query_result.svg
     :width: 650
     :alt: The result of mutagenic('d150')
     :align: center
@@ -246,7 +246,7 @@ The evaluation is not limited only to one molecule id. It is possible to use a *
     SELECT * FROM neuralogic.mutagenic(NULL);
 
 
-.. image:: _static/sql_query_results.svg
+.. image:: ../_static/sql_query_results.svg
     :width: 650
     :alt: The results of mutagenic(NULL)
     :align: center
@@ -260,7 +260,7 @@ This means we can even inspect values of different layers, for example, the valu
 
     SELECT * FROM neuralogic.layer1('d15_11');
 
-.. image:: _static/sql_layer_query_result.svg
+.. image:: ../_static/sql_layer_query_result.svg
     :width: 650
     :alt: The results of layer1('d15_11')
     :align: center

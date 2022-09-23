@@ -5,6 +5,7 @@
 [![PyPI version](https://badge.fury.io/py/neuralogic.svg)](https://badge.fury.io/py/neuralogic)
 [![License](https://img.shields.io/pypi/l/neuralogic)](https://badge.fury.io/py/neuralogic)
 [![Tests Status](https://github.com/LukasZahradnik/PyNeuraLogic/actions/workflows/tests.yml/badge.svg)](https://github.com/LukasZahradnik/PyNeuraLogic/actions/workflows/tests.yml)
+[![Code Quality Status](https://github.com/LukasZahradnik/PyNeuraLogic/actions/workflows/black-mypy-flake.yml/badge.svg)](https://github.com/LukasZahradnik/PyNeuraLogic/actions/workflows/black-mypy-flake.yml)
 [![Documentation Status](https://readthedocs.org/projects/pyneuralogic/badge/?version=latest)](https://pyneuralogic.readthedocs.io/en/latest/?badge=latest)
 [![Tweet](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2FLukasZahradnik%2FPyNeuraLogic)](https://twitter.com/intent/tweet?text=Check%20out:&url=https%3A%2F%2Fgithub.com%2FLukasZahradnik%2FPyNeuraLogic)
 
@@ -12,9 +13,6 @@
 [Documentation](https://pyneuralogic.readthedocs.io/en/latest/) | [Examples](#-examples) | [Papers](#-papers)
 
 PyNeuraLogic lets you use Python to write **Differentiable Logic Programs**
-
-
-[comment]: <> (PyNeuraLogic is a framework built on top of [NeuraLogic]&#40;https://github.com/GustikS/NeuraLogic&#41; which combines relational and deep learning.)
 
 ---
 
@@ -25,7 +23,7 @@ Logic programming is a declarative coding paradigm in which you declare your log
 PyNeuralogic, through its [**NeuraLogic**](https://github.com/GustikS/NeuraLogic) backend, then makes this inference process _differentiable_ which, in turn, makes it equivalent to forward propagation in deep learning. This lets you learn numeric parameters that can be associated with the rules, just like you learn weights in neural networks.
 
 <p align="center">
-    <a href="https://pyneuralogic.readthedocs.io/en/latest/database_deep_learning.html">
+    <a href="https://pyneuralogic.readthedocs.io/en/latest/advanced/database_deep_learning.html">
         <img src="https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/docs/_static/sql_banner.svg" alt="SQL tutorial" title="SQL tutorial"/>
     </a>
 </p>
@@ -81,7 +79,7 @@ While PyNeuraLogic allows you to easily declare highly expressive models with ca
 <img src="https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/docs/_static/benchmark.svg" alt="Benchmark of PyNeuraLogic" title="Benchmark of PyNeuraLogic"/>
 </p>
 
-</br>
+<br>
 
 We hope you'll find the framework useful in designing _your own_ deep **relational** learning ideas beyond the GNNs!
 Please let us know if you need some guidance or would like to cooperate!
