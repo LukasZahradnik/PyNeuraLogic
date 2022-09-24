@@ -11,11 +11,11 @@ from neuralogic.core.constructs.rule import Rule
 
 
 class InferenceEngine:
-    def __init__(self, template: Template):
+    def __init__(self, template: Template, settings: Settings = None):
         if not is_initialized():
             initialize()
 
-        self.settings = Settings().create_disconnected_proxy()
+        self.settings = Settings().create_disconnected_proxy() if settings is None else settings.create_proxy()
         self.java_factory = JavaFactory()
 
         self.settings.settings.inferTemplateFacts = False

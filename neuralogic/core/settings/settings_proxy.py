@@ -3,6 +3,7 @@ import jpype
 import neuralogic
 from neuralogic import is_initialized, initialize
 from neuralogic.core.constructs.function import Transformation, Combination
+from neuralogic.core.enums import Grounder
 from neuralogic.nn.init import Initializer
 from neuralogic.nn.loss import MSE, SoftEntropy, CrossEntropy, ErrorFunction
 from neuralogic.optim import Optimizer
@@ -23,6 +24,7 @@ class SettingsProxy:
         relation_combination: Combination,
         iso_value_compression: bool,
         chain_pruning: bool,
+        grounder: Grounder,
     ):
         if not is_initialized():
             initialize()
@@ -65,6 +67,19 @@ class SettingsProxy:
     @chain_pruning.setter
     def chain_pruning(self, chain_pruning: bool):
         self.settings.chainPruning = chain_pruning
+
+    @property
+    def grounder(self):
+        return self.settings.grounding
+
+    @grounder.setter
+    def grounder(self, grounder: Grounder):
+        if grounder == Grounder.BUP:
+            self.settings.grounding = self.settings.GroundingAlgo.BUP
+        elif grounder == Grounder.GRINGO:
+            self.settings.grounding = self.settings.GroundingAlgo.GRINGO
+        else:
+            raise ValueError(f"Invalid grounder {grounder}")
 
     @property
     def optimizer(self) -> Optimizer:

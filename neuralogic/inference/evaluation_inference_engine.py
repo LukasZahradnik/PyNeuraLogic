@@ -8,8 +8,8 @@ from neuralogic.dataset import Dataset
 
 
 class EvaluationInferenceEngine:
-    def __init__(self, template: Template):
-        self.settings = Settings()
+    def __init__(self, template: Template, settings: Settings = None):
+        self.settings = Settings() if settings is None else settings
         self.model = template.build(self.settings)
 
         self.examples: List[Union[BaseRelation, Rule]] = []

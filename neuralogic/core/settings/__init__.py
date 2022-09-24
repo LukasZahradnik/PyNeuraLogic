@@ -1,6 +1,7 @@
 from typing import Any, Optional
 import weakref
 
+from neuralogic.core.enums import Grounder
 from neuralogic.nn.init import Initializer, Uniform
 from neuralogic.nn.loss import MSE, ErrorFunction
 from neuralogic.core.settings.settings_proxy import SettingsProxy
@@ -23,6 +24,7 @@ class Settings:
         relation_combination: Combination = Combination.SUM,
         iso_value_compression: bool = True,
         chain_pruning: bool = True,
+        grounder: Grounder = Grounder.BUP,
     ):
         self.params = locals().copy()
         self.params.pop("self")
@@ -43,6 +45,14 @@ class Settings:
     @chain_pruning.setter
     def chain_pruning(self, chain_pruning: bool):
         self._update("chain_pruning", chain_pruning)
+
+    @property
+    def grounder(self) -> Grounder:
+        return self.params["grounder"]
+
+    @grounder.setter
+    def grounder(self, grounder: Grounder):
+        self._update("grounder", grounder)
 
     @property
     def optimizer(self) -> Optimizer:
