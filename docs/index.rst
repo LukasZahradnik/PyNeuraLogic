@@ -114,17 +114,6 @@ We hope you'll find the framework useful in designing your own deep **relational
 Please let us know if you need some guidance or would like to cooperate!
 
 
-Supported backends
-******************
-
-Models defined in PyNeuraLogic can be built for and evaluated in different backends. Currently, you can pick and use
-the following backends, which, except for the Java backend, have to be additionally installed:
-
-- Java
-- `PyTorch <https://github.com/pytorch/pytorch>`_
-- `DyNet <https://github.com/clab/dynet>`_
-
-
 Examples
 ********
 

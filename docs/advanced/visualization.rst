@@ -41,11 +41,11 @@ All that is needed to visualize the model - the template with current weights' v
 .. code-block:: Python
 
     from neuralogic.utils.data import XOR_Vectorized
-    from neuralogic.core import Settings, Backend
+    from neuralogic.core import Settings
 
 
     template, dataset = XOR_Vectorized()
-    model = template.build(Backend.JAVA, Settings())
+    model = template.build(Settings())
 
     model.draw()
 

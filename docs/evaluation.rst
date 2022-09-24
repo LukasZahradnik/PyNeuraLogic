@@ -10,7 +10,7 @@ The 'compilation' is done in two steps. Firstly, we retrieve a model instance fo
 
 .. code-block:: Python
 
-    from neuralogic.core import Backend, Settings
+    from neuralogic.core import Settings
 
     settings = Settings()
     model = template.build(settings)
@@ -53,7 +53,7 @@ Writing custom training loops and handling different backends can be cumbersome 
     from neuralogic.nn import get_evaluator
 
 
-    evaluator = get_evaluator(template, settings, Backend.JAVA)
+    evaluator = get_evaluator(template, settings)
 
 
 Once you have an evaluator, you can evaluate or train the model on a dataset. The dataset doesn't have to be pre-built, as in the case of classical evaluation - the evaluator handles that for you.
