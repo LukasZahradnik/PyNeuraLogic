@@ -7,12 +7,11 @@ from neuralogic import is_initialized, initialize
 from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.nn.base import AbstractNeuraLogic
 from neuralogic.core.settings import SettingsProxy
-from neuralogic.core.enums import Backend
 
 
 class NeuraLogic(AbstractNeuraLogic):
     def __init__(self, model, dataset_builder, template, settings: SettingsProxy):
-        super().__init__(Backend.JAVA, dataset_builder, template, settings)
+        super().__init__(dataset_builder, template, settings)
 
         if not is_initialized():
             initialize()

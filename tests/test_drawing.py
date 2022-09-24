@@ -3,7 +3,7 @@ import sys
 from neuralogic.nn import get_evaluator
 from neuralogic.utils.visualize import draw_model, draw_sample
 from neuralogic.utils.data import XOR_Vectorized
-from neuralogic.core import Settings, Backend
+from neuralogic.core import Settings
 
 
 def test_draw_model():

@@ -2,21 +2,20 @@ from typing import Dict, Optional, Union, Callable, List
 
 from neuralogic.core.settings import Settings
 from neuralogic.core.builder import DatasetBuilder
-from neuralogic.core import Template, Backend, BuiltDataset, SettingsProxy
+from neuralogic.core import Template, BuiltDataset, SettingsProxy
 from neuralogic.dataset.base import BaseDataset
 
 from neuralogic.utils.visualize import draw_model
 
 
 class AbstractNeuraLogic:
-    def __init__(self, backend: Backend, dataset_builder: DatasetBuilder, template: Template, settings: SettingsProxy):
+    def __init__(self, dataset_builder: DatasetBuilder, template: Template, settings: SettingsProxy):
         self.need_sync = True
 
         self.source_template = [rule for rule in template.template]
         self.template = dataset_builder.parsed_template
         self.dataset_builder = dataset_builder
 
-        self.backend = backend
         self.settings = settings
 
         self.hooks_set = False
@@ -26,7 +25,7 @@ class AbstractNeuraLogic:
         raise NotImplementedError
 
     def build_dataset(self, dataset: BaseDataset, file_mode: bool = False, learnable_facts: bool = False):
-        return self.dataset_builder.build_dataset(dataset, self.backend, self.settings, file_mode, learnable_facts)
+        return self.dataset_builder.build_dataset(dataset, self.settings, file_mode, learnable_facts)
 
     def set_hooks(self, hooks):
         self.hooks_set = len(hooks) != 0
@@ -87,12 +86,11 @@ class AbstractNeuraLogic:
 
 
 class AbstractEvaluator:
-    def __init__(self, backend: Backend, template: Template, settings: Settings):
+    def __init__(self, template: Template, settings: Settings):
         self.settings = settings.create_proxy()
-        self.backend = backend
         self.dataset: Optional[BuiltDataset] = None
 
-        self.neuralogic_model = template.build(settings, backend)
+        self.neuralogic_model = template.build(settings)
         self.neuralogic_model.set_hooks(template.hooks)
 
     def set_dataset(self, dataset: Union[BaseDataset, BuiltDataset]):

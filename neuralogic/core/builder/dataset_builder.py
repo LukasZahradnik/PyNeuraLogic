@@ -7,7 +7,6 @@ import neuralogic.dataset as datasets
 from neuralogic import is_initialized, initialize
 from neuralogic.core.builder.builder import Builder
 from neuralogic.core.builder.components import BuiltDataset
-from neuralogic.core.enums import Backend
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.java_objects import JavaFactory
@@ -109,7 +108,6 @@ class DatasetBuilder:
     def build_dataset(
         self,
         dataset: datasets.BaseDataset,
-        backend: Backend,
         settings: SettingsProxy,
         file_mode: bool = False,
         learnable_facts: bool = False,
@@ -133,10 +131,10 @@ class DatasetBuilder:
                     q_tf.flush()
                     e_tf.flush()
 
-                    return self.build_dataset(datasets.FileDataset(e_tf.name, q_tf.name), backend, settings, False)
+                    return self.build_dataset(datasets.FileDataset(e_tf.name, q_tf.name), settings, False)
 
         if isinstance(dataset, datasets.ConvertableDataset):
-            return self.build_dataset(dataset.to_dataset(), backend, settings, False)
+            return self.build_dataset(dataset.to_dataset(), settings, False)
 
         if isinstance(dataset, datasets.Dataset):
             self.examples_counter = 0
@@ -169,7 +167,7 @@ class DatasetBuilder:
             )
             logic_samples = jpype.java.util.ArrayList(logic_samples).stream()
 
-            samples = Builder(settings).from_logic_samples(self.parsed_template, logic_samples, backend)
+            samples = Builder(settings).from_logic_samples(self.parsed_template, logic_samples)
 
             self.java_factory.weight_factory = weight_factory
         elif isinstance(dataset, datasets.FileDataset):
@@ -179,7 +177,7 @@ class DatasetBuilder:
             if dataset.examples_file is not None:
                 args.extend(["-e", dataset.examples_file])
             sources = Sources.from_args(args, settings)
-            samples = Builder(settings).from_sources(self.parsed_template, sources, backend)
+            samples = Builder(settings).from_sources(self.parsed_template, sources)
         else:
             raise NotImplementedError
 

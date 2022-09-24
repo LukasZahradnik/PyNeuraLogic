@@ -4,7 +4,6 @@ import jpype
 
 from neuralogic import is_initialized, initialize
 from neuralogic.core.builder import Builder, DatasetBuilder
-from neuralogic.core.enums import Backend
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.predicate import PredicateMetadata
@@ -135,16 +134,16 @@ class Template:
             deduplicated_template.append(entry)
         self.template = deduplicated_template
 
-    def build(self, settings: Settings, backend: Backend = Backend.JAVA):
+    def build(self, settings: Settings):
         from neuralogic.nn import get_neuralogic_layer
 
         java_factory = JavaFactory()
         settings_proxy = settings.create_proxy()
 
         parsed_template = self.get_parsed_template(settings_proxy, java_factory)
-        model = Builder(settings_proxy).build_model(parsed_template, backend, settings_proxy)
+        model = Builder(settings_proxy).build_model(parsed_template, settings_proxy)
 
-        return get_neuralogic_layer(backend)(model, DatasetBuilder(parsed_template, java_factory), self, settings_proxy)
+        return get_neuralogic_layer()(model, DatasetBuilder(parsed_template, java_factory), self, settings_proxy)
 
     def draw(
         self,
@@ -162,10 +161,8 @@ class Template:
         java_factory = JavaFactory()
 
         parsed_template = self.get_parsed_template(settings_proxy, java_factory)
-        model = Builder(settings_proxy).build_model(parsed_template, Backend.JAVA, settings_proxy)
-        layer = get_neuralogic_layer(Backend.JAVA)(
-            model, DatasetBuilder(parsed_template, java_factory), self, settings_proxy
-        )
+        model = Builder(settings_proxy).build_model(parsed_template, settings_proxy)
+        layer = get_neuralogic_layer()(model, DatasetBuilder(parsed_template, java_factory), self, settings_proxy)
 
         return draw_model(layer, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs)
 

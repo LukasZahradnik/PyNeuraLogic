@@ -2,7 +2,6 @@ from typing import Optional, Dict, Union
 
 import jpype
 
-from neuralogic.core.enums import Backend
 from neuralogic.core import Template, BuiltDataset
 from neuralogic.nn.base import AbstractEvaluator
 from neuralogic.core.settings import Settings
@@ -13,10 +12,10 @@ from neuralogic.dataset.base import BaseDataset
 class JavaEvaluator(AbstractEvaluator):
     def __init__(
         self,
-        problem: Optional[Template],
+        template: Optional[Template],
         settings: Settings,
     ):
-        super().__init__(Backend.JAVA, problem, settings)
+        super().__init__(template, settings)
 
     def set_dataset(self, dataset: Union[BaseDataset, BuiltDataset]):
         super().set_dataset(dataset)

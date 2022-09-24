@@ -1,12 +1,12 @@
 from examples.datasets.vectorized_xor import template, dataset
 
 from neuralogic.nn import get_evaluator
-from neuralogic.core import Backend, Settings
+from neuralogic.core import Settings
 from neuralogic.optim import SGD
 
 
 settings = Settings(optimizer=SGD(), epochs=300)
-neuralogic_evaluator = get_evaluator(template, settings, Backend.JAVA)
+neuralogic_evaluator = get_evaluator(template, settings)
 
 printouts = 10
 

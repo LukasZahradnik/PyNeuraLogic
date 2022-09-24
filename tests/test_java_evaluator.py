@@ -1,7 +1,7 @@
 from typing import List
 
 from neuralogic import manual_seed
-from neuralogic.core import Settings, Template, Backend
+from neuralogic.core import Settings, Template
 from neuralogic.dataset.base import BaseDataset
 from neuralogic.nn import get_evaluator
 from neuralogic.optim import SGD
@@ -250,7 +250,7 @@ def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expect
     manual_seed(0)
     settings = Settings(optimizer=SGD(0.1), epochs=50)
 
-    evaluator = get_evaluator(template, settings, Backend.JAVA)
+    evaluator = get_evaluator(template, settings)
 
     built_dataset = evaluator.build_dataset(dataset)
     evaluator.train(built_dataset, generator=False)
@@ -356,7 +356,7 @@ def test_evaluator_run_on_rules(template: Template, dataset: BaseDataset, expect
     manual_seed(0)
     settings = Settings(optimizer=SGD(lr=0.1), epochs=300)
 
-    evaluator = get_evaluator(template, settings, Backend.JAVA)
+    evaluator = get_evaluator(template, settings)
 
     built_dataset = evaluator.build_dataset(dataset)
     evaluator.train(built_dataset, generator=False)
@@ -381,7 +381,7 @@ def test_evaluator_state_loading(template: Template, dataset: BaseDataset) -> No
     """Tests for loading state"""
     settings = Settings(optimizer=SGD(0.1), epochs=20)
 
-    evaluator = get_evaluator(template, settings, Backend.JAVA)
+    evaluator = get_evaluator(template, settings)
     built_dataset = evaluator.build_dataset(dataset)
     evaluator.train(built_dataset, generator=False)
 
@@ -389,7 +389,7 @@ def test_evaluator_state_loading(template: Template, dataset: BaseDataset) -> No
     for predicted in evaluator.test(built_dataset):
         results.append(round(predicted, 5))
 
-    second_evaluator = get_evaluator(template, settings, Backend.JAVA)
+    second_evaluator = get_evaluator(template, settings)
     built_dataset = second_evaluator.build_dataset(dataset)
 
     second_results = []

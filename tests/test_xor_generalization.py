@@ -5,7 +5,7 @@ import pytest
 
 from neuralogic import manual_seed
 from neuralogic.nn import get_evaluator
-from neuralogic.core import Backend, Settings, R, V, Template, Transformation
+from neuralogic.core import Settings, R, V, Template, Transformation
 from neuralogic.dataset import Dataset
 from neuralogic.optim import SGD
 
@@ -43,7 +43,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
         epochs=5000, rule_transformation=Transformation.TANH, relation_transformation=Transformation.IDENTITY
     )
 
-    evaluator = get_evaluator(template, settings, Backend.JAVA)
+    evaluator = get_evaluator(template, settings)
     evaluator.train(dataset, generator=False)
 
     # build the dataset for n inputs
@@ -106,7 +106,7 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
     ])
 
     settings = Settings(optimizer=SGD(), epochs=300)
-    neuralogic_evaluator = get_evaluator(template, settings, Backend.JAVA)
+    neuralogic_evaluator = get_evaluator(template, settings)
 
     # Train on the dataset with two var input
     neuralogic_evaluator.train(dataset, generator=False)
