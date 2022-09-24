@@ -24,14 +24,14 @@ class RawSample:
         return None
 
     def get_fact(self, fact):
-        fact_str = fact.to_str()
+        fact_str = fact.predicate.to_str()
 
         if fact_str in self.fact_cache:
             return self.fact_cache[fact_str]
         return self._find_fact(fact_str)
 
     def set_fact_value(self, fact, value) -> int:
-        fact_str = fact.to_str()
+        fact_str = fact.predicate.to_str()
         sample_fact = self.fact_cache[fact_str] if fact_str in self.fact_cache else self._find_fact(fact_str)
         sample_fact.getRawState().setValue(value)
         sample_fact.offset.value = value

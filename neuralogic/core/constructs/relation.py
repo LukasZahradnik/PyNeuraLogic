@@ -111,8 +111,6 @@ class WeightedRelation(BaseRelation):
 
         if isinstance(weight, np.ndarray):
             self.weight = weight.tolist()
-        elif isinstance(weight, Iterable) and not isinstance(weight, tuple):
-            self.weight = list(weight)
 
     def fixed(self) -> "WeightedRelation":
         if self.is_fixed:

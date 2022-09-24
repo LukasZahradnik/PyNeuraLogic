@@ -1,5 +1,5 @@
 import json
-from typing import Callable, Any, List
+from typing import Callable, Any, List, Union
 
 import torch
 from torch import nn
@@ -7,6 +7,8 @@ from torch.autograd import Function
 
 from neuralogic.core import Template, Settings
 from neuralogic.core.constructs.java_objects import ValueFactory
+from neuralogic.core.constructs.relation import BaseRelation
+from neuralogic.core.constructs.rule import Rule
 from neuralogic.dataset import Dataset
 
 
@@ -19,8 +21,8 @@ class _NeuraLogicFunction(Function):
         ctx.dtype = dtype
         ctx.mapping = mapping
 
-        for fact, value in mapping.items():
-            sample.set_fact_value(fact, value_factory.get_value(value)[1])
+        for fact in mapping:
+            sample.set_fact_value(fact, value_factory.get_value(fact.weight)[1])
 
         return torch.tensor(model(sample, train=False), dtype=dtype, requires_grad=True)
 
@@ -40,9 +42,8 @@ class _NeuraLogicFunction(Function):
                     str(sample.get_fact(fact).getComputationView(state_index).getGradient().toString(number_format))
                 ),
                 dtype=dtype,
-                requires_grad=False,
-            ).reshape(input.shape)
-            for fact, input in ctx.mapping.items()
+            ).reshape(fact.weight.shape)
+            for fact in ctx.mapping
         )
 
         trainer = model.strategy.getTrainer()
@@ -56,14 +57,16 @@ class NeuraLogic(nn.Module):
     def __init__(
         self,
         template: Template,
-        input_facts: List,
-        output_relation,
+        input_facts: List[Union[BaseRelation, Rule]],
+        output_relation: BaseRelation,
         to_logic: Callable,
-        settings: Settings,
+        settings: Settings = None,
         dtype=torch.float32,
     ):
         super(NeuraLogic, self).__init__()
 
+        if settings is None:
+            settings = Settings()
         settings.iso_value_compression = False
         settings.chain_pruning = False
 
@@ -90,5 +93,5 @@ class NeuraLogic(nn.Module):
             self.model,
             self.number_format,
             self.dtype,
-            *(value for value in mapping.values()),
+            *(fact.weight for fact in mapping),
         )
