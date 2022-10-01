@@ -50,7 +50,7 @@ class _NeuraLogicFunction(Function):
         trainer.updateWeights(model.strategy.getCurrentModel(), weight_updater)
         trainer.invalidateSample(trainer.getInvalidation(), sample.java_sample)
 
-        return None, None, None, None, None, None, *gradients
+        return (None, None, None, None, None, None, *gradients)
 
 
 class NeuraLogic(nn.Module):
