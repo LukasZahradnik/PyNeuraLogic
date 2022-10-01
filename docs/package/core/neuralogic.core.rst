@@ -38,11 +38,3 @@ neuralogic.core.template
    :members:
    :undoc-members:
    :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: neuralogic.core
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -5,6 +5,7 @@ Advanced Usage
     :hidden:
     :maxdepth: 1
 
+    advanced/pytorch_integration
     advanced/heterogeneous
     advanced/database_deep_learning
     advanced/inference_engine
@@ -14,6 +15,8 @@ Advanced Usage
     advanced/recursive_xor
     advanced/java_settings_and_debugging
 
+* | :doc:`advanced/pytorch_integration`
+  | Use PyNeuraLogic in combination with the PyTorch 🔥 framework.
 
 * | :doc:`advanced/heterogeneous`
   | Learn how to represent heterogeneous graphs and possible ways to incorporate rules utilizing them into your templates.
