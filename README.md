@@ -50,7 +50,7 @@ to project your `[1,20]` input node embeddings ('message1') through a learnable 
 If you don't like the default settings, you can of course [specify](https://pyneuralogic.readthedocs.io/en/latest/language.html) various additional details, such as the particular aggregation and activation functions
 
 ```logtalk
-(R.message2(V.X)[5,10] <= (R.message1(V.Y)[10,20], R.edge(V.Y, V.X))) | [Activation.RELU, Aggregation.AVG]
+(R.message2(V.X)[5,10] <= (R.message1(V.Y)[10,20], R.edge(V.Y, V.X))) | [Transformation.RELU, Aggregation.AVG]
 ```
 
 to instantiate the classic GCN layer specification, which you can directly train now!
