@@ -65,7 +65,6 @@ class Combination(Function):
     # Combination
     PRODUCT: "Combination"
     ELPRODUCT: "Combination"
-    SOFTMAX: "Combination"
     SPARSEMAX: "Combination"
     CROSSSUM: "Combination"
     CONCAT: "Combination"
