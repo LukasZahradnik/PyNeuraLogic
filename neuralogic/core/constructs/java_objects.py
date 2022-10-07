@@ -52,13 +52,9 @@ class ValueFactory:
                         value = self.matrix_value(matrix, len(weight), len(weight[0]))
                     except TypeError:
                         value = self.vector_value([float(w) for w in weight])
-
-                    print(str(value.toString()))
-                    print(weight)
-
                 return True, value
 
-        raise NotImplementedError
+        raise ValueError(f"Cannot create weight from type {type(weight)}, value {weight}")
 
 
 class JavaFactory:
