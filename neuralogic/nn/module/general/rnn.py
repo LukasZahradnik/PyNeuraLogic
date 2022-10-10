@@ -25,9 +25,6 @@ class RNNCell(Module):
         Default: ``Transformation.TANH``
     arity : int
         Arity of the input and output predicate. Default: ``1``
-    next_name : str
-        Predicate name to get positive integer sequence from.
-        Default: ``_next__positive``
     """
 
     def __init__(
@@ -39,7 +36,6 @@ class RNNCell(Module):
         hidden_input_name: str,
         activation: Transformation = Transformation.TANH,
         arity: int = 1,
-        next_name: str = "_next__positive",
     ):
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -50,7 +46,6 @@ class RNNCell(Module):
 
         self.activation = activation
         self.arity = arity
-        self.next_name = next_name
 
     def __call__(self):
         terms = [f"X{i}" for i in range(self.arity)]
@@ -60,7 +55,7 @@ class RNNCell(Module):
         rnn_rule = output([*terms, V.T]) <= (
             R.get(self.input_name)(input_terms)[self.hidden_size, self.input_size],
             R.get(self.hidden_input_name)([*terms, V.Z])[self.hidden_size, self.hidden_size],
-            R.get(self.next_name)(V.Z, V.T),
+            R.special.next(V.Z, V.T),
         )
 
         return [
@@ -86,13 +81,12 @@ class RNN(Module):
         (R.<output_name>(<...terms>, V.T) <= (
             R.<input_name>(<...terms>, V.T)[<hidden_size>, <input_size>],
             R.<hidden_input_name>(<...terms>, V.Z)[<hidden_size>, <hidden_size>],
-            R.<next_name>(V.Z, V.T),
+            R.special.next(V.Z, V.T),
         )) | [<activation>]
 
         R.<output_name> / <arity> + 1 | [Transformation.IDENTITY]
 
-    Additionally, we define rules for the recursion purpose
-    (the positive integer sequence :code:`R.<next_name>(V.Z, V.T)`) and the "stop condition", that is:
+    Additionally, we define a rule for the "stop condition", that is:
 
     .. code:: logtalk
 
@@ -119,9 +113,6 @@ class RNN(Module):
         Default: ``Transformation.TANH``
     arity : int
         Arity of the input and output predicate. Default: ``1``
-    next_name : str
-        Predicate name to get positive integer sequence from.
-        Default: ``_next__positive``
     """
 
     def __init__(
@@ -134,7 +125,6 @@ class RNN(Module):
         hidden_0_name: str,
         activation: Transformation = Transformation.TANH,
         arity: int = 1,
-        next_name: str = "_next__positive",
     ):
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -146,7 +136,6 @@ class RNN(Module):
 
         self.activation = activation
         self.arity = arity
-        self.next_name = next_name
 
     def __call__(self):
         recursive_cell = RNNCell(
@@ -157,14 +146,11 @@ class RNN(Module):
             self.output_name,
             self.activation,
             self.arity,
-            self.next_name,
         )
 
-        next_relation = R.get(self.next_name)
         terms = [f"X{i}" for i in range(self.arity)]
 
         return [
-            *[next_relation(i, i + 1) for i in range(0, self.sequence_length)],
             (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Transformation.IDENTITY],
             *recursive_cell(),
         ]

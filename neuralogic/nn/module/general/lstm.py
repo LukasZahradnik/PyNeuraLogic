@@ -24,9 +24,6 @@ class LSTMCell(Module):
         Predicate name to get initial cell state from.
     arity : int
         Arity of the input and output predicate. Default: ``1``
-    next_name : str
-        Predicate name to get positive integer sequence from.
-        Default: ``_next__positive``
     """
 
     def __init__(
@@ -38,7 +35,6 @@ class LSTMCell(Module):
         hidden_input_name: str,
         cell_state_0_name: str,
         arity: int = 1,
-        next_name: str = "_next__positive",
     ):
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -49,7 +45,6 @@ class LSTMCell(Module):
         self.cell_state_0_name = cell_state_0_name
 
         self.arity = arity
-        self.next_name = next_name
 
     def __call__(self):
         terms = [f"X{i}" for i in range(self.arity)]
@@ -64,9 +59,8 @@ class LSTMCell(Module):
         c_left_name = f"{self.output_name}__left"
         c_right_name = f"{self.output_name}__right"
         c_name = f"{self.output_name}__c"
-        c_tanh_name = f"{self.output_name}__ctanh"
 
-        next_rel = R.get(self.next_name)(V.Z, V.T)
+        next_rel = R.special.next(V.Z, V.T)
 
         cell_args = [
             self.input_size,
@@ -76,7 +70,6 @@ class LSTMCell(Module):
             self.hidden_input_name,
             Transformation.SIGMOID,
             self.arity,
-            self.next_name,
         ]
 
         i = RNNCell(*cell_args)
@@ -94,8 +87,7 @@ class LSTMCell(Module):
         c_left = R.get(c_left_name)(t_terms) <= (R.get(f_name)(t_terms), R.get(c_name)(z_terms), next_rel)
         c_right = R.get(c_right_name)(t_terms) <= (R.get(i_name)(t_terms), R.get(g_name)(t_terms))
         c = R.get(c_name)(t_terms) <= (R.get(c_left_name)(t_terms), R.get(c_right_name)(t_terms))
-        c_tanh = R.get(c_tanh_name)(t_terms) <= (R.get(c_name)(t_terms))
-        h = R.get(self.output_name)(t_terms) <= (R.get(o_name)(t_terms), R.get(c_tanh_name)(t_terms))
+        h = R.get(self.output_name)(t_terms) <= (R.get(o_name)(t_terms), Transformation.TANH(R.get(c_name)(t_terms)))
 
         return [
             *i(),
@@ -109,8 +101,6 @@ class LSTMCell(Module):
             c | [Transformation.IDENTITY],
             (R.get(c_name)([*terms, 0]) <= R.get(self.cell_state_0_name)(terms)) | [Transformation.IDENTITY],
             c.head.predicate | [Transformation.IDENTITY],
-            c_tanh | [Transformation.TANH],
-            c_tanh.head.predicate | [Transformation.IDENTITY],
             h | [Transformation.IDENTITY, Combination.ELPRODUCT],
             h.head.predicate | [Transformation.IDENTITY],
         ]
@@ -164,9 +154,6 @@ class LSTM(Module):
         Predicate name to get initial cell state from.
     arity : int
         Arity of the input and output predicate. Default: ``1``
-    next_name : str
-        Predicate name to get positive integer sequence from.
-        Default: ``_next__positive``
     """
 
     def __init__(
@@ -179,7 +166,6 @@ class LSTM(Module):
         hidden_0_name: str,
         cell_state_0_name: str,
         arity: int = 1,
-        next_name: str = "_next__positive",
     ):
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -191,7 +177,6 @@ class LSTM(Module):
         self.cell_state_0_name = cell_state_0_name
 
         self.arity = arity
-        self.next_name = next_name
 
     def __call__(self):
         recursive_cell = LSTMCell(
@@ -202,14 +187,11 @@ class LSTM(Module):
             self.output_name,
             self.cell_state_0_name,
             self.arity,
-            self.next_name,
         )
 
-        next_relation = R.get(self.next_name)
         terms = [f"X{i}" for i in range(self.arity)]
 
         return [
-            *[next_relation(i, i + 1) for i in range(0, self.sequence_length)],
             (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Transformation.IDENTITY],
             *recursive_cell(),
         ]

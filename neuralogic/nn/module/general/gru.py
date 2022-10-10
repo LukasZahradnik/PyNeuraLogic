@@ -22,9 +22,6 @@ class GRUCell(Module):
         Predicate name to get hidden state from.
     arity : int
         Arity of the input and output predicate. Default: ``1``
-    next_name : str
-        Predicate name to get positive integer sequence from.
-        Default: ``_next__positive``
     """
 
     def __init__(
@@ -35,7 +32,6 @@ class GRUCell(Module):
         input_name: str,
         hidden_input_name: str,
         arity: int = 1,
-        next_name: str = "_next__positive",
     ):
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -45,7 +41,6 @@ class GRUCell(Module):
         self.hidden_input_name = hidden_input_name
 
         self.arity = arity
-        self.next_name = next_name
 
     def __call__(self):
         terms = [f"X{i}" for i in range(self.arity)]
@@ -57,12 +52,10 @@ class GRUCell(Module):
         z_name = f"{self.output_name}__z"
         n_name = f"{self.output_name}__n"
         n_helper_name = f"{self.output_name}__n_helper"
-        n_helper_weighted_name = f"{self.output_name}__n_helper_w"
-
         h_left_name = f"{self.output_name}__left"
         h_right_name = f"{self.output_name}__right"
 
-        next_rel = R.get(self.next_name)(V.Z, V.T)
+        next_rel = R.special.next(V.Z, V.T)
 
         r = RNNCell(
             self.input_size,
@@ -72,7 +65,6 @@ class GRUCell(Module):
             self.hidden_input_name,
             Transformation.SIGMOID,
             self.arity,
-            self.next_name,
         )
         z = RNNCell(
             self.input_size,
@@ -82,16 +74,11 @@ class GRUCell(Module):
             self.hidden_input_name,
             Transformation.SIGMOID,
             self.arity,
-            self.next_name,
         )
 
         h_weight = self.hidden_size, self.hidden_size
         n_helper = R.get(n_helper_name)(h_terms) <= (
             R.get(r_name)(h_terms),
-            R.get(n_helper_weighted_name)(h_terms),
-        )
-
-        n_helper_weighted = R.get(n_helper_weighted_name)(h_terms) <= (
             R.get(self.hidden_input_name)(p_terms)[h_weight],
             next_rel,
         )
@@ -113,8 +100,6 @@ class GRUCell(Module):
             *z(),
             n_helper | [Transformation.IDENTITY, Combination.ELPRODUCT],
             n_helper.head.predicate | [Transformation.IDENTITY],
-            n_helper_weighted | [Transformation.IDENTITY],
-            n_helper_weighted.head.predicate | [Transformation.IDENTITY],
             n | [Transformation.TANH],
             n.head.predicate | [Transformation.IDENTITY],
             h_left | [Transformation.IDENTITY, Combination.ELPRODUCT],
@@ -236,9 +221,6 @@ class GRU(Module):
         Predicate name to get initial hidden state from.
     arity : int
         Arity of the input and output predicate. Default: ``1``
-    next_name : str
-        Predicate name to get positive integer sequence from.
-        Default: ``_next__positive``
     """
 
     def __init__(
@@ -271,14 +253,11 @@ class GRU(Module):
             self.input_name,
             self.output_name,
             self.arity,
-            self.next_name,
         )
 
-        next_relation = R.get(self.next_name)
         terms = [f"X{i}" for i in range(self.arity)]
 
         return [
-            *[next_relation(i, i + 1) for i in range(0, self.sequence_length)],
             (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Transformation.IDENTITY],
             *recursive_cell(),
         ]

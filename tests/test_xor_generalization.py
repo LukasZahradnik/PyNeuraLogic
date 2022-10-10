@@ -26,9 +26,8 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
     dataset = Dataset()
     template = Template()
 
-    template += (R._next(a, b) for a, b in zip(range(max_number_of_max_vars - 1), range(1, max_number_of_max_vars)))
     template += R.xor_at(0) <= R.val_at(0)
-    template += R.xor_at(V.Y)["a":1, 8] <= (R.val_at(V.Y)["b":8, 1], R.xor_at(V.X)["c":8, 1], R._next(V.X, V.Y))
+    template += R.xor_at(V.Y)["a":1, 8] <= (R.val_at(V.Y)["b":8, 1], R.xor_at(V.X)["c":8, 1], R.special.next(V.X, V.Y))
 
     dataset.add_examples(
         [
