@@ -1,4 +1,5 @@
 import os
+import sys
 from enum import Enum
 from typing import List, Tuple
 
@@ -6,6 +7,7 @@ import jpype
 
 
 _is_logging_initialized = False
+_default_logging = True
 _loggers_buffer: List[Tuple] = []
 
 
@@ -47,6 +49,9 @@ def _init_logging():
     jpype.JClass("cz.cvut.fel.ida.logging.Logging").initLogging(jpype.JClass("cz.cvut.fel.ida.setup.Settings")())
     _is_logging_initialized = True
 
+    if _default_logging:
+        add_handler(sys.stdout, Level.SEVERE)
+
     for handler_settings in _loggers_buffer:
         add_handler(*handler_settings)
     _loggers_buffer.clear()
@@ -54,12 +59,15 @@ def _init_logging():
 
 def add_handler(output, level: Level = Level.FINER, formatter: Formatter = Formatter.COLOR):
     """
-    Add logger handler for an insight into the java backend
+    Add logger handler for an insight into the java backend. Overrides the default logger to stdout.
 
     :param output: File-like object (has ``write(text: str)`` method)
     :param level: The logging level
     :param formatter: The log formatter
     """
+    global _default_logging
+    _default_logging = False
+
     if not _is_logging_initialized:
         _loggers_buffer.append((output, level, formatter))
         return
@@ -86,6 +94,9 @@ def add_handler(output, level: Level = Level.FINER, formatter: Formatter = Forma
 
 def clear_handlers():
     """Clear all handlers"""
+    global _default_logging
+    _default_logging = False
+
     if not _is_logging_initialized:
         _loggers_buffer.clear()
         return
