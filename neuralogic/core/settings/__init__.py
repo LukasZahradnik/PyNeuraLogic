@@ -24,6 +24,7 @@ class Settings:
         relation_combination: Combination = Combination.SUM,
         iso_value_compression: bool = True,
         chain_pruning: bool = True,
+        prune_only_identities: bool = False,
         grounder: Grounder = Grounder.BUP,
     ):
         self.params = locals().copy()
@@ -45,6 +46,14 @@ class Settings:
     @chain_pruning.setter
     def chain_pruning(self, chain_pruning: bool):
         self._update("chain_pruning", chain_pruning)
+
+    @property
+    def prune_only_identities(self) -> bool:
+        return self.params["prune_only_identities"]
+
+    @prune_only_identities.setter
+    def prune_only_identities(self, prune_only_identities: bool):
+        self._update("prune_only_identities", prune_only_identities)
 
     @property
     def grounder(self) -> Grounder:

@@ -24,6 +24,7 @@ class SettingsProxy:
         relation_combination: Combination,
         iso_value_compression: bool,
         chain_pruning: bool,
+        prune_only_identities: bool,
         grounder: Grounder,
     ):
         if not is_initialized():
@@ -67,6 +68,14 @@ class SettingsProxy:
     @chain_pruning.setter
     def chain_pruning(self, chain_pruning: bool):
         self.settings.chainPruning = chain_pruning
+
+    @property
+    def prune_only_identities(self) -> bool:
+        return self.settings.pruneOnlyIdentities
+
+    @prune_only_identities.setter
+    def prune_only_identities(self, prune_only_identities: bool):
+        self.settings.pruneOnlyIdentities = prune_only_identities
 
     @property
     def grounder(self):
