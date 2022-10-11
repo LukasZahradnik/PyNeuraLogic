@@ -24,6 +24,18 @@ class AtomFactory:
         def __getattr__(self, item):
             return relation.BaseRelation(Predicate(item, 0, self.is_hidden, self.is_special))
 
+        def __call__(self, *args, **kwargs):
+            raise Exception(
+                "Cannot add terms to not fully initialized relation - 'special' and 'hidden' are keywords, "
+                "that cannot be used as a predicate name with dot notation (use `get` method instead)"
+            )
+
+        def __getitem__(self, item):
+            raise Exception(
+                "Cannot add terms to not fully initialized relation - 'special' and 'hidden' are keywords, "
+                "that cannot be used as a predicate name with dot notation (use `get` method instead)"
+            )
+
     def __init__(self):
         self.instances: Dict[str, Dict[int, relation.BaseRelation]] = {}
 
