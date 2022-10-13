@@ -197,8 +197,7 @@ class GRU(Module):
         )) | [Transformation.IDENTITY]
         R.<output_name> / <arity> + 1 | [Transformation.IDENTITY],
 
-    Additionally, we define rules for the recursion purpose
-    (the positive integer sequence :code:`R.<next_name>(V.Z, V.T)`) and the "stop condition", that is:
+    Additionally, we define a rule for the "stop condition", that is:
 
     .. code:: logtalk
 
@@ -211,8 +210,6 @@ class GRU(Module):
         Input feature size.
     hidden_size : int
         Output and hidden feature size.
-    sequence_length : int
-        Sequence length.
     output_name : str
         Output (head) predicate name of the module.
     input_name : str
@@ -227,7 +224,6 @@ class GRU(Module):
         self,
         input_size: int,
         hidden_size: int,
-        sequence_length: int,
         output_name: str,
         input_name: str,
         hidden_0_name: str,
@@ -236,7 +232,6 @@ class GRU(Module):
     ):
         self.input_size = input_size
         self.hidden_size = hidden_size
-        self.sequence_length = sequence_length
 
         self.output_name = output_name
         self.input_name = input_name

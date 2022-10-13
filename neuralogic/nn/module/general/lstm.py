@@ -81,7 +81,7 @@ class LSTMCell(Module):
         o = RNNCell(*cell_args)
 
         cell_args[2] = g_name
-        cell_args[-3] = Transformation.TANH
+        cell_args[-2] = Transformation.TANH
         g = RNNCell(*cell_args)
 
         c_left = R.get(c_left_name)(t_terms) <= (R.get(f_name)(t_terms), R.get(c_name)(z_terms), next_rel)
@@ -142,8 +142,6 @@ class LSTM(Module):
         Input feature size.
     hidden_size : int
         Output and hidden feature size.
-    sequence_length : int
-        Sequence length.
     output_name : str
         Output (head) predicate name of the module.
     input_name : str
@@ -160,7 +158,6 @@ class LSTM(Module):
         self,
         input_size: int,
         hidden_size: int,
-        sequence_length: int,
         output_name: str,
         input_name: str,
         hidden_0_name: str,
@@ -169,7 +166,6 @@ class LSTM(Module):
     ):
         self.input_size = input_size
         self.hidden_size = hidden_size
-        self.sequence_length = sequence_length
 
         self.output_name = output_name
         self.input_name = input_name

@@ -100,8 +100,6 @@ class RNN(Module):
         Input feature size.
     hidden_size : int
         Output and hidden feature size.
-    sequence_length : int
-        Sequence length.
     output_name : str
         Output (head) predicate name of the module.
     input_name : str
@@ -119,7 +117,6 @@ class RNN(Module):
         self,
         input_size: int,
         hidden_size: int,
-        sequence_length: int,
         output_name: str,
         input_name: str,
         hidden_0_name: str,
@@ -128,7 +125,6 @@ class RNN(Module):
     ):
         self.input_size = input_size
         self.hidden_size = hidden_size
-        self.sequence_length = sequence_length
 
         self.output_name = output_name
         self.input_name = input_name
