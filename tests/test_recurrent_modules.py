@@ -10,176 +10,179 @@ from neuralogic.nn.module import GRU, RNN, LSTM
 from neuralogic.optim import Adam
 
 
-def test_gru_module_forward():
-    """Test that PyNeuraLogic GRU layer computes the same as pytorch GRU layer"""
-    in_size = 1
-    steps = 1
-    hid_size = 1
-    layers = 1
-
-    rnn = torch.nn.GRU(in_size, hid_size, layers, bias=False)
-    torch_input = torch.randn(steps, in_size)
-
-    h0 = torch.tensor([[1.2023]])
-    output, _ = rnn(torch_input, h0)
-
-    template = Template()
-    template += GRU(in_size, hid_size, "h", "f", "h0", arity=0)
-
-    model = template.build(Settings(chain_pruning=False, iso_value_compression=False))
-
-    parameters = model.parameters()
-    torch_parameters = [parameter.tolist() for parameter in rnn.parameters()]
-
-    parameters["weights"][0] = torch_parameters[0][0]
-    parameters["weights"][2] = torch_parameters[0][1]
-    parameters["weights"][5] = torch_parameters[0][2]
-
-    parameters["weights"][1] = torch_parameters[1][0]
-    parameters["weights"][3] = torch_parameters[1][1]
-    parameters["weights"][4] = torch_parameters[1][2]
-
-    model.load_state_dict(parameters)
-
-    dataset = Dataset(
-        [[R.f(1)[float(torch_input[0][0])], R.h0[float(h0[0][0])]]],
-        [R.h(1)[[1]]],
-    )
-
-    bd = model.build_dataset(dataset)
-
-    result = model(bd.samples, train=False)
-    assert round(float(output[0][0]), 3) == round(result[0][0], 3)
-
-
-def test_rnn_module_forward():
-    """Test that PyNeuraLogic RNN layer computes the same as pytorch RNN layer"""
-    in_size = 1
-    hid_size = 1
-    steps = 1
-    layers = 1
-
-    rnn = torch.nn.RNN(in_size, hid_size, layers, bias=False)
-    torch_input = torch.randn(steps, in_size)
-
-    h0 = torch.tensor([[1.2023]])
-    output, _ = rnn(torch_input, h0)
-
-    template = Template()
-    template += RNN(in_size, hid_size, "h", "f", "h0", arity=0)
-
-    model = template.build(Settings(chain_pruning=False, iso_value_compression=False))
-
-    parameters = model.parameters()
-    torch_parameters = [parameter.tolist() for parameter in rnn.parameters()]
-
-    parameters["weights"][0] = torch_parameters[0]
-    parameters["weights"][1] = torch_parameters[1]
-
-    model.load_state_dict(parameters)
-
-    dataset = Dataset(
-        [[R.f(1)[float(torch_input[0][0])], R.h0[float(h0[0][0])]]],
-        [R.h(1)[[1]]],
-    )
-
-    bd = model.build_dataset(dataset)
-
-    result = model(bd.samples, train=False)
-    assert round(float(output[0][0]), 3) == round(result[0][0], 3)
-
-
-def test_lstm_module_forward():
-    """Test that PyNeuraLogic LSTM layer computes the same as pytorch LSTM layer"""
-    in_size = 1
-    hid_size = 1
-    steps = 1
-    layers = 1
-
-    rnn = torch.nn.LSTM(in_size, hid_size, layers, bias=False)
-    torch_input = torch.randn(steps, in_size)
-
-    h0 = torch.tensor([[1.2023]])
-    c0 = torch.tensor([[1.0123]])
-    output, _ = rnn(torch_input, (h0, c0))
-
-    template = Template()
-    template += LSTM(in_size, hid_size, "h", "f", "h0", "c0", arity=0)
-
-    model = template.build(Settings(chain_pruning=False, iso_value_compression=False))
-
-    parameters = model.parameters()
-    torch_parameters = [parameter.tolist() for parameter in rnn.parameters()]
-
-    parameters["weights"][0] = torch_parameters[0][0]
-    parameters["weights"][2] = torch_parameters[0][1]
-    parameters["weights"][4] = torch_parameters[0][3]
-    parameters["weights"][6] = torch_parameters[0][2]
-
-    parameters["weights"][1] = torch_parameters[1][0]
-    parameters["weights"][3] = torch_parameters[1][1]
-    parameters["weights"][5] = torch_parameters[1][3]
-    parameters["weights"][7] = torch_parameters[1][2]
-
-    model.load_state_dict(parameters)
-
-    dataset = Dataset(
-        [[R.f(1)[float(torch_input[0][0])], R.h0[float(h0[0][0])], R.c0[float(c0[0][0])]]],
-        [R.h(1)[[1]]],
-    )
-
-    bd = model.build_dataset(dataset)
-
-    result = model(bd.samples, train=False)
-    assert round(float(output[0][0]), 3) == round(result[0][0], 3)
-
-
 @pytest.mark.parametrize(
-    "error_fun, torch_error_fun, target, epochs",
+    "input_size, hidden_size, sequence_len, epochs",
     [
-        (MSE(), torch.nn.MSELoss, [1, 0.8, 0.5], 300),
+        (10, 5, 10, 500),
     ],
 )
-def test_rnn_module_bacprop(error_fun, torch_error_fun, target, epochs):
-    """Test that PyNeuraLogic RNN layer computes the same as pytorch RNN layer (with backprop)"""
-    in_size = 3
-    hid_size = 3
-    steps = 3
-    layers = 1
+def test_gru_module(input_size, hidden_size, sequence_len, epochs):
+    """Test that PyNeuraLogic GRU layer computes the same as PyTorch GRU layer (with backprop)"""
+    torch_input = torch.randn((sequence_len, input_size))
+    h0 = torch.randn((1, hidden_size))
+    target = torch.randn((hidden_size,))
 
-    torch_input = torch.randn((steps, in_size))
-    h0 = torch.randn((1, hid_size))
-
-    rnn = torch.nn.RNN(in_size, hid_size, layers, bias=False)
+    rnn = torch.nn.GRU(input_size, hidden_size, 1, bias=False)
 
     template = Template()
-    template += RNN(in_size, hid_size, "h", "f", "h0", arity=0)
+    template += GRU(input_size, hidden_size, "h", "f", "h0", arity=0)
 
     model = template.build(
-        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=error_fun)
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
     )
 
     parameters = model.parameters()
     torch_parameters = [parameter.tolist() for parameter in rnn.parameters()]
 
-    parameters["weights"][0] = torch_parameters[0]
-    parameters["weights"][1] = torch_parameters[1]
+    parameters["weights"][0] = [torch_parameters[0][i] for i in range(0, hidden_size)]
+    parameters["weights"][2] = [torch_parameters[0][i] for i in range(1 * hidden_size, 1 * hidden_size + hidden_size)]
+    parameters["weights"][5] = [torch_parameters[0][i] for i in range(2 * hidden_size, 2 * hidden_size + hidden_size)]
+
+    parameters["weights"][1] = [torch_parameters[1][i] for i in range(0, hidden_size)]
+    parameters["weights"][3] = [torch_parameters[1][i] for i in range(1 * hidden_size, 1 * hidden_size + hidden_size)]
+    parameters["weights"][4] = [torch_parameters[1][i] for i in range(2 * hidden_size, 2 * hidden_size + hidden_size)]
 
     model.load_state_dict(parameters)
 
     dataset = Dataset(
-        [[R.h0[[float(h) for h in h0[0]]], *[R.f(i + 1)[[float(h) for h in torch_input[i]]] for i in range(steps)]]],
-        [R.h(steps)[target]],
+        [
+            [
+                R.h0[[float(h) for h in h0[0]]],
+                *[R.f(i + 1)[[float(h) for h in torch_input[i]]] for i in range(sequence_len)],
+            ]
+        ],
+        [R.h(sequence_len)[target.detach().numpy().tolist()]],
     )
 
     bd = model.build_dataset(dataset)
 
     optimizer = torch.optim.Adam(rnn.parameters(), lr=0.001)
-    loss_fun = torch_error_fun()
+    loss_fun = torch.nn.MSELoss()
 
     for _ in range(epochs):
         output, _ = rnn(torch_input, h0)
-        loss = loss_fun(output[-1], torch.tensor(target))
+        loss = loss_fun(output[-1], target)
+
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+
+        result, _ = model(bd.samples)
+        assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
+
+
+@pytest.mark.parametrize(
+    "input_size, hidden_size, sequence_len, epochs",
+    [
+        (10, 5, 10, 500),
+    ],
+)
+def test_rnn_module(input_size, hidden_size, sequence_len, epochs):
+    """Test that PyNeuraLogic RNN layer computes the same as PyTorch RNN layer (with backprop)"""
+    torch_input = torch.randn((sequence_len, input_size))
+    h0 = torch.randn((1, hidden_size))
+    target = torch.randn((hidden_size,))
+
+    rnn = torch.nn.RNN(input_size, hidden_size, 1, bias=False)
+
+    template = Template()
+    template += RNN(input_size, hidden_size, "h", "f", "h0", arity=0)
+
+    model = template.build(
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
+    )
+
+    parameters = model.parameters()
+    torch_parameters = [parameter.tolist() for parameter in rnn.parameters()]
+
+    parameters["weights"][0] = torch_parameters[0]
+    parameters["weights"][1] = torch_parameters[1]
+
+    model.load_state_dict(parameters)
+
+    dataset = Dataset(
+        [
+            [
+                R.h0[[float(h) for h in h0[0]]],
+                *[R.f(i + 1)[[float(h) for h in torch_input[i]]] for i in range(sequence_len)],
+            ]
+        ],
+        [R.h(sequence_len)[target.detach().numpy().tolist()]],
+    )
+
+    bd = model.build_dataset(dataset)
+
+    optimizer = torch.optim.Adam(rnn.parameters(), lr=0.001)
+    loss_fun = torch.nn.MSELoss()
+
+    for _ in range(epochs):
+        output, _ = rnn(torch_input, h0)
+        loss = loss_fun(output[-1], target)
+
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+
+        result, _ = model(bd.samples)
+        assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
+
+
+@pytest.mark.parametrize(
+    "input_size, hidden_size, sequence_len, epochs",
+    [
+        (10, 5, 10, 500),
+    ],
+)
+def test_lstm_module(input_size, hidden_size, sequence_len, epochs):
+    """Test that PyNeuraLogic LSTM layer computes the same as PyTorch LSTM layer (with backprop)"""
+    torch_input = torch.randn((sequence_len, input_size))
+    h0 = torch.randn((1, hidden_size))
+    c0 = torch.randn((1, hidden_size))
+    target = torch.randn((hidden_size,))
+
+    rnn = torch.nn.LSTM(input_size, hidden_size, 1, bias=False)
+
+    template = Template()
+    template += LSTM(input_size, hidden_size, "h", "f", "h0", "c0", arity=0)
+
+    model = template.build(
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
+    )
+
+    parameters = model.parameters()
+    torch_parameters = [parameter.tolist() for parameter in rnn.parameters()]
+
+    parameters["weights"][0] = [torch_parameters[0][i] for i in range(0, hidden_size)]
+    parameters["weights"][2] = [torch_parameters[0][i] for i in range(1 * hidden_size, 1 * hidden_size + hidden_size)]
+    parameters["weights"][4] = [torch_parameters[0][i] for i in range(3 * hidden_size, 3 * hidden_size + hidden_size)]
+    parameters["weights"][6] = [torch_parameters[0][i] for i in range(2 * hidden_size, 2 * hidden_size + hidden_size)]
+
+    parameters["weights"][1] = [torch_parameters[1][i] for i in range(0, hidden_size)]
+    parameters["weights"][3] = [torch_parameters[1][i] for i in range(1 * hidden_size, 1 * hidden_size + hidden_size)]
+    parameters["weights"][5] = [torch_parameters[1][i] for i in range(3 * hidden_size, 3 * hidden_size + hidden_size)]
+    parameters["weights"][7] = [torch_parameters[1][i] for i in range(2 * hidden_size, 2 * hidden_size + hidden_size)]
+
+    model.load_state_dict(parameters)
+
+    dataset = Dataset(
+        [
+            [
+                R.c0[[float(c) for c in c0[0]]],
+                R.h0[[float(h) for h in h0[0]]],
+                *[R.f(i + 1)[[float(h) for h in torch_input[i]]] for i in range(sequence_len)],
+            ]
+        ],
+        [R.h(sequence_len)[target.detach().numpy().tolist()]],
+    )
+
+    bd = model.build_dataset(dataset)
+
+    optimizer = torch.optim.Adam(rnn.parameters(), lr=0.001)
+    loss_fun = torch.nn.MSELoss()
+
+    for _ in range(epochs):
+        output, _ = rnn(torch_input, (h0, c0))
+        loss = loss_fun(output[-1], target)
 
         optimizer.zero_grad(set_to_none=True)
         loss.backward()
