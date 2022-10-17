@@ -67,6 +67,10 @@ def sparsemax(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelatio
     return Transformation.SPARSEMAX(entity)
 
 
+def norm(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Transformation.NORM(entity)
+
+
 # Combination
 
 
@@ -96,6 +100,10 @@ def product_comb(entity: Union[BaseRelation, Function] = None) -> Union[BaseRela
 
 def elproduct_comb(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
     return Combination.ELPRODUCT(entity)
+
+
+def softmax_comb(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
+    return Combination.SOFTMAX(entity)
 
 
 def sparsemax_comb(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:

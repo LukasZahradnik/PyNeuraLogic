@@ -35,6 +35,7 @@ class Transformation(Function):
     TRANSP: "Transformation"
     SOFTMAX: "Transformation"
     SPARSEMAX: "Transformation"
+    NORM: "Transformation"
 
     def __call__(self, *args):
         from neuralogic.core.constructs import relation
@@ -65,6 +66,7 @@ class Combination(Function):
     # Combination
     PRODUCT: "Combination"
     ELPRODUCT: "Combination"
+    SOFTMAX: "Combination"
     SPARSEMAX: "Combination"
     CROSSSUM: "Combination"
     CONCAT: "Combination"
