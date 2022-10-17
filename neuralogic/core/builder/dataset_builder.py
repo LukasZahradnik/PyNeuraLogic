@@ -109,8 +109,10 @@ class DatasetBuilder:
         self,
         dataset: datasets.BaseDataset,
         settings: SettingsProxy,
+        *,
         file_mode: bool = False,
         learnable_facts: bool = False,
+        progress: bool = False,
     ) -> BuiltDataset:
         """Builds the dataset (does grounding and neuralization) for this template instance and the backend
 
@@ -119,6 +121,7 @@ class DatasetBuilder:
         :param settings:
         :param file_mode:
         :param learnable_facts:
+        :param progress:
         :return:
         """
         if isinstance(dataset, datasets.TensorDataset):
@@ -131,10 +134,18 @@ class DatasetBuilder:
                     q_tf.flush()
                     e_tf.flush()
 
-                    return self.build_dataset(datasets.FileDataset(e_tf.name, q_tf.name), settings, False)
+                    return self.build_dataset(
+                        datasets.FileDataset(e_tf.name, q_tf.name),
+                        settings,
+                        file_mode=False,
+                        learnable_facts=learnable_facts,
+                        progress=progress,
+                    )
 
         if isinstance(dataset, datasets.ConvertableDataset):
-            return self.build_dataset(dataset.to_dataset(), settings, False)
+            return self.build_dataset(
+                dataset.to_dataset(), settings, file_mode=False, learnable_facts=learnable_facts, progress=progress
+            )
 
         if isinstance(dataset, datasets.Dataset):
             self.examples_counter = 0
@@ -167,7 +178,7 @@ class DatasetBuilder:
             )
             logic_samples = jpype.java.util.ArrayList(logic_samples).stream()
 
-            samples = Builder(settings).from_logic_samples(self.parsed_template, logic_samples)
+            samples = Builder(settings).from_logic_samples(self.parsed_template, logic_samples, progress)
 
             self.java_factory.weight_factory = weight_factory
         elif isinstance(dataset, datasets.FileDataset):
@@ -177,7 +188,7 @@ class DatasetBuilder:
             if dataset.examples_file is not None:
                 args.extend(["-e", dataset.examples_file])
             sources = Sources.from_args(args, settings)
-            samples = Builder(settings).from_sources(self.parsed_template, sources)
+            samples = Builder(settings).from_sources(self.parsed_template, sources, progress)
         else:
             raise NotImplementedError
 

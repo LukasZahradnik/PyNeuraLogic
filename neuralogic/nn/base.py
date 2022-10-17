@@ -24,8 +24,12 @@ class AbstractNeuraLogic:
     def __call__(self, sample):
         raise NotImplementedError
 
-    def build_dataset(self, dataset: BaseDataset, file_mode: bool = False, learnable_facts: bool = False):
-        return self.dataset_builder.build_dataset(dataset, self.settings, file_mode, learnable_facts)
+    def build_dataset(
+        self, dataset: BaseDataset, *, file_mode: bool = False, learnable_facts: bool = False, progress: bool = False
+    ):
+        return self.dataset_builder.build_dataset(
+            dataset, self.settings, file_mode=file_mode, learnable_facts=learnable_facts, progress=progress
+        )
 
     def set_hooks(self, hooks):
         self.hooks_set = len(hooks) != 0
@@ -96,9 +100,18 @@ class AbstractEvaluator:
     def set_dataset(self, dataset: Union[BaseDataset, BuiltDataset]):
         self.dataset = self.build_dataset(dataset)
 
-    def build_dataset(self, dataset: Union[BaseDataset, BuiltDataset], file_mode: bool = False):
+    def build_dataset(
+        self,
+        dataset: Union[BaseDataset, BuiltDataset],
+        *,
+        file_mode: bool = False,
+        learnable_facts: bool = False,
+        progress: bool = False,
+    ):
         if isinstance(dataset, BaseDataset):
-            return self.neuralogic_model.build_dataset(dataset, file_mode)
+            return self.neuralogic_model.build_dataset(
+                dataset, file_mode=file_mode, learnable_facts=learnable_facts, progress=progress
+            )
         return dataset
 
     @property
