@@ -45,6 +45,10 @@ class SettingsProxy:
         self.settings.exportBlocks = []
 
         self.settings.infer()
+        self.settings.supressConsoleOutput = True
+        self.settings.supressLogFileOutput = True
+        self.settings.loggingLevel = jpype.JClass("java.util.logging.Level").OFF
+
         self._setup_random_generator()
 
     def _setup_random_generator(self):
