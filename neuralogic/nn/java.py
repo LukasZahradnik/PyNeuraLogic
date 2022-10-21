@@ -24,19 +24,16 @@ class NeuraLogic(AbstractNeuraLogic):
         self.need_sync = False
 
         self.value_factory = ValueFactory()
+
+        if self.settings.optimizer.is_default():
+            optimizer = self.settings.optimizer
+            optimizer_class = jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.training.optimizers.Optimizer")
+            optimizer = optimizer_class.getFrom(self.settings.settings, self.value_factory.get_value(optimizer.lr)[1])
+        else:
+            optimizer = self.settings.optimizer.get()
+
         self.neural_model = model
-        self.strategy = python_strategy(settings.settings, model)
-
-        optimizer = self.settings.optimizer
-
-        if not optimizer.is_default():
-            trainer_field = self.strategy.getClass().getDeclaredField("trainer")
-            trainer_field.setAccessible(True)
-            trainer = trainer_field.get(self.strategy)
-
-            optimizer_field = trainer.getClass().getSuperclass().getDeclaredField("optimizer")
-            optimizer_field.setAccessible(True)
-            optimizer_field.set(trainer, optimizer.get())
+        self.strategy = python_strategy(settings.settings, model, optimizer)
 
         self.samples_len = 0
         self.number_format = self.settings.settings_class.superDetailedNumberFormat
@@ -68,7 +65,7 @@ class NeuraLogic(AbstractNeuraLogic):
         self.samples_len = len(samples)
         self.strategy.setSamples(jpype.java.util.ArrayList(samples))
 
-    def __call__(self, samples=None, train: bool = None, epochs: int = 1):
+    def __call__(self, samples=None, train: bool = None, epochs: int = 1, batch_size: int = 1):
         self.hooks_set = len(self.hooks) != 0
 
         if self.hooks_set:
@@ -78,7 +75,7 @@ class NeuraLogic(AbstractNeuraLogic):
             self.do_train = train
 
         if samples is None:
-            results = self.strategy.learnSamples(epochs)
+            results = self.strategy.learnSamples(epochs, batch_size)
             deserialized_results = json.loads(str(results))
 
             return deserialized_results, self.samples_len
@@ -89,14 +86,14 @@ class NeuraLogic(AbstractNeuraLogic):
                 return json.loads(str(result)), 1
             return json.loads(str(self.strategy.evaluateSample(samples.java_sample)))
 
+        sample_array = jpype.java.util.ArrayList([sample.java_sample for sample in samples])
+
         if self.do_train:
-            results = self.strategy.learnSamples(
-                jpype.java.util.ArrayList([sample.java_sample for sample in samples]), epochs
-            )
+            results = self.strategy.learnSamples(sample_array, epochs, batch_size)
 
             return json.loads(str(results)), len(samples)
 
-        results = self.strategy.evaluateSamples(jpype.java.util.ArrayList([sample.java_sample for sample in samples]))
+        results = self.strategy.evaluateSamples(sample_array, batch_size)
         return json.loads(str(results))
 
     def backprop(self, sample, gradient):
