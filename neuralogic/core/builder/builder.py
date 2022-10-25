@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 import jpype
-from halo._utils import get_environment
+from tqdm.autonotebook import tqdm
 
 from neuralogic import is_initialized, initialize
 from neuralogic.core.builder.components import Sample, RawSample
@@ -27,14 +27,15 @@ class Builder:
 
         @jpype.JImplements(jpype.JClass("java.util.function.IntConsumer"))
         class Callback:
-            def __init__(self, spinner):
+            def __init__(self, progress_bar):
                 self.state = 0
-                self.spinner = spinner
+                self.progress_bar = progress_bar
 
             @jpype.JOverride
             def accept(self, count: int):
-                self.state = count
-                self.spinner.text = Builder._get_spinner_text(count)
+                self.state = max(count, self.state)
+                if not self.progress_bar.disable:
+                    self.progress_bar.update(1)
 
         self._callback = Callback
 
@@ -64,30 +65,10 @@ class Builder:
     def _build_samples_with_progress(
         self, parsed_template, sources: Optional[Sources], logic_samples
     ) -> List[RawSample]:
-        jupyter = get_environment() in ("ipython", "jupyter")
+        total = None if logic_samples is None else len(logic_samples)
 
-        if jupyter:
-            from halo import HaloNotebook as Halo
-        else:
-            from halo import Halo
-
-        self.spinner = Halo(text=self._get_spinner_text(0), spinner="dots")
-        self.spinner.start()
-
-        try:
-            results = self._build_samples(parsed_template, sources, logic_samples, self._callback(self.spinner))
-
-            self.spinner.succeed()
-
-            if jupyter:
-                self.spinner.start().succeed()
-            return results
-        except Exception as e:
-            self.spinner.fail("Building failed")
-
-            if jupyter:
-                self.spinner.start().fail()
-            raise e
+        with tqdm(total=total, desc="Building", unit=" samples", dynamic_ncols=True) as pbar:
+            return self._build_samples(parsed_template, sources, logic_samples, self._callback(pbar))
 
     def _build_samples(
         self, parsed_template, sources: Optional[Sources], logic_samples, callback=None
@@ -95,6 +76,7 @@ class Builder:
         if logic_samples is None:
             source_pipeline = self.example_builder.buildPipeline(parsed_template, sources.sources, callback)
         else:
+            logic_samples = jpype.java.util.ArrayList(logic_samples).stream()
             source_pipeline = self.example_builder.buildPipeline(parsed_template, logic_samples, callback)
 
         source_pipeline.execute(None if sources is None else sources.sources)

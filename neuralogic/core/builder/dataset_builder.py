@@ -176,7 +176,6 @@ class DatasetBuilder:
             logic_samples = DatasetBuilder.merge_queries_with_examples(
                 queries, examples, one_query_per_example, example_queries
             )
-            logic_samples = jpype.java.util.ArrayList(logic_samples).stream()
 
             samples = Builder(settings).from_logic_samples(self.parsed_template, logic_samples, progress)
 
