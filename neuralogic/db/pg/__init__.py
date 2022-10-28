@@ -136,23 +136,17 @@ class PostgresConverter(Converter):
             selects = [f"s{index}.value as value"]
             selects.extend(f"s{index}.t{i}" for i in range(arity))
 
-            selects = ", ".join(selects)
-            inner_select.append(f"SELECT {selects} FROM {function_name}")
+            inner_select.append(f"SELECT {', '.join(selects)} FROM {function_name}")
 
-        if is_fact:
-            select = ["SUM(out.value) as value"]
-        else:
-            select = [f"{FUNCTION_MAP[activation]}(SUM(out.value)) as value"]
-
+        select = ["SUM(out.value) as value"] if is_fact else [f"{FUNCTION_MAP[activation]}(SUM(out.value)) as value"]
         select.extend(f"out.t{i}" for i in range(arity))
-        select = ", ".join(select)
 
         group_by_clause = f" GROUP BY {', '.join('out.t' + str(v) for v in range(arity))}"
         select_from = " UNION ALL ".join(inner_select)
 
         return_type = ["value NUMERIC", *(f"t{i} TEXT" for i in range(arity))]
         name = f"neuralogic._{name}_{arity}"
-        body = f"SELECT {select} FROM ({select_from}) AS out{'' if arity == 0 else group_by_clause}"
+        body = f"SELECT {', '.join(select)} FROM ({select_from}) AS out{'' if arity == 0 else group_by_clause}"
 
         return self.get_function(name, [f"{name} TEXT" for name in function_parameters], return_type, body)
 
@@ -262,18 +256,18 @@ class PostgresConverter(Converter):
                     f"{function_name} AS s{t_index} ON {'1 = 1' if not join_on else ' AND '.join(join_on)}"
                 )
 
-        from_clause = f"{' INNER JOIN '.join(from_clause)}"
         where_clause = f" WHERE {' AND '.join(where)}"
         group_by_clause = f" GROUP BY {', '.join('out.' + v for v in vars_mapping.values())}"
 
         if len(inner_value_select) == 1:
             inner_select.add(f"{inner_value_select[0]} as value")
 
-        from_clause = f"SELECT {', '.join(inner_select)} FROM {from_clause}{'' if not where else where_clause}"
+        from_str = f"{' INNER JOIN '.join(from_clause)}"
+        from_str = f"SELECT {', '.join(inner_select)} FROM {from_str}{'' if not where else where_clause}"
 
         return_type = ["value NUMERIC", *(f"t{i} TEXT" for i in range(len(rule.head.terms)))]
 
         name = f"neuralogic._{rule.head.predicate.name}_{rule.head.predicate.arity}_{index}"
-        body = f"SELECT {', '.join(select)} FROM ({from_clause}) AS out{'' if not vars_mapping else group_by_clause}"
+        body = f"SELECT {', '.join(select)} FROM ({from_str}) AS out{'' if not vars_mapping else group_by_clause}"
 
         return self.get_function(name, [f"{name} TEXT" for name in function_parameters], return_type, body)

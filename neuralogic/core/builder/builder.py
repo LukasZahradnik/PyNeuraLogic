@@ -73,7 +73,7 @@ class Builder:
     def _build_samples(
         self, parsed_template, sources: Optional[Sources], logic_samples, callback=None
     ) -> List[RawSample]:
-        if logic_samples is None:
+        if sources is not None:
             source_pipeline = self.example_builder.buildPipeline(parsed_template, sources.sources, callback)
         else:
             logic_samples = jpype.java.util.ArrayList(logic_samples).stream()

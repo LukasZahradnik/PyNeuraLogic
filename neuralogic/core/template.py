@@ -25,8 +25,6 @@ class Template:
     ):
         self.template: List[TemplateEntries] = []
         self.template_file = template_file
-
-        self.counter = 0
         self.hooks: Dict[str, Set] = {}
 
     def add_hook(self, relation: Union[BaseRelation, str], callback: Callable[[Any], None]) -> None:

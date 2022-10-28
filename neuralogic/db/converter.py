@@ -26,7 +26,7 @@ class Converter:
         self.model = model
         self.settings = settings
 
-        self._used_functions = set()
+        self._used_functions: Set[str] = set()
 
         self.sql_source = None
         self.std_functions = None

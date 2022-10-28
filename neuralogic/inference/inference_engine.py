@@ -1,4 +1,4 @@
-from typing import List, Union, Optional, Tuple
+from typing import List, Union, Optional, Tuple, Dict
 
 import jpype
 
@@ -92,7 +92,7 @@ class InferenceEngine:
 
         clause = self.java_factory.atom_to_clause(query)
         name = str(query.predicate)
-        results = []
+        results: List[Dict[str, str]] = []
         variables = [(index, term) for index, term in enumerate(query.terms) if str(term)[0].isupper()]
 
         self._get_substitutions(clause, name, variables, ground_template.groundRules, results)

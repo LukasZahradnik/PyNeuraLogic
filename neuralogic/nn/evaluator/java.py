@@ -12,13 +12,17 @@ from neuralogic.dataset.base import BaseDataset
 class JavaEvaluator(AbstractEvaluator):
     def __init__(
         self,
-        template: Optional[Template],
+        template: Template,
         settings: Settings,
     ):
         super().__init__(template, settings)
 
     def set_dataset(self, dataset: Union[BaseDataset, BuiltDataset]):
         super().set_dataset(dataset)
+
+        if self.dataset is None:
+            raise Exception("Invalid state of dataset - dataset in the evaluator is None")
+
         self.neuralogic_model.set_training_samples(
             jpype.java.util.ArrayList([sample.java_sample for sample in self.dataset.samples])
         )
