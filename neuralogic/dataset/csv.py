@@ -1,6 +1,6 @@
 import enum
 from pathlib import Path
-from typing import Optional, List, Union, TextIO, Callable
+from typing import Optional, List, Union, TextIO, Callable, Sequence
 
 from neuralogic.core.constructs.factories import R
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
@@ -40,7 +40,7 @@ class CSVFile:
         value_column: Optional[Union[str, int]] = None,
         default_value: Optional[Union[float, int]] = None,
         value_mapper: Optional[Callable] = None,
-        term_columns: Optional[List[Union[str, int]]] = None,
+        term_columns: Optional[Sequence[Union[str, int]]] = None,
         header: bool = False,
         skip_rows: int = 0,
         n_rows: Optional[int] = None,
@@ -74,7 +74,7 @@ class CSVFile:
             new_columns.append(CSVFile._find_index_in_header(header, col_value))
         return new_columns
 
-    def _to_logic(self, fp: TextIO) -> List[DatasetEntries]:
+    def _to_logic(self, fp: TextIO) -> Sequence[DatasetEntries]:
         example = []
 
         use_columns = self.term_columns
@@ -89,10 +89,10 @@ class CSVFile:
             header = fp.readline()
             if not header:
                 return example
-            header = header.strip().split(self.sep)
+            headers = header.strip().split(self.sep)
 
-            value_column = None if value_column is None else CSVFile._find_index_in_header(header, value_column)
-            use_columns = self._get_column_indices(header)
+            value_column = None if value_column is None else CSVFile._find_index_in_header(headers, value_column)
+            use_columns = self._get_column_indices(headers)
 
         for _ in range(self.skip_rows):
             fp.readline()
@@ -129,7 +129,7 @@ class CSVFile:
                 break
         return example
 
-    def to_logic_form(self) -> List[DatasetEntries]:
+    def to_logic_form(self) -> Sequence[DatasetEntries]:
         if isinstance(self.csv_source, (str, Path)):
             with open(self.csv_source, "r") as fp:
                 return self._to_logic(fp)
@@ -154,12 +154,12 @@ class CSVDataset(ConvertableDataset):
         self.csv_queries = file
 
     def to_dataset(self) -> Dataset:
-        examples = []
+        examples: List[List[DatasetEntries]] = []
         queries = self.csv_queries.to_logic_form() if self.csv_queries else []
         dataset = Dataset(examples, queries)
 
         if self.mode == Mode.ONE_EXAMPLE:
-            example = []
+            example: List[DatasetEntries] = []
 
             for source in self.csv_files:
                 example.extend(source.to_logic_form())
