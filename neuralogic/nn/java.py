@@ -25,15 +25,11 @@ class NeuraLogic(AbstractNeuraLogic):
 
         self.value_factory = ValueFactory()
 
-        if self.settings.optimizer.is_default():
-            optimizer = self.settings.optimizer
-            optimizer_class = jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.training.optimizers.Optimizer")
-            optimizer = optimizer_class.getFrom(self.settings.settings, self.value_factory.get_value(optimizer.lr)[1])
-        else:
-            optimizer = self.settings.optimizer.get()
+        optimizer = self.settings.optimizer.initialize()
+        lr_decay = self.settings.optimizer.get_lr_decay()
 
         self.neural_model = model
-        self.strategy = python_strategy(settings.settings, model, optimizer)
+        self.strategy = python_strategy(settings.settings, model, optimizer, lr_decay)
 
         self.samples_len = 0
         self.number_format = self.settings.settings_class.superDetailedNumberFormat
