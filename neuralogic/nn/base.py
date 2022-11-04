@@ -25,10 +25,21 @@ class AbstractNeuraLogic:
         raise NotImplementedError
 
     def build_dataset(
-        self, dataset: BaseDataset, *, file_mode: bool = False, learnable_facts: bool = False, progress: bool = False
+        self,
+        dataset: BaseDataset,
+        *,
+        batch_size: int = 1,
+        file_mode: bool = False,
+        learnable_facts: bool = False,
+        progress: bool = False,
     ):
         return self.dataset_builder.build_dataset(
-            dataset, self.settings, file_mode=file_mode, learnable_facts=learnable_facts, progress=progress
+            dataset,
+            self.settings,
+            batch_size=batch_size,
+            file_mode=file_mode,
+            learnable_facts=learnable_facts,
+            progress=progress,
         )
 
     def set_hooks(self, hooks):
@@ -92,25 +103,26 @@ class AbstractNeuraLogic:
 class AbstractEvaluator:
     def __init__(self, template: Template, settings: Settings):
         self.settings = settings.create_proxy()
-        self.dataset: Optional[BuiltDataset] = None
 
         self.neuralogic_model = template.build(settings)
         self.neuralogic_model.set_hooks(template.hooks)
-
-    def set_dataset(self, dataset: Union[BaseDataset, BuiltDataset]):
-        self.dataset = self.build_dataset(dataset)
 
     def build_dataset(
         self,
         dataset: Union[BaseDataset, BuiltDataset],
         *,
+        batch_size: int = 1,
         file_mode: bool = False,
         learnable_facts: bool = False,
         progress: bool = False,
     ):
         if isinstance(dataset, BaseDataset):
             return self.neuralogic_model.build_dataset(
-                dataset, file_mode=file_mode, learnable_facts=learnable_facts, progress=progress
+                dataset,
+                batch_size=batch_size,
+                file_mode=file_mode,
+                learnable_facts=learnable_facts,
+                progress=progress,
             )
         return dataset
 

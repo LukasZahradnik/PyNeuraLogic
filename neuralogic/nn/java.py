@@ -4,6 +4,7 @@ from typing import Dict, Sized
 import jpype
 
 from neuralogic import is_initialized, initialize
+from neuralogic.core import BuiltDataset
 from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.nn.base import AbstractNeuraLogic
 from neuralogic.core.settings import SettingsProxy
@@ -61,8 +62,15 @@ class NeuraLogic(AbstractNeuraLogic):
         self.samples_len = len(samples)
         self.strategy.setSamples(jpype.java.util.ArrayList(samples))
 
-    def __call__(self, samples=None, train: bool = None, epochs: int = 1, batch_size: int = 1):
+    def __call__(self, dataset=None, train: bool = None, epochs: int = 1):
         self.hooks_set = len(self.hooks) != 0
+
+        if isinstance(dataset, BuiltDataset):
+            samples = dataset.samples
+            batch_size = dataset.batch_size
+        else:
+            samples = dataset
+            batch_size = 1
 
         if self.hooks_set:
             self.strategy.setHooks(set(self.hooks.keys()), self.hook_handler)

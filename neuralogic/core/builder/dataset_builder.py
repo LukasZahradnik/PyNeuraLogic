@@ -110,6 +110,7 @@ class DatasetBuilder:
         dataset: datasets.BaseDataset,
         settings: SettingsProxy,
         *,
+        batch_size: int = 1,
         file_mode: bool = False,
         learnable_facts: bool = False,
         progress: bool = False,
@@ -117,8 +118,8 @@ class DatasetBuilder:
         """Builds the dataset (does grounding and neuralization) for this template instance and the backend
 
         :param dataset:
-        :param backend:
         :param settings:
+        :param batch_size:
         :param file_mode:
         :param learnable_facts:
         :param progress:
@@ -137,6 +138,7 @@ class DatasetBuilder:
                     return self.build_dataset(
                         datasets.FileDataset(e_tf.name, q_tf.name),
                         settings,
+                        batch_size=batch_size,
                         file_mode=False,
                         learnable_facts=learnable_facts,
                         progress=progress,
@@ -144,8 +146,17 @@ class DatasetBuilder:
 
         if isinstance(dataset, datasets.ConvertableDataset):
             return self.build_dataset(
-                dataset.to_dataset(), settings, file_mode=False, learnable_facts=learnable_facts, progress=progress
+                dataset.to_dataset(),
+                settings,
+                batch_size=batch_size,
+                file_mode=False,
+                learnable_facts=learnable_facts,
+                progress=progress,
             )
+
+        if batch_size > 1:
+            settings.settings.minibatchSize = batch_size
+            settings.settings.parallelTraining = True
 
         if isinstance(dataset, datasets.Dataset):
             self.examples_counter = 0
@@ -191,7 +202,7 @@ class DatasetBuilder:
         else:
             raise NotImplementedError
 
-        return BuiltDataset(samples)
+        return BuiltDataset(samples, batch_size)
 
     @staticmethod
     def merge_queries_with_examples(queries, examples, one_query_per_example, example_queries=True):

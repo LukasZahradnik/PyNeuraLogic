@@ -137,8 +137,11 @@ class Weight:
 class BuiltDataset:
     """BuiltDataset represents an already built dataset - that is, a dataset that has been grounded and neuralized."""
 
-    def __init__(self, samples):
+    __slots__ = "samples", "batch_size"
+
+    def __init__(self, samples, batch_size: int):
         self.samples = samples
+        self.batch_size = batch_size
 
     def __len__(self):
         return len(self.samples)
