@@ -22,15 +22,15 @@ class TextIOWrapper:
 class Level(Enum):
     """Logging level"""
 
-    OFF = "OFF"
-    SEVERE = "SEVERE"
-    WARNING = "WARNING"
-    INFO = "INFO"
-    CONFIG = "CONFIG"
-    FINE = "FINE"
-    FINER = "FINER"
-    FINEST = "FINEST"
-    ALL = "ALL"
+    OFF = 2147483647
+    SEVERE = 1000
+    WARNING = 900
+    INFO = 800
+    CONFIG = 700
+    FINE = 500
+    FINER = 400
+    FINEST = 300
+    ALL = -2147483648
 
 
 class Formatter(Enum):
@@ -46,7 +46,13 @@ def _init_logging():
     jpype.java.lang.System.setOut(jpype.java.io.PrintStream(os.devnull))
     jpype.java.lang.System.setErr(jpype.java.io.PrintStream(os.devnull))
 
-    jpype.JClass("cz.cvut.fel.ida.logging.Logging").initLogging(jpype.JClass("cz.cvut.fel.ida.setup.Settings")())
+    settings_class = jpype.JClass("cz.cvut.fel.ida.setup.Settings")
+    settings = settings_class()
+    settings.supressConsoleOutput = True
+    settings.supressLogFileOutput = True
+    settings.loggingLevel = jpype.JClass("java.util.logging.Level").OFF
+
+    jpype.JClass("cz.cvut.fel.ida.logging.Logging").initLogging(settings)
     _is_logging_initialized = True
 
     if _default_logging:
@@ -87,7 +93,10 @@ def add_handler(output, level: Level = Level.FINER, formatter: Formatter = Forma
 
     print_stream = jpype.java.io.PrintStream(java_output_stream)
     stream_handler = jpype.JClass("cz.cvut.fel.ida.logging.FlushStreamHandler")(print_stream, java_formatter)
-    stream_handler.setLevel(getattr(jpype.java.util.logging.Level, str(level.value)))
+    stream_handler.setLevel(getattr(jpype.java.util.logging.Level, str(level.name)))
+
+    if level.value < root_logger.getLevel().intValue():
+        root_logger.setLevel(getattr(jpype.java.util.logging.Level, str(level.name)))
 
     root_logger.addHandler(stream_handler)
 
