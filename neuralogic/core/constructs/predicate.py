@@ -21,6 +21,9 @@ class Predicate:
             return self
 
     def to_str(self):
+        if not self.special and not self.hidden:
+            return self.name
+
         special = "@" if self.special else ""
         hidden = "*" if self.hidden else ""
         return f"{hidden}{special}{self.name}"

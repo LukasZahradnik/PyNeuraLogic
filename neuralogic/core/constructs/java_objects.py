@@ -14,7 +14,7 @@ class ValueFactory:
         self.matrix_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.MatrixValue")
 
     def get_value(self, weight):
-        if np.ndim(weight) == 0:
+        if isinstance(weight, (float, int)) or np.ndim(weight) == 0:
             return True, self.scalar_value(float(weight))
 
         if isinstance(weight, tuple):
@@ -38,7 +38,7 @@ class ValueFactory:
             if len(weight) == 0:
                 raise NotImplementedError
 
-            if np.ndim(weight[0]) == 0:
+            if isinstance(weight[0], (float, int)) or np.ndim(weight[0]) == 0:
                 vector = [float(w) for w in weight]
                 return True, self.vector_value(vector)
 
@@ -192,10 +192,10 @@ class JavaFactory:
         if not isinstance(query, self.rule_type):
             if not isinstance(query, Iterable):
                 query = [query]
-            return None, self.get_conjunction(query, variable_factory, 1.0, True)
-        return self.get_relation(query.head, variable_factory, True), self.get_conjunction(
-            query.body, variable_factory, is_example=True
-        )
+            return None, [self.get_valued_fact(relation, variable_factory, 1.0, True) for relation in query]
+        return self.get_relation(query.head, variable_factory, True), [
+            self.get_valued_fact(relation, variable_factory, True) for relation in query.body
+        ]
 
     def get_lifted_example(self, example, learnable_facts=False):
         conjunctions = []

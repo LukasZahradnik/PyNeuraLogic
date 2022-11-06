@@ -41,8 +41,7 @@ class DatasetBuilder:
         one_query_per_example = True
 
         for query in queries:
-            head, conjunction = self.java_factory.get_query(query)
-            facts = conjunction.facts
+            head, facts = self.java_factory.get_query(query)
 
             if head is not None:
                 id = head.literal.toString()
