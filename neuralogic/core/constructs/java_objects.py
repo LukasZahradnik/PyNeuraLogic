@@ -104,6 +104,9 @@ class JavaFactory:
 
         self.transformation = jpype.JClass("cz.cvut.fel.ida.algebra.functions.Transformation")
 
+        self.parameter = jpype.JClass("cz.cvut.fel.ida.algebra.utils.metadata.Parameter")
+        self.parameter_val = jpype.JClass("cz.cvut.fel.ida.algebra.utils.metadata.ParameterValue")
+
         self.pair = jpype.JClass("cz.cvut.fel.ida.utils.generic.Pair")
         self.settings_class = settings.settings_class
 
@@ -151,8 +154,13 @@ class JavaFactory:
             j_term_list.add(x)
 
         if relation_class == self.body_atom:
-            function = self.settings_class.parseTransformation(str(relation.function)) if relation.function else None
-            transformation_function = self.transformation.getFunction(function) if function is not None else None
+            if relation.function is None:
+                transformation_function = None
+            elif relation.function.is_parametrized():
+                transformation_function = relation.function.get()
+            else:
+                function = self.settings_class.parseTransformation(str(relation.function))
+                transformation_function = self.transformation.getFunction(function) if function is not None else None
 
             java_relation = relation_class(predicate, j_term_list, False, transformation_function, weight)
         else:
@@ -177,14 +185,22 @@ class JavaFactory:
 
         if metadata.aggregation is not None:
             map.put("aggregation", self.string_value(str(metadata.aggregation).lower()))
-        if metadata.transformation is not None:
+        if metadata.transformation is not None and not metadata.transformation.is_parametrized():
             map.put("transformation", self.string_value(str(metadata.transformation).lower()))
         if metadata.combination is not None:
             map.put("combination", self.string_value(str(metadata.combination).lower()))
         if metadata.learnable is not None:
             map.put("learnable", self.string_value(str(metadata.learnable).lower()))
 
-        return metadata_class(self.builder.settings, map)
+        metadata_obj = metadata_class(self.builder.settings, map)
+
+        if metadata.transformation is not None and metadata.transformation.is_parametrized():
+            parameter = self.parameter("transformation")
+            parameter_val = self.parameter_val("dummy")
+            parameter_val.value = metadata.transformation.get()
+
+            metadata_obj.put(parameter, parameter_val)
+        return metadata_obj
 
     def get_query(self, query):
         variable_factory = self.get_variable_factory()

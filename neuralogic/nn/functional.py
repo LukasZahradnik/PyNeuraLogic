@@ -1,7 +1,10 @@
-from typing import Union
+from typing import Union, Tuple
 
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.function import Transformation, Combination, Function, Aggregation
+
+
+dot_type = type(Ellipsis)
 
 
 # Transformation
@@ -69,6 +72,31 @@ def sparsemax(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelatio
 
 def norm(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
     return Transformation.NORM(entity)
+
+
+def slice(
+    entity: Union[BaseRelation, Function] = None,
+    *,
+    rows: Union[type(Ellipsis), Tuple[int, int]] = ...,
+    cols: Union[type(Ellipsis), Tuple[int, int]] = ...,
+) -> Union[BaseRelation, Function]:
+    r"""
+    Slices a value into a new value that is created by taking values on specified rows and columns.
+
+    Rows and Cols coordinates are specified either as ``...``, which means all rows/cols or by a tuple of two
+    elements ``[from_index, to_index]``.
+
+    Parameters
+    ----------
+
+    entity : Union[BaseRelation, Function]
+        Relation to apply the function on. Default: ``None``
+    rows : Union[type(Ellipsis), Tuple[int, int]]
+        Default: ``...``
+    cols : Union[type(Ellipsis), Tuple[int, int]]
+        Default: ``...``
+    """
+    return Transformation.SLICE(entity, rows=rows, cols=cols)
 
 
 # Combination

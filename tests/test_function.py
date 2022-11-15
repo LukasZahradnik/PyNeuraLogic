@@ -36,3 +36,57 @@ def test_transformation_body_function(torch_fun, fun):
     results = np.array(model(built_dataset, train=False)[0]).round(3)
 
     assert np.allclose(torch_result, results, atol=0.0001)
+
+
+def test_slice_function():
+    data = np.array(
+        [
+            [1, 2, 3, 4],
+            [5, 6, 7, 8],
+            [9, 10, 11, 12],
+            [13, 14, 15, 16],
+        ]
+    )
+
+    res = np.array(
+        [
+            [5, 6, 7, 8],
+            [9, 10, 11, 12],
+        ]
+    )
+
+    template = Template()
+    template += (R.h <= F.slice(R.input, rows=(1, 3))) | [F.identity]
+    template += R.h / 0 | [F.identity]
+
+    model = template.build(Settings(iso_value_compression=False, chain_pruning=False))
+    dataset = Dataset([[R.input[data]]], [R.h])
+
+    built_dataset = model.build_dataset(dataset)
+    results = np.array(model(built_dataset, train=False)[0])
+
+    assert np.allclose(res, results)
+
+    template = Template()
+    template += (R.h <= R.input) | [F.slice(rows=(1, 3))]
+    template += R.h / 0 | [F.identity]
+
+    model = template.build(Settings(iso_value_compression=False, chain_pruning=False))
+    dataset = Dataset([[R.input[data]]], [R.h])
+
+    built_dataset = model.build_dataset(dataset)
+    results = np.array(model(built_dataset, train=False)[0])
+
+    assert np.allclose(res, results)
+
+    template = Template()
+    template += (R.h <= R.input) | [F.identity]
+    template += R.h / 0 | [F.slice(rows=(1, 3))]
+
+    model = template.build(Settings(iso_value_compression=False, chain_pruning=False))
+    dataset = Dataset([[R.input[data]]], [R.h])
+
+    built_dataset = model.build_dataset(dataset)
+    results = np.array(model(built_dataset, train=False)[0])
+
+    assert np.allclose(res, results)

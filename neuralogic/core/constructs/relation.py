@@ -72,11 +72,12 @@ class BaseRelation:
             terms = ", ".join([str(term) for term in self.terms])
 
             if self.function:
-                return f"{self.function}({self.predicate.to_str()}({terms})){end}"
+                literal = f"{self.predicate.to_str()}({terms})"
+                return f"{self.function.wrap(literal)}{end}"
             return f"{self.predicate.to_str()}({terms}){end}"
 
         if self.function:
-            return f"{self.function}({self.predicate.to_str()}){end}"
+            return f"{self.function.wrap(self.predicate.to_str())}{end}"
         return f"{self.predicate.to_str()}{end}"
 
     def __str__(self) -> str:
