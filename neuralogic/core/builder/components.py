@@ -18,9 +18,22 @@ class RawSample:
             if str(sample_fact.getClass().getSimpleName()) != "FactNeuron":
                 continue
 
-            if str(sample_fact.name).split(":")[-1].strip() == fact_str:
-                self.fact_cache[fact_str] = sample_fact
-                return sample_fact
+            name = str(sample_fact.name).strip()
+            space_index = name.rfind(" ")
+
+            while True:
+                if space_index == -1:
+                    break
+
+                if name[space_index - 1] == ",":
+                    space_index = name.rfind(" ", __end=space_index)
+                    continue
+
+                if name[space_index + 1 :] == fact_str:
+                    self.fact_cache[fact_str] = sample_fact
+                    return sample_fact
+                break
+
         return None
 
     def get_fact(self, fact):
