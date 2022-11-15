@@ -3,15 +3,15 @@ Deep Learning on Databases
 
 
 Before running machine learning models written in some popular frameworks on data coming from relational databases, we
-must first figure out how to transform data properly. Usually, models expect input data to be in the form of fixed-size
-numeric tensors. Making such a transformation on one database table (relation) might be straightforward. However,
-it does not have to be the case when our data are linked via various (attributed) relations, which is not very unusual.
+must first figure out how to transform the data properly. Commonly, all the models expect input data to be in the form of fixed-size
+numeric tensors. Making such a transformation with a single database table (relation) might be straightforward. However,
+that is not the case when our data are spread across variously linked and attributed relations, which is not very unusual.
 
-So is there a way to treat relational data more simply and efficiently? In the NeuraLogic language, based on relational
-logic, relations are *first-class citizens*. Everything is built around and upon them, making feature engineering of
-relational data (such as from relational databases) *intuitive* and *direct*.
+So, is there a way to skip this preprocessing step and treat relational data more naturally and efficiently? In the NeuraLogic language, based on relational
+logic, relations are *first-class citizens*. Everything is built around and upon them, enabling for *intuitive* and *direct* creation of models for
+relational data, such as relational databases.
 
-Since relational databases are such an essential topic that most developers and engineers come in touch with on a daily
+Since relational databases are an essential topic that most developers and engineers come in touch with on a daily
 basis, the *PyNeuraLogic* framework is equipped with a set of tools to handle loading data from databases and exporting
 your trained model to SQL so that you can evaluate your models directly in your databases!
 
@@ -21,7 +21,7 @@ and exporting the trained model to SQL.
 .. note::
     :class: empty-title, outline-only
 
-    ⚗️ Evaluation of trained models directly in the database (conversion to SQL) is currently an experimental feature;
+    ⚗️ The last step - evaluation of trained models directly in the database (conversion to SQL) is currently an experimental feature;
     therefore, it comes with a few restrictions - models cannot contain recursive rules, matrices, and vectors.
     Also, only a limited set of transformation functions is implemented.
 
@@ -36,8 +36,8 @@ Data loading from database
 
 
 First things first, get to know the data we work with. Our example database contains information about molecules. Each
-molecule has some attributes and is formed by various numbers of atoms. Atoms also have some attributes and can be in
-bond (connected) with another atom. Therefore, our database consists of three tables - *molecule*, *atom*, and *bond*.
+molecule has some attributes and is formed by a varying number of atoms. Atoms also have some attributes and can make
+bonds (connections) with other atoms. Therefore, our database consists of three tables - *molecule*, *atom*, and *bond*.
 
 .. figure:: ../_static/mutagenesis_tables.svg
     :width: 500
@@ -50,10 +50,10 @@ bond (connected) with another atom. Therefore, our database consists of three ta
 In this scenario, our task is to determine the mutagenicity of a molecule on Salmonella typhimurium. Our target is the
 *mutagenic* field in the *molecule* table.
 
-But how exactly can we transform those tabular data to *something* that PyNeuraLogic would understand, that is,
-relations? We have to define mappings according to our needs.
-For example, we would want to map each row of the *atom* table to the relation *R.atom* with *atom_id* and *molecule_id*
-fields as the relations' terms and the *charge* field as the relations' values.
+But how exactly can we transform those tabular data to *something* that PyNeuraLogic understands, that is,
+relations? While there is a natural 1:1 mapping between tables and relations, we can also customize this a bit w.r.t. our needs.
+For example, we might want to map each row of the *atom* table to the relation *R.atom* with *atom_id* and *molecule_id*
+fields as the relations' *terms*, and the *charge* field as the relations' *values*.
 
 .. figure:: ../_static/mutagenesis_table_mapping.svg
     :width: 500
@@ -65,12 +65,12 @@ fields as the relations' terms and the *charge* field as the relations' values.
 
 
 Notice that in the mapping visualization above, we skipped *element* and *type* fields. That is because we will
-not utilize them in our model, but there is nothing stopping us from mapping all fields to terms or even mapping
+not utilize them in our model, but there is nothing stopping us from mapping all the fields to terms, or even mapping
 one database table to multiple relations.
 
 The mapping itself is quite straightforward; we create an instance of *DBSource* with *relation name*,
 *table name*, and *column names* (that will be mapped to terms) as its arguments.
-We will utilize only data from *bond* and *atom* tables in our example set to keep it simple.
+Here, we will utilize only data from *bond* and *atom* tables in our example set to keep it simple.
 
 .. code-block:: python
 
@@ -95,10 +95,9 @@ that maps the original value from a table to some arbitrary numeric value.
     )
 
 Since our task is to determine the mutagenicity, let's give our queries proper naming, i.e., *mutagenic*,
-that is more self-explaining (and can be more understandable by other team members). Let's put everything together and
-create a connection with some compatible driver (such as psycopg2 or MariaDB) and create a logic dataset.
-With just those few lines of code, we have managed to create a dataset in the logic representation (relations)
-populated from a database.
+which is more self-explanatory (and can be more understandable to other team members). Let's now put everything together and
+create a connection with some compatible driver (such as psycopg2 or MariaDB) to create a logical dataset.
+With just those few lines of code, we have managed to create a relational dataset in the logic representation, populated from a database.
 
 .. code-block:: python
 
@@ -112,14 +111,14 @@ populated from a database.
 Training on data from database
 ******************************
 
-The dataset is ready; let's take a look at defining a template. A template can be seen as a high-level blueprint for
-constructing a computation graph tailored for each query (sample).
+The dataset is ready; let's now take a look at defining the *template*, which roughly corresponds to creating a neural model architecture. 
+A template can be seen as a high-level blueprint for constructing a computation graph, which will be automatically tailored for each example and its target query.
 
-The template we define contains embeddings for each type of bond (bond type is an integer in the range 1-7). Then we
-define four stacked *Message Passing Neural Networks* (*MPNNs*) where edges are bonds and nodes are atoms. Our proposed
-layers are similar to the *GraphSAGE* architecture except for extra edge (*bond*) embeddings. The template then
+The template we will define here calculates embeddings for each type of chemical bond (bond type is an integer in the range 1-7). Then we will
+define four stacked *Message Passing Neural Networks* (*MPNNs*) where edges are bonds and nodes are chemical atoms. Our proposed
+layers are similar to the *GraphSAGE* architecture except for the extra edge (*bond*) embeddings. Finally, the template 
 defines a readout layer (*mutagenic*) that pools embeddings of all nodes from all layers and aggregates them into one
-value passed into a sigmoid function.
+value passed into a sigmoid function for the target molecule classification.
 
 .. code-block:: python
 
@@ -148,8 +147,7 @@ value passed into a sigmoid function.
     template += R.mutagenic / 1 | [Transformation.SIGMOID]
 
 
-Now we can build our model by passing the template into an evaluator. We then use the evaluator
-to train the model on our dataset.
+Now we can build our model by passing the template into an *evaluator*, which we then use to train the model on our dataset.
 
 .. code-block:: python
 
@@ -175,11 +173,11 @@ Converting model to SQL
 ***********************
 
 With just a few lines of code, the model that we just built from scratch and trained can be turned into (Postgres) SQL
-code. By doing so, you can evaluate the model directly on your database server without installing *NeuraLogic* or even
+code. By doing so, you can evaluate the model directly on your database server *without installing NeuraLogic* or even
 Python. Just plain *PostgreSQL* will do!
 
-All we have to do is create a converter that takes our model, table mappings, and settings. Table mappings are similar
-to *DBSource* from the beginning of this article and map relation name to table name and terms to
+All we have to do is to create a converter that takes our model, table mappings, and settings. Table mappings are similar
+to *DBSource* described at the beginning of this article, which map relation names to table names and terms to
 column names in the table.
 
 
@@ -220,10 +218,10 @@ After installing the first SQL code, you can install your actual model as SQL co
 
     💾 `Download the full SQL dump (with std functions) of the trained model. <https://gist.github.com/LukasZahradnik/cb4535a272026f088d60b09e68bc03b3>`_
 
-You are set and ready to evaluate your trained model directly in the database without data ever leaving it.
+You are now set and ready to evaluate your trained model directly in the database without data ever leaving it.
 For each fact and head of a rule, there is a corresponding function in the *neuralogic* namespace.
 Let's say we would want to evaluate our model on a molecule with an id *"d150"*.
-It is as simple as making one select statement!
+It is as simple as making one *Select* statement!
 
 
 .. code-block:: sql
@@ -270,7 +268,7 @@ This means we can even inspect values of different layers, for example, the valu
 
 Conclusion
 **********
-This short tutorial introduced and demonstrated PyNeuraLogic's support of deep learning on databases on a simple example
-(learning on molecules). We went through how to fetch data from a database, transform them into PyNeuraLogic
+This short tutorial introduced and demonstrated PyNeuraLogic's support of deep learning for databases on a simple example
+(learning with molecules). We went through how to fetch data from a database, transform them into PyNeuraLogic
 relations with just a few lines of code, and train a model on those data. After training the model, we dumped it
-to SQL code, which allowed us to evaluate the model directly in the database.
+into SQL code, which allowed us to evaluate the model directly in the database.
