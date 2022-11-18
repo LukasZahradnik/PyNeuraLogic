@@ -1,4 +1,5 @@
 from neuralogic.core.constructs.function.function import Transformation, Combination, Aggregation, Function
+from neuralogic.core.constructs.function.reshape import Reshape
 from neuralogic.core.constructs.function.slice import Slice
 
 _special_namings = {"LEAKY_RELU": "LEAKYRELU", "TRANSP": "TRANSPOSE"}
@@ -8,6 +9,7 @@ for function_name in Transformation.__annotations__:
 
 
 Transformation.SLICE = Slice("SLICE")
+Transformation.RESHAPE = Reshape("RESHAPE")
 
 
 for function_name in Combination.__annotations__:

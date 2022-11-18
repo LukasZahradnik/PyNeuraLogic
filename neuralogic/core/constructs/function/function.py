@@ -46,6 +46,7 @@ class Transformation(Function):
     SPARSEMAX: "Transformation"
     NORM: "Transformation"
     SLICE: "Transformation"
+    RESHAPE: "Transformation"
 
     def __call__(self, *args, **kwargs):
         from neuralogic.core.constructs import relation

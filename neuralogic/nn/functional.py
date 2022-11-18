@@ -99,6 +99,34 @@ def slice(
     return Transformation.SLICE(entity, rows=rows, cols=cols)
 
 
+def reshape(
+    entity: Union[BaseRelation, Function] = None,
+    *,
+    shape: Union[None, Tuple[int, int], int],
+) -> Union[BaseRelation, Function]:
+    r"""
+    Change the shape/type of the value to a new shape. The shape can be either ``None``, int, or a tuple of two ints.
+
+    * If ``None``, the underlying value will be converted to a scalar. E.g., a matrix value of one element ``[[1]]``
+      will be converted to scalar ``1``.
+
+    * If int, then the value will be converted to scalar (if the int is ``0``) or to a column vector.
+
+    * If a tuple of two ints, the value will be converted to a scalar if the tuple is ``(0, 0)``. Into a row vector
+      if the shape is ``(len, 0)`` or a column vector for shape ``(0, len)``. For other tuples ``(n, m)``,
+      the value will be reshaped to matrix :math:`n \times m`.
+
+    Parameters
+    ----------
+
+    entity : Union[BaseRelation, Function]
+        Relation to apply the function on. Default: ``None``
+    shape : Union[None, Tuple[int, int], int]
+        The new shape of the value
+    """
+    return Transformation.RESHAPE(entity, shape=shape)
+
+
 # Combination
 
 
