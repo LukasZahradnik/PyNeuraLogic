@@ -199,3 +199,7 @@ def sum(entity: BaseRelation = None) -> Union[BaseRelation, Function]:
 
 def count(entity: BaseRelation = None) -> Union[BaseRelation, Function]:
     return Aggregation.COUNT(entity)
+
+
+def concat(entity: BaseRelation = None) -> Union[BaseRelation, Function]:
+    return Aggregation.CONCAT(entity)

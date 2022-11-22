@@ -84,3 +84,4 @@ class Aggregation(Function):
     MIN: "Aggregation"
     SUM: "Aggregation"
     COUNT: "Aggregation"
+    CONCAT: "Aggregation"
