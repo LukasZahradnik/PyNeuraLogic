@@ -33,8 +33,8 @@ class Slice(Transformation):
         return True
 
     def get(self):
-        cols = None if self.cols is Ellipsis else list(self.cols)
-        rows = None if self.rows is Ellipsis else list(self.rows)
+        cols = None if self.cols is Ellipsis else list(int(x) for x in self.cols)
+        rows = None if self.rows is Ellipsis else list(int(x) for x in self.rows)
 
         return jpype.JClass("cz.cvut.fel.ida.algebra.functions.transformation.joint.Slice")(rows, cols)
 
