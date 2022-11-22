@@ -182,8 +182,6 @@ class JavaFactory:
             parameter = self.parameter(function)
             parameter_val = self.parameter_val("dummy")
             parameter_val.value = value.get()
-
-            print(value, function)
             metadata_obj.put(parameter, parameter_val)
 
     def get_metadata(self, metadata, metadata_class):
