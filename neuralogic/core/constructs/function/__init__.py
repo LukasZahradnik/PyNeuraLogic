@@ -1,3 +1,4 @@
+from neuralogic.core.constructs.function.concat import ConcatComb, Concat
 from neuralogic.core.constructs.function.function import Transformation, Combination, Aggregation, Function
 from neuralogic.core.constructs.function.reshape import Reshape
 from neuralogic.core.constructs.function.slice import Slice
@@ -16,8 +17,14 @@ for function_name in Combination.__annotations__:
     setattr(Combination, function_name, Combination(function_name))
 
 
+Combination.CONCAT = ConcatComb("CONCAT")
+
+
 for function_name in Aggregation.__annotations__:
     setattr(Aggregation, function_name, Aggregation(function_name))
+
+
+Aggregation.CONCAT = Concat("CONCAT")
 
 
 __all__ = ["Transformation", "Combination", "Aggregation", "Function"]

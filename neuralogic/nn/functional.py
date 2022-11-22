@@ -170,8 +170,8 @@ def crosssum_comb(entity: Union[BaseRelation, Function] = None) -> Union[BaseRel
     return Combination.CROSSSUM(entity)
 
 
-def concat_comb(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
-    return Combination.CONCAT(entity)
+def concat_comb(entity: Union[BaseRelation, Function] = None, *, axis: int = -1) -> Union[BaseRelation, Function]:
+    return Combination.CONCAT(entity, axis=axis)
 
 
 def cossim_comb(entity: Union[BaseRelation, Function] = None) -> Union[BaseRelation, Function]:
@@ -201,5 +201,5 @@ def count(entity: BaseRelation = None) -> Union[BaseRelation, Function]:
     return Aggregation.COUNT(entity)
 
 
-def concat(entity: BaseRelation = None) -> Union[BaseRelation, Function]:
-    return Aggregation.CONCAT(entity)
+def concat(entity: BaseRelation = None, *, axis: int = -1) -> Union[BaseRelation, Function]:
+    return Aggregation.CONCAT(entity, axis=axis)

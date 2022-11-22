@@ -169,6 +169,23 @@ class JavaFactory:
 
         return java_relation
 
+    def add_metadata_function(self, metadata, map, function: str):
+        value = getattr(metadata, function)
+
+        if value is not None and not value.is_parametrized():
+            map.put(function, self.string_value(str(value).lower()))
+
+    def add_parametrized_function(self, metadata, metadata_obj, function: str):
+        value = getattr(metadata, function)
+
+        if value is not None and value.is_parametrized():
+            parameter = self.parameter(function)
+            parameter_val = self.parameter_val("dummy")
+            parameter_val.value = value.get()
+
+            print(value, function)
+            metadata_obj.put(parameter, parameter_val)
+
     def get_metadata(self, metadata, metadata_class):
         if metadata is None:
             return None
@@ -183,23 +200,19 @@ class JavaFactory:
 
         map = jpype.JClass("java.util.LinkedHashMap")()
 
-        if metadata.aggregation is not None:
-            map.put("aggregation", self.string_value(str(metadata.aggregation).lower()))
-        if metadata.transformation is not None and not metadata.transformation.is_parametrized():
-            map.put("transformation", self.string_value(str(metadata.transformation).lower()))
-        if metadata.combination is not None:
-            map.put("combination", self.string_value(str(metadata.combination).lower()))
+        self.add_metadata_function(metadata, map, "aggregation")
+        self.add_metadata_function(metadata, map, "transformation")
+        self.add_metadata_function(metadata, map, "combination")
+
         if metadata.learnable is not None:
             map.put("learnable", self.string_value(str(metadata.learnable).lower()))
 
         metadata_obj = metadata_class(self.builder.settings, map)
 
-        if metadata.transformation is not None and metadata.transformation.is_parametrized():
-            parameter = self.parameter("transformation")
-            parameter_val = self.parameter_val("dummy")
-            parameter_val.value = metadata.transformation.get()
+        self.add_parametrized_function(metadata, metadata_obj, "aggregation")
+        self.add_parametrized_function(metadata, metadata_obj, "transformation")
+        self.add_parametrized_function(metadata, metadata_obj, "combination")
 
-            metadata_obj.put(parameter, parameter_val)
         return metadata_obj
 
     def get_query(self, query):
