@@ -17,7 +17,7 @@ from neuralogic.nn.module.general.gru import GRU
 from neuralogic.nn.module.general.lstm import LSTM
 from neuralogic.nn.module.general.rvnn import RvNN
 from neuralogic.nn.module.general.pooling import Pooling, AvgPooling, SumPooling, MaxPooling
-from neuralogic.nn.module.general.attention import Attention
+from neuralogic.nn.module.general.attention import Attention, MultiheadAttention
 
 from neuralogic.nn.module.meta.meta import MetaConv
 from neuralogic.nn.module.meta.magnn import MAGNNMean
@@ -45,6 +45,7 @@ __all__ = [
     "MaxPooling",
     "SumPooling",
     "Attention",
+    "MultiheadAttention",
     "MetaConv",
     "MAGNNLinear",
     "MAGNNMean",
