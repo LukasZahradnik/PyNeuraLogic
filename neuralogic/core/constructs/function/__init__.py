@@ -2,6 +2,7 @@ from neuralogic.core.constructs.function.concat import ConcatComb, Concat
 from neuralogic.core.constructs.function.function import Transformation, Combination, Aggregation, Function
 from neuralogic.core.constructs.function.reshape import Reshape
 from neuralogic.core.constructs.function.slice import Slice
+from neuralogic.core.constructs.function.softmax import Softmax
 
 _special_namings = {"LEAKY_RELU": "LEAKYRELU", "TRANSP": "TRANSPOSE"}
 
@@ -25,6 +26,7 @@ for function_name in Aggregation.__annotations__:
 
 
 Aggregation.CONCAT = Concat("CONCAT")
+Aggregation.SOFTMAX = Softmax("SOFTMAX")
 
 
 __all__ = ["Transformation", "Combination", "Aggregation", "Function"]

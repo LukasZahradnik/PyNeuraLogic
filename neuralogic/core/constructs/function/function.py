@@ -85,3 +85,4 @@ class Aggregation(Function):
     SUM: "Aggregation"
     COUNT: "Aggregation"
     CONCAT: "Aggregation"
+    SOFTMAX: "Aggregation"

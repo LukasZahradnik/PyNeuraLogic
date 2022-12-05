@@ -16,6 +16,13 @@ class Slice(Transformation):
         cols: Union[type(Ellipsis), Tuple[int, int]] = ...,
     ):
         super().__init__(name)
+
+        if cols is not Ellipsis:
+            cols = [int(x) for x in self.cols]
+
+        if rows is not Ellipsis:
+            rows = [int(x) for x in self.rows]
+
         self.rows = rows
         self.cols = cols
 
@@ -33,8 +40,8 @@ class Slice(Transformation):
         return True
 
     def get(self):
-        cols = None if self.cols is Ellipsis else list(int(x) for x in self.cols)
-        rows = None if self.rows is Ellipsis else list(int(x) for x in self.rows)
+        cols = None if self.cols is Ellipsis else self.cols
+        rows = None if self.rows is Ellipsis else self.rows
 
         return jpype.JClass("cz.cvut.fel.ida.algebra.functions.transformation.joint.Slice")(rows, cols)
 

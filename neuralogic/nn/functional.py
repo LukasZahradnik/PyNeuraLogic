@@ -1,4 +1,4 @@
-from typing import Union, Tuple
+from typing import Union, Tuple, Sequence
 
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.function import Transformation, Combination, Function, Aggregation
@@ -203,3 +203,7 @@ def count(entity: BaseRelation = None) -> Union[BaseRelation, Function]:
 
 def concat(entity: BaseRelation = None, *, axis: int = -1) -> Union[BaseRelation, Function]:
     return Aggregation.CONCAT(entity, axis=axis)
+
+
+def softmax_agg(entity: BaseRelation = None, *, agg_terms: Sequence[int] = None) -> Union[BaseRelation, Function]:
+    return Aggregation.SOFTMAX(entity, agg_terms=agg_terms)
