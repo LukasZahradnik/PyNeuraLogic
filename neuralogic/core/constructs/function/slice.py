@@ -18,10 +18,10 @@ class Slice(Transformation):
         super().__init__(name)
 
         if cols is not Ellipsis:
-            cols = [int(x) for x in self.cols]
+            cols = [int(x) for x in cols]
 
         if rows is not Ellipsis:
-            rows = [int(x) for x in self.rows]
+            rows = [int(x) for x in rows]
 
         self.rows = rows
         self.cols = cols
