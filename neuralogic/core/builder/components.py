@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 import numpy as np
 
@@ -152,7 +152,7 @@ class BuiltDataset:
 
     __slots__ = "samples", "batch_size"
 
-    def __init__(self, samples, batch_size: int):
+    def __init__(self, samples: List[RawSample], batch_size: int):
         self.samples = samples
         self.batch_size = batch_size
 
