@@ -23,26 +23,25 @@ class Attention(Module):
         self.arity = arity
 
     def __call__(self):
-        terms = [f"X{i}" for i in range(self.arity)]
-        val_terms = [f"X{i}" for i in range(self.arity - 1)]
-        agg_terms = [*val_terms, f"X{self.arity}"]
+        terms = [f"X{i}" for i in range(self.arity - 1)]
+
+        k_terms = [*terms, "Y"]
+        h_terms = [*terms, "X", "Y"]
+        q_terms = [*terms, "X"]
 
         d_k = 1 / math.sqrt(self.embed_dim)
 
         dk_rel = R.get(f"{self.output_name}__dk")
         dot_rel = R.get(f"{self.output_name}__dot")
-        values_rel = R.get(f"{self.output_name}__vals")
+
+        metadata = [Combination.PRODUCT, Transformation.IDENTITY, Aggregation.SOFTMAX(agg_terms=[self.arity])]
+        out_metadata = [Combination.PRODUCT, Aggregation.SUM, Transformation.IDENTITY]
 
         return [
             dk_rel[d_k].fixed(),
-            (dot_rel(terms) <= (dk_rel, R.get(self.key_name)(agg_terms).T, R.get(self.query_name)(terms)))
-            | [Combination.PRODUCT, Transformation.IDENTITY, Aggregation.CONCAT],
-            dot_rel / self.arity | [Transformation.SOFTMAX],
-            (values_rel(val_terms) <= R.get(self.value_name)(agg_terms).T)
-            | [Transformation.IDENTITY, Aggregation.CONCAT(axis=0)],
-            values_rel / (self.arity - 1) | [Transformation.IDENTITY],
-            (R.get(self.output_name)(terms) <= (dot_rel(terms).T, values_rel(val_terms)))
-            | [Transformation.IDENTITY, Combination.PRODUCT],
+            (dot_rel(h_terms) <= (dk_rel, R.get(self.key_name)(k_terms).T, R.get(self.query_name)(q_terms))) | metadata,
+            dot_rel / (self.arity + 1) | [Transformation.IDENTITY],
+            (R.get(self.output_name)(q_terms) <= (dot_rel(h_terms), R.get(self.value_name)(k_terms))) | out_metadata,
             R.get(self.output_name) / self.arity | [Transformation.IDENTITY],
         ]
 
