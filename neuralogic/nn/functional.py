@@ -205,5 +205,5 @@ def concat(entity: BaseRelation = None, *, axis: int = -1) -> Union[BaseRelation
     return Aggregation.CONCAT(entity, axis=axis)
 
 
-def softmax_agg(entity: BaseRelation = None, *, agg_terms: Sequence[int] = None) -> Union[BaseRelation, Function]:
+def softmax_agg(entity: BaseRelation = None, *, agg_terms: Sequence[str] = None) -> Union[BaseRelation, Function]:
     return Aggregation.SOFTMAX(entity, agg_terms=agg_terms)

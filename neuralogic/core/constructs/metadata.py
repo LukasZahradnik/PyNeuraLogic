@@ -48,3 +48,8 @@ class Metadata:
         if self.aggregation is not None:
             metadata_list.append(f"aggregation={str(self.aggregation)}")
         return f"[{', '.join(metadata_list)}]"
+
+    def copy(self) -> "Metadata":
+        return Metadata(
+            self.learnable, self.transformation, self.combination, self.aggregation, self.duplicit_grounding
+        )

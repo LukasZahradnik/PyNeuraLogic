@@ -76,6 +76,11 @@ class Rule:
             other = Metadata.from_iterable(other)
         elif not isinstance(other, Metadata):
             raise NotImplementedError
+
+        if other.aggregation is not None and other.aggregation.rule_head_dependant():
+            other = other.copy()
+            other.aggregation = other.aggregation.process_head(self.head)
+
         self.metadata = other
 
         return self

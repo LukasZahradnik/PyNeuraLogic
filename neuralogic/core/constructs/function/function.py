@@ -24,6 +24,12 @@ class Function:
     def get(self):
         raise NotImplementedError
 
+    def rule_head_dependant(self) -> bool:
+        return False
+
+    def process_head(self, head) -> "Function":
+        pass
+
 
 class Transformation(Function):
     # Element wise
