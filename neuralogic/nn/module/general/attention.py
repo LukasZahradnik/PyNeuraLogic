@@ -71,60 +71,59 @@ class MultiheadAttention(Module):
 
     def __call__(self):
         terms = [f"X{i}" for i in range(self.arity)]
-        qproj_name = f"{self.output_name}__qproj"
-        kproj_name = f"{self.output_name}__kproj"
-        vproj_name = f"{self.output_name}__vproj"
+        dim = self.embed_dim
+
+        q_weight = f"{self.output_name}_qw"
+        k_weight = f"{self.output_name}_kw"
+        v_weight = f"{self.output_name}_vw"
+
+        q_proj_name = f"{self.output_name}__qproj"
+        k_proj_name = f"{self.output_name}__kproj"
+        v_proj_name = f"{self.output_name}__vproj"
+
+        q_proj = R.get(q_proj_name)
+        k_proj = R.get(k_proj_name)
+        v_proj = R.get(v_proj_name)
+        output_rel = R.get(self.output_name)
+
         attention_name = f"{self.output_name}__attention"
 
-        multihead_rules = [
-            (R.get(self.output_name)(terms)[self.embed_dim, self.embed_dim] <= R.get(attention_name)(terms).T)
-            | [Transformation.IDENTITY],
-            R.get(self.output_name) / self.arity | [Transformation.IDENTITY],
-        ]
-
         if self.num_heads > 1:
-            qslice_name = f"{self.output_name}__qslice"
-            kslice_name = f"{self.output_name}__kslice"
-            vslice_name = f"{self.output_name}__vslice"
+            size = self.embed_dim / self.num_heads
             attention = Attention(
-                self.embed_dim // self.num_heads, attention_name, qslice_name, kslice_name, vslice_name, self.arity + 1
+                dim // self.num_heads, attention_name, q_proj_name, k_proj_name, v_proj_name, self.arity + 1
             )
 
             attention_concat = []
             multihead_rules = [
-                R.get(qslice_name) / (self.arity + 1) | [Transformation.IDENTITY],
-                R.get(kslice_name) / (self.arity + 1) | [Transformation.IDENTITY],
-                R.get(vslice_name) / (self.arity + 1) | [Transformation.IDENTITY],
-                R.get(self.output_name) / self.arity | [Transformation.IDENTITY],
+                q_proj / (self.arity + 1) | [Transformation.IDENTITY],
+                k_proj / (self.arity + 1) | [Transformation.IDENTITY],
+                v_proj / (self.arity + 1) | [Transformation.IDENTITY],
+                output_rel / self.arity | [Transformation.IDENTITY],
             ]
 
             for i in range(self.num_heads):
-                size = self.embed_dim / self.num_heads
-                metadata = [Transformation.SLICE(rows=(i * size, (i + 1) * size))]
-                multihead_rules.append((R.get(qslice_name)(i, *terms) <= R.get(qproj_name)(terms)) | metadata)
-                multihead_rules.append((R.get(kslice_name)(i, *terms) <= R.get(kproj_name)(terms)) | metadata)
-                multihead_rules.append((R.get(vslice_name)(i, *terms) <= R.get(vproj_name)(terms)) | metadata)
+                meta = [Transformation.SLICE(rows=(i * size, (i + 1) * size))]
+                multihead_rules.append((q_proj(i, *terms) <= R.get(self.query_name)(terms)[q_weight:dim, dim]) | meta)
+                multihead_rules.append((v_proj(i, *terms) <= R.get(self.value_name)(terms)[v_weight:dim, dim]) | meta)
+                multihead_rules.append((k_proj(i, *terms) <= R.get(self.key_name)(terms)[k_weight:dim, dim]) | meta)
                 attention_concat.append(R.get(attention_name)(i, *terms))
 
             multihead_rules.append(
-                (R.get(self.output_name)(terms)[self.embed_dim, self.embed_dim] <= attention_concat)
-                | [Transformation.IDENTITY, Combination.CONCAT]
+                (output_rel(terms)[dim, dim] <= attention_concat) | [Transformation.IDENTITY, Combination.CONCAT]
             )
         else:
-            attention = Attention(
-                self.embed_dim // self.num_heads, attention_name, qproj_name, kproj_name, vproj_name, self.arity
-            )
+            multihead_rules = [
+                (q_proj(terms)[q_weight:dim, dim] <= R.get(self.query_name)(terms)) | [Transformation.IDENTITY],
+                q_proj / self.arity | [Transformation.IDENTITY],
+                (v_proj(terms)[v_weight:dim, self.vdim] <= R.get(self.value_name)(terms)) | [Transformation.IDENTITY],
+                v_proj / self.arity | [Transformation.IDENTITY],
+                (k_proj(terms)[k_weight:dim, self.kdim] <= R.get(self.key_name)(terms)) | [Transformation.IDENTITY],
+                k_proj / self.arity | [Transformation.IDENTITY],
+                (output_rel(terms)[dim, dim] <= R.get(attention_name)(terms)) | [Transformation.IDENTITY],
+                output_rel / self.arity | [Transformation.IDENTITY],
+            ]
 
-        return [
-            (R.get(qproj_name)(terms)[self.embed_dim, self.embed_dim] <= R.get(self.query_name)(terms))
-            | [Transformation.IDENTITY],
-            R.get(qproj_name) / self.arity | [Transformation.IDENTITY],
-            (R.get(vproj_name)(terms)[self.embed_dim, self.vdim] <= R.get(self.value_name)(terms))
-            | [Transformation.IDENTITY],
-            R.get(vproj_name) / self.arity | [Transformation.IDENTITY],
-            (R.get(kproj_name)(terms)[self.embed_dim, self.kdim] <= R.get(self.key_name)(terms))
-            | [Transformation.IDENTITY],
-            R.get(kproj_name) / self.arity | [Transformation.IDENTITY],
-            *attention(),
-            *multihead_rules,
-        ]
+            attention = Attention(dim, attention_name, q_proj_name, k_proj_name, v_proj_name, self.arity)
+
+        return [*attention(), *multihead_rules]
