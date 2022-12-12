@@ -34,7 +34,7 @@ class Attention(Module):
         dk_rel = R.get(f"{self.output_name}__dk")
         dot_rel = R.get(f"{self.output_name}__dot")
 
-        metadata = [Combination.PRODUCT, Transformation.IDENTITY, Aggregation.SOFTMAX(agg_terms=[self.arity])]
+        metadata = [Combination.PRODUCT, Transformation.IDENTITY, Aggregation.SOFTMAX(agg_terms=["Y"])]
         out_metadata = [Combination.PRODUCT, Aggregation.SUM, Transformation.IDENTITY]
 
         return [
@@ -90,12 +90,11 @@ class MultiheadAttention(Module):
                 self.embed_dim // self.num_heads, attention_name, qslice_name, kslice_name, vslice_name, self.arity + 1
             )
 
+            attention_concat = []
             multihead_rules = [
                 R.get(qslice_name) / (self.arity + 1) | [Transformation.IDENTITY],
                 R.get(kslice_name) / (self.arity + 1) | [Transformation.IDENTITY],
                 R.get(vslice_name) / (self.arity + 1) | [Transformation.IDENTITY],
-                (R.get(self.output_name)(terms)[self.embed_dim, self.embed_dim] <= R.get(attention_name)("Y0", *terms))
-                | [Transformation.IDENTITY, Aggregation.CONCAT],
                 R.get(self.output_name) / self.arity | [Transformation.IDENTITY],
             ]
 
@@ -105,6 +104,12 @@ class MultiheadAttention(Module):
                 multihead_rules.append((R.get(qslice_name)(i, *terms) <= R.get(qproj_name)(terms)) | metadata)
                 multihead_rules.append((R.get(kslice_name)(i, *terms) <= R.get(kproj_name)(terms)) | metadata)
                 multihead_rules.append((R.get(vslice_name)(i, *terms) <= R.get(vproj_name)(terms)) | metadata)
+                attention_concat.append(R.get(attention_name)(i, *terms))
+
+            multihead_rules.append(
+                (R.get(self.output_name)(terms)[self.embed_dim, self.embed_dim] <= attention_concat)
+                | [Transformation.IDENTITY, Combination.CONCAT]
+            )
         else:
             attention = Attention(
                 self.embed_dim // self.num_heads, attention_name, qproj_name, kproj_name, vproj_name, self.arity

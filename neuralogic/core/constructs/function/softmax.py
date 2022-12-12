@@ -33,7 +33,7 @@ class Softmax(Aggregation):
             return "softmax"
         return f"softmax(agg_terms=[{', '.join(self.agg_terms)}])"
 
-    def head_dependant(self) -> bool:
+    def rule_head_dependant(self) -> bool:
         return self.agg_terms is not None
 
     def process_head(self, head) -> "Softmax":
