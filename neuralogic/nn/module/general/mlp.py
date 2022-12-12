@@ -49,7 +49,7 @@ class MLP(Module):
         for index, (in_channels, out_channels) in enumerate(zip(self.units[:-1], self.units[1:])):
             out_layer = R.get(f"{self.output_name}__{index}")
 
-            layers.append(out_layer(V.I)[out_channels, in_channels] <= prev_layer(V.I))
+            layers.append((out_layer(V.I)[out_channels, in_channels] <= prev_layer(V.I)) | [Transformation.IDENTITY])
             act_layer = out_layer / 1 | (
                 Metadata(transformation=self.activation[index]) if metadata is None else metadata
             )
@@ -60,7 +60,7 @@ class MLP(Module):
         in_channels, out_channels = self.units[-2], self.units[-1]
         out = R.get(self.output_name)
 
-        layers.append(out(V.I)[out_channels, in_channels] <= prev_layer(V.I))
+        layers.append((out(V.I)[out_channels, in_channels] <= prev_layer(V.I)) | [Transformation.IDENTITY])
         layers.append(out / 1 | (Metadata(transformation=self.activation[-1]) if metadata is None else metadata))
 
         return layers
