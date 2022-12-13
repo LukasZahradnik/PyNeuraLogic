@@ -46,7 +46,8 @@ class MLP(Module):
         else:
             metadata = Metadata(transformation=self.activation)
 
-        for index, (in_channels, out_channels) in enumerate(zip(self.units[:-1], self.units[1:])):
+        for index in range(len(self.units[:-1]) // 2):
+            in_channels, out_channels = self.units[index * 2], self.units[index * 2 + 1]
             out_layer = R.get(f"{self.output_name}__{index}")
 
             layers.append((out_layer(V.I)[out_channels, in_channels] <= prev_layer(V.I)) | [Transformation.IDENTITY])
