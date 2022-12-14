@@ -1,8 +1,8 @@
-from typing import List, Union
+from typing import List, Union, Sequence
 
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation
-from neuralogic.core.constructs.factories import R, V
+from neuralogic.core.constructs.factories import R
 from neuralogic.nn.module.module import Module
 
 
@@ -21,6 +21,8 @@ class MLP(Module):
     activation : Union[Transformation, List[Transformation]]
         Activation function of all layers or list of activations for each layer.
         Default: ``Transformation.RELU``
+    arity : int
+        Default: ``-1``
     """
 
     def __init__(
@@ -29,39 +31,53 @@ class MLP(Module):
         output_name: str,
         input_name: str,
         activation: Union[Transformation, List[Transformation]] = Transformation.RELU,
+        arity: int = 1,
     ):
         self.output_name = output_name
         self.input_name = input_name
 
         self.units = units
         self.activation: Union[Transformation, List[Transformation]] = activation
+        self.arity = arity
 
     def __call__(self):
+        terms = [f"X{i}" for i in range(self.arity)]
         layers = []
 
         prev_layer = R.get(self.input_name)
+        iters = len(self.units) - 1
 
-        if isinstance(self.activation, list):
-            metadata = None
+        if isinstance(self.activation, Sequence):
+            metadata = [Metadata(transformation=act) for act in self.activation]
+            metadata.extend([Metadata(transformation=Transformation.IDENTITY)] * (iters - len(metadata)))
         else:
-            metadata = Metadata(transformation=self.activation)
+            metadata = [Metadata(transformation=self.activation)] * iters
 
-        for index in range(len(self.units[:-1]) // 2):
-            in_channels, out_channels = self.units[index * 2], self.units[index * 2 + 1]
-            out_layer = R.get(f"{self.output_name}__{index}")
+        for index in range(0, iters, 2):
+            in_channels, out_channels = self.units[index], self.units[index + 1]
 
-            layers.append((out_layer(V.I)[out_channels, in_channels] <= prev_layer(V.I)) | [Transformation.IDENTITY])
-            act_layer = out_layer / 1 | (
-                Metadata(transformation=self.activation[index]) if metadata is None else metadata
-            )
+            head_predicate = R.get(f"{self.output_name}__mlp{index // 2}")
+            body_literal = prev_layer(terms)[out_channels, in_channels]
+            head_literal = head_predicate(terms)
 
-            layers.append(act_layer)
-            prev_layer = out_layer
+            body_metadata = metadata[index]
+            head_metadata = metadata[index + 1]
 
-        in_channels, out_channels = self.units[-2], self.units[-1]
-        out = R.get(self.output_name)
+            if body_metadata is None:
+                if index < len(self.activation):
+                    body_metadata = Metadata(transformation=self.activation[index])
+                else:
+                    body_metadata = [Transformation.IDENTITY]
 
-        layers.append((out(V.I)[out_channels, in_channels] <= prev_layer(V.I)) | [Transformation.IDENTITY])
-        layers.append(out / 1 | (Metadata(transformation=self.activation[-1]) if metadata is None else metadata))
+            if index + 2 < len(self.units):
+                in_channels, out_channels = self.units[index + 1], self.units[index + 2]
+                head_literal = head_literal[out_channels, in_channels]
+
+            layers.append((head_literal <= body_literal) | body_metadata)
+            layers.append(head_predicate / self.arity | head_metadata)
+            prev_layer = head_predicate
+
+        layers[-2].head.predicate.name = self.output_name
+        layers[-1].predicate.name = self.output_name
 
         return layers

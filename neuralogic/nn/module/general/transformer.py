@@ -43,14 +43,14 @@ class EncoderBlock(Module):
         )
 
         if self.mlp:
-            dims = [dim, self.dim_feedforward, self.dim_feedforward, dim]
-            mlp = MLP(dims, output_name, norm_name, activation=[Transformation.RELU, Transformation.NORM])
+            dims = [dim, self.dim_feedforward, dim]
+            mlp = MLP(dims, output_name, norm_name, [Transformation.RELU, Transformation.NORM], self.arity)
 
             return [
-                *mlp(),
                 *attention(),
                 (R.get(norm_name)(terms) <= (R.get(attn_name)(terms), R.get(data_name)(terms))) | [Transformation.NORM],
                 R.get(norm_name) / self.arity | [Transformation.IDENTITY],
+                *mlp(),
             ]
 
         return [
