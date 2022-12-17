@@ -50,12 +50,12 @@ class AtomFactory:
 
 
 class VariableFactory:
-    def __getattr__(self, item) -> str:
-        return item.upper()
+    def __getattr__(self, item: str) -> str:
+        return item.capitalize()
 
 
 class ConstantFactory:
-    def __getattr__(self, item) -> str:
+    def __getattr__(self, item: str) -> str:
         return item.lower()
 
 
