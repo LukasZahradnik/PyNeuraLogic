@@ -13,8 +13,8 @@ template = Template()
 # 1. There are five houses.
 template += [R.house(i) for i in range(1, 6)]
 
-# We need to add 0 and 6 constants, so that we can do R.special._in(1, Left, Right), where left is 0 (non-existent) etc.
-template += R.tmp(0, 6)
+template += R.next_to(V.X, V.Y) <= R.special.next(V.X, V.Y)  # Y is on the right side of X
+template += R.next_to(V.X, V.Y) <= R.special.next(V.Y, V.X)  # Y is on the left side of X
 
 template += R.solve(*person_vars, V.Zebra, V.Water) <= [
     *[R.house(var) for var in color_vars],
@@ -42,21 +42,15 @@ template += R.solve(*person_vars, V.Zebra, V.Water) <= [
     # 10. The Norwegian lives in the first house.
     R.special.eq(V.Norwegian, 1),
     # 11. The man who smokes Chesterfields lives in the house next to the man with the fox.
-    R.special.next(V.Fox, V.RightOfFox),
-    R.special.next(V.LeftOfFox, V.Fox),
-    R.special._in(V.Chesterfield, V.LeftOfFox, V.RightOfFox),
+    R.next_to(V.Chesterfield, V.Fox),
     # 12. Kools are smoked in a house next to the house where the horse is kept.
-    R.special.next(V.Horse, V.RightOfHorse),
-    R.special.next(V.LeftOfHorse, V.Horse),
-    R.special._in(V.Kools, V.LeftOfHorse, V.RightOfHorse),
+    R.next_to(V.Kools, V.Horse),
     # 13. The Lucky Strike smoker drinks orange juice.
     R.special.eq(V.LuckyStrike, V.OrangeJuice),
     # 14. The Japanese smokes Parliaments.
     R.special.eq(V.Japanese, V.Parliament),
     # 15. The Norwegian lives next to the blue house.
-    R.special.next(V.Blue, V.RightOfBlue),
-    R.special.next(V.LeftOfBlue, V.Blue),
-    R.special._in(V.Norwegian, V.LeftOfBlue, V.RightOfBlue),
+    R.next_to(V.Norwegian, V.Blue),
     # In one house can live only one person, house can have only one color etc.
     R.special.alldiff(color_vars),
     R.special.alldiff(drink_vars),
