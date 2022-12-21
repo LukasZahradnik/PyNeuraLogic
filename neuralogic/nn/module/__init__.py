@@ -10,6 +10,7 @@ from neuralogic.nn.module.gnn.rgcn import RGCNConv
 from neuralogic.nn.module.gnn.sg import SGConv
 from neuralogic.nn.module.gnn.tag import TAGConv
 
+from neuralogic.nn.module.general.positional_encoding import PositionalEncoding
 from neuralogic.nn.module.general.mlp import MLP
 from neuralogic.nn.module.general.linear import Linear
 from neuralogic.nn.module.general.rnn import RNN
@@ -35,6 +36,7 @@ __all__ = [
     "RGCNConv",
     "SGConv",
     "TAGConv",
+    "PositionalEncoding",
     "MLP",
     "Linear",
     "RNN",
