@@ -31,8 +31,7 @@ template += R.solve(*person_vars, V.Zebra, V.Water) <= [
     # 5. The Ukrainian drinks tea.
     R.special.eq(V.Ukrainian, V.Tea),
     # 6. The green house is immediately to the right of the ivory house.
-    R.special.next(V.Ivory, V.RightOfIvory),
-    R.special.eq(V.Green, V.RightOfIvory),
+    R.special.next(V.Ivory, V.Green),
     # 7. The Old Gold smoker owns snails.
     R.special.eq(V.OldGold, V.Snails),
     # 8. Kools are smoked in the yellow house.
