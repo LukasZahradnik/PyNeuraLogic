@@ -1,4 +1,7 @@
 import math
+from typing import Optional
+
+import numpy as np
 
 from neuralogic.core.constructs.function import Transformation, Combination, Aggregation
 from neuralogic.core.constructs.factories import R
@@ -13,6 +16,7 @@ class Attention(Module):
         query_name: str,
         key_name: str,
         value_name: str,
+        mask_name: Optional[str] = None,
         arity: int = 1,
     ):
         self.embed_dim = embed_dim
@@ -20,6 +24,7 @@ class Attention(Module):
         self.query_name = query_name
         self.key_name = key_name
         self.value_name = value_name
+        self.mask_name = mask_name
         self.arity = arity
 
     def __call__(self):
@@ -37,10 +42,34 @@ class Attention(Module):
         metadata = [Combination.PRODUCT, Transformation.IDENTITY, Aggregation.SOFTMAX(agg_terms=["Y"])]
         out_metadata = [Combination.PRODUCT, Aggregation.SUM, Transformation.IDENTITY]
 
-        return [
-            dk_rel[d_k].fixed(),
+        attention_product_rules = [
             (dot_rel(h_terms) <= (dk_rel, R.get(self.key_name)(k_terms).T, R.get(self.query_name)(q_terms))) | metadata,
             dot_rel / (self.arity + 1) | [Transformation.IDENTITY],
+        ]
+
+        if self.mask_name is not None:
+            ones = np.ones((1, self.embed_dim))
+            mask = R.get(self.mask_name)
+
+            key_rel = R.get(f"{self.output_name}__key")
+            query_rel = R.get(f"{self.output_name}__query")
+
+            mask_value = math.sqrt(9e15 / d_k)
+
+            attention_product_rules = [
+                (key_rel(h_terms) <= (R.get(self.key_name)(k_terms).T)) | [Transformation.IDENTITY],
+                (key_rel(h_terms)[-mask_value].fixed() <= (mask(h_terms)[ones].fixed())) | [Transformation.IDENTITY],
+                key_rel / len(h_terms) | [Combination.MIN, Transformation.IDENTITY],
+                (query_rel(h_terms) <= (R.get(self.query_name)(q_terms))) | [Transformation.IDENTITY],
+                (query_rel(h_terms)[mask_value].fixed() <= (mask(h_terms)[ones].fixed())) | [Transformation.TRANSP],
+                query_rel / len(h_terms) | [Combination.MAX, Transformation.IDENTITY],
+                (dot_rel(h_terms) <= (dk_rel, key_rel(h_terms), query_rel(h_terms))) | metadata,
+                dot_rel / (self.arity + 1) | [Transformation.IDENTITY],
+            ]
+
+        return [
+            dk_rel[d_k].fixed(),
+            *attention_product_rules,
             (R.get(self.output_name)(q_terms) <= (dot_rel(h_terms), R.get(self.value_name)(k_terms))) | out_metadata,
             R.get(self.output_name) / self.arity | [Transformation.IDENTITY],
         ]
@@ -57,6 +86,7 @@ class MultiheadAttention(Module):
         value_name: str,
         vdim: int = None,
         kdim: int = None,
+        mask_name: Optional[str] = None,
         arity: int = 1,
     ):
         self.embed_dim = embed_dim
@@ -67,6 +97,7 @@ class MultiheadAttention(Module):
         self.value_name = value_name
         self.vdim = vdim if vdim is not None else embed_dim
         self.kdim = kdim if kdim is not None else embed_dim
+        self.mask_name = mask_name
         self.arity = arity
 
     def __call__(self):
@@ -88,11 +119,13 @@ class MultiheadAttention(Module):
 
         attention_name = f"{self.output_name}__attention"
 
-        if self.num_heads > 1:
+        attention = Attention(
+            dim // self.num_heads, attention_name, q_proj_name, k_proj_name, v_proj_name, self.mask_name, self.arity
+        )
+
+        if self.num_heads != 1:
             size = self.embed_dim / self.num_heads
-            attention = Attention(
-                dim // self.num_heads, attention_name, q_proj_name, k_proj_name, v_proj_name, self.arity + 1
-            )
+            attention.arity += 1
 
             attention_concat = []
             multihead_rules = [
@@ -123,7 +156,5 @@ class MultiheadAttention(Module):
                 (output_rel(terms)[dim, dim] <= R.get(attention_name)(terms)) | [Transformation.IDENTITY],
                 output_rel / self.arity | [Transformation.IDENTITY],
             ]
-
-            attention = Attention(dim, attention_name, q_proj_name, k_proj_name, v_proj_name, self.arity)
 
         return [*attention(), *multihead_rules]

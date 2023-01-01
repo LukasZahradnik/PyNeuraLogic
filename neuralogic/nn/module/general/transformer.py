@@ -1,3 +1,5 @@
+from typing import Optional
+
 from neuralogic.core.constructs.function import Transformation
 from neuralogic.core.constructs.factories import R
 from neuralogic.nn.module.module import Module
@@ -14,6 +16,9 @@ class Transformer(Module):
         output_name: str,
         src_name: str,
         tgt_name: str,
+        src_mask_name: Optional[str] = None,
+        tgt_mask_name: Optional[str] = None,
+        memory_mask_name: Optional[str] = None,
         arity: int = 1,
     ):
         self.input_dim = input_dim
@@ -22,6 +27,9 @@ class Transformer(Module):
         self.output_name = output_name
         self.src_name = src_name
         self.tgt_name = tgt_name
+        self.src_mask_name = src_mask_name
+        self.tgt_mask_name = tgt_mask_name
+        self.memory_mask_name = memory_mask_name
         self.arity = arity
 
     def __call__(self):
@@ -31,6 +39,7 @@ class Transformer(Module):
             self.dim_feedforward,
             f"{self.output_name}__encoder",
             self.src_name,
+            self.src_mask_name,
             self.arity,
         )
 
@@ -41,6 +50,8 @@ class Transformer(Module):
             self.output_name,
             self.tgt_name,
             f"{self.output_name}__encoder",
+            self.tgt_mask_name,
+            self.memory_mask_name,
             self.arity,
         )
 
@@ -60,6 +71,7 @@ class EncoderBlock(Module):
         query_name: str,
         key_name: str,
         value_name: str,
+        mask_name: Optional[str] = None,
         arity: int = 1,
         mlp: bool = True,
     ):
@@ -70,6 +82,7 @@ class EncoderBlock(Module):
         self.query_name = query_name
         self.key_name = key_name
         self.value_name = value_name
+        self.mask_name = mask_name
         self.arity = arity
         self.mlp = mlp
 
@@ -84,7 +97,14 @@ class EncoderBlock(Module):
         data_name = self.query_name
 
         attention = MultiheadAttention(
-            dim, self.num_heads, attn_name, self.query_name, self.key_name, self.value_name, arity=self.arity
+            dim,
+            self.num_heads,
+            attn_name,
+            self.query_name,
+            self.key_name,
+            self.value_name,
+            mask_name=self.mask_name,
+            arity=self.arity,
         )
 
         if self.mlp:
@@ -107,10 +127,26 @@ class EncoderBlock(Module):
 
 class TransformerEncoder(EncoderBlock):
     def __init__(
-        self, input_dim: int, num_heads: int, dim_feedforward: int, output_name: str, input_name: str, arity: int = 1
+        self,
+        input_dim: int,
+        num_heads: int,
+        dim_feedforward: int,
+        output_name: str,
+        input_name: str,
+        mask_name: Optional[str] = None,
+        arity: int = 1,
     ):
         super().__init__(
-            input_dim, num_heads, dim_feedforward, output_name, input_name, input_name, input_name, arity, True
+            input_dim,
+            num_heads,
+            dim_feedforward,
+            output_name,
+            input_name,
+            input_name,
+            input_name,
+            mask_name,
+            arity,
+            True,
         )
 
 
@@ -123,6 +159,8 @@ class TransformerDecoder(Module):
         output_name: str,
         input_name: str,
         encoder_name: str,
+        mask_name: Optional[str] = None,
+        memory_mask_name: Optional[str] = None,
         arity: int = 1,
     ):
         self.input_dim = input_dim
@@ -131,6 +169,8 @@ class TransformerDecoder(Module):
         self.output_name = output_name
         self.input_name = input_name
         self.encoder_name = encoder_name
+        self.mask_name = mask_name
+        self.memory_mask_name = memory_mask_name
         self.arity = arity
 
     def __call__(self):
@@ -142,11 +182,28 @@ class TransformerDecoder(Module):
         mlp_dim = self.dim_feedforward
 
         enc_block_one = EncoderBlock(
-            dim, self.num_heads, mlp_dim, tmp_encoder_out, data_name, data_name, data_name, self.arity, False
+            dim,
+            self.num_heads,
+            mlp_dim,
+            tmp_encoder_out,
+            data_name,
+            data_name,
+            data_name,
+            self.mask_name,
+            self.arity,
+            False,
         )
 
         enc_block_two = EncoderBlock(
-            dim, self.num_heads, mlp_dim, self.output_name, tmp_encoder_out, encoder_name, encoder_name, self.arity
+            dim,
+            self.num_heads,
+            mlp_dim,
+            self.output_name,
+            tmp_encoder_out,
+            encoder_name,
+            encoder_name,
+            self.memory_mask_name,
+            self.arity,
         )
 
         return [
