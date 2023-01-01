@@ -5,6 +5,51 @@ from neuralogic.nn.module.general.mlp import MLP
 from neuralogic.nn.module.general.attention import MultiheadAttention
 
 
+class Transformer(Module):
+    def __init__(
+        self,
+        input_dim: int,
+        num_heads: int,
+        dim_feedforward: int,
+        output_name: str,
+        src_name: str,
+        tgt_name: str,
+        arity: int = 1,
+    ):
+        self.input_dim = input_dim
+        self.num_heads = num_heads
+        self.dim_feedforward = dim_feedforward
+        self.output_name = output_name
+        self.src_name = src_name
+        self.tgt_name = tgt_name
+        self.arity = arity
+
+    def __call__(self):
+        encoder = TransformerEncoder(
+            self.input_dim,
+            self.num_heads,
+            self.dim_feedforward,
+            f"{self.output_name}__encoder",
+            self.src_name,
+            self.arity,
+        )
+
+        decoder = TransformerDecoder(
+            self.input_dim,
+            self.num_heads,
+            self.dim_feedforward,
+            self.output_name,
+            self.tgt_name,
+            f"{self.output_name}__encoder",
+            self.arity,
+        )
+
+        return [
+            *encoder(),
+            *decoder(),
+        ]
+
+
 class EncoderBlock(Module):
     def __init__(
         self,
@@ -92,7 +137,7 @@ class TransformerDecoder(Module):
         data_name = self.input_name
         dim = self.input_dim
 
-        tmp_encoder_out = f"{self.output_name}__encoder"
+        tmp_encoder_out = f"{self.output_name}__decoder"
         encoder_name = self.encoder_name
         mlp_dim = self.dim_feedforward
 

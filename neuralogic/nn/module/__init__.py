@@ -19,7 +19,7 @@ from neuralogic.nn.module.general.lstm import LSTM
 from neuralogic.nn.module.general.rvnn import RvNN
 from neuralogic.nn.module.general.pooling import Pooling, AvgPooling, SumPooling, MaxPooling
 from neuralogic.nn.module.general.attention import Attention, MultiheadAttention
-from neuralogic.nn.module.general.transformer import TransformerEncoder, TransformerDecoder
+from neuralogic.nn.module.general.transformer import Transformer, TransformerEncoder, TransformerDecoder
 
 from neuralogic.nn.module.meta.meta import MetaConv
 from neuralogic.nn.module.meta.magnn import MAGNNMean
@@ -47,6 +47,7 @@ __all__ = [
     "AvgPooling",
     "MaxPooling",
     "SumPooling",
+    "Transformer",
     "TransformerEncoder",
     "TransformerDecoder",
     "Attention",
