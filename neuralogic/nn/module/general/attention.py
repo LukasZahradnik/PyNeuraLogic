@@ -1,8 +1,6 @@
 import math
 from typing import Optional
 
-import numpy as np
-
 from neuralogic.core.constructs.function import Transformation, Combination, Aggregation
 from neuralogic.core.constructs.factories import R
 from neuralogic.nn.module.module import Module
@@ -48,24 +46,7 @@ class Attention(Module):
         ]
 
         if self.mask_name is not None:
-            ones = np.ones((1, self.embed_dim))
-            mask = R.get(self.mask_name)
-
-            key_rel = R.get(f"{self.output_name}__key")
-            query_rel = R.get(f"{self.output_name}__query")
-
-            mask_value = math.sqrt(9e15 / d_k)
-
-            attention_product_rules = [
-                (key_rel(h_terms) <= (R.get(self.key_name)(k_terms).T)) | [Transformation.IDENTITY],
-                (key_rel(h_terms)[-mask_value].fixed() <= (mask(h_terms)[ones].fixed())) | [Transformation.IDENTITY],
-                key_rel / len(h_terms) | [Combination.MIN, Transformation.IDENTITY],
-                (query_rel(h_terms) <= (R.get(self.query_name)(q_terms))) | [Transformation.IDENTITY],
-                (query_rel(h_terms)[mask_value].fixed() <= (mask(h_terms)[ones].fixed())) | [Transformation.TRANSP],
-                query_rel / len(h_terms) | [Combination.MAX, Transformation.IDENTITY],
-                (dot_rel(h_terms) <= (dk_rel, key_rel(h_terms), query_rel(h_terms))) | metadata,
-                dot_rel / (self.arity + 1) | [Transformation.IDENTITY],
-            ]
+            attention_product_rules[0].body.append(R.hidden.get(self.mask_name)(h_terms))
 
         return [
             dk_rel[d_k].fixed(),
