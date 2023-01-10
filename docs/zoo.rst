@@ -69,6 +69,20 @@ Pre-defined Modules
             :widths: 99 1
             :header-rows: 1
 
+            * - Transformer module
+              -
+
+            * - :class:`~neuralogic.nn.module.general.transformer.Transformer`
+              -
+            * - :class:`~neuralogic.nn.module.general.transformer.TransformerEncoder`
+              -
+            * - :class:`~neuralogic.nn.module.general.transformer.TransformerDecoder`
+              -
+
+        .. list-table::
+            :widths: 99 1
+            :header-rows: 1
+
             * - Recurrent/Recursive module
               -
 
@@ -85,6 +99,18 @@ Pre-defined Modules
             :widths: 99 1
             :header-rows: 1
 
+            * - Attention module
+              -
+
+            * - :class:`~neuralogic.nn.module.general.attention.Attention`
+              -
+            * - :class:`~neuralogic.nn.module.general.attention.MultiheadAttention`
+              -
+
+        .. list-table::
+            :widths: 99 1
+            :header-rows: 1
+
             * - Pooling module
               -
 
@@ -95,6 +121,16 @@ Pre-defined Modules
             * - :class:`~neuralogic.nn.module.general.pooling.AvgPooling`
               -
             * - :class:`~neuralogic.nn.module.general.pooling.MaxPooling`
+              -
+
+        .. list-table::
+            :widths: 99 1
+            :header-rows: 1
+
+            * - Encoding module
+              -
+
+            * - :class:`~neuralogic.nn.module.general.positional_encoding.PositionalEncoding`
               -
 
     .. tab:: Meta
@@ -156,6 +192,15 @@ General Block Modules
 .. autoclass:: neuralogic.nn.module.general.mlp::MLP
    :members:
 
+.. autoclass:: neuralogic.nn.module.general.transformer::Transformer
+   :members:
+
+.. autoclass:: neuralogic.nn.module.general.transformer::TransformerEncoder
+   :members:
+
+.. autoclass:: neuralogic.nn.module.general.transformer::TransformerDecoder
+   :members:
+
 .. autoclass:: neuralogic.nn.module.general.rvnn::RvNN
    :members:
 
@@ -168,6 +213,12 @@ General Block Modules
 .. autoclass:: neuralogic.nn.module.general.lstm::LSTM
    :members:
 
+.. autoclass:: neuralogic.nn.module.general.attention::Attention
+   :members:
+
+.. autoclass:: neuralogic.nn.module.general.attention::MultiheadAttention
+   :members:
+
 .. autoclass:: neuralogic.nn.module.general.pooling::Pooling
    :members:
 
@@ -178,6 +229,9 @@ General Block Modules
    :members:
 
 .. autoclass:: neuralogic.nn.module.general.pooling::MaxPooling
+   :members:
+
+.. autoclass:: neuralogic.nn.module.general.positional_encoding::PositionalEncoding
    :members:
 
 -----

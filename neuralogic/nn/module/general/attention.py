@@ -7,6 +7,28 @@ from neuralogic.nn.module.module import Module
 
 
 class Attention(Module):
+    r"""
+    A single-head attention module based on `"Attention Is All You Need" <https://arxiv.org/abs/1706.03762>`_.
+
+    Parameters
+    ----------
+
+    embed_dim : int
+        The number of expected features.
+    output_name : str
+        Output (head) predicate name of the module.
+    query_name : str
+        The name of the queries predicate.
+    key_name : str
+        The name of the keys predicate.
+    value_name : str
+        The name of the values predicate.
+    mask_name : str, optional
+        The name of the input mask predicate. Default: ``None``
+    arity : int
+        Arity of the input and output predicates. Default: ``1``
+    """
+
     def __init__(
         self,
         embed_dim: int,
@@ -57,6 +79,34 @@ class Attention(Module):
 
 
 class MultiheadAttention(Module):
+    r"""
+    A multi-head attention module based on `"Attention Is All You Need" <https://arxiv.org/abs/1706.03762>`_.
+
+    Parameters
+    ----------
+
+    embed_dim : int
+        The number of expected features.
+    num_heads : int
+        The number of heads.
+    output_name : str
+        Output (head) predicate name of the module.
+    query_name : str
+        The name of the queries predicate.
+    key_name : str
+        The name of the keys predicate.
+    value_name : str
+        The name of the values predicate.
+    vdim : int
+        Total number of features for values.
+    kdim : int
+        Total number of features for keys.
+    mask_name : str, optional
+        The name of the input mask predicate. Default: ``None``
+    arity : int
+        Arity of the input and output predicates. Default: ``1``
+    """
+
     def __init__(
         self,
         embed_dim: int,

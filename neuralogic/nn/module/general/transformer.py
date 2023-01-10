@@ -8,6 +8,34 @@ from neuralogic.nn.module.general.attention import MultiheadAttention
 
 
 class Transformer(Module):
+    r"""
+    A transformer module based on `"Attention Is All You Need" <https://arxiv.org/abs/1706.03762>`_.
+
+    Parameters
+    ----------
+
+    input_dim : int
+        The number of expected features.
+    num_heads : int
+        The number of heads in the multi-head attention module.
+    dim_feedforward : int
+        The dimension of the feedforward network.
+    output_name : str
+        Output (head) predicate name of the module.
+    src_name : str
+        The name of the predicate of the input to the encoder.
+    tgt_name : str
+        The name of the predicate of the input to the decoder.
+    src_mask_name : str, optional
+        The name of the predicate of the encoder input mask. Default: ``None``
+    tgt_mask_name : str, optional
+        The name of the predicate of the decoder input mask. Default: ``None``
+    memory_mask_name : str, optional
+        The name of the predicate of the encoder output mask. Default: ``None``
+    arity : int
+        Arity of the input and output predicate. Default: ``1``
+    """
+
     def __init__(
         self,
         input_dim: int,
@@ -126,6 +154,28 @@ class EncoderBlock(Module):
 
 
 class TransformerEncoder(EncoderBlock):
+    r"""
+    A transformer encoder module based on `"Attention Is All You Need" <https://arxiv.org/abs/1706.03762>`_.
+
+    Parameters
+    ----------
+
+    input_dim : int
+        The number of expected features.
+    num_heads : int
+        The number of heads in the multi-head attention module.
+    dim_feedforward : int
+        The dimension of the feedforward network.
+    output_name : str
+        Output (head) predicate name of the module.
+    input_name : str
+        The name of the predicate of the input sequence.
+    mask_name : str, optional
+        The name of the predicate of the input sequence mask. Default: ``None``
+    arity : int
+        Arity of the input and output predicate. Default: ``1``
+    """
+
     def __init__(
         self,
         input_dim: int,
@@ -151,6 +201,32 @@ class TransformerEncoder(EncoderBlock):
 
 
 class TransformerDecoder(Module):
+    r"""
+    A transformer decoder module based on `"Attention Is All You Need" <https://arxiv.org/abs/1706.03762>`_.
+
+    Parameters
+    ----------
+
+    input_dim : int
+        The number of expected features.
+    num_heads : int
+        The number of heads in the multi-head attention module.
+    dim_feedforward : int
+        The dimension of the feedforward network.
+    output_name : str
+        Output (head) predicate name of the module.
+    input_name : str
+        The name of the predicate of the input sequence.
+    input_name : str
+        The name of the input encoder.
+    mask_name : str, optional
+        The name of the predicate of the decoder input sequence mask. Default: ``None``
+    memory_mask_name : str, optional
+        The name of the predicate of the encoder output mask. Default: ``None``
+    arity : int
+        Arity of the input and output predicate. Default: ``1``
+    """
+
     def __init__(
         self,
         input_dim: int,
