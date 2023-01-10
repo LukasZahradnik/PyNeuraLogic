@@ -75,3 +75,9 @@ The special modifier changes the relation's behavior depending on its predicate 
 - :code:`Relation.special.gt`
 
 - :code:`Relation.special.eq`
+
+- :code:`Relation.special.add`
+
+- :code:`Relation.special.sub`
+
+- :code:`Relation.special.mod`
