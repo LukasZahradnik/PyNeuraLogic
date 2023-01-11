@@ -5,12 +5,14 @@ import numpy as np
 from neuralogic.core.constructs.predicate import Predicate
 from neuralogic.core.constructs import rule, factories
 from neuralogic.core.constructs.function import Transformation, Combination
+from neuralogic.core.constructs.function.tree import FunctionalTree
 
 
-class BaseRelation:
+class BaseRelation(FunctionalTree):
     __slots__ = "predicate", "function", "terms"
 
     def __init__(self, predicate: Predicate, terms=None, function: Union[Transformation, Combination] = None):
+        super().__init__()
         self.predicate = predicate
         self.function = function
         self.terms = terms
@@ -63,6 +65,7 @@ class BaseRelation:
         return WeightedRelation(item, self.predicate, False, self.terms, self.function)
 
     def __le__(self, other: Union[Iterable["BaseRelation"], "BaseRelation"]) -> rule.Rule:
+        print("1: __le__ called")
         return rule.Rule(self, other)
 
     def to_str(self, end=False) -> str:

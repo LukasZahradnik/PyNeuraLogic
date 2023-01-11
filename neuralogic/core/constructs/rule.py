@@ -84,3 +84,10 @@ class Rule:
         self.metadata = other
 
         return self
+
+    def __rshift__(self, tree):
+        # TODO - add intended functionality instead of print
+        # call java and give it the tree to construct network
+        print("3: rshift called!")
+        print(tree.print_tree())
+

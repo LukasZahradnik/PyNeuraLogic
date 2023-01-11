@@ -1,3 +1,6 @@
+from neuralogic.core.constructs.function.tree import FunctionalTree
+
+
 class Function:
     __slots__ = ("name",)
 
@@ -92,3 +95,22 @@ class Aggregation(Function):
     COUNT: "Aggregation"
     CONCAT: "Aggregation"
     SOFTMAX: "Aggregation"
+
+
+class F:
+    # all functions available for functional syntax type, includes combinations, aggregations and transformations
+    # TODO: more effective dictionary-like approach, might delete operations like sum, that can be substituted using operators such as '+'
+    def __init__(self):
+        pass
+    
+    def sum(self):
+        n = FunctionalTree()
+        n.operation = "sum"
+        n.left_value = self
+        return n
+
+    def identity(self):
+        n = FunctionalTree()
+        n.operation = "identity"
+        n.left_value = self
+        return n
