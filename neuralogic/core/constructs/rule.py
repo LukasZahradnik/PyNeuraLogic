@@ -126,3 +126,10 @@ class Rule:
             metadata.aggregation = metadata.aggregation.process_head(self.head)
 
         self.metadata = metadata
+
+    def __rshift__(self, tree):
+        # TODO - add intended functionality instead of print
+        # call java and give it the tree to construct network
+        print("3: rshift called!")
+        print(tree.print_tree())
+
