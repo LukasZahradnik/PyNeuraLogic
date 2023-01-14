@@ -56,7 +56,7 @@ The special modifier changes the relation's behavior depending on its predicate 
 
 - :code:`Relation.special.anypred`
 
-- :code:`Relation.special.in`
+- :code:`Relation.special._in`
 
 - :code:`Relation.special.maxcard`
 
