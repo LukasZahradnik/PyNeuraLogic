@@ -119,8 +119,9 @@ class EncoderBlock(Module):
 
         attn_name = f"{self.output_name}__mhattn"
         norm_name = f"{self.output_name}__norm"
+        mlp_name = f"{self.output_name}__mlp"
 
-        output_name = self.output_name
+        output_rel = R.get(self.output_name)
         dim = self.input_dim
         data_name = self.query_name
 
@@ -137,19 +138,21 @@ class EncoderBlock(Module):
 
         if self.mlp:
             dims = [dim, self.dim_feedforward, dim]
-            mlp = MLP(dims, output_name, norm_name, [Transformation.RELU, Transformation.NORM], self.arity)
+            mlp = MLP(dims, mlp_name, norm_name, [Transformation.RELU, Transformation.IDENTITY], self.arity)
 
             return [
                 *attention(),
                 (R.get(norm_name)(terms) <= (R.get(attn_name)(terms), R.get(data_name)(terms))) | [Transformation.NORM],
                 R.get(norm_name) / self.arity | [Transformation.IDENTITY],
                 *mlp(),
+                (output_rel(terms) <= (R.get(norm_name)(terms), R.get(mlp_name)(terms))) | [Transformation.NORM],
+                output_rel / self.arity | [Transformation.IDENTITY],
             ]
 
         return [
             *attention(),
-            (R.get(output_name)(terms) <= (R.get(attn_name)(terms), R.get(data_name)(terms))) | [Transformation.NORM],
-            R.get(output_name) / self.arity | [Transformation.IDENTITY],
+            (output_rel(terms) <= (R.get(attn_name)(terms), R.get(data_name)(terms))) | [Transformation.NORM],
+            output_rel / self.arity | [Transformation.IDENTITY],
         ]
 
 
