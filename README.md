@@ -134,13 +134,25 @@ It contains, for example, predefined modules for:
 
 - Graph Neural Networks (GNNConv, SAGEConv, GINConv, RGCNConv, ...)
 - Meta graphs and meta paths (MetaConv, MAGNN, ...)
-- LSTM, GRU, RNN, [...and more!](https://pyneuralogic.readthedocs.io/en/latest/zoo.html)
+- Transformer, LSTM, GRU, RNN, [...and more!](https://pyneuralogic.readthedocs.io/en/latest/zoo.html)
 
 ## 📝 Papers
 
-[Beyond Graph Neural Networks with Lifted Relational Neural Networks](https://arxiv.org/abs/2007.06286) Machine Learning Journal, 2021
+- [Beyond Graph Neural Networks with Lifted Relational Neural Networks](https://arxiv.org/abs/2007.06286) Machine Learning Journal, 2021
+- [Lifted Relational Neural Networks](https://arxiv.org/abs/1508.05128) Journal of Artificial Intelligence Research, 2018
+- [Lossless compression of structured convolutional models via lifting](https://arxiv.org/abs/2007.06567) ICLR, 2021
 
-[Lifted Relational Neural Networks](https://arxiv.org/abs/1508.05128) Journal of Artificial Intelligence Research, 2018
+## 📘 Articles
+
+- [What is Relational Machine Learning?](https://medium.com/towards-data-science/what-is-relational-machine-learning-afbe4a9c4231)
+- [What is Neural-Symbolic Integration?](https://medium.com/towards-data-science/what-is-neural-symbolic-integration-d5c6267dfdb0)
+- [From Graph ML to Deep Relational Learning](https://medium.com/towards-data-science/from-graph-ml-to-deep-relational-learning-f07a0dddda89)
+- [Beyond Graph Neural Networks with PyNeuraLogic](https://medium.com/towards-data-science/beyond-graph-neural-networks-with-pyneuralogic-c1e6502c46f7)
+- [Towards Deep Learning for Relational Databases](https://medium.com/towards-data-science/towards-deep-learning-for-relational-databases-de9adce5bb00)
+- [Beyond Transformers with PyNeuraLogic](https://medium.com/towards-data-science/beyond-transformers-with-pyneuralogic-10b70cdc5e45)
 
 
-[Lossless compression of structured convolutional models via lifting](https://arxiv.org/abs/2007.06567) ICLR, 2021
+## 🎥 Videos
+
+- [Beyond Graph Neural Networks with Lifted Relational Neural Networks
+](https://www.youtube.com/watch?v=qA0tQ8jwrlA)
