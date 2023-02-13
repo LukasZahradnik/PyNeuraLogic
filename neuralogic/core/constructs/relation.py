@@ -8,12 +8,19 @@ from neuralogic.core.constructs.function import Transformation, Combination
 
 
 class BaseRelation:
-    __slots__ = "predicate", "function", "terms"
+    __slots__ = "predicate", "function", "terms", "negated"
 
-    def __init__(self, predicate: Predicate, terms=None, function: Union[Transformation, Combination] = None):
+    def __init__(
+        self,
+        predicate: Predicate,
+        terms=None,
+        function: Union[Transformation, Combination] = None,
+        negated: bool = False,
+    ):
         self.predicate = predicate
         self.function = function
         self.terms = terms
+        self.negated = negated
 
         if self.terms is None:
             self.terms = []
@@ -21,16 +28,24 @@ class BaseRelation:
             self.terms = [self.terms]
 
     def __neg__(self) -> "BaseRelation":
-        return self.__invert__()
+        return self.attach_activation_function(Transformation.REVERSE)
 
     def __invert__(self) -> "BaseRelation":
-        return self.attach_activation_function(Transformation.REVERSE)
+        if self.function is not None:
+            raise ValueError(f"Cannot negate relation {self} with attached function.")
+
+        predicate = Predicate(self.predicate.name, self.predicate.arity, True, self.predicate.special)
+        relation = BaseRelation(predicate, self.terms, self.function, not self.negated)
+
+        return relation
 
     @property
     def T(self) -> "BaseRelation":
         return self.attach_activation_function(Transformation.TRANSP)
 
     def attach_activation_function(self, function: Union[Transformation, Combination]):
+        if self.negated:
+            raise ValueError(f"Cannot attach function to negated relation {self}")
         relation = self.__copy__()
         relation.function = function
         return relation
@@ -55,7 +70,7 @@ class BaseRelation:
         name, hidden, special = self.predicate.name, self.predicate.hidden, self.predicate.special
         predicate = factories.AtomFactory.Predicate.get_predicate(name, arity, hidden, special)
 
-        return BaseRelation(predicate, terms, self.function)
+        return BaseRelation(predicate, terms, self.function, self.negated)
 
     def __getitem__(self, item) -> "WeightedRelation":
         if self.predicate.hidden or self.predicate.special:
@@ -71,11 +86,15 @@ class BaseRelation:
         if self.terms:
             terms = ", ".join([str(term) for term in self.terms])
 
+            if self.negated:
+                return f"~{self.predicate.to_str()}({terms}){end}"
             if self.function:
                 literal = f"{self.predicate.to_str()}({terms})"
                 return f"{self.function.wrap(literal)}{end}"
             return f"{self.predicate.to_str()}({terms}){end}"
 
+        if self.negated:
+            return f"~{self.predicate.to_str()}{end}"
         if self.function:
             return f"{self.function.wrap(self.predicate.to_str())}{end}"
         return f"{self.predicate.to_str()}{end}"
@@ -84,12 +103,13 @@ class BaseRelation:
         return self.to_str(True)
 
     def __copy__(self):
-        atom = BaseRelation.__new__(BaseRelation)
-        atom.function = self.function
-        atom.terms = self.terms
-        atom.predicate = self.predicate
+        relation = BaseRelation.__new__(BaseRelation)
+        relation.function = self.function
+        relation.terms = self.terms
+        relation.predicate = self.predicate
+        relation.negated = self.negated
 
-        return atom
+        return relation
 
 
 class WeightedRelation(BaseRelation):
@@ -98,7 +118,7 @@ class WeightedRelation(BaseRelation):
     def __init__(
         self, weight, predicate: Predicate, fixed=False, terms=None, function: Union[Transformation, Combination] = None
     ):
-        super().__init__(predicate, terms, function)
+        super().__init__(predicate, terms, function, False)
 
         self.weight = weight
         self.weight_name = None
@@ -148,14 +168,16 @@ class WeightedRelation(BaseRelation):
     @property
     def T(self) -> "WeightedRelation":
         raise NotImplementedError(
-            f"Cannot transpose weighted relation {self}. Apply the transposition before adding weights."
+            f"Cannot transpose weighted relation {self} Apply the transposition before adding weights."
         )
 
     def __invert__(self) -> "WeightedRelation":
-        raise NotImplementedError(f"Cannot negate weighted relation {self}. Apply the negation before adding weights.")
+        raise NotImplementedError(f"Weighted relations ({self}) cannot be negated.")
 
     def __neg__(self) -> "WeightedRelation":
-        return self.__invert__()
+        raise NotImplementedError(
+            f"Cannot negate weighted relation {self} Apply the reverse function before adding weights."
+        )
 
     def __copy__(self):
         relation = WeightedRelation.__new__(WeightedRelation)
@@ -165,5 +187,6 @@ class WeightedRelation(BaseRelation):
         relation.terms = self.terms
         relation.weight = self.weight
         relation.is_fixed = self.is_fixed
+        relation.negated = self.negated
 
         return relation

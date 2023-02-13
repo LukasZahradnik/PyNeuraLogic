@@ -124,7 +124,7 @@ def test_relation_creation() -> None:
     assert neg_relation.function is Transformation.REVERSE
 
     neg_relation = ~relation
-    assert neg_relation.function is Transformation.REVERSE
+    assert neg_relation.negated is True
 
     t_relation = relation.T
     assert t_relation.function is Transformation.TRANSP

@@ -162,9 +162,9 @@ class JavaFactory:
                 function = self.settings_class.parseTransformation(str(relation.function))
                 transformation_function = self.transformation.getFunction(function) if function is not None else None
 
-            java_relation = relation_class(predicate, j_term_list, False, transformation_function, weight)
+            java_relation = relation_class(predicate, j_term_list, relation.negated, transformation_function, weight)
         else:
-            java_relation = relation_class(predicate, j_term_list, False, weight)
+            java_relation = relation_class(predicate, j_term_list, relation.negated, weight)
         java_relation.originalString = relation.to_str()
 
         return java_relation
