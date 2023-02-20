@@ -45,7 +45,7 @@ Relation.message2(Var.X) <= (Relation.message1(Var.Y), Relation.edge(Var.Y, Var.
 Relation.message2(Var.X)[5,10] <= (Relation.message1(Var.Y)[10,20], Relation.edge(Var.Y, Var.X))
 ```
 
-to project your `[1,20]` input node embeddings ('message1') through a learnable ``[10,20]`` layer before the aggregation, and subsequently a `[5,10]` layer after the aggregation.
+to project your `[20,1]` input node embeddings ('message1') through a learnable ``[10,20]`` layer before the aggregation, and subsequently a `[5,10]` layer after the aggregation.
 
 If you don't like the default settings, you can of course [specify](https://pyneuralogic.readthedocs.io/en/latest/language.html) various additional details, such as the particular aggregation and activation functions
 
