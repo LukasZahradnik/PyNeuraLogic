@@ -94,7 +94,7 @@ class BaseRelation:
             return f"{self.predicate.to_str()}({terms}){end}"
 
         if self.negated:
-            return f"~{self.predicate.to_str()}{end}"
+            return f"!{self.predicate.to_str()}{end}"
         if self.function:
             return f"{self.function.wrap(self.predicate.to_str())}{end}"
         return f"{self.predicate.to_str()}{end}"
