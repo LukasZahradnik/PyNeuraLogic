@@ -1,9 +1,10 @@
 from neuralogic.core.constructs.metadata import Metadata
 from typing import Iterable, Optional
+from neuralogic.core.constructs.function.tree import FunctionalTree
 
 
 class Rule:
-    __slots__ = "head", "body", "metadata"
+    __slots__ = "head", "body", "metadata", "tree"
 
     def __init__(self, head, body):
         from neuralogic.core import Relation
@@ -18,6 +19,7 @@ class Rule:
 
         self.body = list(body)
         self.metadata: Optional[Metadata] = None
+        self.tree = None
 
         if self.is_ellipsis_templated():
             variable_set = {term for term in head.terms if term is not Ellipsis and str(term)[0].isupper()}
@@ -73,21 +75,32 @@ class Rule:
 
     def __or__(self, other) -> "Rule":
         if isinstance(other, Iterable):
+            # yes
             other = Metadata.from_iterable(other)
+            # just creates information (other==metadata) about how to combine atoms
         elif not isinstance(other, Metadata):
             raise NotImplementedError
 
         if other.aggregation is not None and other.aggregation.rule_head_dependant():
+            # no
             other = other.copy()
             other.aggregation = other.aggregation.process_head(self.head)
 
         self.metadata = other
-
+        print("printing metadata")
+        print(self.metadata)
         return self
 
     def __rshift__(self, tree):
-        # TODO - add intended functionality instead of print
-        # call java and give it the tree to construct network
-        print("3: rshift called!")
+        # we only assign the new tree to rule
+        # self.metadata = None
+        
         print(tree.print_tree())
+
+        if isinstance(tree, Iterable):
+            raise NotImplementedError("Wrong syntax, use '|' instead of '>>'!")
+        elif isinstance(tree, FunctionalTree):
+            self.tree = tree
+
+        return self
 

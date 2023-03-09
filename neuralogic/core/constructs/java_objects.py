@@ -198,15 +198,25 @@ class JavaFactory:
 
         map = jpype.JClass("java.util.LinkedHashMap")()
 
+        print("new map:")
+        print(map)
+
+        # just puts values in map
         self.add_metadata_function(metadata, map, "aggregation")
         self.add_metadata_function(metadata, map, "transformation")
         self.add_metadata_function(metadata, map, "combination")
 
         if metadata.learnable is not None:
+            # no
             map.put("learnable", self.string_value(str(metadata.learnable).lower()))
 
+        # this just inicializes the java class and checks, if all metadata are valid
         metadata_obj = metadata_class(self.builder.settings, map)
 
+        print("initialized map:")
+        print(map)
+
+        # just puts values in metadata_obj's map I guess
         self.add_parametrized_function(metadata, metadata_obj, "aggregation")
         self.add_parametrized_function(metadata, metadata_obj, "transformation")
         self.add_parametrized_function(metadata, metadata_obj, "combination")
@@ -292,9 +302,15 @@ class JavaFactory:
 
         if rule.metadata is not None:
             java_rule.allowDuplicitGroundings = rule.metadata.duplicit_grounding
+            # == False
 
-        java_rule.setMetadata(self.get_metadata(rule.metadata, self.rule_metadata))
+        # this is java class with map, that describes the list of functions and their order
+        java_metadata_with_map = self.get_metadata(rule.metadata, self.rule_metadata)
 
+        # just assign it
+        java_rule.setMetadata(java_metadata_with_map)
+
+        # this is java class WeightedRule
         return java_rule
 
     def get_predicate(self, predicate):

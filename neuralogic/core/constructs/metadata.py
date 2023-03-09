@@ -1,4 +1,5 @@
 from typing import Union, Iterable, Callable
+from neuralogic.core.constructs.function.tree import FunctionalTree
 
 from neuralogic.core.constructs.function import Transformation, Combination, Aggregation, Function
 
@@ -30,12 +31,15 @@ class Metadata:
             if isinstance(entry, Aggregation):
                 metadata.aggregation = entry
             elif isinstance(entry, Transformation):
+                # identity is transformation
                 metadata.transformation = entry
             elif isinstance(entry, Combination):
+                # sum is combination
                 metadata.combination = entry
             else:
                 raise ValueError(f"Invalid entry for metadata: {entry}")
         return metadata
+    
 
     def __str__(self):
         metadata_list = []
