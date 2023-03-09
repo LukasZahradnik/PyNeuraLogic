@@ -1,6 +1,6 @@
-from typing import Iterable, Optional
-
 from neuralogic.core.constructs.metadata import Metadata
+from typing import Iterable, Optional
+from neuralogic.core.constructs.function.tree import FunctionalTree
 
 
 class RuleBody:

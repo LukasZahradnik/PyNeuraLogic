@@ -99,8 +99,13 @@ class Template:
         for rule in self.template:
             if isinstance(rule, PredicateMetadata):
                 predicate_metadata.append(java_factory.get_predicate_metadata_pair(rule))
+
             elif isinstance(rule, Rule):
-                weighted_rules.append(java_factory.get_rule(rule))
+                # TODO - this one
+                # creates java WeightedRule class instance with map
+                weighted_rule = java_factory.get_rule(rule)
+                weighted_rules.append(weighted_rule)
+
             elif isinstance(rule, (WeightedRelation, BaseRelation)):
                 valued_facts.append(java_factory.get_valued_fact(rule, java_factory.get_variable_factory()))
 
@@ -138,6 +143,7 @@ class Template:
         java_factory = JavaFactory()
         settings_proxy = settings.create_proxy()
 
+        #TODO: here is current fail
         parsed_template = self.get_parsed_template(settings_proxy, java_factory)
         model = Builder(settings_proxy).build_model(parsed_template, settings_proxy)
 
