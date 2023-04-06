@@ -87,7 +87,7 @@ class BaseRelation:
             terms = ", ".join([str(term) for term in self.terms])
 
             if self.negated:
-                return f"~{self.predicate.to_str()}({terms}){end}"
+                return f"!{self.predicate.to_str()}({terms}){end}"
             if self.function:
                 literal = f"{self.predicate.to_str()}({terms})"
                 return f"{self.function.wrap(literal)}{end}"
