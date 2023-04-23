@@ -105,10 +105,12 @@ class CSVFile:
 
             terms = line.strip().split(self.sep)
             if use_columns is None:
-                line_relation = relation([(term.strip() if len(term.strip()) else replace_empty) for term in terms])
+                line_relation = relation(
+                    [(term.strip().lower() if len(term.strip()) else replace_empty) for term in terms]
+                )
             else:
                 line_relation = relation(
-                    [(terms[i].strip() if len(terms[i].strip()) else replace_empty) for i in use_columns]
+                    [(terms[i].strip().lower() if len(terms[i].strip()) else replace_empty) for i in use_columns]
                 )
 
             if value_column is None:
