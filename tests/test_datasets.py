@@ -207,6 +207,25 @@ def test_data_edge_features_from_torch() -> None:
         assert str(a) == str(b)
 
 
+def test_data_edge_features_types() -> None:
+    """Tests data creation with edge features from torch"""
+
+    features = torch.tensor([])
+    edges = torch.tensor([[0, 2], [1, 3]])
+    edge_features = torch.tensor([[0, 1, 0], [1, 0, 0]])
+
+    data = Data(x=features, edge_index=edges, edge_attr=edge_features, y=0)
+    query, example = data.to_logic_form(one_hot_decode_edge_features=True)
+
+    expected_examples = [
+        "<1> edge_1(0, 1).",
+        "<1> edge_0(2, 3).",
+    ]
+
+    for a, b in zip(expected_examples, example):
+        assert str(a) == str(b)
+
+
 def test_data_edge_features_from_numpy() -> None:
     """Tests data creation with edge features from numpy"""
 

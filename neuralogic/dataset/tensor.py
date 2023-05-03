@@ -85,6 +85,14 @@ class Data:
                 query = relation[y.detach().numpy()]
         return query
 
+    @staticmethod
+    def _get_edge_rel(edge_name, u, v, w):
+        return Relation.get(edge_name)(int(u), int(v))[w].fixed()
+
+    @staticmethod
+    def _get_edge_rel_decode(edge_name, u, v, w):
+        return Relation.get(f"{edge_name}_{np.argmax(w)}")(int(u), int(v))[1].fixed()
+
     def to_logic_form(
         self,
         feature_name: str = "node_feature",
@@ -92,6 +100,7 @@ class Data:
         output_name: str = "predict",
         one_hot_encode_labels=False,
         one_hot_decode_features=False,
+        one_hot_decode_edge_features=False,
         max_classes=1,
     ) -> Tuple:
         if self.y_mask is not None:
@@ -102,38 +111,30 @@ class Data:
         else:
             query = Data.get_query(self.y, output_name, one_hot_encode_labels, max_classes)
 
+        edge_process = Data._get_edge_rel
+        if one_hot_decode_edge_features:
+            edge_process = Data._get_edge_rel_decode
+
         if self.edge_attr is None:
             example = [
                 Relation.get(edge_name)(int(u), int(v))[1].fixed()
                 for u, v in zip(self.edge_index[0], self.edge_index[1])
             ]
-        elif isinstance(self.edge_attr, np.ndarray):
-            example = [
-                Relation.get(edge_name)(int(u), int(v))[w if w.size == 1 else w].fixed()
-                for u, v, w in zip(self.edge_index[0], self.edge_index[1], self.edge_attr)
-            ]
         elif isinstance(self.edge_attr, (Sequence, np.ndarray)):
             example = [
-                Relation.get(edge_name)(int(u), int(v))[
-                    w if len(w) == 1 and isinstance(w[0], (float, int)) else w
-                ].fixed()
+                edge_process(edge_name, u, v, w)
                 for u, v, w in zip(self.edge_index[0], self.edge_index[1], self.edge_attr)
             ]
         else:
             example = [
-                Relation.get(edge_name)(int(u), int(v))[w if w.size == 1 else w].fixed()
+                edge_process(edge_name, u, v, w)
                 for u, v, w in zip(self.edge_index[0], self.edge_index[1], self.edge_attr.detach().numpy())
             ]
 
         if one_hot_decode_features:
-            if isinstance(self.x, (list, np.ndarray)):
-                for i, features in enumerate(self.x):
-                    class_ = np.argmax(features)
-                    example.append(Relation.get(f"{feature_name}_{class_}")(i)[1].fixed())
-            else:
-                for i, features in enumerate(self.x):
-                    class_ = np.argmax(features)
-                    example.append(Relation.get(f"{feature_name}_{class_}")(i)[1].fixed())
+            for i, features in enumerate(self.x):
+                class_ = np.argmax(features)
+                example.append(Relation.get(f"{feature_name}_{class_}")(i)[1].fixed())
         else:
             if isinstance(self.x, np.ndarray):
                 for i, features in enumerate(self.x):
@@ -194,21 +195,25 @@ class TensorDataset(ConvertableDataset):
         into a vector ``[0, 0, 1, .., 0]`` of length ``number_of_classes``.
         Default: ``False``
     one_hot_decode_features : bool = False
-        Turn one hot encoded feature vectors into a scalar - e.g., feature vector ``[0, 0, 1]`` would be turned into a
-        scalar feature ``2``.
+        Turn one hot encoded feature vectors into a scalar - e.g., feature vector ``[0, 0, 1]`` would be turned into
+        a predicate ``<feature_name>_2``.
+        Default: ``False``
+    one_hot_decode_edge_features : bool = False
+        Turn one hot encoded edge feature vectors into a scalar - e.g., edge feature vector ``[0, 0, 1]`` would be turned into
+        a predicate ``<edge_name>_2``.
         Default: ``False``
     number_of_classes : int
         Specifies the number of classes for converting numerical labels to one hot encoded vectors.
         Default: ``1``
     feature_name : str
         Specify the node feature predicate name used for converting into the logic format.
-        Default: ``node_feature``
+        Default: ``"node_feature"``
     edge_name : str
         Specify the edge predicate name used for converting into the logic format.
-        Default: ``edge``
+        Default: ``"edge"``
     output_name : str
         Specify the output predicate name used for converting into the logic format.
-        Default: ``predict``
+        Default: ``"predict"``
 
     """
 
@@ -217,6 +222,7 @@ class TensorDataset(ConvertableDataset):
         data: List[Data],
         one_hot_encode_labels: bool = False,
         one_hot_decode_features: bool = False,
+        one_hot_decode_edge_features: bool = False,
         number_of_classes: int = 1,
         feature_name: str = "node_feature",
         edge_name: str = "edge",
@@ -225,11 +231,12 @@ class TensorDataset(ConvertableDataset):
         self.data = data
 
         self.one_hot_decode_features = one_hot_decode_features
+        self.one_hot_decode_edge_features = one_hot_decode_edge_features
         self.one_hot_encode_labels = one_hot_encode_labels
         self.number_of_classes = number_of_classes
 
-        self.feature_name: str = feature_name
-        self.edge_name: str = edge_name
+        self.feature_name = feature_name
+        self.edge_name = edge_name
         self.output_name: str = output_name
 
     def add_data(self, data: Data):
@@ -245,6 +252,7 @@ class TensorDataset(ConvertableDataset):
                 self.output_name,
                 self.one_hot_encode_labels,
                 self.one_hot_decode_features,
+                self.one_hot_decode_edge_features,
                 self.number_of_classes,
             )
 
@@ -265,6 +273,7 @@ class TensorDataset(ConvertableDataset):
                 self.output_name,
                 self.one_hot_encode_labels,
                 self.one_hot_decode_features,
+                self.one_hot_decode_edge_features,
                 self.number_of_classes,
             )
 
