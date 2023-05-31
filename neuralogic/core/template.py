@@ -90,6 +90,7 @@ class Template:
             initialize()
 
         if self.template_file is not None:
+            print("WARNING - 110")
             return Builder(settings).build_template_from_file(settings, self.template_file)
 
         predicate_metadata = []
@@ -98,15 +99,17 @@ class Template:
 
         for rule in self.template:
             if isinstance(rule, PredicateMetadata):
+                print("WARNING - 586")
                 predicate_metadata.append(java_factory.get_predicate_metadata_pair(rule))
 
             elif isinstance(rule, Rule):
                 # TODO - this one
-                # creates java WeightedRule class instance with map
+                # creates java WeightedRule class instance with map - METADATA
                 weighted_rule = java_factory.get_rule(rule)
                 weighted_rules.append(weighted_rule)
 
             elif isinstance(rule, (WeightedRelation, BaseRelation)):
+                print("WARNING - 446")
                 valued_facts.append(java_factory.get_valued_fact(rule, java_factory.get_variable_factory()))
 
         parsed_template = jpype.JClass("cz.cvut.fel.ida.logic.constructs.template.types.ParsedTemplate")
@@ -174,6 +177,7 @@ class Template:
         return "\n".join(str(r) for r in self.template)
 
     def __iadd__(self, other) -> "Template":
+        print("debugger debug")
         if isinstance(other, Iterable):
             self.template.extend(other)
         elif isinstance(other, Module):

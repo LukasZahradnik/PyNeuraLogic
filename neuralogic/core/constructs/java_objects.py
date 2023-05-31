@@ -296,13 +296,13 @@ class JavaFactory:
         java_rule.setHead(self.head_atom(head_relation))
         java_rule.setBody(body_relation_list)
 
-        offset = None  # TODO: Implement
+        offset = None
 
         java_rule.setOffset(offset)
 
         if rule.metadata is not None:
+            print("WARNING - 962")
             java_rule.allowDuplicitGroundings = rule.metadata.duplicit_grounding
-            # == False
 
         # this is java class with map, that describes the list of functions and their order
         java_metadata_with_map = self.get_metadata(rule.metadata, self.rule_metadata)

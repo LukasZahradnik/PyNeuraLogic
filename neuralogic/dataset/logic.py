@@ -14,7 +14,7 @@ class Dataset(BaseDataset):
 
     One learning sample consists of:
 
-    * Example: A list of logic facts and rules representing some instance (e.g., a graph)
+    * Example: A list of logic facts and rules representing some instance (e.g., a graph) 
 
     * Query: A logic fact to mark the output of a model and optionally target label.
 
