@@ -11,3 +11,5 @@ sphinx
 sphinx-rtd-theme
 sphinx-tabs
 sphinx-copybutton
+
+neuralogic
