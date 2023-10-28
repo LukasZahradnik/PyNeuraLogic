@@ -150,19 +150,13 @@ class Template:
         img_type="png",
         value_detail: int = 0,
         graphviz_path: Optional[str] = None,
+        model=None,
         *args,
         **kwargs,
     ):
-        from neuralogic.nn import get_neuralogic_layer
-
-        settings_proxy = Settings().create_proxy()
-        java_factory = JavaFactory()
-
-        parsed_template = self.get_parsed_template(settings_proxy, java_factory)
-        model = Builder(settings_proxy).build_model(parsed_template, settings_proxy)
-        layer = get_neuralogic_layer()(model, DatasetBuilder(parsed_template, java_factory), self, settings_proxy)
-
-        return draw_model(layer, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs)
+        if model is None:
+            model = self.build(Settings())
+        return draw_model(model, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs)
 
     def __str__(self) -> str:
         return "\n".join(str(r) for r in self.template)
