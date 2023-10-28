@@ -60,9 +60,12 @@ class Rule:
     def to_str(self, _: bool = False) -> str:
         return str(self)
 
-    def __str__(self):
+    def __str__(self) -> str:
         metadata = "" if self.metadata is None is None else f" {self.metadata}"
         return f"{self.head.to_str()} :- {', '.join(atom.to_str() for atom in self.body)}.{metadata}"
+
+    def __repr__(self) -> str:
+        return self.to_str()
 
     def __and__(self, other) -> "Rule":
         if isinstance(other, Iterable):

@@ -37,7 +37,7 @@ class Metadata:
                 raise ValueError(f"Invalid entry for metadata: {entry}")
         return metadata
 
-    def __str__(self):
+    def __str__(self) -> str:
         metadata_list = []
         if self.learnable is not None:
             metadata_list.append(f"learnable={str(self.learnable).lower()}")
@@ -48,6 +48,9 @@ class Metadata:
         if self.aggregation is not None:
             metadata_list.append(f"aggregation={str(self.aggregation)}")
         return f"[{', '.join(metadata_list)}]"
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def copy(self) -> "Metadata":
         return Metadata(

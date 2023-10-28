@@ -28,10 +28,13 @@ class Predicate:
         hidden = "*" if self.hidden else ""
         return f"{hidden}{special}{self.name}"
 
-    def __str__(self):
+    def __str__(self) -> str:
         special = "@" if self.special else ""
         hidden = "*" if self.hidden else ""
         return f"{hidden}{special}{self.name}/{self.arity}"
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def __or__(self, other) -> "PredicateMetadata":
         if isinstance(other, Sequence):
@@ -54,5 +57,8 @@ class PredicateMetadata:
         self.predicate = predicate
         self.metadata = metadata
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.predicate} {self.metadata}"
+
+    def __repr__(self) -> str:
+        return self.__str__()

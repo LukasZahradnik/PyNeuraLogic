@@ -102,6 +102,9 @@ class BaseRelation:
     def __str__(self) -> str:
         return self.to_str(True)
 
+    def __repr__(self) -> str:
+        return self.__str__()
+
     def __copy__(self):
         relation = BaseRelation.__new__(BaseRelation)
         relation.function = self.function
@@ -151,8 +154,11 @@ class WeightedRelation(BaseRelation):
             return f"<{weight}> {super().to_str(end)}"
         return f"{weight} {super().to_str(end)}"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.to_str(True)
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def __call__(self, *args) -> BaseRelation:
         raise NotImplementedError(f"Cannot assign terms to weighted relation {self.predicate}")

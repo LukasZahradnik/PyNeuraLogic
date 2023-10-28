@@ -167,6 +167,9 @@ class Template:
     def __str__(self) -> str:
         return "\n".join(str(r) for r in self.template)
 
+    def __repr__(self) -> str:
+        return self.__str__()
+
     def __iadd__(self, other) -> "Template":
         if isinstance(other, Iterable):
             self.template.extend(other)
