@@ -1,4 +1,5 @@
 from neuralogic.core.constructs.factories import Var, Constant, Relation, V, C, R
+from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.template import Template
 from neuralogic.core.builder import BuiltDataset
 from neuralogic.core.constructs.metadata import Metadata
@@ -14,6 +15,7 @@ __all__ = [
     "C",
     "Relation",
     "R",
+    "Rule",
     "Template",
     "BuiltDataset",
     "Transformation",
