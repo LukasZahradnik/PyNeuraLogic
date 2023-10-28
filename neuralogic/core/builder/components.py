@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional, List
 
 import numpy as np
 
+from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.utils.visualize import draw_sample
 
 
@@ -12,6 +13,10 @@ class RawSample:
     def __init__(self, sample):
         self.java_sample = sample
         self.fact_cache = {}
+
+    @property
+    def target(self):
+        return ValueFactory.from_java(self.java_sample.target)
 
     def _find_fact(self, fact_str):
         for sample_fact in self.java_sample.query.evidence.allNeuronsTopologic:

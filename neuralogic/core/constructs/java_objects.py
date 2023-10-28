@@ -1,3 +1,4 @@
+import json
 from typing import Optional, Iterable, Sequence
 
 import numpy as np
@@ -12,6 +13,16 @@ class ValueFactory:
         self.scalar_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.ScalarValue")
         self.vector_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.VectorValue")
         self.matrix_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.MatrixValue")
+
+    @staticmethod
+    def from_java(value):
+        size = list(value.size())
+
+        if len(size) == 0 or size[0] == 0:
+            return float(value.get(0))
+        elif len(size) == 1 or size[0] == 1 or size[1] == 1:
+            return list(float(x) for x in value.values)
+        return json.loads(str(value.toString()))
 
     def get_value(self, weight):
         if isinstance(weight, (float, int)) or np.ndim(weight) == 0:
