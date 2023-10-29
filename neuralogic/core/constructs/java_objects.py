@@ -36,7 +36,7 @@ class ValueFactory:
                     value = self.vector_value(weight[0])
             elif len(weight) == 2:
                 if weight[0] == 1:
-                    value = self.vector_value(weight[1], True)
+                    value = self.scalar_value() if weight[1] == 1 else self.vector_value(weight[1], True)
                 elif weight[1] == 1:
                     value = self.vector_value(weight[0], False)
                 else:
