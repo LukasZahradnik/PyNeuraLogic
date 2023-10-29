@@ -82,10 +82,10 @@ class Builder:
         source_pipeline.execute(None if sources is None else sources.sources)
         java_model = source_pipeline.get()
 
-        groundings = java_model.r.collect(self.collectors.toList())
+        # groundings = java_model.r.collect(self.collectors.toList())
         logic_samples = java_model.s.collect(self.collectors.toList())
 
-        return [RawSample(sample, grounding) for sample, grounding in zip(logic_samples, groundings)]
+        return [RawSample(sample, None) for sample in logic_samples]
 
     def build_model(self, parsed_template, settings: SettingsProxy):
         neural_model = self.neural_model(parsed_template.getAllWeights(), settings.settings)

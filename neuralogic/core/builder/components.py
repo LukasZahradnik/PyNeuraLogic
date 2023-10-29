@@ -78,16 +78,19 @@ class RawSample:
         *args,
         **kwargs,
     ):
-        return draw_grounding(
-            self.grounding, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs
-        )
+        if False:
+            return draw_grounding(
+                self.grounding, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs
+            )
+
+        raise NotImplementedError
 
 
 class Sample(RawSample):
     __slots__ = ("id", "target", "neurons", "output_neuron", "java_sample")
 
     def __init__(self, sample, java_sample):
-        super().__init__(sample)
+        super().__init__(sample, None)
         serialized_sample = json.loads(str(sample.exportToJson()))
 
         self.id = serialized_sample["id"]
