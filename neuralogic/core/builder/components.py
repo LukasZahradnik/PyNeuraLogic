@@ -4,14 +4,15 @@ from typing import Any, Dict, Optional, List
 import numpy as np
 
 from neuralogic.core.constructs.java_objects import ValueFactory
-from neuralogic.utils.visualize import draw_sample
+from neuralogic.utils.visualize import draw_sample, draw_grounding
 
 
 class RawSample:
-    __slots__ = "java_sample", "fact_cache"
+    __slots__ = "java_sample", "fact_cache", "grounding"
 
-    def __init__(self, sample):
+    def __init__(self, sample, grounding):
         self.java_sample = sample
+        self.grounding = grounding
         self.fact_cache = {}
 
     @property
@@ -66,6 +67,20 @@ class RawSample:
         **kwargs,
     ):
         return draw_sample(self, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs)
+
+    def draw_grounding(
+        self,
+        filename: Optional[str] = None,
+        draw_ipython=True,
+        img_type="png",
+        value_detail: int = 0,
+        graphviz_path: Optional[str] = None,
+        *args,
+        **kwargs,
+    ):
+        return draw_grounding(
+            self.grounding, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs
+        )
 
 
 class Sample(RawSample):

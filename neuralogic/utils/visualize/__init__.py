@@ -50,6 +50,10 @@ def get_sample_drawer(settings: SettingsProxy):
     return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.NeuralNetDrawer")(settings.settings)
 
 
+def get_grounding_drawer(settings: SettingsProxy):
+    return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.GroundingDrawer")(settings.settings)
+
+
 # todo gusta: + groundingDrawer, pipelineDrawer...
 
 
@@ -120,6 +124,36 @@ def draw_model(
     template_drawer = get_template_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
 
     return draw(template_drawer, template, filename, draw_ipython, img_type, *args, **kwargs)
+
+
+def draw_grounding(
+    grounding,
+    filename: Optional[str] = None,
+    draw_ipython=True,
+    img_type="png",
+    value_detail: int = 0,
+    graphviz_path: Optional[str] = None,
+    *args,
+    **kwargs,
+):
+    """Draws sample's grounding either as an image of type img_type either into:
+        * a file - if filename is specified),
+        * an IPython Image - if draw_ipython is True
+        * or bytes otherwise
+
+    :param sample:
+    :param filename:
+    :param draw_ipython:
+    :param img_type:
+    :param detail:
+    :param graphviz_path:
+    :param args:
+    :param kwargs:
+    :return:
+    """
+    grounding_drawer = get_grounding_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
+
+    return draw(grounding_drawer, grounding, filename, draw_ipython, img_type, *args, **kwargs)
 
 
 def draw_sample(
