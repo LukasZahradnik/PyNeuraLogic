@@ -1,5 +1,27 @@
-from neuralogic.core.constructs.metadata import Metadata
 from typing import Iterable, Optional
+
+from neuralogic.core.constructs.metadata import Metadata
+
+
+class RuleBody:
+    __slots__ = "literals"
+
+    def __init__(self, lit1, lit2):
+        self.literals = [lit1, lit2]
+
+    def __and__(self, other):
+        from neuralogic.core.constructs.relation import BaseRelation
+
+        if isinstance(other, BaseRelation):
+            self.literals.append(other)
+            return self
+        raise NotImplementedError
+
+    def __str__(self) -> str:
+        return ", ".join(atom.to_str() for atom in self.literals)
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
 class Rule:
@@ -12,6 +34,9 @@ class Rule:
 
         if head.function is not None:
             raise NotImplementedError(f"Rule head {head} cannot have a function attached")
+
+        if isinstance(body, RuleBody):
+            body = body.literals
 
         if not isinstance(body, Iterable):
             body = [body]

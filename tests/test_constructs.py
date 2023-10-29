@@ -174,3 +174,12 @@ def test_rules():
 
     assert len(my_rule.body) == 1
     assert my_rule.body[0].predicate.name == "b"
+
+
+def test_rules_and():
+    my_rule: Rule = R.a(V.X) <= R.b(V.Y) & R.c(V.Z) & R.d
+
+    assert len(my_rule.body) == 3
+    assert str(my_rule.body[0]) == "b(Y)."
+    assert str(my_rule.body[1]) == "c(Z)."
+    assert str(my_rule.body[2]) == "d."

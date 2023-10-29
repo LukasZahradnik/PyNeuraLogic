@@ -114,6 +114,11 @@ class BaseRelation:
 
         return relation
 
+    def __and__(self, other) -> rule.RuleBody:
+        if isinstance(other, BaseRelation):
+            return rule.RuleBody(self, other)
+        raise NotImplementedError
+
 
 class WeightedRelation(BaseRelation):
     __slots__ = "weight", "weight_name", "is_fixed"
