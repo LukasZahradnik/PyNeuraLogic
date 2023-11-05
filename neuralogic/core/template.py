@@ -175,3 +175,11 @@ class Template:
 
     def __getitem__(self, item) -> TemplateEntries:
         return self.template[item]
+
+    def __delitem__(self, key):
+        self.template.pop(key)
+
+    def __setitem__(self, key, value):
+        if isinstance(value, (Iterable, Module)):
+            raise NotImplementedError
+        self.template[key] = value
