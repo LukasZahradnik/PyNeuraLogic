@@ -172,3 +172,6 @@ class Template:
         else:
             self.template.append(other)
         return self
+
+    def __getitem__(self, item) -> TemplateEntries:
+        return self.template[item]
