@@ -18,7 +18,7 @@ VERSION = None
 
 REQUIRED = [
     "JPype1 >=1.3.0",
-    "numpy >= 1.19.0",
+    "numpy >= 1.20.4",
     "tqdm",
 ]
 
