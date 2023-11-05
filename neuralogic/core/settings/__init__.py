@@ -5,7 +5,7 @@ from neuralogic.core.enums import Grounder
 from neuralogic.nn.init import Initializer, Uniform
 from neuralogic.nn.loss import MSE, ErrorFunction
 from neuralogic.core.settings.settings_proxy import SettingsProxy
-from neuralogic.core.constructs.function import Transformation, Combination
+from neuralogic.core.constructs.function import Transformation, Combination, Aggregation
 from neuralogic.optim import Optimizer, Adam
 
 
@@ -20,6 +20,7 @@ class Settings:
         initializer: Initializer = Uniform(),
         rule_transformation: Transformation = Transformation.TANH,
         rule_combination: Combination = Combination.SUM,
+        rule_aggregation: Aggregation = Aggregation.AVG,
         relation_transformation: Transformation = Transformation.TANH,
         relation_combination: Combination = Combination.SUM,
         iso_value_compression: bool = True,
@@ -126,6 +127,14 @@ class Settings:
     @rule_combination.setter
     def rule_combination(self, value: Combination):
         self._update("rule_combination", value)
+
+    @property
+    def rule_aggregation(self) -> Aggregation:
+        return self.params["rule_aggregation"]
+
+    @rule_aggregation.setter
+    def rule_aggregation(self, value: Aggregation):
+        self._update("rule_aggregation", value)
 
     def create_proxy(self) -> SettingsProxy:
         proxy = SettingsProxy(**self.params)

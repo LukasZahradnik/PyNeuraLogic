@@ -2,7 +2,7 @@ import jpype
 
 import neuralogic
 from neuralogic import is_initialized, initialize
-from neuralogic.core.constructs.function import Transformation, Combination
+from neuralogic.core.constructs.function import Transformation, Combination, Aggregation
 from neuralogic.core.enums import Grounder
 from neuralogic.nn.init import Initializer
 from neuralogic.nn.loss import MSE, SoftEntropy, CrossEntropy, ErrorFunction
@@ -20,6 +20,7 @@ class SettingsProxy:
         initializer: Initializer,
         rule_transformation: Transformation,
         rule_combination: Combination,
+        rule_aggregation: Aggregation,
         relation_transformation: Transformation,
         relation_combination: Combination,
         iso_value_compression: bool,
@@ -224,6 +225,14 @@ class SettingsProxy:
         self.settings.ruleNeuronCombination = self.get_combination_function(value)
 
     @property
+    def rule_aggregation(self) -> Aggregation:
+        return Aggregation(str(self.settings.aggNeuronAggregation))
+
+    @rule_aggregation.setter
+    def rule_aggregation(self, value: Aggregation):
+        self.settings.aggNeuronAggregation = self.get_aggregation_function(value)
+
+    @property
     def debug_exporting(self) -> bool:
         return self.settings.debugExporting
 
@@ -242,6 +251,10 @@ class SettingsProxy:
     def get_combination_function(self, combination: Combination):
         combination_name = str(combination)
         return self.settings_class.parseCombination(combination_name)
+
+    def get_aggregation_function(self, aggregation: Aggregation):
+        aggregation_name = str(aggregation)
+        return self.settings_class.parseCombination(aggregation_name)
 
     def get_transformation_function(self, transformation: Transformation):
         transformation_name = str(transformation)
