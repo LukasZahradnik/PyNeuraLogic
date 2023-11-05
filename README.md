@@ -102,7 +102,7 @@ $ pip install neuralogic
 To use PyNeuraLogic, you need to install the following prerequisites:
 
 ```
-Python >= 3.7
+Python >= 3.8
 Java >= 1.8
 ```
 

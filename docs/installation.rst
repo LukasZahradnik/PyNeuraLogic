@@ -14,7 +14,7 @@ PyNeuraLogic can be easily installed from PyPI repository via :code:`pip install
 Requirements
 ############
 
-The PyNeuraLogic library requires :code:`Python >= 3.7` and :code:`Java >= 1.8` to be installed.
+The PyNeuraLogic library requires :code:`Python >= 3.8` and :code:`Java >= 1.8` to be installed.
 
 Additionally, if you plan to use NeuraLogic as PyTorch function, you have to install PyTorch manually.
 
