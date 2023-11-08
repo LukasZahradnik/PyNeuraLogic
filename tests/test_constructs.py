@@ -183,3 +183,9 @@ def test_rules_and():
     assert str(my_rule.body[0]) == "b(Y)."
     assert str(my_rule.body[1]) == "c(Z)."
     assert str(my_rule.body[2]) == "d."
+
+
+def test_rules_and_with_metadata():
+    my_rule: Rule = R.a(V.X) <= R.b(V.Y) & R.c(V.Z) & R.d | [Transformation.SIGMOID]
+
+    assert str(my_rule) == "a(X) :- b(Y), c(Z), d. [transformation=sigmoid]"

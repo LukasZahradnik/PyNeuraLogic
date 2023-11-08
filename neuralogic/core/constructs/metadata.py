@@ -1,10 +1,10 @@
-from typing import Union, Iterable, Callable
+from typing import Union, Iterable, Callable, Tuple, Optional
 
 from neuralogic.core.constructs.function import Transformation, Combination, Aggregation, Function
 
 
 class Metadata:
-    __slots__ = "learnable", "transformation", "aggregation", "duplicit_grounding", "combination"
+    __slots__ = "learnable", "transformation", "aggregation", "duplicit_grounding", "combination", "bias"
 
     def __init__(
         self,
@@ -12,13 +12,15 @@ class Metadata:
         transformation: Union[str, Transformation, Combination] = None,
         combination: Union[str, Combination] = None,
         aggregation: Union[str, Aggregation] = None,
-        duplicit_grounding: bool = False,
+        duplicit_grounding: Optional[bool] = None,
+        bias: Optional[Union[Tuple, Iterable, float, int]] = None,
     ):
         self.learnable = learnable
         self.combination = combination
         self.transformation = transformation
         self.aggregation = aggregation
         self.duplicit_grounding = duplicit_grounding
+        self.bias = bias
 
     @staticmethod
     def from_iterable(iterable: Iterable) -> "Metadata":
@@ -47,6 +49,10 @@ class Metadata:
             metadata_list.append(f"combination={str(self.combination)}")
         if self.aggregation is not None:
             metadata_list.append(f"aggregation={str(self.aggregation)}")
+        if self.duplicit_grounding is not None:
+            metadata_list.append(f"duplicit_grounding={str(self.duplicit_grounding)}")
+        if self.bias is not None:
+            metadata_list.append(f"bias={str(self.bias)}")
         return f"[{', '.join(metadata_list)}]"
 
     def __repr__(self) -> str:
@@ -54,5 +60,10 @@ class Metadata:
 
     def copy(self) -> "Metadata":
         return Metadata(
-            self.learnable, self.transformation, self.combination, self.aggregation, self.duplicit_grounding
+            learnable=self.learnable,
+            transformation=self.transformation,
+            combination=self.combination,
+            aggregation=self.aggregation,
+            duplicit_grounding=self.duplicit_grounding,
+            bias=self.bias,
         )
