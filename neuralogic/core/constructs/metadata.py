@@ -1,10 +1,10 @@
-from typing import Union, Iterable, Callable, Tuple, Optional
+from typing import Union, Iterable, Callable, Optional
 
 from neuralogic.core.constructs.function import Transformation, Combination, Aggregation, Function
 
 
 class Metadata:
-    __slots__ = "learnable", "transformation", "aggregation", "duplicit_grounding", "combination", "bias"
+    __slots__ = "learnable", "transformation", "aggregation", "duplicit_grounding", "combination"
 
     def __init__(
         self,
@@ -13,14 +13,12 @@ class Metadata:
         combination: Union[str, Combination] = None,
         aggregation: Union[str, Aggregation] = None,
         duplicit_grounding: Optional[bool] = None,
-        bias: Optional[Union[Tuple, Iterable, float, int]] = None,
     ):
         self.learnable = learnable
         self.combination = combination
         self.transformation = transformation
         self.aggregation = aggregation
         self.duplicit_grounding = duplicit_grounding
-        self.bias = bias
 
     @staticmethod
     def from_iterable(iterable: Iterable) -> "Metadata":
@@ -51,8 +49,6 @@ class Metadata:
             metadata_list.append(f"aggregation={str(self.aggregation)}")
         if self.duplicit_grounding is not None:
             metadata_list.append(f"duplicit_grounding={str(self.duplicit_grounding)}")
-        if self.bias is not None:
-            metadata_list.append(f"bias={str(self.bias)}")
         return f"[{', '.join(metadata_list)}]"
 
     def __repr__(self) -> str:
@@ -65,5 +61,4 @@ class Metadata:
             combination=self.combination,
             aggregation=self.aggregation,
             duplicit_grounding=self.duplicit_grounding,
-            bias=self.bias,
         )
