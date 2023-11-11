@@ -11,6 +11,7 @@ _seed = int.from_bytes(os.urandom(4), byteorder="big")
 _initial_seed = _seed
 _rnd_generator = None
 _max_memory_size = None
+_graphviz_path = None
 
 jvm_params = {
     "classpath": os.path.join(os.path.abspath(os.path.dirname(__file__)), "jar", "NeuraLogic.jar"),
@@ -106,8 +107,31 @@ def is_initialized() -> bool:
     return _is_initialized
 
 
+def set_graphviz_path(path: Optional[str]):
+    """
+    Set the default path to Graphviz
+
+    Parameters
+    ----------
+    path : Optional[str]
+        The Graphviz path
+    """
+    global _graphviz_path
+    _graphviz_path = path
+
+
+def get_default_graphviz_path() -> Optional[str]:
+    """
+    Get the default path to Graphviz
+    """
+    return _graphviz_path
+
+
 def initialize(
-    debug_mode: bool = False, debug_port: int = 12999, is_debug_server: bool = True, debug_suspend: bool = True
+    debug_mode: bool = False,
+    debug_port: int = 12999,
+    is_debug_server: bool = True,
+    debug_suspend: bool = True,
 ):
     """
     Initialize the NeuraLogic backend. This function is called implicitly when needed and should be called

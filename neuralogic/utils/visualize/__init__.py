@@ -4,7 +4,17 @@ from typing import Optional
 
 import jpype
 
+from neuralogic import get_default_graphviz_path
 from neuralogic.core.settings import Settings, SettingsProxy
+
+
+def get_graphviz_path(path: Optional[str] = None) -> str:
+    """
+    Get the path to the Graphviz executable
+    """
+    if path is not None:
+        return path
+    return get_default_graphviz_path()
 
 
 def get_drawing_settings(
@@ -19,8 +29,9 @@ def get_drawing_settings(
     """
     settings = Settings().create_proxy()
 
-    if graphviz_path is not None:
-        settings.settings.graphvizPath = graphviz_path
+    graphviz = get_graphviz_path(graphviz_path)
+    if graphviz is not None:
+        settings.settings.graphvizPath = graphviz
 
     settings.settings.drawing = False
     settings.settings.storeNotShow = True
