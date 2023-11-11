@@ -146,7 +146,7 @@ class Template:
     def draw(
         self,
         filename: Optional[str] = None,
-        draw_ipython=True,
+        show=True,
         img_type="png",
         value_detail: int = 0,
         graphviz_path: Optional[str] = None,
@@ -156,7 +156,7 @@ class Template:
     ):
         if model is None:
             model = self.build(Settings())
-        return draw_model(model, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs)
+        return draw_model(model, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
 
     def __str__(self) -> str:
         return "\n".join(str(r) for r in self.template)

@@ -90,14 +90,14 @@ class AbstractNeuraLogic:
     def draw(
         self,
         filename: Optional[str] = None,
-        draw_ipython=True,
+        show=True,
         img_type="png",
         value_detail: int = 0,
         graphviz_path: Optional[str] = None,
         *args,
         **kwargs,
     ):
-        return draw_model(self, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs)
+        return draw_model(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
 
 
 class AbstractEvaluator:
@@ -151,13 +151,11 @@ class AbstractEvaluator:
     def draw(
         self,
         filename: Optional[str] = None,
-        draw_ipython=True,
+        show=True,
         img_type="png",
         value_detail: int = 0,
         graphviz_path: Optional[str] = None,
         *args,
         **kwargs,
     ):
-        return self.neuralogic_model.draw(
-            filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs
-        )
+        return self.neuralogic_model.draw(filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)

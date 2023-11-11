@@ -4,6 +4,7 @@ pytest
 torch
 tqdm
 JPype1>=1.3.0
+matplotlib
 
 jupyter>=1.0.0
 

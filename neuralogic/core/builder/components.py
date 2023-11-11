@@ -59,19 +59,19 @@ class RawSample:
     def draw(
         self,
         filename: Optional[str] = None,
-        draw_ipython=True,
+        show=True,
         img_type="png",
         value_detail: int = 0,
         graphviz_path: Optional[str] = None,
         *args,
         **kwargs,
     ):
-        return draw_sample(self, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs)
+        return draw_sample(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
 
     def draw_grounding(
         self,
         filename: Optional[str] = None,
-        draw_ipython=True,
+        show=True,
         img_type="png",
         value_detail: int = 0,
         graphviz_path: Optional[str] = None,
@@ -80,7 +80,7 @@ class RawSample:
     ):
         if False:
             return draw_grounding(
-                self.grounding, filename, draw_ipython, img_type, value_detail, graphviz_path, *args, **kwargs
+                self.grounding, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs
             )
 
         raise NotImplementedError

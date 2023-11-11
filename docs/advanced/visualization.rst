@@ -83,7 +83,7 @@ We can also get raw images bytes by turning off displaying into IPython:
 
 .. code-block:: Python
 
-    model.draw(draw_ipython=False)
+    model.draw(show=False)
 
 .. tip::
     If you are drawing straight into Jupyter Notebook, you can include additional parameters into drawing functions
