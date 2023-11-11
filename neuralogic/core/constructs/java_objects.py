@@ -302,7 +302,7 @@ class JavaFactory:
         java_rule.setOffset(offset)
 
         if rule.metadata is not None:
-            java_rule.allowDuplicitGroundings = rule.metadata.duplicit_grounding
+            java_rule.allowDuplicitGroundings = bool(rule.metadata.duplicit_grounding)
 
         java_rule.setMetadata(self.get_metadata(rule.metadata, self.rule_metadata))
 
