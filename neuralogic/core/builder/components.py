@@ -1,6 +1,7 @@
 import json
 from typing import Any, Dict, Optional, List
 
+import jpype
 import numpy as np
 
 from neuralogic.core.constructs.java_objects import ValueFactory
@@ -67,23 +68,6 @@ class RawSample:
         **kwargs,
     ):
         return draw_sample(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
-
-    def draw_grounding(
-        self,
-        filename: Optional[str] = None,
-        show=True,
-        img_type="png",
-        value_detail: int = 0,
-        graphviz_path: Optional[str] = None,
-        *args,
-        **kwargs,
-    ):
-        if False:
-            return draw_grounding(
-                self.grounding, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs
-            )
-
-        raise NotImplementedError
 
 
 class Sample(RawSample):
@@ -184,3 +168,46 @@ class BuiltDataset:
 
     def __getitem__(self, item):
         return self.samples[item]
+
+
+class Grounding:
+
+    __slots__ = ("grounding",)
+
+    def __init__(self, grounding):
+        self.grounding = grounding
+
+    def draw_grounding(
+        self,
+        filename: Optional[str] = None,
+        show=True,
+        img_type="png",
+        value_detail: int = 0,
+        graphviz_path: Optional[str] = None,
+        *args,
+        **kwargs,
+    ):
+        return draw_grounding(self.grounding, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
+
+
+class GroundedDataset:
+    """GroundedDataset represents grounded examples that are not neuralized yet."""
+
+    __slots__ = "length", "_groundings", "_groundings_list", "_builder"
+
+    def __init__(self, groundings, length, builder):
+        self.length = length
+        self._groundings = groundings
+        self._groundings_list = None
+        self._builder = builder
+
+    def __getitem__(self, item):
+        if self._groundings_list is None:
+            self._groundings = self._groundings.collect(jpype.JClass("java.util.stream.Collectors").toList())
+            self._groundings_list = [Grounding(g) for g in self._groundings]
+        return self._groundings_list[item]
+
+    def neuralize(self, progress: bool) -> BuiltDataset:
+        if self._groundings_list is not None:
+            return self._builder.neuralize(self._groundings.stream(), progress, self.length)
+        return self._builder.neuralize(self._groundings, progress, self.length)

@@ -52,38 +52,35 @@ class Builder:
 
         return template
 
-    def from_sources(self, parsed_template, sources: Sources, progress: bool) -> List[RawSample]:
-        if progress:
-            return self._build_samples_with_progress(parsed_template, sources, None)
-        return self._build_samples(parsed_template, sources, None)
+    def ground_from_sources(self, parsed_template, sources: Sources):
+        return self._ground(parsed_template, sources, None)
 
-    def from_logic_samples(self, parsed_template, logic_samples, progress: bool) -> List[RawSample]:
-        if progress:
-            return self._build_samples_with_progress(parsed_template, None, logic_samples)
-        return self._build_samples(parsed_template, None, logic_samples)
+    def ground_from_logic_samples(self, parsed_template, logic_samples):
+        return self._ground(parsed_template, None, logic_samples)
 
-    def _build_samples_with_progress(
-        self, parsed_template, sources: Optional[Sources], logic_samples
-    ) -> List[RawSample]:
-        total = None if logic_samples is None else len(logic_samples)
-
-        with tqdm(total=total, desc="Building", unit=" samples", dynamic_ncols=True) as pbar:
-            return self._build_samples(parsed_template, sources, logic_samples, self._callback(pbar))
-
-    def _build_samples(
-        self, parsed_template, sources: Optional[Sources], logic_samples, callback=None
-    ) -> List[RawSample]:
+    def _ground(self, parsed_template, sources: Optional[Sources], logic_samples) -> List[RawSample]:
         if sources is not None:
-            source_pipeline = self.example_builder.buildPipeline(parsed_template, sources.sources, callback)
+            ground_pipeline = self.example_builder.buildGroundings(parsed_template, sources.sources)
         else:
             logic_samples = jpype.java.util.ArrayList(logic_samples).stream()
-            source_pipeline = self.example_builder.buildPipeline(parsed_template, logic_samples, callback)
+            ground_pipeline = self.example_builder.buildGroundings(parsed_template, logic_samples)
 
-        source_pipeline.execute(None if sources is None else sources.sources)
-        java_model = source_pipeline.get()
+        ground_pipeline.execute(None if sources is None else sources.sources)
 
-        # groundings = java_model.r.collect(self.collectors.toList())
-        logic_samples = java_model.s.collect(self.collectors.toList())
+        return ground_pipeline.get()
+
+    def neuralize(self, groundings, progress: bool, length: Optional[int]) -> List[RawSample]:
+        if not progress:
+            return self._neuralize(groundings, None)
+        with tqdm(total=length, desc="Building", unit=" samples", dynamic_ncols=True) as pbar:
+            return self._neuralize(groundings, self._callback(pbar))
+
+    def _neuralize(self, groundings, callback) -> List[RawSample]:
+        neuralize_pipeline = self.example_builder.neuralize(groundings, None)
+        neuralize_pipeline.execute(None)
+
+        samples = neuralize_pipeline.get()
+        logic_samples = samples.collect(self.collectors.toList())
 
         return [RawSample(sample, None) for sample in logic_samples]
 

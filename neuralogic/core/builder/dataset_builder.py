@@ -6,7 +6,7 @@ import jpype
 import neuralogic.dataset as datasets
 from neuralogic import is_initialized, initialize
 from neuralogic.core.builder.builder import Builder
-from neuralogic.core.builder.components import BuiltDataset
+from neuralogic.core.builder.components import BuiltDataset, GroundedDataset
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.java_objects import JavaFactory
@@ -104,7 +104,7 @@ class DatasetBuilder:
             self.examples_counter += 1
         return logic_samples, examples_queries
 
-    def build_dataset(
+    def ground_dataset(
         self,
         dataset: datasets.BaseDataset,
         settings: SettingsProxy,
@@ -112,50 +112,48 @@ class DatasetBuilder:
         batch_size: int = 1,
         file_mode: bool = False,
         learnable_facts: bool = False,
-        progress: bool = False,
-    ) -> BuiltDataset:
-        """Builds the dataset (does grounding and neuralization) for this template instance and the backend
+    ) -> GroundedDataset:
+        """Grounds the dataset
 
         :param dataset:
         :param settings:
         :param batch_size:
         :param file_mode:
         :param learnable_facts:
-        :param progress:
         :return:
         """
-        if isinstance(dataset, datasets.TensorDataset):
-            if file_mode:
-                with tempfile.NamedTemporaryFile(mode="w", suffix=".txt") as q_tf, tempfile.NamedTemporaryFile(
-                    mode="w", suffix=".txt"
-                ) as e_tf:
-                    dataset.dump(q_tf, e_tf)
+        if isinstance(dataset, datasets.TensorDataset) and file_mode:
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".txt") as q_tf, tempfile.NamedTemporaryFile(
+                mode="w", suffix=".txt"
+            ) as e_tf:
+                dataset.dump(q_tf, e_tf)
 
-                    q_tf.flush()
-                    e_tf.flush()
+                q_tf.flush()
+                e_tf.flush()
 
-                    return self.build_dataset(
-                        datasets.FileDataset(e_tf.name, q_tf.name),
-                        settings,
-                        batch_size=batch_size,
-                        file_mode=False,
-                        learnable_facts=learnable_facts,
-                        progress=progress,
-                    )
+                return self.ground_dataset(
+                    datasets.FileDataset(e_tf.name, q_tf.name),
+                    settings,
+                    batch_size=batch_size,
+                    file_mode=False,
+                    learnable_facts=learnable_facts,
+                )
 
         if isinstance(dataset, datasets.ConvertableDataset):
-            return self.build_dataset(
+            return self.ground_dataset(
                 dataset.to_dataset(),
                 settings,
                 batch_size=batch_size,
                 file_mode=False,
                 learnable_facts=learnable_facts,
-                progress=progress,
             )
 
         if batch_size > 1:
             settings.settings.minibatchSize = batch_size
             settings.settings.parallelTraining = True
+
+        builder = Builder(settings)
+        length = None
 
         if isinstance(dataset, datasets.Dataset):
             self.examples_counter = 0
@@ -187,7 +185,8 @@ class DatasetBuilder:
                 queries, examples, one_query_per_example, example_queries
             )
 
-            samples = Builder(settings).from_logic_samples(self.parsed_template, logic_samples, progress)
+            length = len(logic_samples)
+            groundings = builder.ground_from_logic_samples(self.parsed_template, logic_samples)
 
             self.java_factory.weight_factory = weight_factory
         elif isinstance(dataset, datasets.FileDataset):
@@ -197,11 +196,40 @@ class DatasetBuilder:
             if dataset.examples_file is not None:
                 args.extend(["-e", dataset.examples_file])
             sources = Sources.from_args(args, settings)
-            samples = Builder(settings).from_sources(self.parsed_template, sources, progress)
+
+            groundings = builder.ground_from_sources(self.parsed_template, sources)
         else:
             raise NotImplementedError
 
-        return BuiltDataset(samples, batch_size)
+        return GroundedDataset(groundings, length, builder)
+
+    def build_dataset(
+        self,
+        dataset: Union[datasets.BaseDataset, GroundedDataset],
+        settings: SettingsProxy,
+        *,
+        batch_size: int = 1,
+        file_mode: bool = False,
+        learnable_facts: bool = False,
+        progress: bool = False,
+    ) -> BuiltDataset:
+        """Builds the dataset (does grounding and neuralization)
+
+        :param dataset:
+        :param settings:
+        :param batch_size:
+        :param file_mode:
+        :param learnable_facts:
+        :param progress:
+        :return:
+        """
+        grounded_dataset = dataset
+
+        if not isinstance(dataset, GroundedDataset):
+            grounded_dataset = self.ground_dataset(
+                dataset, settings, batch_size=batch_size, file_mode=file_mode, learnable_facts=learnable_facts
+            )
+        return grounded_dataset.neuralize(progress)
 
     @staticmethod
     def merge_queries_with_examples(queries, examples, one_query_per_example, example_queries=True):

@@ -3,6 +3,7 @@ from typing import Dict, Optional, Union, Callable, List
 from neuralogic.core.settings import Settings
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core import Template, BuiltDataset, SettingsProxy
+from neuralogic.core.builder.components import GroundedDataset
 from neuralogic.dataset.base import BaseDataset
 
 from neuralogic.utils.visualize import draw_model
@@ -24,9 +25,25 @@ class AbstractNeuraLogic:
     def __call__(self, sample):
         raise NotImplementedError
 
-    def build_dataset(
+    def ground(
         self,
         dataset: BaseDataset,
+        *,
+        batch_size: int = 1,
+        file_mode: bool = False,
+        learnable_facts: bool = False,
+    ):
+        return self.dataset_builder.ground_dataset(
+            dataset,
+            self.settings,
+            batch_size=batch_size,
+            file_mode=file_mode,
+            learnable_facts=learnable_facts,
+        )
+
+    def build_dataset(
+        self,
+        dataset: Union[BaseDataset, GroundedDataset],
         *,
         batch_size: int = 1,
         file_mode: bool = False,
