@@ -229,7 +229,7 @@ class DatasetBuilder:
             grounded_dataset = self.ground_dataset(
                 dataset, settings, batch_size=batch_size, file_mode=file_mode, learnable_facts=learnable_facts
             )
-        return grounded_dataset.neuralize(progress)
+        return BuiltDataset(grounded_dataset.neuralize(progress), batch_size)
 
     @staticmethod
     def merge_queries_with_examples(queries, examples, one_query_per_example, example_queries=True):

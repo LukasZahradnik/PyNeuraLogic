@@ -2,8 +2,7 @@ from typing import Dict, Optional, Union, Callable, List
 
 from neuralogic.core.settings import Settings
 from neuralogic.core.builder import DatasetBuilder
-from neuralogic.core import Template, BuiltDataset, SettingsProxy
-from neuralogic.core.builder.components import GroundedDataset
+from neuralogic.core import Template, BuiltDataset, SettingsProxy, GroundedDataset
 from neuralogic.dataset.base import BaseDataset
 
 from neuralogic.utils.visualize import draw_model
@@ -32,7 +31,7 @@ class AbstractNeuraLogic:
         batch_size: int = 1,
         file_mode: bool = False,
         learnable_facts: bool = False,
-    ):
+    ) -> GroundedDataset:
         return self.dataset_builder.ground_dataset(
             dataset,
             self.settings,
@@ -49,7 +48,7 @@ class AbstractNeuraLogic:
         file_mode: bool = False,
         learnable_facts: bool = False,
         progress: bool = False,
-    ):
+    ) -> BuiltDataset:
         return self.dataset_builder.build_dataset(
             dataset,
             self.settings,

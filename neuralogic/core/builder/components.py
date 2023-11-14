@@ -207,7 +207,7 @@ class GroundedDataset:
             self._groundings_list = [Grounding(g) for g in self._groundings]
         return self._groundings_list[item]
 
-    def neuralize(self, progress: bool) -> BuiltDataset:
+    def neuralize(self, progress: bool):
         if self._groundings_list is not None:
             return self._builder.neuralize(self._groundings.stream(), progress, self.length)
         return self._builder.neuralize(self._groundings, progress, self.length)
