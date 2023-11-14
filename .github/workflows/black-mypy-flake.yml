@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd /home/runner/work/PyNeuraLogic/PyNeuraLogic/
-          pip install black
+          pip install black==23.11.0
           pip install mypy
           pip install flake8
 

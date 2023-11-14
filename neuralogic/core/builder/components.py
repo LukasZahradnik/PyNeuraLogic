@@ -171,7 +171,6 @@ class BuiltDataset:
 
 
 class Grounding:
-
     __slots__ = ("grounding",)
 
     def __init__(self, grounding):
