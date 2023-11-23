@@ -183,3 +183,14 @@ class Template:
         if isinstance(value, (Iterable, Module)):
             raise NotImplementedError
         self.template[key] = value
+
+    def __copy__(self) -> "Template":
+        temp = Template()
+
+        temp.template_file = self.template_file
+        temp.template = self.template
+
+        return temp
+
+    def clone(self) -> "Template":
+        return self.__copy__()
