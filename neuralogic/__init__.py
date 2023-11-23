@@ -3,7 +3,7 @@ from typing import Optional, List
 
 import jpype
 
-from neuralogic.logging import _init_logging
+from neuralogic.logging import _init_logging, LogHandler, add_log_handler
 
 
 _is_initialized = False
@@ -132,6 +132,11 @@ def initialize(
     debug_port: int = 12999,
     is_debug_server: bool = True,
     debug_suspend: bool = True,
+    *,
+    seed: Optional[int] = None,
+    graphviz_path: Optional[str] = None,
+    max_memory_size: Optional[int] = None,
+    log_handler: Optional[LogHandler] = None,
 ):
     """
     Initialize the NeuraLogic backend. This function is called implicitly when needed and should be called
@@ -147,11 +152,31 @@ def initialize(
         Act like server and listen for the debugger. Default: ``True``
     debug_suspend : bool
         Wait until the debugger is connected. Default: ``True``
+    seed : Optional[int]
+        The seed for the random number generator.
+    graphviz_path : Optional[str]
+        The Graphviz path
+    max_memory_size : Optional[int]
+        The maximum memory size (in gigabytes)
+    log_handler: Optional[LogHandler]
+        The handler for logging
     """
     global _is_initialized
 
     if _is_initialized:
         raise Exception("NeuraLogic already initialized")
+
+    if seed is not None:
+        manual_seed(seed)
+
+    if graphviz_path is not None:
+        set_graphviz_path(graphviz_path)
+
+    if max_memory_size is not None:
+        set_max_memory_size(max_memory_size)
+
+    if log_handler is not None:
+        add_log_handler(log_handler)
 
     _is_initialized = True
     options = [*jvm_options]

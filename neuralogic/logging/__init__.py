@@ -1,7 +1,8 @@
+import dataclasses
 import os
 import sys
 from enum import Enum
-from typing import List, Tuple
+from typing import List, Tuple, Any
 
 import jpype
 
@@ -40,6 +41,13 @@ class Formatter(Enum):
     NORMAL = "normal"
 
 
+@dataclasses.dataclass
+class LogHandler:
+    output: Any
+    level: Level = Level.FINER
+    formatter: Formatter = Formatter.COLOR
+
+
 def _init_logging():
     global _is_logging_initialized
 
@@ -61,6 +69,15 @@ def _init_logging():
     for handler_settings in _loggers_buffer:
         add_handler(*handler_settings)
     _loggers_buffer.clear()
+
+
+def add_log_handler(handler: LogHandler):
+    """
+    Add logger handler for an insight into the java backend. Overrides the default logger to stdout.
+
+    :param handler: LogHandler
+    """
+    return add_handler(handler.output, handler.level, handler.formatter)
 
 
 def add_handler(output, level: Level = Level.FINER, formatter: Formatter = Formatter.COLOR):
@@ -116,4 +133,4 @@ def clear_handlers():
         root_logger.removeHandler(handler)
 
 
-__all__ = ["add_handler", "clear_handlers", "Level", "Formatter", "TextIOWrapper"]
+__all__ = ["add_handler", "add_log_handler", "clear_handlers", "Level", "Formatter", "TextIOWrapper", "LogHandler"]
