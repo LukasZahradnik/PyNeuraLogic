@@ -3,7 +3,7 @@ from neuralogic.core import Template, R, V, C, Metadata, Aggregation, Transforma
 from neuralogic.inference.evaluation_inference_engine import EvaluationInferenceEngine
 
 
-def test_eval_inference_engine_london_reachable() -> None:
+def test_evaluation_inference_engine_london_reachable() -> None:
     """
     Test of the evaluation inference engine
     based on https://book.simply-logical.space/part_i.html#a_brief_introduction_to_clausal_logic

@@ -9,7 +9,7 @@ from neuralogic.core import Template, Settings
 from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.rule import Rule
-from neuralogic.dataset import Dataset
+from neuralogic.dataset import Dataset, Sample
 
 
 class _NeuraLogicFunction(Function):
@@ -76,7 +76,7 @@ class NeuraLogic(nn.Module):
         self.model = template.build(settings)
         self.number_format = self.model.settings.settings_class.superDetailedNumberFormat
 
-        dataset = Dataset([input_facts], [output_relation])
+        dataset = Dataset(Sample(output_relation, input_facts))
         self.sample = self.model.build_dataset(dataset, learnable_facts=True).samples[0]
         self.value_factory = ValueFactory()
 

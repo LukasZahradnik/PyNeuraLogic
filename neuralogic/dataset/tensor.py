@@ -3,7 +3,7 @@ from typing import Optional, List, Union, Tuple, Sequence, Iterable
 import numpy as np
 
 from neuralogic.core.constructs.factories import Relation
-from neuralogic.dataset.base import ConvertableDataset
+from neuralogic.dataset.base import ConvertibleDataset
 from neuralogic.dataset.logic import Dataset
 
 
@@ -181,7 +181,7 @@ class Data:
         return data_list
 
 
-class TensorDataset(ConvertableDataset):
+class TensorDataset(ConvertibleDataset):
     r"""The ``TensorDataset`` holds a list of :py:class:`~neuralogic.dataset.tensor.Data` instances -
     a list of graphs represented in a tensor format.
 
@@ -256,8 +256,11 @@ class TensorDataset(ConvertableDataset):
                 self.number_of_classes,
             )
 
-            dataset.add_query(query)
-            dataset.add_example(examples)
+            if isinstance(query, Sequence):
+                for q in query:
+                    dataset.add(q, examples)
+            else:
+                dataset.add(query, examples)
         return dataset
 
     def dump(

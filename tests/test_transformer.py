@@ -3,7 +3,7 @@ import pytest
 import torch
 
 from neuralogic.core import Template, Settings, V, R
-from neuralogic.dataset import Dataset
+from neuralogic.dataset import Dataset, Sample
 from neuralogic.nn.module import MultiheadAttention
 
 
@@ -42,7 +42,7 @@ def test_multiheadattention(qdim: int, kdim: int, vdim: int, num_heads: int, seq
         example.append(R.k(i)[keys[i]])
         example.append(R.q(i)[queries[i]])
 
-    dataset = Dataset([example], [R.out(i) for i in range(sequence_len)])
+    dataset = Dataset([Sample(R.out(i), example) for i in range(sequence_len)])
     built_dataset = model.build_dataset(dataset)
 
     torch_results = mha(queries, keys, values)

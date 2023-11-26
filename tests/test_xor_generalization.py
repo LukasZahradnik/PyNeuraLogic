@@ -6,7 +6,7 @@ import pytest
 from neuralogic import manual_seed
 from neuralogic.nn import get_evaluator
 from neuralogic.core import Settings, R, V, Template, Transformation
-from neuralogic.dataset import Dataset
+from neuralogic.dataset import Dataset, Sample
 from neuralogic.optim import SGD
 
 
@@ -29,12 +29,12 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
     template += R.xor_at(0) <= R.val_at(0)
     template += R.xor_at(V.Y)["a":1, 8] <= (R.val_at(V.Y)["b":8, 1], R.xor_at(V.X)["c":8, 1], R.special.next(V.X, V.Y))
 
-    dataset.add_examples(
+    dataset.add_samples(
         [
-            R.xor_at(1)[0] <= (R.val_at(0)[0], R.val_at(1)[0]),
-            R.xor_at(1)[1] <= (R.val_at(0)[0], R.val_at(1)[1]),
-            R.xor_at(1)[1] <= (R.val_at(0)[1], R.val_at(1)[0]),
-            R.xor_at(1)[0] <= (R.val_at(0)[1], R.val_at(1)[1]),
+            Sample(R.xor_at(1)[0], [R.val_at(0)[0], R.val_at(1)[0]]),
+            Sample(R.xor_at(1)[1], [R.val_at(0)[0], R.val_at(1)[1]]),
+            Sample(R.xor_at(1)[1], [R.val_at(0)[1], R.val_at(1)[0]]),
+            Sample(R.xor_at(1)[0], [R.val_at(0)[1], R.val_at(1)[1]]),
         ]
     )
 
@@ -50,7 +50,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
     n_dataset = Dataset()
 
     for example in products:
-        n_dataset.add_example(R.xor_at(n - 1)[0] <= (R.val_at(i)[int(val)] for i, val in enumerate(example)))
+        n_dataset.add_sample(Sample(R.xor_at(n - 1)[0], [R.val_at(i)[int(val)] for i, val in enumerate(example)]))
 
     for expected_value, predicted in zip(expected, evaluator.test(n_dataset)):
         assert expected_value == predicted
@@ -90,18 +90,11 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
     # The training dataset to train xor on two inputs x(0) and x(1), n(1) is means the max index of input is 1
     # x(0, 1) defines which input should be "xor-ed" together
     dataset = Dataset()
-    dataset.add_examples(
-        [
-            [R.xy(0, 1), R.x(0)[0.0], R.x(1)[0.0], R.n(1)],
-            [R.xy(0, 1), R.x(0)[1.0], R.x(1)[0.0], R.n(1)],
-            [R.xy(0, 1), R.x(0)[0.0], R.x(1)[1.0], R.n(1)],
-            [R.xy(0, 1), R.x(0)[1.0], R.x(1)[1.0], R.n(1)],
-        ]
-    )
-
-    # Trarining queries (0, 1, 1, 0)
-    dataset.add_queries([
-        R.xor[0.0], R.xor[1.0], R.xor[1.0], R.xor[0.0],
+    dataset.add_samples([
+        Sample(R.xor[0.0], [R.xy(0, 1), R.x(0)[0.0], R.x(1)[0.0], R.n(1)]),
+        Sample(R.xor[1.0], [R.xy(0, 1), R.x(0)[1.0], R.x(1)[0.0], R.n(1)]),
+        Sample(R.xor[1.0], [R.xy(0, 1), R.x(0)[0.0], R.x(1)[1.0], R.n(1)]),
+        Sample(R.xor[0.0], [R.xy(0, 1), R.x(0)[1.0], R.x(1)[1.0], R.n(1)]),
     ])
 
     settings = Settings(optimizer=SGD(), epochs=300)
@@ -126,8 +119,7 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
         fact_example.append(R.n(n - 1))
 
         # Add example and query to the dataset, the query has some default value (1.0) as we do not care about the label
-        n_dataset.add_example(fact_example)
-        n_dataset.add_query(R.xor)
+        n_dataset.add(R.xor, fact_example)
 
     # Check that we predicted correct values for n inputs for model trained on 2 inputs
     for expected_value, predicted in zip(expected, neuralogic_evaluator.test(n_dataset)):

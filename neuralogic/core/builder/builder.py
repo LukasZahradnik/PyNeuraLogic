@@ -4,7 +4,7 @@ import jpype
 from tqdm.autonotebook import tqdm
 
 from neuralogic import is_initialized, initialize
-from neuralogic.core.builder.components import Sample, RawSample
+from neuralogic.core.builder.components import NeuralSample
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
 
@@ -58,7 +58,7 @@ class Builder:
     def ground_from_logic_samples(self, parsed_template, logic_samples):
         return self._ground(parsed_template, None, logic_samples)
 
-    def _ground(self, parsed_template, sources: Optional[Sources], logic_samples) -> List[RawSample]:
+    def _ground(self, parsed_template, sources: Optional[Sources], logic_samples) -> List[NeuralSample]:
         if sources is not None:
             ground_pipeline = self.example_builder.buildGroundings(parsed_template, sources.sources)
         else:
@@ -69,20 +69,20 @@ class Builder:
 
         return ground_pipeline.get()
 
-    def neuralize(self, groundings, progress: bool, length: Optional[int]) -> List[RawSample]:
+    def neuralize(self, groundings, progress: bool, length: Optional[int]) -> List[NeuralSample]:
         if not progress:
             return self._neuralize(groundings, None)
         with tqdm(total=length, desc="Building", unit=" samples", dynamic_ncols=True) as pbar:
             return self._neuralize(groundings, self._callback(pbar))
 
-    def _neuralize(self, groundings, callback) -> List[RawSample]:
+    def _neuralize(self, groundings, callback) -> List[NeuralSample]:
         neuralize_pipeline = self.example_builder.neuralize(groundings, None)
         neuralize_pipeline.execute(None)
 
         samples = neuralize_pipeline.get()
         logic_samples = samples.collect(self.collectors.toList())
 
-        return [RawSample(sample, None) for sample in logic_samples]
+        return [NeuralSample(sample, None) for sample in logic_samples]
 
     def build_model(self, parsed_template, settings: SettingsProxy):
         neural_model = self.neural_model(parsed_template.getAllWeights(), settings.settings)
@@ -94,14 +94,6 @@ class Builder:
         builder = jpype.JClass("cz.cvut.fel.ida.pipelines.building.PythonBuilder")(settings.settings)
 
         return builder
-
-    @staticmethod
-    def build(samples):
-        serializer = jpype.JClass("cz.cvut.fel.ida.neural.networks.structure.export.NeuralSerializer")()
-        super_detailed_format = jpype.JClass("cz.cvut.fel.ida.setup.Settings").superDetailedNumberFormat
-        serializer.numberFormat = super_detailed_format
-
-        return [Sample(serializer.serialize(sample), sample) for sample in samples]
 
     @staticmethod
     def _get_spinner_text(count: int) -> str:

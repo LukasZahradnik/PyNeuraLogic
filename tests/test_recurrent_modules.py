@@ -3,7 +3,7 @@ import pytest
 import torch
 
 from neuralogic.core import Template, Settings, R
-from neuralogic.dataset import Dataset
+from neuralogic.dataset import Dataset, Sample
 from neuralogic.nn.loss import MSE
 
 from neuralogic.nn.module import GRU, RNN, LSTM
@@ -46,12 +46,14 @@ def test_gru_module(input_size, hidden_size, sequence_len, epochs):
 
     dataset = Dataset(
         [
-            [
-                R.h0[[float(h) for h in h0[0]]],
-                *[R.f(i + 1)[[float(h) for h in torch_input[i]]] for i in range(sequence_len)],
-            ]
-        ],
-        [R.h(sequence_len)[target.detach().numpy().tolist()]],
+            Sample(
+                R.h(sequence_len)[target.detach().numpy().tolist()],
+                [
+                    R.h0[[float(h) for h in h0[0]]],
+                    *[R.f(i + 1)[[float(h) for h in torch_input[i]]] for i in range(sequence_len)],
+                ],
+            )
+        ]
     )
 
     bd = model.build_dataset(dataset)
@@ -102,12 +104,14 @@ def test_rnn_module(input_size, hidden_size, sequence_len, epochs):
 
     dataset = Dataset(
         [
-            [
-                R.h0[[float(h) for h in h0[0]]],
-                *[R.f(i + 1)[[float(h) for h in torch_input[i]]] for i in range(sequence_len)],
-            ]
-        ],
-        [R.h(sequence_len)[target.detach().numpy().tolist()]],
+            Sample(
+                R.h(sequence_len)[target.detach().numpy().tolist()],
+                [
+                    R.h0[[float(h) for h in h0[0]]],
+                    *[R.f(i + 1)[[float(h) for h in torch_input[i]]] for i in range(sequence_len)],
+                ],
+            ),
+        ]
     )
 
     bd = model.build_dataset(dataset)
@@ -166,13 +170,15 @@ def test_lstm_module(input_size, hidden_size, sequence_len, epochs):
 
     dataset = Dataset(
         [
-            [
-                R.c0[[float(c) for c in c0[0]]],
-                R.h0[[float(h) for h in h0[0]]],
-                *[R.f(i + 1)[[float(h) for h in torch_input[i]]] for i in range(sequence_len)],
-            ]
-        ],
-        [R.h(sequence_len)[target.detach().numpy().tolist()]],
+            Sample(
+                R.h(sequence_len)[target.detach().numpy().tolist()],
+                [
+                    R.c0[[float(c) for c in c0[0]]],
+                    R.h0[[float(h) for h in h0[0]]],
+                    *[R.f(i + 1)[[float(h) for h in torch_input[i]]] for i in range(sequence_len)],
+                ],
+            ),
+        ]
     )
 
     bd = model.build_dataset(dataset)

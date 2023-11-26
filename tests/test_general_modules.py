@@ -4,7 +4,7 @@ import torch
 
 from neuralogic.core import Template, R, Settings, Transformation
 from neuralogic.nn.module import Linear
-from neuralogic.dataset import Dataset
+from neuralogic.dataset import Dataset, Sample
 
 
 @pytest.mark.parametrize(
@@ -34,10 +34,8 @@ def test_linear_module(feature_size: int, output_size: int, num_of_inputs: int, 
     state["weights"][0] = list(linear.parameters())[0].detach().numpy()
     model.load_state_dict(state)
 
-    examples = [R.f(index)[row.detach().numpy()] for index, row in enumerate(linear_input)]
-    queries = [R.h(index) for index, _ in enumerate(linear_input)]
-
-    built_dataset = model.build_dataset(Dataset(examples, queries))
+    samples = [Sample(R.h(index), [R.f(index)[row.detach().numpy()]]) for index, row in enumerate(linear_input)]
+    built_dataset = model.build_dataset(Dataset(samples))
 
     for sample, row in zip(built_dataset.samples, linear_output):
         results = model(sample, train=False)

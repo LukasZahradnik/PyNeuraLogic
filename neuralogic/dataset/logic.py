@@ -1,10 +1,38 @@
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Sequence
 
-from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
+from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.dataset.base import BaseDataset
 
-DatasetEntries = Union[BaseRelation, WeightedRelation, Rule]
+DatasetEntries = Union[BaseRelation, Rule]
+
+
+class Sample:
+    __slots__ = (
+        "query",
+        "example",
+    )
+
+    def __init__(
+        self, query: Optional[BaseRelation], example: Optional[Union[Sequence[DatasetEntries], DatasetEntries]]
+    ):
+        self.query = query
+
+        if example is None:
+            example = []
+
+        if not isinstance(example, Sequence):
+            self.example = [example]
+        else:
+            self.example = example
+
+    def __str__(self) -> str:
+        return str(self.query)
+
+    def __len__(self) -> int:
+        if self.example is None:
+            return 0
+        return len(self.example)
 
 
 class Dataset(BaseDataset):
@@ -68,40 +96,36 @@ class Dataset(BaseDataset):
 
     """
 
-    def __init__(
-        self,
-        examples: Optional[List[List[DatasetEntries]]] = None,
-        queries: Optional[List[Union[List[DatasetEntries], DatasetEntries]]] = None,
-    ):
-        self.examples: List[List[DatasetEntries]] = examples if examples is not None else []
-        self.queries: List[Union[List[DatasetEntries], DatasetEntries]] = queries if queries is not None else []
+    __slots__ = ("samples",)
 
-    def add_example(self, example):
-        self.add_examples([example])
+    def __init__(self, samples: Optional[Union[List[Sample], Sample]] = None):
+        self.samples = samples
 
-    def add_examples(self, examples: List):
-        self.examples.extend(examples)
+        if self.samples is None:
+            self.samples = []
+        elif not isinstance(self.samples, list):
+            self.samples = [self.samples]
 
-    def set_examples(self, examples: List):
-        self.examples = examples
+    def add_samples(self, samples: List[Sample]):
+        self.samples.extend(samples)
 
-    def add_query(self, query):
-        self.add_queries([query])
+    def add_sample(self, sample: Sample):
+        self.samples.append(sample)
 
-    def add_queries(self, queries: List):
-        self.queries.extend(queries)
+    def add(self, query: BaseRelation, example: Optional[List[DatasetEntries]]):
+        self.samples.append(Sample(query, example))
 
-    def set_queries(self, queries: List):
-        self.queries = queries
+    def __getitem__(self, item: int) -> Sample:
+        return self.samples[item]
 
-    def dump(
-        self,
-        queries_fp,
-        examples_fp,
-        sep: str = "\n",
-    ):
-        for examples in self.examples:
-            examples_fp.write(f"{','.join(example.to_str(False) for example in examples)}.{sep}")
+    def __setitem__(self, key: int, value: Sample):
+        self.samples[key] = value
 
-        for query in self.queries:
-            queries_fp.write(f"{query}{sep}")
+    def __delitem__(self, key: int):
+        del self.samples
+
+    def __str__(self):
+        return ". ".join(str(s) for s in self.samples)
+
+    def __len__(self):
+        return len(self.samples)

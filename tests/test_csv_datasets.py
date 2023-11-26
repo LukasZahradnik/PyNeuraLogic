@@ -71,49 +71,55 @@ def tests_csv_file() -> None:
     assert [str(e) for e in examples] == expected
 
 
-@pytest.mark.parametrize("mode,expected", [
-    (
+@pytest.mark.parametrize(
+    "mode,expected",
+    [
+        (
             Mode.ONE_EXAMPLE,
-            [[
-            "rel_a(1, 2, 3).",
-            "rel_a(4, 5, 6).",
-            "rel_a(7, 8, 9).",
-            "rel_b(1, 2, 3).",
-            "rel_b(4, 5, 6).",
-            "rel_b(7, 8, 9).",
-            "rel_c(1, 2, 3).",
-            "rel_c(4, 5, 6).",
-            "rel_c(7, 8, 9).",
-        ]]
-    ),
-    (
+            [
+                [
+                    "rel_a(1, 2, 3).",
+                    "rel_a(4, 5, 6).",
+                    "rel_a(7, 8, 9).",
+                    "rel_b(1, 2, 3).",
+                    "rel_b(4, 5, 6).",
+                    "rel_b(7, 8, 9).",
+                    "rel_c(1, 2, 3).",
+                    "rel_c(4, 5, 6).",
+                    "rel_c(7, 8, 9).",
+                ]
+            ],
+        ),
+        (
             Mode.ZIP,
             [
-            ["rel_a(1, 2, 3).", "rel_b(1, 2, 3).", "rel_c(1, 2, 3)."],
-            ["rel_a(4, 5, 6).", "rel_b(4, 5, 6).", "rel_c(4, 5, 6)."],
-            ["rel_a(7, 8, 9).", "rel_b(7, 8, 9).", "rel_c(7, 8, 9)."]
-        ]
-    ),
-    (
+                ["rel_a(1, 2, 3).", "rel_b(1, 2, 3).", "rel_c(1, 2, 3)."],
+                ["rel_a(4, 5, 6).", "rel_b(4, 5, 6).", "rel_c(4, 5, 6)."],
+                ["rel_a(7, 8, 9).", "rel_b(7, 8, 9).", "rel_c(7, 8, 9)."],
+            ],
+        ),
+        (
             Mode.EXAMPLE_PER_SOURCE,
             [
-            [
-                "rel_a(1, 2, 3).",
-                "rel_a(4, 5, 6).",
-                "rel_a(7, 8, 9).",
-            ], [
-                "rel_b(1, 2, 3).",
-                "rel_b(4, 5, 6).",
-                "rel_b(7, 8, 9).",
-            ], [
-                "rel_c(1, 2, 3).",
-                "rel_c(4, 5, 6).",
-                "rel_c(7, 8, 9).",
+                [
+                    "rel_a(1, 2, 3).",
+                    "rel_a(4, 5, 6).",
+                    "rel_a(7, 8, 9).",
+                ],
+                [
+                    "rel_b(1, 2, 3).",
+                    "rel_b(4, 5, 6).",
+                    "rel_b(7, 8, 9).",
+                ],
+                [
+                    "rel_c(1, 2, 3).",
+                    "rel_c(4, 5, 6).",
+                    "rel_c(7, 8, 9).",
+                ],
             ],
-        ]
-    ),
-
-])
+        ),
+    ],
+)
 def test_csv_dataset(mode: Mode, expected: List[List[str]]) -> None:
     csv_string_source = """1,2,3
     4,5,6
@@ -132,8 +138,8 @@ def test_csv_dataset(mode: Mode, expected: List[List[str]]) -> None:
     dataset = CSVDataset([csv_source_a, csv_source_b, csv_source_c], mode=mode)
     logic_dataset = dataset.to_dataset()
 
-    assert len(logic_dataset.examples) == len(expected)
+    assert len(logic_dataset) == len(expected)
 
-    for exp, actual in zip(expected, logic_dataset.examples):
-        assert len(exp) == len(actual)
-        assert exp == [str(e) for e in actual]
+    for exp, sample in zip(expected, logic_dataset.samples):
+        assert len(exp) == len(sample)
+        assert exp == [str(e) for e in sample.example]

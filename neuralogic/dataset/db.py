@@ -6,7 +6,7 @@ from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.dataset.logic import Dataset
 from neuralogic.dataset.csv import CSVDataset, CSVFile, Mode
-from neuralogic.dataset.base import ConvertableDataset
+from neuralogic.dataset.base import ConvertibleDataset
 
 DatasetEntries = Union[BaseRelation, WeightedRelation, Rule]
 
@@ -89,7 +89,7 @@ class DBSource:
         )
 
 
-class DBDataset(ConvertableDataset):
+class DBDataset(ConvertibleDataset):
     def __init__(
         self,
         connection,

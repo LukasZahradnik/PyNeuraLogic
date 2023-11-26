@@ -1,5 +1,4 @@
-import tempfile
-from typing import Union, Set, Dict
+from typing import Union, Set, Dict, List
 
 import jpype
 
@@ -12,7 +11,6 @@ from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
-
 
 TemplateEntries = Union[BaseRelation, WeightedRelation, Rule]
 
@@ -74,6 +72,9 @@ class DatasetBuilder:
         examples_queries = False
 
         for example in examples:
+            if example is None:
+                example = []
+
             label, lifted_example = self.java_factory.get_lifted_example(example, learnable_facts)
             example_query = False
 
@@ -110,7 +111,6 @@ class DatasetBuilder:
         settings: SettingsProxy,
         *,
         batch_size: int = 1,
-        file_mode: bool = False,
         learnable_facts: bool = False,
     ) -> GroundedDataset:
         """Grounds the dataset
@@ -118,33 +118,14 @@ class DatasetBuilder:
         :param dataset:
         :param settings:
         :param batch_size:
-        :param file_mode:
         :param learnable_facts:
         :return:
         """
-        if isinstance(dataset, datasets.TensorDataset) and file_mode:
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".txt") as q_tf, tempfile.NamedTemporaryFile(
-                mode="w", suffix=".txt"
-            ) as e_tf:
-                dataset.dump(q_tf, e_tf)
-
-                q_tf.flush()
-                e_tf.flush()
-
-                return self.ground_dataset(
-                    datasets.FileDataset(e_tf.name, q_tf.name),
-                    settings,
-                    batch_size=batch_size,
-                    file_mode=False,
-                    learnable_facts=learnable_facts,
-                )
-
-        if isinstance(dataset, datasets.ConvertableDataset):
+        if isinstance(dataset, datasets.ConvertibleDataset):
             return self.ground_dataset(
                 dataset.to_dataset(),
                 settings,
                 batch_size=batch_size,
-                file_mode=False,
                 learnable_facts=learnable_facts,
             )
 
@@ -166,9 +147,7 @@ class DatasetBuilder:
             query_builder.setFactoriesFrom(examples_builder)
 
             settings.settings.groundingMode = self.grounding_mode.INDEPENDENT
-
-            examples = dataset.examples
-            queries = dataset.queries
+            examples, queries = self.samples_to_examples_and_queries(dataset.samples)
 
             if len(examples) == 1:
                 settings.settings.groundingMode = self.grounding_mode.GLOBAL
@@ -209,7 +188,6 @@ class DatasetBuilder:
         settings: SettingsProxy,
         *,
         batch_size: int = 1,
-        file_mode: bool = False,
         learnable_facts: bool = False,
         progress: bool = False,
     ) -> BuiltDataset:
@@ -218,7 +196,6 @@ class DatasetBuilder:
         :param dataset:
         :param settings:
         :param batch_size:
-        :param file_mode:
         :param learnable_facts:
         :param progress:
         :return:
@@ -227,7 +204,7 @@ class DatasetBuilder:
 
         if not isinstance(dataset, GroundedDataset):
             grounded_dataset = self.ground_dataset(
-                dataset, settings, batch_size=batch_size, file_mode=file_mode, learnable_facts=learnable_facts
+                dataset, settings, batch_size=batch_size, learnable_facts=learnable_facts
             )
         return BuiltDataset(grounded_dataset.neuralize(progress), batch_size)
 
@@ -279,3 +256,18 @@ class DatasetBuilder:
             query_object.query.evidence = example_object.query.evidence
             logic_samples.append(query)
         return logic_samples
+
+    @staticmethod
+    def samples_to_examples_and_queries(samples: List):
+        example_dict = {}
+        queries_dict = {}
+
+        for sample in samples:
+            idx = id(sample.example)
+
+            if idx not in example_dict:
+                queries_dict[idx] = [sample.query]
+                example_dict[idx] = sample.example
+            else:
+                queries_dict[idx].append(sample.query)
+        return example_dict.values(), queries_dict.values()

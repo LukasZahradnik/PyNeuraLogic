@@ -167,7 +167,7 @@ def evaluate(model, dataset, steps, dataset_loc, dim, task: Task):
         dataset.number_of_classes = task.output_size
         dataset.one_hot_encoding = True
 
-    built_dataset = model.build_dataset(dataset, file_mode=True)
+    built_dataset = model.build_dataset(dataset)
 
     build_time = time.perf_counter() - start_time
     start_time = time.perf_counter()

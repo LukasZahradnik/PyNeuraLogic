@@ -29,14 +29,12 @@ class AbstractNeuraLogic:
         dataset: BaseDataset,
         *,
         batch_size: int = 1,
-        file_mode: bool = False,
         learnable_facts: bool = False,
     ) -> GroundedDataset:
         return self.dataset_builder.ground_dataset(
             dataset,
             self.settings,
             batch_size=batch_size,
-            file_mode=file_mode,
             learnable_facts=learnable_facts,
         )
 
@@ -45,7 +43,6 @@ class AbstractNeuraLogic:
         dataset: Union[BaseDataset, GroundedDataset],
         *,
         batch_size: int = 1,
-        file_mode: bool = False,
         learnable_facts: bool = False,
         progress: bool = False,
     ) -> BuiltDataset:
@@ -53,7 +50,6 @@ class AbstractNeuraLogic:
             dataset,
             self.settings,
             batch_size=batch_size,
-            file_mode=file_mode,
             learnable_facts=learnable_facts,
             progress=progress,
         )
@@ -128,7 +124,6 @@ class AbstractEvaluator:
         dataset: Union[BaseDataset, BuiltDataset],
         *,
         batch_size: int = 1,
-        file_mode: bool = False,
         learnable_facts: bool = False,
         progress: bool = False,
     ):
@@ -136,7 +131,6 @@ class AbstractEvaluator:
             return self.neuralogic_model.build_dataset(
                 dataset,
                 batch_size=batch_size,
-                file_mode=file_mode,
                 learnable_facts=learnable_facts,
                 progress=progress,
             )

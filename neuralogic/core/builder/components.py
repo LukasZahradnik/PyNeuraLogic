@@ -8,7 +8,7 @@ from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.utils.visualize import draw_sample, draw_grounding
 
 
-class RawSample:
+class NeuralSample:
     __slots__ = "java_sample", "fact_cache", "grounding"
 
     def __init__(self, sample, grounding):
@@ -68,30 +68,6 @@ class RawSample:
         **kwargs,
     ):
         return draw_sample(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
-
-
-class Sample(RawSample):
-    __slots__ = ("id", "target", "neurons", "output_neuron", "java_sample")
-
-    def __init__(self, sample, java_sample):
-        super().__init__(sample, None)
-        serialized_sample = json.loads(str(sample.exportToJson()))
-
-        self.id = serialized_sample["id"]
-        self.target = json.loads(serialized_sample["target"])
-        self.neurons = Sample.deserialize_network(serialized_sample["network"])
-        self.output_neuron = self.neurons[-1].index
-        self.java_sample = java_sample
-
-    @staticmethod
-    def deserialize_network(network):
-        neurons = []
-
-        for i, neuron in enumerate(network):
-            neuron_object = Neuron(neuron, i)
-            neurons.append(neuron_object)
-
-        return neurons
 
 
 class Neuron:
@@ -159,7 +135,7 @@ class BuiltDataset:
 
     __slots__ = "samples", "batch_size"
 
-    def __init__(self, samples: List[RawSample], batch_size: int):
+    def __init__(self, samples: List[NeuralSample], batch_size: int):
         self.samples = samples
         self.batch_size = batch_size
 

@@ -21,16 +21,16 @@ Y = Var.Y
 
 template.add_rules(
     [
-        *[Relation.shape(Y) <= Relation.shape(Y, s)[1,] for s in shapes],
-        *[Relation.length(Y) <= Relation.length(Y, s)[1,] for s in [Constant.short, Constant.long]],
-        *[Relation.sides(Y) <= Relation.sides(Y, s)[1,] for s in [Constant.not_double, Constant.double]],
-        *[Relation.roof(Y) <= Relation.roof(Y, s)[1,] for s in roofs],
-        *[Relation.wheels(Y) <= Relation.wheels(Y, s)[1,] for s in [2, 3]],
-        *[Relation.loadnum(Y) <= Relation.loadnum(Y, s)[1,] for s in [0, 1, 2, 3]],
-        *[Relation.loadshape(Y) <= Relation.loadshape(Y, s)[1,] for s in loadshapes],
-        Relation.vagon(Y) <= (atom(Y)[1,] for atom in vagon_atoms),
-        *[Relation.train <= Relation.vagon(i)[1,] for i in [1, 2, 3, 4]],
-        Relation.direction <= Relation.train[1,],
+        *[Relation.shape(Y) <= Relation.shape(Y, s)[1, ] for s in shapes],
+        *[Relation.length(Y) <= Relation.length(Y, s)[1, ] for s in [Constant.short, Constant.long]],
+        *[Relation.sides(Y) <= Relation.sides(Y, s)[1, ] for s in [Constant.not_double, Constant.double]],
+        *[Relation.roof(Y) <= Relation.roof(Y, s)[1, ] for s in roofs],
+        *[Relation.wheels(Y) <= Relation.wheels(Y, s)[1, ] for s in [2, 3]],
+        *[Relation.loadnum(Y) <= Relation.loadnum(Y, s)[1, ] for s in [0, 1, 2, 3]],
+        *[Relation.loadshape(Y) <= Relation.loadshape(Y, s)[1, ] for s in loadshapes],
+        Relation.vagon(Y) <= (atom(Y)[1, ] for atom in vagon_atoms),
+        *[Relation.train <= Relation.vagon(i)[1, ] for i in [1, 2, 3, 4]],
+        Relation.direction <= Relation.train[1, ],
     ]
 )
 
@@ -50,5 +50,9 @@ for _, id, pos, shape, length, sides, roof, wheels, load, loadnum in train_examp
         ]
     )
 
-dataset.add_examples(examples)
-dataset.add_queries([*[Relation.direction[1.0] for _ in range(1, 11)], *[Relation.direction[-1.0] for _ in range(11, 21)]])
+
+for example in examples[:10]:
+    dataset.add(Relation.direction[1.0], example)
+
+for example in examples[10:]:
+    dataset.add(Relation.direction[-1.0], example)

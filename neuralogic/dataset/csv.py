@@ -3,12 +3,12 @@ from pathlib import Path
 from typing import Optional, List, Union, TextIO, Callable, Sequence
 
 from neuralogic.core.constructs.factories import R
-from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
+from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.rule import Rule
-from neuralogic.dataset import Dataset
-from neuralogic.dataset.base import ConvertableDataset
+from neuralogic.dataset import Dataset, Sample
+from neuralogic.dataset.base import ConvertibleDataset
 
-DatasetEntries = Union[BaseRelation, WeightedRelation, Rule]
+DatasetEntries = Union[BaseRelation, Rule]
 
 
 class Mode(enum.Enum):
@@ -138,7 +138,7 @@ class CSVFile:
         return self._to_logic(self.csv_source)
 
 
-class CSVDataset(ConvertableDataset):
+class CSVDataset(ConvertibleDataset):
     def __init__(
         self,
         csv_files: Union[List[CSVFile], CSVFile],
@@ -156,22 +156,23 @@ class CSVDataset(ConvertableDataset):
         self.csv_queries = file
 
     def to_dataset(self) -> Dataset:
-        examples: List[List[DatasetEntries]] = []
         queries = self.csv_queries.to_logic_form() if self.csv_queries else []
-        dataset = Dataset(examples, queries)
 
         if self.mode == Mode.ONE_EXAMPLE:
             example: List[DatasetEntries] = []
 
             for source in self.csv_files:
                 example.extend(source.to_logic_form())
-            examples.append(example)
+            if not queries:
+                return Dataset([Sample(None, example)])
+            return Dataset([Sample(q, example) for q in queries])
         elif self.mode == Mode.ZIP:
             logic_examples = [source.to_logic_form() for source in self.csv_files]
-
-            for zipped_example in zip(*logic_examples):
-                examples.append(zipped_example)
+            if not queries:
+                return Dataset([Sample(None, zipped_example) for zipped_example in zip(*logic_examples)])
+            return Dataset([Sample(q, zipped_example) for q, zipped_example in zip(queries, zip(*logic_examples))])
         elif self.mode == Mode.EXAMPLE_PER_SOURCE:
-            for source in self.csv_files:
-                examples.append(source.to_logic_form())
-        return dataset
+            if not queries:
+                return Dataset([Sample(None, source.to_logic_form()) for source in self.csv_files])
+            return Dataset([Sample(q, source.to_logic_form()) for source, q in zip(self.csv_files, queries)])
+        raise NotImplementedError

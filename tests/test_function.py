@@ -5,7 +5,7 @@ import numpy as np
 
 import neuralogic.nn.functional as F
 from neuralogic.core import Template, R, Settings
-from neuralogic.dataset import Dataset
+from neuralogic.dataset import Dataset, Sample
 
 
 @pytest.mark.parametrize(
@@ -29,7 +29,7 @@ def test_transformation_body_function(torch_fun, fun):
     template += R.h / 0 | [F.identity]
 
     model = template.build(Settings(iso_value_compression=False, chain_pruning=False))
-    dataset = Dataset([[R.input[data.tolist()]]], [R.h])
+    dataset = Dataset([Sample(R.h, R.input[data.tolist()])])
 
     built_dataset = model.build_dataset(dataset)
 
@@ -60,7 +60,7 @@ def test_slice_function():
     template += R.h / 0 | [F.identity]
 
     model = template.build(Settings(iso_value_compression=False, chain_pruning=False))
-    dataset = Dataset([[R.input[data]]], [R.h])
+    dataset = Dataset([Sample(R.h, [R.input[data]])])
 
     built_dataset = model.build_dataset(dataset)
     results = np.array(model(built_dataset, train=False)[0])
@@ -72,7 +72,7 @@ def test_slice_function():
     template += R.h / 0 | [F.identity]
 
     model = template.build(Settings(iso_value_compression=False, chain_pruning=False))
-    dataset = Dataset([[R.input[data]]], [R.h])
+    dataset = Dataset(Sample(R.h, [R.input[data]]))
 
     built_dataset = model.build_dataset(dataset)
     results = np.array(model(built_dataset, train=False)[0])
@@ -84,7 +84,7 @@ def test_slice_function():
     template += R.h / 0 | [F.slice(rows=(1, 3))]
 
     model = template.build(Settings(iso_value_compression=False, chain_pruning=False))
-    dataset = Dataset([[R.input[data]]], [R.h])
+    dataset = Dataset(Sample(R.h, [R.input[data]]))
 
     built_dataset = model.build_dataset(dataset)
     results = np.array(model(built_dataset, train=False)[0])
