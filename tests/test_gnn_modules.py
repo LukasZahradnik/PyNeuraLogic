@@ -40,13 +40,13 @@ def test_gen_module(input_size, hidden_size):
 
     data = Data(x=x, edge_index=edge_index.t().contiguous(), edge_attr=e)
 
-    gen = GENConv(input_size, hidden_size, aggr="mean", num_layers=1, eps=0)
+    gen = GENConv(input_size, hidden_size, aggr="mean", num_layers=1, eps=0, edge_dim=input_size)
     for m in gen.mlp._modules.values():
         m.bias = None
 
     template = Template()
     template += neuralogic.nn.module.GENConv(
-        input_size, hidden_size, "h", "f", "e", num_layers=1, aggregation=Aggregation.AVG, eps=0
+        input_size, hidden_size, "h", "f", "e", num_layers=1, aggregation=Aggregation.AVG, eps=0, edge_dim=input_size
     )
 
     model = template.build(
@@ -55,7 +55,11 @@ def test_gen_module(input_size, hidden_size):
 
     parameters = model.parameters()
     torch_parameters = [parameter.tolist() for parameter in gen.parameters()]
-    parameters["weights"][1] = [torch_parameters[0][i] for i in range(0, hidden_size)]
+
+    parameters["weights"][2] = [torch_parameters[0][i] for i in range(0, hidden_size)]
+    parameters["weights"][1] = [torch_parameters[1][i] for i in range(0, hidden_size)]
+    parameters["weights"][3] = [torch_parameters[2][i] for i in range(0, hidden_size)]
+    parameters["weights"][4] = torch_parameters[3][0]
 
     model.load_state_dict(parameters)
 

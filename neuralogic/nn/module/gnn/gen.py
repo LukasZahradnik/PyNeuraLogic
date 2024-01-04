@@ -86,25 +86,31 @@ class GENConv(Module):
             v_eps = v_eps.fixed()
 
         e_proj = []
-        if self.edge_dim is not None:
+        if self.edge_dim is not None and self.out_channels != self.edge_dim:
             e = R.get(f"{self.output_name}__gen_edge_proj")
             e_proj = [
-                (e(V.I, V.J)[self.in_channels, self.edge_dim] <= R.get(self.edge_name)(V.I, V.J))
+                (e(V.I, V.J)[self.out_channels, self.edge_dim] <= R.get(self.edge_name)(V.I, V.J))
                 | Metadata(transformation=Transformation.IDENTITY),
                 e / 2 | Metadata(transformation=Transformation.IDENTITY),
             ]
 
-        channels = [self.in_channels]
+        channels = [self.out_channels]
         for _ in range(self.num_layers - 1):
             channels.append(self.out_channels * self.expansion)
         channels.append(self.out_channels)
 
         mlp = MLP(channels, self.output_name, f"{self.output_name}__gen_out", Transformation.IDENTITY)
 
+        j_feat = x(V.J)
+        i_feat = x(V.I)
+        if self.in_channels != self.out_channels:
+            j_feat = x(V.J)[self.out_channels, self.in_channels]
+            i_feat = x(V.I)[self.out_channels, self.in_channels]
+
         return [
             v_eps,
             *e_proj,
-            (feat_sum(V.I, V.J) <= (x(V.J), e(V.J, V.I)))
+            (feat_sum(V.I, V.J) <= (j_feat, e(V.J, V.I)))
             | Metadata(transformation=Transformation.RELU, combination=Combination.SUM),
             feat_sum / 2 | Metadata(transformation=Transformation.IDENTITY),
             (feat_agg(V.I) <= (feat_sum(V.I, V.J), eps))
@@ -112,7 +118,7 @@ class GENConv(Module):
                 transformation=Transformation.IDENTITY, aggregation=self.aggregation, combination=Combination.SUM
             ),
             feat_agg / 1 | Metadata(transformation=Transformation.IDENTITY),
-            (out(V.I) <= (x(V.I), feat_agg(V.I)))
+            (out(V.I) <= (i_feat, feat_agg(V.I)))
             | Metadata(transformation=Transformation.IDENTITY, combination=Combination.SUM),
             out / 1 | Metadata(transformation=Transformation.IDENTITY),
             *mlp(),
