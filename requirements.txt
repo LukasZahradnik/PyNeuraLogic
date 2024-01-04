@@ -12,3 +12,5 @@ sphinx
 sphinx-rtd-theme
 sphinx-tabs
 sphinx-copybutton
+
+torch_geometric

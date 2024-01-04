@@ -9,6 +9,8 @@ from neuralogic.nn.module.gnn.res_gated import ResGatedGraphConv
 from neuralogic.nn.module.gnn.rgcn import RGCNConv
 from neuralogic.nn.module.gnn.sg import SGConv
 from neuralogic.nn.module.gnn.tag import TAGConv
+from neuralogic.nn.module.gnn.gine import GINEConv
+from neuralogic.nn.module.gnn.gen import GENConv
 
 from neuralogic.nn.module.general.positional_encoding import PositionalEncoding
 from neuralogic.nn.module.general.mlp import MLP
@@ -36,6 +38,8 @@ __all__ = [
     "RGCNConv",
     "SGConv",
     "TAGConv",
+    "GINEConv",
+    "GENConv",
     "PositionalEncoding",
     "MLP",
     "Linear",

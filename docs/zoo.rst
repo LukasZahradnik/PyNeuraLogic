@@ -50,6 +50,10 @@ Pre-defined Modules
               - :code:`R.<edge_name>(<source>, <target>)`
             * - :class:`~neuralogic.nn.module.gnn.res_gated.ResGatedGraphConv`
               - :code:`R.<edge_name>(<source>, <target>)`
+            * - :class:`~neuralogic.nn.module.gnn.gine.GINEConv`
+              - :code:`R.<edge_name>(<source>, <target>)`
+            * - :class:`~neuralogic.nn.module.gnn.gen.GENConv`
+              - :code:`R.<edge_name>(<source>, <target>)`
 
     .. tab:: General Blocks
 
@@ -179,6 +183,12 @@ GNN Modules
    :members:
 
 .. autoclass:: neuralogic.nn.module.gnn.res_gated::ResGatedGraphConv
+   :members:
+
+.. autoclass:: neuralogic.nn.module.gnn.gine::GINEConv
+   :members:
+
+.. autoclass:: neuralogic.nn.module.gnn.gen::GENConv
    :members:
 
 -----

@@ -51,7 +51,7 @@ class MLP(Module):
             metadata = [Metadata(transformation=act) for act in self.activation]
             metadata.extend([Metadata(transformation=Transformation.IDENTITY)] * (iters - len(metadata)))
         else:
-            metadata = [Metadata(transformation=self.activation)] * iters
+            metadata = [Metadata(transformation=self.activation)] * (iters + 1)
 
         for index in range(0, iters, 2):
             in_channels, out_channels = self.units[index], self.units[index + 1]
