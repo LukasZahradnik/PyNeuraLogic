@@ -39,64 +39,9 @@ class Dataset(BaseDataset):
     r"""
     Dataset encapsulating (learning) samples in the form of logic format, allowing users to fully take advantage of the
     PyNeuraLogic library.
-
-    One learning sample consists of:
-
-    * Example: A list of logic facts and rules representing some instance (e.g., a graph)
-
-    * Query: A logic fact to mark the output of a model and optionally target label.
-
-    Examples and queries in the dataset can be paired in the following ways:
-
-    * :math:`N:N` - Dataset contains :math:`N` examples and :math:`N` queries. They will be paired by their index.
-
-    .. code:: python
-
-        dataset.add_example(first_example)
-        dataset.add_example(second_example)
-
-        dataset.add_query(first_query)
-        dataset.add_query(second_query)
-
-        # Learning samples: [first_example, first_query], [second_example, second_query]
-
-    * :math:`1:N` - Dataset contains :math:`1` example and :math:`N` queries. All queries will be run on the example.
-
-    .. code:: python
-
-        dataset.add_example(example)
-
-        dataset.add_query(first_query)
-        dataset.add_query(second_query)
-
-        # Learning samples: [example, first_query], [example, second_query]
-
-    * :math:`N:M` - Dataset contains :math:`N` examples and :math:`M` queries (:math:`N \leq M`).
-      It pairs queries similarly to the :math:`N:N` case but also allows running multiple queries on a specific example
-      (by inserting a list of queries instead of one query).
-
-    .. code:: python
-
-        dataset.add_example(first_example)
-        dataset.add_example(second_example)
-
-        dataset.add_query([first_query_0, first_query_1])
-        dataset.add_query(second_query)
-
-        # Learning samples:
-        #   [first_example, first_query_0], [first_example, first_query_1], [second_example, second_query]
-
-    Parameters
-    ----------
-
-    examples : Optional[List]
-        List of examples. Default: ``None``
-    queries : Optional[List]
-        List of queries. Default: ``None``
-
     """
 
-    __slots__ = ("samples",)
+    __slots__ = ("samples", "_examples", "_queries")
 
     def __init__(self, samples: Optional[Union[List[Sample], Sample]] = None):
         self.samples = samples
@@ -105,6 +50,12 @@ class Dataset(BaseDataset):
             self.samples = []
         elif not isinstance(self.samples, list):
             self.samples = [self.samples]
+
+        self._examples = []
+        self._queries = []
+
+    def set_samples(self, samples: List[Sample]):
+        self.samples = samples
 
     def add_samples(self, samples: List[Sample]):
         self.samples.extend(samples)
@@ -129,3 +80,22 @@ class Dataset(BaseDataset):
 
     def __len__(self):
         return len(self.samples)
+
+    # Deprecated
+    def add_example(self, example):
+        self.add_examples([example])
+
+    def add_examples(self, examples: List):
+        self._examples.extend(examples)
+
+    def add_query(self, query):
+        self.add_queries([query])
+
+    def add_queries(self, queries: List):
+        self._queries.extend(queries)
+
+    def set_examples(self, examples: List):
+        self._examples = examples
+
+    def set_queries(self, queries: List):
+        self._queries = queries

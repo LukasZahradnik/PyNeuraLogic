@@ -147,7 +147,14 @@ class DatasetBuilder:
             query_builder.setFactoriesFrom(examples_builder)
 
             settings.settings.groundingMode = self.grounding_mode.INDEPENDENT
-            examples, queries = self.samples_to_examples_and_queries(dataset.samples)
+            if len(dataset.samples) != 0 and (len(dataset._examples) != 0 or len(dataset._queries) != 0):
+                raise ValueError("Cannot provide both samples and examples with queries")
+
+            examples = dataset._examples
+            queries = dataset._queries
+
+            if len(dataset.samples) != 0:
+                examples, queries = self.samples_to_examples_and_queries(dataset.samples)
 
             if len(examples) == 1:
                 settings.settings.groundingMode = self.grounding_mode.GLOBAL
