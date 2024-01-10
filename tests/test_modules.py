@@ -41,11 +41,20 @@ def test_rgcnconv_relations_edge_replace():
 def test_gcnconv():
     template = Template()
 
-    template += GCNConv(1, 2, "h1", "h0", "_edge")
+    template += GCNConv(1, 2, "h1", "h0", "edge")
     template_str = str(template).split("\n")
 
-    assert template_str[0] == "{2, 1} h1(I) :- h0(J), *edge(J, I). [transformation=identity, aggregation=sum]"
-    assert template_str[1] == "h1/1 [transformation=identity]"
+    assert template_str[0] == "h1__edge(I, I)."
+    assert template_str[1] == "h1__edge(I, J) :- edge(I, J). [transformation=identity]"
+    assert template_str[2] == "h1__edge/2 [transformation=identity]"
+    assert template_str[3] == "h1__edge_count(I, J) :- h1__edge(J, X). [transformation=identity, aggregation=count]"
+    assert template_str[4] == "h1__edge_count(I, J) :- h1__edge(I, X). [transformation=identity, aggregation=count]"
+    assert template_str[5] == "h1__edge_count/2 [transformation=inverse, combination=product]"
+    assert (
+        template_str[6]
+        == "{2, 1} h1(I) :- h0(J), h1__edge(J, I), sqrt(h1__edge_count(J, I)). [transformation=identity, combination=product, aggregation=sum]"
+    )
+    assert template_str[7] == "h1/1 [transformation=identity]"
 
 
 def test_sageconv():

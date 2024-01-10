@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.constructs.function import Transformation, Aggregation
+from neuralogic.core.constructs.function import Transformation, Aggregation, Combination
 from neuralogic.core.constructs.factories import R, V
 from neuralogic.nn.module.module import Module
 
@@ -8,28 +8,6 @@ class GCNConv(Module):
     r"""
     Graph Convolutional layer from
     `"Semi-supervised Classification with Graph Convolutional Networks" <https://arxiv.org/abs/1609.02907>`_.
-    Which can be expressed as:
-
-    .. math::
-        \mathbf{x}^{\prime}_i = act(\mathbf{W} \cdot {agg}_{j \in \mathcal{N}(i)}(\mathbf{x}_j))
-
-    Where *act* is an activation function, *agg* aggregation function and *W* is a learnable parameter. This equation is
-    translated into the logic form as:
-
-    .. code:: logtalk
-
-         (R.<output_name>(V.I)[<W>] <= (R.<feature_name>(V.J), R.<edge_name>(V.J, V.I))) | [<aggregation>, Transformation.IDENTITY]
-         R.<output_name> / 1 | [<activation>]
-
-    Examples
-    --------
-
-    The whole computation of this module (parametrized as :code:`GCNConv(2, 3, "h1", "h0", "_edge")`) is as follows:
-
-    .. code:: logtalk
-
-        (R.h1(V.I)[3, 2] <= (R.h0(V.J), R._edge(V.J, V.I)) | [Aggregation.SUM, Transformation.IDENTITY]
-        R.h1 / 1 | [Transformation.IDENTITY]
 
     Parameters
     ----------
@@ -75,9 +53,23 @@ class GCNConv(Module):
 
     def __call__(self):
         head = R.get(self.output_name)(V.I)[self.out_channels, self.in_channels]
-        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(
+            transformation=Transformation.IDENTITY, aggregation=self.aggregation, combination=Combination.PRODUCT
+        )
+
+        edge = R.get(f"{self.output_name}__edge")
+        edge_count = R.get(f"{self.output_name}__edge_count")
 
         return [
-            (head <= (R.get(self.feature_name)(V.J), R.get(self.edge_name)(V.J, V.I))) | metadata,
+            edge(V.I, V.I),
+            (edge(V.I, V.J) <= (R.get(self.edge_name)(V.I, V.J))) | Metadata(transformation=Transformation.IDENTITY),
+            edge / 2 | Metadata(transformation=Transformation.IDENTITY),
+            (edge_count(V.I, V.J) <= edge(V.J, V.X))
+            | Metadata(transformation=Transformation.IDENTITY, aggregation=Aggregation.COUNT),
+            (edge_count(V.I, V.J) <= edge(V.I, V.X))
+            | Metadata(transformation=Transformation.IDENTITY, aggregation=Aggregation.COUNT),
+            edge_count / 2 | Metadata(combination=Combination.PRODUCT, transformation=Transformation.INVERSE),
+            (head <= (R.get(self.feature_name)(V.J), edge(V.J, V.I), Transformation.SQRT(edge_count(V.J, V.I))))
+            | metadata,
             R.get(self.output_name) / 1 | Metadata(transformation=self.activation),
         ]
