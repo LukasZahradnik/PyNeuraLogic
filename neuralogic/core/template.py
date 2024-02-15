@@ -1,4 +1,4 @@
-from typing import Union, List, Optional, Set, Dict, Any, Callable, Iterable
+from typing import Union, List, Optional, Iterable
 
 import jpype
 
@@ -8,6 +8,7 @@ from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.predicate import PredicateMetadata
 from neuralogic.core.constructs.java_objects import JavaFactory
+from neuralogic.core.neural_module import NeuralModule
 from neuralogic.core.settings import SettingsProxy, Settings
 from neuralogic.nn.module.module import Module
 
@@ -17,49 +18,11 @@ from neuralogic.utils.visualize import draw_model
 TemplateEntries = Union[BaseRelation, WeightedRelation, Rule]
 
 
-class Template:
-    def __init__(
-        self,
-        *,
-        template_file: Optional[str] = None,
-    ):
+class Template(NeuralModule):
+    def __init__(self, *, template_file: Optional[str] = None):
+        super().__init__()
         self.template: List[TemplateEntries] = []
         self.template_file = template_file
-        self.hooks: Dict[str, Set] = {}
-
-    def add_hook(self, relation: Union[BaseRelation, str], callback: Callable[[Any], None]) -> None:
-        """Hooks the callable to be called with the relation's value as an argument when the value of
-        the relation is being calculated.
-
-        :param relation:
-        :param callback:
-        :return:
-        """
-        name = str(relation)
-
-        if isinstance(relation, BaseRelation):
-            name = name[:-1]
-
-        if name not in self.hooks:
-            self.hooks[name] = {callback}
-        else:
-            self.hooks[name].add(callback)
-
-    def remove_hook(self, relation: Union[BaseRelation, str], callback):
-        """Removes the callable from the relation's hooks
-
-        :param relation:
-        :param callback:
-        :return:
-        """
-        name = str(relation)
-
-        if isinstance(relation, BaseRelation):
-            name = name[:-1]
-
-        if name not in self.hooks:
-            return
-        self.hooks[name].discard(callback)
 
     def add_rule(self, rule) -> None:
         """Adds one rule to the template
@@ -132,16 +95,20 @@ class Template:
             deduplicated_template.append(entry)
         self.template = deduplicated_template
 
-    def build(self, settings: Settings):
-        from neuralogic.nn import get_neuralogic_layer
-
+    def build(self, settings: Settings) -> "Template":
         java_factory = JavaFactory()
         settings_proxy = settings.create_proxy()
 
         parsed_template = self.get_parsed_template(settings_proxy, java_factory)
-        model = Builder(settings_proxy).build_model(parsed_template, settings_proxy)
+        neural_model = Builder(settings_proxy).build_model(parsed_template, settings_proxy)
 
-        return get_neuralogic_layer()(model, DatasetBuilder(parsed_template, java_factory), self, settings_proxy)
+        self._initialize_neural_module(
+            DatasetBuilder(parsed_template, java_factory),
+            settings_proxy,
+            neural_model,
+        )
+
+        return self
 
     def draw(
         self,
@@ -188,7 +155,7 @@ class Template:
         temp = Template()
 
         temp.template_file = self.template_file
-        temp.template = self.template
+        temp.template = [rule for rule in self.template]
 
         return temp
 
