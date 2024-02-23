@@ -1,4 +1,4 @@
-from typing import Optional, Union, Callable, Dict, Sized, Any, Set
+from typing import Optional, Union, Callable, Dict, Any, Set, Collection
 import json
 
 import jpype
@@ -9,6 +9,7 @@ from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core.builder.components import BuiltDataset, GroundedDataset
 from neuralogic.core.settings.settings_proxy import SettingsProxy
+from neuralogic.dataset import Dataset
 from neuralogic.dataset.base import BaseDataset
 
 from neuralogic.utils.visualize import draw_model
@@ -24,8 +25,6 @@ class NeuralModule:
 
         self.number_format = jpype.JClass("cz.cvut.fel.ida.setup.Settings").superDetailedNumberFormat
         self.value_factory = ValueFactory()
-
-        self.samples_len = 0
 
         @jpype.JImplements(
             jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler")
@@ -123,27 +122,28 @@ class NeuralModule:
                 for j, val in enumerate(values):
                     weight_value.set(i * cols + j, float(val))
 
+    @property
     def train(self) -> "NeuralModule":
         self.do_train = True
         return self
 
+    @property
     def test(self) -> "NeuralModule":
         self.do_train = False
         return self
 
-    def set_training_samples(self, samples):
-        self.samples_len = len(samples)
-        self.strategy.setSamples(jpype.java.util.ArrayList(samples))
-
-    def __call__(self, dataset=None, train: bool = None, epochs: int = 1):
+    def __call__(self, dataset=None, train: Optional[bool] = None, epochs: int = 1):
         self.hooks_set = len(self.hooks) != 0
+
+        samples = dataset
+        batch_size = 1
+
+        if isinstance(dataset, Dataset):
+            dataset = self.build_dataset(dataset)
 
         if isinstance(dataset, BuiltDataset):
             samples = dataset.samples
             batch_size = dataset.batch_size
-        else:
-            samples = dataset
-            batch_size = 1
 
         if self.hooks_set:
             self.strategy.setHooks(set(self.hooks.keys()), self.hook_handler)
@@ -151,13 +151,7 @@ class NeuralModule:
         if train is not None:
             self.do_train = train
 
-        if samples is None:
-            results = self.strategy.learnSamples(epochs, batch_size)
-            deserialized_results = json.loads(str(results))
-
-            return deserialized_results, self.samples_len
-
-        if not isinstance(samples, Sized):
+        if not isinstance(samples, Collection):
             if self.do_train:
                 result = self.strategy.learnSample(samples.java_sample)
                 return json.loads(str(result)), 1
@@ -173,7 +167,7 @@ class NeuralModule:
         results = self.strategy.evaluateSamples(sample_array, batch_size)
         return json.loads(str(results))
 
-    def forward(self, dataset=None, train: bool = None, epochs: int = 1):
+    def forward(self, dataset=None, train: Optional[bool] = None, epochs: int = 1):
         return self(dataset, train, epochs)
 
     def backprop(self, sample, gradient):
