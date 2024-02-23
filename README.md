@@ -85,7 +85,7 @@ We hope you'll find the framework useful in designing _your own_ deep **relation
 Please let us know if you need some guidance or would like to cooperate!
 
 
-## 💡 Getting started
+## 🚀 Getting started
 
 
 ### Installation
@@ -108,6 +108,15 @@ Java >= 1.8
 
 In case you want to use visualization provided in the library, it is required to have [Graphviz](https://graphviz.org/download/) installed.
 
+## 📦 Predefined Modules
+
+PyNeuraLogic has a set of predefined modules to get you quickly started with your experimenting!
+It contains, for example, predefined modules for:
+
+- Graph Neural Networks (GNNConv, SAGEConv, GINConv, RGCNConv, ...)
+- Meta graphs and meta paths (MetaConv, MAGNN, ...)
+- Transformer, LSTM, GRU, RNN, [...and more!](https://pyneuralogic.readthedocs.io/en/latest/zoo.html)
+
 ## 🔬 Examples
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/SimpleXOR.ipynb) [Simple XOR example](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/SimpleXOR.ipynb)
 <br />
@@ -123,18 +132,6 @@ In case you want to use visualization provided in the library, it is required to
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingKRegularGraphs.ipynb) [Distinguishing k-regular graphs](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingKRegularGraphs.ipynb)
 <br />
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingNonRegularGraphs.ipynb) [Distinguishing non-regular graphs](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingNonRegularGraphs.ipynb)
-
-<br />
-
-
-## 📦 Predefined Modules
-
-PyNeuraLogic has a set of predefined modules to get you quickly started with your experimenting!
-It contains, for example, predefined modules for:
-
-- Graph Neural Networks (GNNConv, SAGEConv, GINConv, RGCNConv, ...)
-- Meta graphs and meta paths (MetaConv, MAGNN, ...)
-- Transformer, LSTM, GRU, RNN, [...and more!](https://pyneuralogic.readthedocs.io/en/latest/zoo.html)
 
 ## 📝 Papers
 
