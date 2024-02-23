@@ -1,6 +1,5 @@
 from neuralogic.dataset import Data, TensorDataset, Dataset, Sample
 from neuralogic.core import Template, Settings, Relation
-from neuralogic.nn import get_evaluator
 from neuralogic.nn.module import GCNConv
 from neuralogic.optim import SGD
 
@@ -66,12 +65,12 @@ def test_model_evaluation_from_tensor():
         GCNConv(in_channels=5, out_channels=1, output_name="predict", feature_name="h0", edge_name="edge")
     )
 
-    settings = Settings(optimizer=SGD(0.01), epochs=100)
-    model = template.build(settings)
-    built_dataset = model.build_dataset(dataset)
+    settings = Settings(optimizer=SGD(0.01))
+    template.build(settings)
+    built_dataset = template.build_dataset(dataset)
 
-    model.train()  # or model.test() to change the mode
-    output = model(built_dataset)
+    # or template.test() to change the mode
+    output = template.train(built_dataset, epochs=100)
 
     assert len(output[0]) == 3
     assert output[1] == 3
@@ -108,53 +107,12 @@ def test_model_evaluation_from_logic():
         GCNConv(in_channels=5, out_channels=1, output_name="predict", feature_name="h0", edge_name="edge")
     )
 
-    settings = Settings(optimizer=SGD(0.01), epochs=100)
-    model = template.build(settings)
-    built_dataset = model.build_dataset(dataset)
+    settings = Settings(optimizer=SGD(0.01))
+    template.build(settings)
+    built_dataset = template.build_dataset(dataset)
 
-    model.train()  # or model.test() to change the mode
-    output = model(built_dataset)
+    # or template.test() to change the mode
+    output = template.train(built_dataset, epochs=100)
 
     assert len(output[0]) == 3
-    assert output[1] == 3
-
-
-def test_evaluator_from_logic():
-    dataset = Dataset()
-
-    example = [
-        Relation.edge(0, 1),
-        Relation.edge(1, 2),
-        Relation.edge(2, 0),
-        Relation.edge(1, 0),
-        Relation.edge(2, 1),
-        Relation.edge(0, 2),
-        Relation.node_feature(0)[0],
-        Relation.node_feature(1)[1],
-        Relation.node_feature(2)[-1],
-    ]
-
-    dataset.add_samples(
-        [
-            Sample(Relation.predict(0)[1], example),
-            Sample(Relation.predict(1)[0], example),
-            Sample(Relation.predict(2)[1], example),
-        ]
-    )
-
-    template = Template()
-    template.add_module(
-        GCNConv(in_channels=1, out_channels=5, output_name="h0", feature_name="node_feature", edge_name="edge")
-    )
-    template.add_module(
-        GCNConv(in_channels=5, out_channels=1, output_name="predict", feature_name="h0", edge_name="edge")
-    )
-
-    settings = Settings(optimizer=SGD(0.01), epochs=100)
-    evaluator = get_evaluator(template, settings=settings)
-
-    built_dataset = evaluator.build_dataset(dataset)
-    output = evaluator.train(built_dataset, generator=False)
-
-    assert len(output) == 2
     assert output[1] == 3
