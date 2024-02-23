@@ -147,7 +147,7 @@ def draw_model(
     if model.need_sync:
         model.sync_template()
 
-    template = model.template
+    template = model.parsed_template
     template_drawer = get_template_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
 
     return draw(template_drawer, template, filename, show, img_type, *args, **kwargs)
