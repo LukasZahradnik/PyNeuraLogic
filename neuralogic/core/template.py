@@ -12,8 +12,6 @@ from neuralogic.core.neural_module import NeuralModule
 from neuralogic.core.settings import SettingsProxy, Settings
 from neuralogic.nn.module.module import Module
 
-from neuralogic.utils.visualize import draw_model
-
 
 TemplateEntries = Union[BaseRelation, WeightedRelation, Rule]
 
@@ -109,21 +107,6 @@ class Template(NeuralModule):
         )
 
         return self
-
-    def draw(
-        self,
-        filename: Optional[str] = None,
-        show=True,
-        img_type="png",
-        value_detail: int = 0,
-        graphviz_path: Optional[str] = None,
-        model=None,
-        *args,
-        **kwargs,
-    ):
-        if model is None:
-            model = self.build(Settings())
-        return draw_model(model, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
 
     def __str__(self) -> str:
         return "\n".join(str(r) for r in self.template)
