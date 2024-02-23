@@ -14,7 +14,6 @@ class SettingsProxy:
         self,
         *,
         optimizer: Optimizer,
-        learning_rate: float,
         epochs: int,
         error_function: ErrorFunction,
         initializer: Initializer,

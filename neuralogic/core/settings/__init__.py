@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 import weakref
 
 from neuralogic.core.enums import Grounder
@@ -14,7 +14,6 @@ class Settings:
         self,
         *,
         optimizer: Optimizer = Adam(),
-        learning_rate: Optional[float] = None,
         epochs: int = 3000,
         error_function: ErrorFunction = MSE(),
         initializer: Initializer = Uniform(),
