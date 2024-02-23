@@ -10,7 +10,7 @@
 [![Tweet](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2FLukasZahradnik%2FPyNeuraLogic)](https://twitter.com/intent/tweet?text=Check%20out:&url=https%3A%2F%2Fgithub.com%2FLukasZahradnik%2FPyNeuraLogic)
 
 
-[Documentation](https://pyneuralogic.readthedocs.io/en/latest/) | [Examples](#-examples) | [Papers](#-papers)
+[Documentation](https://pyneuralogic.readthedocs.io/en/latest/) · [Examples](#-examples) · [Papers](#-papers) · [Report Bug](https://github.com/LukasZahradnik/PyNeuraLogic/issues/new?assignees=&labels=bug&projects=&template=bug_report.yaml&title=%5B%F0%9F%90%9B+Bug+Report%5D%3A+) · [Request Feature](https://github.com/LukasZahradnik/PyNeuraLogic/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.yaml&title=%5B%E2%9C%A8+Feature+Request%5D%3A+)
 
 PyNeuraLogic lets you use Python to write **Differentiable Logic Programs**
 
