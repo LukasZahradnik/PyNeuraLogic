@@ -106,7 +106,11 @@ Python >= 3.8
 Java >= 1.8
 ```
 
-In case you want to use visualization provided in the library, it is required to have [Graphviz](https://graphviz.org/download/) installed.
+> \[!TIP]
+>
+> In case you want to use visualization provided in the library, it is required to have [Graphviz](https://graphviz.org/download/) installed.
+
+<br />
 
 ## 📦 Predefined Modules
 
