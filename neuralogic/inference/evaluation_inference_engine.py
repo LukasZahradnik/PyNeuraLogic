@@ -30,7 +30,7 @@ class EvaluationInferenceEngine:
 
         try:
             built_dataset = self.model.build_dataset(self.dataset)
-            results = self.model(built_dataset.samples, train=False)
+            results = self.model.test(built_dataset.samples)
         except Exception:
             self.dataset[0].example = global_examples
             return {}

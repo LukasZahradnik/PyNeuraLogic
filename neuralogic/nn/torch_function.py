@@ -24,7 +24,7 @@ class _NeuraLogicFunction(Function):
         for fact in mapping:
             sample.set_fact_value(fact, value_factory.get_value(fact.weight)[1])
 
-        return torch.tensor(model(sample, train=False), dtype=dtype, requires_grad=True)
+        return torch.tensor(model.test(sample), dtype=dtype, requires_grad=True)
 
     @staticmethod
     def backward(ctx: Any, *grad_outputs: Any) -> Any:

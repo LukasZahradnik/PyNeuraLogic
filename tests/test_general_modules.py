@@ -38,7 +38,7 @@ def test_linear_module(feature_size: int, output_size: int, num_of_inputs: int, 
     built_dataset = model.build_dataset(Dataset(samples))
 
     for sample, row in zip(built_dataset.samples, linear_output):
-        results = model(sample, train=False)
+        results = model.test(sample)
 
         assert len(results) == len(row)
 

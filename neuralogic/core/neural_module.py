@@ -8,6 +8,7 @@ from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core.builder.components import BuiltDataset, GroundedDataset
+from neuralogic.core.result import Results, Result
 from neuralogic.core.settings.settings_proxy import SettingsProxy
 from neuralogic.dataset import Dataset
 from neuralogic.dataset.base import BaseDataset
@@ -21,7 +22,6 @@ class NeuralModule:
             initialize()
 
         self.need_sync = False
-        self.do_train = True
 
         self.number_format = jpype.JClass("cz.cvut.fel.ida.setup.Settings").superDetailedNumberFormat
         self.value_factory = ValueFactory()
@@ -45,8 +45,14 @@ class NeuralModule:
         self.parsed_template = None
         self.dataset_builder: Optional[DatasetBuilder] = None
         self.settings: Optional[SettingsProxy] = None
+
         self.neural_model = None
         self.strategy = None
+        self.trainer = None
+
+        self.invalidation = None
+        self.evaluation = None
+        self.backpropagation = None
 
     def _initialize_neural_module(self, dataset_builder: DatasetBuilder, settings: SettingsProxy, model):
         self.parsed_template = dataset_builder.parsed_template
@@ -62,6 +68,12 @@ class NeuralModule:
         )
 
         self.strategy = python_strategy(settings.settings, model, optimizer, lr_decay)
+        self.trainer = self.strategy.getTrainer()
+
+        self.invalidation = self.trainer.getInvalidation()
+        self.evaluation = self.trainer.getEvaluation()
+        self.backpropagation = self.trainer.getBackpropagation()
+
         self.reset_parameters()
 
     def ground(
@@ -94,72 +106,28 @@ class NeuralModule:
             progress=progress,
         )
 
-    def sync_template(self, state_dict: Optional[Dict] = None, weights=None):
-        state_dict = self.state_dict() if state_dict is None else state_dict
-        weights = self.parsed_template.getAllWeights() if weights is None else weights
-        weight_dict = state_dict["weights"]
+    def train(self, dataset, epochs: int = 1):
+        return self._train_test(dataset, True, epochs)
 
-        for weight in weights:
-            if not weight.isLearnable:
-                continue
-            weight_value = weight.value
+    def test(self, dataset, epochs: int = 1):
+        return self._train_test(dataset, False, epochs)
 
-            index = weight.index
-            value = weight_dict[index]
-
-            if isinstance(value, (float, int)):
-                weight_value.set(0, float(value))
-                continue
-
-            if isinstance(value[0], (float, int)):
-                for i, val in enumerate(value):
-                    weight_value.set(i, float(val))
-                continue
-
-            cols = len(value[0])
-
-            for i, values in enumerate(value):
-                for j, val in enumerate(values):
-                    weight_value.set(i * cols + j, float(val))
-
-    @property
-    def train(self) -> "NeuralModule":
-        self.do_train = True
-        return self
-
-    @property
-    def test(self) -> "NeuralModule":
-        self.do_train = False
-        return self
-
-    def __call__(self, dataset=None, train: Optional[bool] = None, epochs: int = 1):
+    def _train_test(self, dataset, train: bool, epochs: int = 1):
         self.hooks_set = len(self.hooks) != 0
-
-        samples = dataset
-        batch_size = 1
-
-        if isinstance(dataset, Dataset):
-            dataset = self.build_dataset(dataset)
-
-        if isinstance(dataset, BuiltDataset):
-            samples = dataset.samples
-            batch_size = dataset.batch_size
+        samples, batch_size = self._dataset_to_samples(dataset)
 
         if self.hooks_set:
             self.strategy.setHooks(set(self.hooks.keys()), self.hook_handler)
 
-        if train is not None:
-            self.do_train = train
-
         if not isinstance(samples, Collection):
-            if self.do_train:
+            if train:
                 result = self.strategy.learnSample(samples.java_sample)
                 return json.loads(str(result)), 1
             return json.loads(str(self.strategy.evaluateSample(samples.java_sample)))
 
         sample_array = jpype.java.util.ArrayList([sample.java_sample for sample in samples])
 
-        if self.do_train:
+        if train:
             results = self.strategy.learnSamples(sample_array, epochs, batch_size)
 
             return json.loads(str(results)), len(samples)
@@ -167,8 +135,29 @@ class NeuralModule:
         results = self.strategy.evaluateSamples(sample_array, batch_size)
         return json.loads(str(results))
 
-    def forward(self, dataset=None, train: Optional[bool] = None, epochs: int = 1):
-        return self(dataset, train, epochs)
+    def __call__(self, dataset=None) -> Union[Results, Result]:
+        samples, batch_size = self._dataset_to_samples(dataset)
+
+        if not isinstance(samples, Collection):
+            return Results(
+                [
+                    Result(
+                        self.trainer.evaluateSample(self.evaluation, sample),
+                        sample,
+                        self,
+                        self.number_format,
+                    )
+                    for sample in samples
+                ]
+            )
+
+        sample = samples
+        result = self.trainer.evaluateSample(self.evaluation, sample)
+
+        return Result(result, sample, self, self.number_format)
+
+    def forward(self, dataset) -> Union[Results, Result]:
+        return self(dataset)
 
     def backprop(self, sample, gradient):
         trainer = self.strategy.getTrainer()
@@ -256,3 +245,40 @@ class NeuralModule:
     def _run_hook(self, hook: str, value):
         for callback in self.hooks[hook]:
             callback(value)
+
+    def _dataset_to_samples(self, dataset):
+        if isinstance(dataset, Dataset):
+            dataset = self.build_dataset(dataset)
+            return dataset.samples, dataset.batch_size
+
+        if isinstance(dataset, BuiltDataset):
+            return dataset.samples, dataset.batch_size
+        return dataset, 1
+
+    def sync_template(self, state_dict: Optional[Dict] = None, weights=None):
+        state_dict = self.state_dict() if state_dict is None else state_dict
+        weights = self.parsed_template.getAllWeights() if weights is None else weights
+        weight_dict = state_dict["weights"]
+
+        for weight in weights:
+            if not weight.isLearnable:
+                continue
+            weight_value = weight.value
+
+            index = weight.index
+            value = weight_dict[index]
+
+            if isinstance(value, (float, int)):
+                weight_value.set(0, float(value))
+                continue
+
+            if isinstance(value[0], (float, int)):
+                for i, val in enumerate(value):
+                    weight_value.set(i, float(val))
+                continue
+
+            cols = len(value[0])
+
+            for i, values in enumerate(value):
+                for j, val in enumerate(values):
+                    weight_value.set(i * cols + j, float(val))

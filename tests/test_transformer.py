@@ -46,7 +46,7 @@ def test_multiheadattention(qdim: int, kdim: int, vdim: int, num_heads: int, seq
     built_dataset = model.build_dataset(dataset)
 
     torch_results = mha(queries, keys, values)
-    pyneuralogic_results = model(built_dataset, train=False)
+    pyneuralogic_results = model.test(built_dataset)
 
     for t_res, pnl_res in zip(torch_results[0], pyneuralogic_results):
         assert np.allclose(t_res.detach().numpy(), np.array(pnl_res))
