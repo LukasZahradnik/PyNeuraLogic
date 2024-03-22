@@ -138,23 +138,27 @@ class NeuralModule:
     def __call__(self, dataset=None) -> Union[Results, Result]:
         samples, batch_size = self._dataset_to_samples(dataset)
 
-        if not isinstance(samples, Collection):
-            return Results(
-                [
+        if isinstance(samples, Collection):
+            results = []
+
+            for sample in samples:
+                self.trainer.invalidateSample(self.invalidation, sample.java_sample)
+
+                results.append(
                     Result(
-                        self.trainer.evaluateSample(self.evaluation, sample),
-                        sample,
+                        self.trainer.evaluateSample(self.evaluation, sample.java_sample),
+                        sample.java_sample,
                         self,
                         self.number_format,
                     )
-                    for sample in samples
-                ]
-            )
+                )
+            return Results(results)
 
         sample = samples
-        result = self.trainer.evaluateSample(self.evaluation, sample)
+        self.trainer.invalidateSample(self.invalidation, sample.java_sample)
+        result = self.trainer.evaluateSample(self.evaluation, sample.java_sample)
 
-        return Result(result, sample, self, self.number_format)
+        return Result(result, sample.java_sample, self, self.number_format)
 
     def forward(self, dataset) -> Union[Results, Result]:
         return self(dataset)

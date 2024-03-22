@@ -1,20 +1,21 @@
+import json
+
+
 class Result:
-    __slots__ = "result", "sample", "model", "number_format"
+    __slots__ = "_result", "_sample", "_model", "_number_format"
 
     def __init__(self, result, sample, model, number_format):
-        self.result = result
-        self.sample = sample
-        self.model = model
-        self.number_format = number_format
+        self._result = result
+        self._sample = sample
+        self._model = model
+        self._number_format = number_format
 
     def backward(self):
-        weight_updater = self.model.trainer.backpropSample(self.model.backpropagation, self.result, self.sample)
-        self.model.trainer.updateWeights(self.model.strategy.getCurrentModel(), weight_updater)
-
-        self.model.trainer.invalidateSample(self.model.invalidation, self.sample)
+        weight_updater = self._model.trainer.backpropSample(self._model.backpropagation, self._result, self._sample)
+        self._model.trainer.updateWeights(self._model.strategy.getCurrentModel(), weight_updater)
 
     def value(self):
-        return self.result.getOutput().toString(self.number_format)
+        return json.loads(str(self._result.getOutput().toString(self._number_format)))
 
 
 class Results:
