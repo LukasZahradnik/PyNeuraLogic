@@ -36,13 +36,13 @@ Many things! For instance - ever heard of [Graph Neural Networks](https://distil
 Or, a bit more 'formally':
 
 ```logtalk
-R.msg2(Var.X) <= (R.msg1(Var.Y), R.edge(Var.Y, Var.X))
+R.msg2(Var.X) <= (R.msg1(V.Y), R.edge(V.Y, V.X))
 ```
 
 ...and that's the actual _code_! Now for a classic learnable GNN layer, you'll want to add some weights, such as
 
 ```logtalk
-R.msg2(Var.X)[5,10] <= (R.msg1(Var.Y)[10,20], R.edge(Var.Y, Var.X))
+R.msg2(Var.X)[5,10] <= (R.msg1(V.Y)[10,20], R.edge(V.Y, V.X))
 ```
 
 to project your `[20,1]` input node embeddings ('message1') through a learnable ``[10,20]`` layer before the aggregation, and subsequently a `[5,10]` layer after the aggregation.
