@@ -55,6 +55,25 @@ If you don't like the default settings, you can of course [specify](https://pyne
 
 to instantiate the classic GCN layer specification, which you can directly train now!
 
+```mermaid
+graph TD;
+    edge10[/"edge(1, 0)"\]-->RuleNeuron1("msg2(0) <= msg1(1), edge(1, 0).");
+    msg1[/"msg1(1)"\]-- w_1 -->RuleNeuron1;
+
+    edge00[/"edge(0, 0)"\]-->RuleNeuron2("msg2(0) <= msg1(0), edge(0, 0).");
+    msg0[/"msg1(0)"\]-- w_1 -->RuleNeuron2;
+
+    edge30[/"edge(3, 0)"\]-->RuleNeuron3("msg2(0) <= msg1(3), edge(3, 0).");
+    msg3[/"msg1(3)"\]-- w_1 -->RuleNeuron3;
+
+    RuleNeuron1-- ReLU -->AggregationNeuron[["Rules Aggregation (Average)"]]
+    RuleNeuron2-- ReLU -->AggregationNeuron[["Rules Aggregation (Average)"]]
+    RuleNeuron3-- ReLU -->AggregationNeuron[["Rules Aggregation (Average)"]]
+
+    AggregationNeuron-- w_2 -->OutputNeuron[\"Output Neuron (Tanh)"/]
+
+```
+
 ### How is it different from other GNN frameworks?
 
 Naturally, PyNeuralogic is by no means limited to GNN models, as the expressiveness of _relational_ logic goes much further beyond graphs. Hence, nothing stops you from playing directly with:
