@@ -1,4 +1,4 @@
-from typing import Optional, Union, Callable, Dict, Any, Set, Collection
+from typing import Optional, Union, Callable, Dict, Any, Set, Collection, List, Tuple
 import json
 
 import jpype
@@ -14,6 +14,9 @@ from neuralogic.dataset import Dataset
 from neuralogic.dataset.base import BaseDataset
 
 from neuralogic.utils.visualize import draw_model
+
+
+Value = Union[List, float]
 
 
 class NeuralModule:
@@ -54,28 +57,6 @@ class NeuralModule:
         self._evaluation = None
         self._backpropagation = None
 
-    def _initialize_neural_module(self, dataset_builder: DatasetBuilder, settings: SettingsProxy, model):
-        self._parsed_template = dataset_builder.parsed_template
-        self._dataset_builder = dataset_builder
-        self._settings = settings
-        self._neural_model = model
-
-        optimizer = self._settings.optimizer.initialize()
-        lr_decay = self._settings.optimizer.get_lr_decay()
-
-        python_strategy = jpype.JClass(
-            "cz.cvut.fel.ida.neural.networks.computation.training.strategies.PythonTrainingStrategy"
-        )
-
-        self._strategy = python_strategy(settings.settings, model, optimizer, lr_decay)
-        self._trainer = self._strategy.getTrainer()
-
-        self._invalidation = self._trainer.getInvalidation()
-        self._evaluation = self._trainer.getEvaluation()
-        self._backpropagation = self._trainer.getBackpropagation()
-
-        self.reset_parameters()
-
     def ground(
         self,
         dataset: BaseDataset,
@@ -106,37 +87,9 @@ class NeuralModule:
             progress=progress,
         )
 
-    def train(self, dataset, epochs: int = 1):
-        return self._train_test(dataset, True, epochs)
-
-    def test(self, dataset, epochs: int = 1):
-        return self._train_test(dataset, False, epochs)
-
-    def _train_test(self, dataset, train: bool, epochs: int = 1):
-        self._hooks_set = len(self._hooks) != 0
-        samples, batch_size = self._dataset_to_samples(dataset)
-
-        if self._hooks_set:
-            self._strategy.setHooks(set(self._hooks.keys()), self._hook_handler)
-
-        if not isinstance(samples, Collection):
-            if train:
-                result = self._strategy.learnSample(samples.java_sample)
-                return json.loads(str(result)), 1
-            return json.loads(str(self._strategy.evaluateSample(samples.java_sample)))
-
-        sample_array = jpype.java.util.ArrayList([sample.java_sample for sample in samples])
-
-        if train:
-            results = self._strategy.learnSamples(sample_array, epochs, batch_size)
-
-            return json.loads(str(results)), len(samples)
-
-        results = self._strategy.evaluateSamples(sample_array, batch_size)
-        return json.loads(str(results))
-
     def __call__(self, dataset=None) -> Union[Results, Result]:
-        samples, batch_size = self._dataset_to_samples(dataset)
+        self._set_hooks()
+        samples, _ = self._dataset_to_samples(dataset)
 
         if isinstance(samples, Collection):
             results = []
@@ -163,15 +116,30 @@ class NeuralModule:
     def forward(self, dataset) -> Union[Results, Result]:
         return self(dataset)
 
-    def backprop(self, sample, gradient):
-        trainer = self._strategy.getTrainer()
-        _, gradient_value = self._value_factory.get_value(gradient)
+    def train(self, dataset, epochs: int = 1) -> Tuple[Value, int]:
+        return self._train_test(dataset, True, epochs)
 
-        backpropagation = trainer.getBackpropagation()
-        weight_updater = backpropagation.backpropagate(sample.java_sample, gradient_value)
-        state_index = backpropagation.backproper
+    def test(self, dataset, epochs: int = 1) -> Value:
+        return self._train_test(dataset, False, epochs)
 
-        return state_index, weight_updater
+    def _train_test(self, dataset, train: bool, epochs: int = 1) -> Union[Tuple[Value, int], Value]:
+        self._set_hooks()
+        samples, batch_size = self._dataset_to_samples(dataset)
+
+        if not isinstance(samples, Collection):
+            if train:
+                result = self._strategy.learnSample(samples.java_sample)
+                return json.loads(str(result)), 1
+            return json.loads(str(self._strategy.evaluateSample(samples.java_sample)))
+
+        sample_array = jpype.java.util.ArrayList([sample.java_sample for sample in samples])
+
+        if train:
+            results = self._strategy.learnSamples(sample_array, epochs, batch_size)
+            return json.loads(str(results)), len(samples)
+
+        results = self._strategy.evaluateSamples(sample_array, batch_size)
+        return json.loads(str(results))
 
     def reset_parameters(self):
         self._strategy.resetParameters()
@@ -194,7 +162,7 @@ class NeuralModule:
         }
 
     def load_state_dict(self, state_dict: Dict):
-        self.sync_template(state_dict, self._neural_model.getAllWeights())
+        self._sync_template(state_dict, self._neural_model.getAllWeights())
 
     def draw(
         self,
@@ -212,7 +180,7 @@ class NeuralModule:
         self._hooks_set = len(hooks) != 0
         self._hooks = hooks
 
-    def add_hook(self, relation: Union[BaseRelation, str], callback: Callable[[Any], None]) -> None:
+    def add_hook(self, relation: Union[BaseRelation, str], callback: Callable[[Any], None]):
         """Hooks the callable to be called with the relation's value as an argument when the value of
         the relation is being calculated.
 
@@ -246,6 +214,28 @@ class NeuralModule:
             return
         self._hooks[name].discard(callback)
 
+    def _initialize_neural_module(self, dataset_builder: DatasetBuilder, settings: SettingsProxy, model):
+        self._parsed_template = dataset_builder.parsed_template
+        self._dataset_builder = dataset_builder
+        self._settings = settings
+        self._neural_model = model
+
+        optimizer = self._settings.optimizer.initialize()
+        lr_decay = self._settings.optimizer.get_lr_decay()
+
+        python_strategy = jpype.JClass(
+            "cz.cvut.fel.ida.neural.networks.computation.training.strategies.PythonTrainingStrategy"
+        )
+
+        self._strategy = python_strategy(settings.settings, model, optimizer, lr_decay)
+        self._trainer = self._strategy.getTrainer()
+
+        self._invalidation = self._trainer.getInvalidation()
+        self._evaluation = self._trainer.getEvaluation()
+        self._backpropagation = self._trainer.getBackpropagation()
+
+        self.reset_parameters()
+
     def _run_hook(self, hook: str, value):
         for callback in self._hooks[hook]:
             callback(value)
@@ -259,7 +249,11 @@ class NeuralModule:
             return dataset.samples, dataset.batch_size
         return dataset, 1
 
-    def sync_template(self, state_dict: Optional[Dict] = None, weights=None):
+    def _set_hooks(self):
+        if len(self._hooks) != 0:
+            self._strategy.setHooks(set(self._hooks.keys()), self._hook_handler)
+
+    def _sync_template(self, state_dict: Optional[Dict] = None, weights=None):
         state_dict = self.state_dict() if state_dict is None else state_dict
         weights = self._parsed_template.getAllWeights() if weights is None else weights
         weight_dict = state_dict["weights"]
@@ -286,3 +280,13 @@ class NeuralModule:
             for i, values in enumerate(value):
                 for j, val in enumerate(values):
                     weight_value.set(i * cols + j, float(val))
+
+    def _backprop(self, sample, gradient):
+        trainer = self._strategy.getTrainer()
+        _, gradient_value = self._value_factory.get_value(gradient)
+
+        backpropagation = trainer.getBackpropagation()
+        weight_updater = backpropagation.backpropagate(sample.java_sample, gradient_value)
+        state_index = backpropagation.backproper
+
+        return state_index, weight_updater

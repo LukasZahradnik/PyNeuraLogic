@@ -33,7 +33,7 @@ class _NeuraLogicFunction(Function):
         number_format = ctx.number_format
         dtype = ctx.dtype
 
-        backproper, weight_updater = model.backprop(sample, -grad_outputs[0].detach().numpy())
+        backproper, weight_updater = model._backprop(sample, -grad_outputs[0].detach().numpy())
         state_index = backproper.stateIndex
 
         gradients = tuple(

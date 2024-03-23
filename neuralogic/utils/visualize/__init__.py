@@ -145,7 +145,7 @@ def draw_model(
     :return:
     """
     if model._need_sync:
-        model.sync_template()
+        model._sync_template()
 
     template = model._parsed_template
     template_drawer = get_template_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
@@ -223,7 +223,7 @@ def model_to_dot_source(model) -> str:
     :return:
     """
     if model._need_sync:
-        model.sync_template()
+        model._sync_template()
 
     template = model._template
     template_drawer = get_template_drawer(get_drawing_settings())
