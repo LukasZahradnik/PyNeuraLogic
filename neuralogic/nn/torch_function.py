@@ -46,8 +46,8 @@ class _NeuraLogicFunction(Function):
             for fact in ctx.mapping
         )
 
-        trainer = model.strategy.getTrainer()
-        trainer.updateWeights(model.strategy.getCurrentModel(), weight_updater)
+        trainer = model._trainer
+        trainer.updateWeights(model._strategy.getCurrentModel(), weight_updater)
         trainer.invalidateSample(trainer.getInvalidation(), sample.java_sample)
 
         return (None, None, None, None, None, None, *gradients)
@@ -74,7 +74,7 @@ class NeuraLogic(nn.Module):
         self.to_logic = to_logic
 
         self.model = template.build(settings)
-        self.number_format = self.model.settings.settings_class.superDetailedNumberFormat
+        self.number_format = self.model._settings.settings_class.superDetailedNumberFormat
 
         dataset = Dataset(Sample(output_relation, input_facts))
         self.sample = self.model.build_dataset(dataset, learnable_facts=True).samples[0]

@@ -11,8 +11,8 @@ class Result:
         self._number_format = number_format
 
     def backward(self):
-        weight_updater = self._model.trainer.backpropSample(self._model.backpropagation, self._result, self._sample)
-        self._model.trainer.updateWeights(self._model.strategy.getCurrentModel(), weight_updater)
+        weight_updater = self._model._trainer.backpropSample(self._model._backpropagation, self._result, self._sample)
+        self._model._trainer.updateWeights(self._model._strategy.getCurrentModel(), weight_updater)
 
     def value(self):
         return json.loads(str(self._result.getOutput().toString(self._number_format)))

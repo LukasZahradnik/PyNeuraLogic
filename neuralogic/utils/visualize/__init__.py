@@ -144,10 +144,10 @@ def draw_model(
     :param kwargs:
     :return:
     """
-    if model.need_sync:
+    if model._need_sync:
         model.sync_template()
 
-    template = model.parsed_template
+    template = model._parsed_template
     template_drawer = get_template_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
 
     return draw(template_drawer, template, filename, show, img_type, *args, **kwargs)
@@ -222,7 +222,7 @@ def model_to_dot_source(model) -> str:
     :param model:
     :return:
     """
-    if model.need_sync:
+    if model._need_sync:
         model.sync_template()
 
     template = model._template
