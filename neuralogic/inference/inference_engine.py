@@ -20,7 +20,7 @@ class InferenceEngine:
 
         self.settings.settings.inferTemplateFacts = False
 
-        self.parsed_template = template.get_parsed_template(self.settings, self.java_factory)
+        self.parsed_template = template._get_parsed_template(self.settings, self.java_factory)
         self.dataset_builder = DatasetBuilder(self.parsed_template, self.java_factory)
 
         self.examples: List[Union[BaseRelation, Rule]] = []

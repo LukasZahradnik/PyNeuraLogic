@@ -40,7 +40,7 @@ def get_drawing_settings(
     settings.settings.outDir = tempfile.gettempdir()
 
     if value_detail not in [0, 1, 2]:
-        raise NotImplementedError
+        raise ValueError(f"Invalid value_detail - {value_detail}. Expected 0, 1, or 2.")
 
     settings_class = settings.settings_class
     details = [
@@ -225,7 +225,7 @@ def model_to_dot_source(model) -> str:
     if model.need_sync:
         model.sync_template()
 
-    template = model.template
+    template = model._template
     template_drawer = get_template_drawer(get_drawing_settings())
 
     return to_dot_source(template_drawer, template)
