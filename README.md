@@ -36,13 +36,13 @@ Many things! For instance - ever heard of [Graph Neural Networks](https://distil
 Or, a bit more 'formally':
 
 ```logtalk
-Relation.message2(Var.X) <= (Relation.message1(Var.Y), Relation.edge(Var.Y, Var.X))
+R.msg2(Var.X) <= (R.msg1(Var.Y), R.edge(Var.Y, Var.X))
 ```
 
 ...and that's the actual _code_! Now for a classic learnable GNN layer, you'll want to add some weights, such as
 
 ```logtalk
-Relation.message2(Var.X)[5,10] <= (Relation.message1(Var.Y)[10,20], Relation.edge(Var.Y, Var.X))
+R.msg2(Var.X)[5,10] <= (R.msg1(Var.Y)[10,20], R.edge(Var.Y, Var.X))
 ```
 
 to project your `[20,1]` input node embeddings ('message1') through a learnable ``[10,20]`` layer before the aggregation, and subsequently a `[5,10]` layer after the aggregation.
@@ -50,11 +50,10 @@ to project your `[20,1]` input node embeddings ('message1') through a learnable 
 If you don't like the default settings, you can of course [specify](https://pyneuralogic.readthedocs.io/en/latest/language.html) various additional details, such as the particular aggregation and activation functions
 
 ```logtalk
-(R.message2(V.X)[5,10] <= (R.message1(V.Y)[10,20], R.edge(V.Y, V.X))) | [Transformation.RELU, Aggregation.AVG]
+(R.msg2(V.X)[5,10] <= (R.msg1(V.Y)[10,20], R.edge(V.Y, V.X))) | [Transformation.RELU, Aggregation.AVG]
 ```
 
 to instantiate the classic GCN layer specification, which you can directly train now!
-
 
 ### How is it different from other GNN frameworks?
 
