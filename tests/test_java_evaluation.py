@@ -3,7 +3,6 @@ from typing import List
 from neuralogic import manual_seed
 from neuralogic.core import Settings, Template
 from neuralogic.dataset.base import BaseDataset
-from neuralogic.nn import get_evaluator
 from neuralogic.optim import SGD
 from neuralogic.utils.data import XOR, XOR_Vectorized, Trains, Mutagenesis
 
@@ -248,21 +247,21 @@ import pytest
 def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expected_results: List[float]) -> None:
     """Tests for running java evaluator on files"""
     manual_seed(0)
-    settings = Settings(optimizer=SGD(0.1), epochs=50)
+    settings = Settings(optimizer=SGD(0.1))
 
-    evaluator = get_evaluator(template, settings)
+    template.build(settings)
 
-    built_dataset = evaluator.build_dataset(dataset)
-    evaluator.train(built_dataset, generator=False)
+    built_dataset = template.build_dataset(dataset)
+    template.train(built_dataset, epochs=50)
 
     results = []
-    for predicted in evaluator.test(built_dataset):
+    for predicted in template.test(built_dataset):
         results.append(round(predicted, 3))
 
     assert len(results) == len(expected_results)
 
     for result, expected_result in zip(results, expected_results):
-        assert expected_result == result
+        assert result == expected_result
 
 
 @pytest.mark.parametrize(
@@ -354,21 +353,21 @@ def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expect
 def test_evaluator_run_on_rules(template: Template, dataset: BaseDataset, expected_results: List[float]) -> None:
     """Tests for running java evaluator on rules"""
     manual_seed(0)
-    settings = Settings(optimizer=SGD(lr=0.1), epochs=300)
+    settings = Settings(optimizer=SGD(lr=0.1))
 
-    evaluator = get_evaluator(template, settings)
+    template.build(settings)
 
-    built_dataset = evaluator.build_dataset(dataset)
-    evaluator.train(built_dataset, generator=False)
+    built_dataset = template.build_dataset(dataset)
+    template.train(built_dataset, epochs=300)
 
     results = []
-    for predicted in evaluator.test(built_dataset):
+    for predicted in template.test(built_dataset):
         results.append(round(predicted, 3))
 
     assert len(results) == len(expected_results)
 
     for result, expected_result in zip(results, expected_results):
-        assert expected_result == result
+        assert result == expected_result
 
 
 @pytest.mark.parametrize(
@@ -381,28 +380,30 @@ def test_evaluator_state_loading(template: Template, dataset: BaseDataset) -> No
     """Tests for loading state"""
     settings = Settings(optimizer=SGD(0.1), epochs=20)
 
-    evaluator = get_evaluator(template, settings)
-    built_dataset = evaluator.build_dataset(dataset)
-    evaluator.train(built_dataset, generator=False)
+    template.build(settings)
+    built_dataset = template.build_dataset(dataset)
+    template.train(built_dataset)
 
     results = []
-    for predicted in evaluator.test(built_dataset):
+    for predicted in template.test(built_dataset):
         results.append(round(predicted, 5))
 
-    second_evaluator = get_evaluator(template, settings)
-    built_dataset = second_evaluator.build_dataset(dataset)
+    second_template = template.clone()
+    second_template.build(settings)
+
+    built_dataset = second_template.build_dataset(dataset)
 
     second_results = []
-    for predicted in second_evaluator.test(built_dataset):
+    for predicted in second_template.test(built_dataset):
         second_results.append(round(predicted, 5))
 
     assert len(results) == len(second_results)
     assert any(result != second_result for result, second_result in zip(results, second_results))
 
-    second_evaluator.load_state_dict(evaluator.state_dict())
+    second_template.load_state_dict(template.state_dict())
 
     second_results = []
-    for predicted in second_evaluator.test(built_dataset):
+    for predicted in second_template.test(built_dataset):
         second_results.append(round(predicted, 5))
 
     assert len(results) == len(second_results)

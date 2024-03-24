@@ -76,7 +76,7 @@ class Builder:
             return self._neuralize(groundings, self._callback(pbar))
 
     def _neuralize(self, groundings, callback) -> List[NeuralSample]:
-        neuralize_pipeline = self.example_builder.neuralize(groundings, None)
+        neuralize_pipeline = self.example_builder.neuralize(groundings, callback)
         neuralize_pipeline.execute(None)
 
         samples = neuralize_pipeline.get()
