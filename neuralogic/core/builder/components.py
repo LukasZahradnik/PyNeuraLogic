@@ -9,19 +9,19 @@ from neuralogic.utils.visualize import draw_sample, draw_grounding
 
 
 class NeuralSample:
-    __slots__ = "java_sample", "fact_cache", "grounding"
+    __slots__ = "_java_sample", "_fact_cache", "_grounding"
 
     def __init__(self, sample, grounding):
-        self.java_sample = sample
-        self.grounding = grounding
-        self.fact_cache = {}
+        self._java_sample = sample
+        self._grounding = grounding
+        self._fact_cache = {}
 
     @property
     def target(self):
-        return ValueFactory.from_java(self.java_sample.target)
+        return ValueFactory.from_java(self._java_sample.target)
 
     def _find_fact(self, fact_str):
-        for sample_fact in self.java_sample.query.evidence.allNeuronsTopologic:
+        for sample_fact in self._java_sample.query.evidence.allNeuronsTopologic:
             if str(sample_fact.getClass().getSimpleName()) != "FactNeuron":
                 continue
 
@@ -37,7 +37,7 @@ class NeuralSample:
                     continue
 
                 if name[space_index + 1 :] == fact_str:
-                    self.fact_cache[fact_str] = sample_fact
+                    self._fact_cache[fact_str] = sample_fact
                     return sample_fact
                 break
 
@@ -46,13 +46,13 @@ class NeuralSample:
     def get_fact(self, fact):
         fact_str = fact.predicate.to_str()
 
-        if fact_str in self.fact_cache:
-            return self.fact_cache[fact_str]
+        if fact_str in self._fact_cache:
+            return self._fact_cache[fact_str]
         return self._find_fact(fact_str)
 
     def set_fact_value(self, fact, value) -> int:
         fact_str = fact.predicate.to_str()
-        sample_fact = self.fact_cache[fact_str] if fact_str in self.fact_cache else self._find_fact(fact_str)
+        sample_fact = self._fact_cache[fact_str] if fact_str in self._fact_cache else self._find_fact(fact_str)
         sample_fact.getRawState().setValue(value)
         sample_fact.offset.value = value
         return sample_fact.index

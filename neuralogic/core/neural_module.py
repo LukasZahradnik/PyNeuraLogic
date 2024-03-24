@@ -95,12 +95,12 @@ class NeuralModule:
             results = []
 
             for sample in samples:
-                self._trainer.invalidateSample(self._invalidation, sample.java_sample)
+                self._trainer.invalidateSample(self._invalidation, sample._java_sample)
 
                 results.append(
                     Result(
-                        self._trainer.evaluateSample(self._evaluation, sample.java_sample),
-                        sample.java_sample,
+                        self._trainer.evaluateSample(self._evaluation, sample._java_sample),
+                        sample._java_sample,
                         self,
                         self._number_format,
                     )
@@ -108,10 +108,10 @@ class NeuralModule:
             return Results(results)
 
         sample = samples
-        self._trainer.invalidateSample(self._invalidation, sample.java_sample)
-        result = self._trainer.evaluateSample(self._evaluation, sample.java_sample)
+        self._trainer.invalidateSample(self._invalidation, sample._java_sample)
+        result = self._trainer.evaluateSample(self._evaluation, sample._java_sample)
 
-        return Result(result, sample.java_sample, self, self._number_format)
+        return Result(result, sample._java_sample, self, self._number_format)
 
     def forward(self, dataset) -> Union[Results, Result]:
         return self(dataset)
@@ -128,11 +128,11 @@ class NeuralModule:
 
         if not isinstance(samples, Collection):
             if train:
-                result = self._strategy.learnSample(samples.java_sample)
+                result = self._strategy.learnSample(samples._java_sample)
                 return json.loads(str(result)), 1
-            return json.loads(str(self._strategy.evaluateSample(samples.java_sample)))
+            return json.loads(str(self._strategy.evaluateSample(samples._java_sample)))
 
-        sample_array = jpype.java.util.ArrayList([sample.java_sample for sample in samples])
+        sample_array = jpype.java.util.ArrayList([sample._java_sample for sample in samples])
 
         if train:
             results = self._strategy.learnSamples(sample_array, epochs, batch_size)
@@ -286,7 +286,7 @@ class NeuralModule:
         _, gradient_value = self._value_factory.get_value(gradient)
 
         backpropagation = trainer.getBackpropagation()
-        weight_updater = backpropagation.backpropagate(sample.java_sample, gradient_value)
+        weight_updater = backpropagation.backpropagate(sample._java_sample, gradient_value)
         state_index = backpropagation.backproper
 
         return state_index, weight_updater

@@ -42,7 +42,7 @@ class EvaluationInferenceEngine:
 
         def generator():
             for result, sample in zip(results, built_dataset.samples):
-                sub_query = str(sample.java_sample.query.neuron.getName())
+                sub_query = str(sample._java_sample.query.neuron.getName())
                 sub_query = sub_query.split("(")[1].strip()[:-1]
 
                 substitutions = sub_query.split(",")
