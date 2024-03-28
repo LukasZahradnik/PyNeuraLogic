@@ -120,16 +120,29 @@ class Rule:
         self._set_metadata(other)
         return self
 
+
     def _set_metadata(self, metadata: Metadata):
         if metadata.aggregation is not None and metadata.aggregation.rule_head_dependant():
             metadata = metadata.copy()
             metadata.aggregation = metadata.aggregation.process_head(self.head)
 
         self.metadata = metadata
-
+    # mine
     def __rshift__(self, tree):
-        # TODO - add intended functionality instead of print
-        # call java and give it the tree to construct network
-        print("3: rshift called!")
-        print(tree.print_tree())
+        # we only assign the new tree to rule
+        # self.metadata = None
+
+        USE_PYTORCH_EVAL = 1
+        USE_JAVA_EVAL = 0
+
+        if USE_PYTORCH_EVAL:
+            print(tree.print_tree())
+
+        elif USE_JAVA_EVAL:
+            if isinstance(tree, Iterable):
+                raise NotImplementedError("Wrong syntax, use '|' instead of '>>'!")
+            elif isinstance(tree, FunctionalTree):
+                self.tree = tree
+
+            return self
 
