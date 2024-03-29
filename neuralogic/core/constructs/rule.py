@@ -93,20 +93,15 @@ class Rule:
 
     # mine
     def __rshift__(self, tree):
-        # we only assign the new tree to rule
+        # tree is assigned to rule
         # self.metadata = None
 
-        USE_PYTORCH_EVAL = 1
-        USE_JAVA_EVAL = 0
+        if isinstance(tree, Iterable):
+            raise NotImplementedError("Wrong syntax, use '|' instead of '>>'!")
+        elif isinstance(tree, FunctionalTree):
+            self.tree = tree
+            print(self.tree.print_tree())
 
-        if USE_PYTORCH_EVAL:
-            print(tree.print_tree())
+        
 
-        elif USE_JAVA_EVAL:
-            if isinstance(tree, Iterable):
-                raise NotImplementedError("Wrong syntax, use '|' instead of '>>'!")
-            elif isinstance(tree, FunctionalTree):
-                self.tree = tree
-
-            return self
         

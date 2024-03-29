@@ -65,7 +65,6 @@ class BaseRelation(FunctionalTree):
         return WeightedRelation(item, self.predicate, False, self.terms, self.function)
 
     def __le__(self, other: Union[Iterable["BaseRelation"], "BaseRelation"]) -> rule.Rule:
-        print("1: __le__ called")
         return rule.Rule(self, other)
 
     def to_str(self, end=False) -> str:
