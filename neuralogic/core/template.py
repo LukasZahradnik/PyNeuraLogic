@@ -174,7 +174,6 @@ class Template:
         return self.__str__()
 
     def __iadd__(self, other) -> "Template":
-        print("debugger debug")
         if isinstance(other, Iterable):
             self.template.extend(other)
         elif isinstance(other, Module):

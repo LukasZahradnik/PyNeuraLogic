@@ -129,7 +129,7 @@ class Rule:
         self.metadata = metadata
     # mine
     def __rshift__(self, tree):
-        # we only assign the new tree to rule
+        # tree is assigned to rule
         # self.metadata = None
 
         USE_PYTORCH_EVAL = 1
