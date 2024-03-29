@@ -135,7 +135,7 @@ Java >= 1.8
 PyNeuraLogic has a set of predefined modules to get you quickly started with your experimenting!
 It contains, for example, predefined modules for:
 
-- Graph Neural Networks (GNNConv, SAGEConv, GINConv, RGCNConv, ...)
+- Graph Neural Networks (GCNConv, SAGEConv, GINConv, RGCNConv, ...)
 - Meta graphs and meta paths (MetaConv, MAGNN, ...)
 - Transformer, LSTM, GRU, RNN, [...and more!](https://pyneuralogic.readthedocs.io/en/latest/zoo.html)
 
