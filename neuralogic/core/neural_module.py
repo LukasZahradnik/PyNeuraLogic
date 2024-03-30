@@ -282,11 +282,9 @@ class NeuralModule:
                     weight_value.set(i * cols + j, float(val))
 
     def _backprop(self, sample, gradient):
-        trainer = self._strategy.getTrainer()
         _, gradient_value = self._value_factory.get_value(gradient)
 
-        backpropagation = trainer.getBackpropagation()
-        weight_updater = backpropagation.backpropagate(sample._java_sample, gradient_value)
-        state_index = backpropagation.backproper
+        weight_updater = self._backpropagation.backpropagate(sample._java_sample, gradient_value)
+        state_index = self._backpropagation.backproper
 
         return state_index, weight_updater
