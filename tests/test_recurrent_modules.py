@@ -204,7 +204,7 @@ def test_lstm_module(input_size, hidden_size, sequence_len, epochs):
         (10, 5, 10, 500),
     ],
 )
-def test_rnn_module_no_batch(input_size, hidden_size, sequence_len, epochs):
+def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
     """Test that PyNeuraLogic RNN layer computes the same as PyTorch RNN layer (with backprop)"""
     torch_input = torch.randn((sequence_len, input_size))
     h0 = torch.randn((1, hidden_size))
@@ -215,9 +215,7 @@ def test_rnn_module_no_batch(input_size, hidden_size, sequence_len, epochs):
     template = Template()
     template += RNN(input_size, hidden_size, "h", "f", "h0", arity=0)
 
-    model = template.build(
-        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
-    )
+    model = template.build(Settings(chain_pruning=False, iso_value_compression=False, error_function=MSE()))
 
     parameters = model.parameters()
     torch_parameters = [parameter.tolist() for parameter in rnn.parameters()]
@@ -227,6 +225,7 @@ def test_rnn_module_no_batch(input_size, hidden_size, sequence_len, epochs):
 
     model.load_state_dict(parameters)
 
+    pynelo_torch_optim = torch.optim.Adam(params=model.tensor_parameters(), lr=0.001)
     dataset = Dataset(
         [
             Sample(
@@ -253,7 +252,7 @@ def test_rnn_module_no_batch(input_size, hidden_size, sequence_len, epochs):
         optimizer.step()
 
         result = model(bd.samples)
-
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result.values()[0]], atol=10e-5)
 
         result.backward()
+        pynelo_torch_optim.step()

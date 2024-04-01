@@ -10,6 +10,7 @@ from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core.builder.components import BuiltDataset, GroundedDataset
 from neuralogic.core.result import Results, Result
 from neuralogic.core.settings.settings_proxy import SettingsProxy
+from neuralogic.core.tensor import NeuralogicOptTensor
 from neuralogic.dataset import Dataset
 from neuralogic.dataset.base import BaseDataset
 
@@ -56,6 +57,8 @@ class NeuralModule:
         self._invalidation = None
         self._evaluation = None
         self._backpropagation = None
+
+        self._weight_updater = None
 
     def ground(
         self,
@@ -154,12 +157,25 @@ class NeuralModule:
 
         for weight in weights:
             if weight.isLearnable:
-                weights_dict[weight.index] = ValueFactory.from_java(weight.value)
+                weights_dict[weight.index] = ValueFactory.from_java(weight.value, self._number_format)
                 weight_names[weight.index] = weight.name
         return {
             "weights": weights_dict,
             "weight_names": weight_names,
         }
+
+    def tensor_parameters(self) -> List[NeuralogicOptTensor]:
+        return [
+            NeuralogicOptTensor.create(
+                weight,
+                ValueFactory.from_java(weight.value, self._number_format),
+                self._weight_updater,
+                self._value_factory,
+                self._number_format,
+            )
+            for weight in self._neural_model.getAllWeights()
+            if weight.isLearnable
+        ]
 
     def load_state_dict(self, state_dict: Dict):
         self._sync_template(state_dict, self._neural_model.getAllWeights())
@@ -233,6 +249,7 @@ class NeuralModule:
         self._invalidation = self._trainer.getInvalidation()
         self._evaluation = self._trainer.getEvaluation()
         self._backpropagation = self._trainer.getBackpropagation()
+        self._weight_updater = self._backpropagation.weightUpdater
 
         self.reset_parameters()
 

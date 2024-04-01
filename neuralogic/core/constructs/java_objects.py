@@ -15,14 +15,14 @@ class ValueFactory:
         self.matrix_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.MatrixValue")
 
     @staticmethod
-    def from_java(value):
+    def from_java(value, number_format):
         size = list(value.size())
 
         if len(size) == 0 or size[0] == 0:
             return float(value.get(0))
         elif len(size) == 1 or size[0] == 1 or size[1] == 1:
             return list(float(x) for x in value.values)
-        return json.loads(str(value.toString()))
+        return json.loads(str(value.toString(number_format)))
 
     def get_value(self, weight):
         if isinstance(weight, (float, int)) or np.ndim(weight) == 0:
