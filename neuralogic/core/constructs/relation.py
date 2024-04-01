@@ -64,8 +64,12 @@ class BaseRelation(FunctionalTree):
             raise ValueError(f"Special/Hidden relation {self} cannot have learnable parameters.")
         return WeightedRelation(item, self.predicate, False, self.terms, self.function)
 
-    def __le__(self, other: Union[Iterable["BaseRelation"], "BaseRelation"]) -> rule.Rule:
-        return rule.Rule(self, other)
+    def __le__(self, other: Union[Iterable["BaseRelation"], "BaseRelation", "FunctionalTree"]) -> rule.Rule:
+        # TODO this is obviously wrong
+        if isinstance(other, FunctionalTree):
+            print(other.print_tree())
+        else:
+            return rule.Rule(self, other)
 
     def to_str(self, end=False) -> str:
         end = "." if end else ""

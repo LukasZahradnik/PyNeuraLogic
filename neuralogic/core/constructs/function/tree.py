@@ -54,35 +54,59 @@ class FunctionalTree:
             return "(" + self.left_value.print_tree() + self.operation + self.right_value.print_tree() + ")"
     
 
-class F:
+class FunctionContainer:
     # all functions available for functional syntax type, includes combinations, aggregations and transformations
     # if input value is torch tensor, evaluate it directly
     # TODO: more effective dictionary-like approach, might delete operations like sum, that can be substituted using operators such as '+'
     
-    def __init__(self):
-        pass
+    class FunctionCallSimulator:
+        def __init__(self, function):
+            self.function = function
+
+        def __getitem__(self, args):
+            return self.function(args)
+
+        def __call__(self, arg):
+            return self.function(arg)
+
+    @property
+    def identity(self):
+        return self.FunctionCallSimulator(self._identity_private)
     
-    def identity(value):
-        if torch.is_tensor(value):
-            print("it is tensor apparently1")
-            return torch.tensor(value)
+    @property
+    def relu(self):
+        return self.FunctionCallSimulator(self._relu_private)
+    
+    @property
+    def avg(self):
+        return self.FunctionCallSimulator(self._avg_private)
         
+        
+    def _avg_private(self, value):      
+        if torch.is_tensor(value):
+            # this is probably wrong
+            return torch.mean(value)
         else:
-            print("it is not tensor, it is tree1")
             n = FunctionalTree()
-            n.operation = "identity"
+            n.operation = "avg"
             n.left_value = value
             return n
-        
-    def relu(value):
+
+    def _relu_private(self, value):
         if torch.is_tensor(value):
-            print("it is tensor apparently2")
             return torch.relu(value)
-        
         else:
-            print("it is not tensor, it is tree2")
             n = FunctionalTree()
             n.operation = "relu"
+            n.left_value = value
+            return n
+    
+    def _identity_private(self, value):
+        if torch.is_tensor(value):
+            return value
+        else:
+            n = FunctionalTree()
+            n.operation = "identity"
             n.left_value = value
             return n
          
