@@ -96,11 +96,11 @@ class Rule:
     def __rshift__(self, tree):
 
         if isinstance(tree, Iterable):
-            self.__or__(tree)
+            return self.__or__(tree)
 
         elif isinstance(tree, FunctionalTree):
             metadata = tree.create_metadata()
-            self.__or__(metadata)
+            return self.__or__(metadata)
 
         
 
