@@ -74,6 +74,9 @@ class Rule:
         return self
 
     def __or__(self, other) -> "Rule":
+        print("printing metadata")
+        print(other)
+
         if isinstance(other, Iterable):
             # yes
             other = Metadata.from_iterable(other)
@@ -87,20 +90,17 @@ class Rule:
             other.aggregation = other.aggregation.process_head(self.head)
 
         self.metadata = other
-        print("printing metadata")
-        print(self.metadata)
         return self
 
-    # mine
+
     def __rshift__(self, tree):
-        # tree is assigned to rule
-        # self.metadata = None
 
         if isinstance(tree, Iterable):
-            raise NotImplementedError("Wrong syntax, use '|' instead of '>>'!")
+            self.__or__(tree)
+
         elif isinstance(tree, FunctionalTree):
-            self.tree = tree
-            print(self.tree.print_tree())
+            metadata = tree.create_metadata()
+            self.__or__(metadata)
 
         
 
