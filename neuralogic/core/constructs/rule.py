@@ -3,58 +3,23 @@ from typing import Iterable, Optional
 from neuralogic.core.constructs.function.tree import FunctionalTree
 
 
-class RuleBody:
-    __slots__ = "literals", "metadata"
-
-    def __init__(self, lit1, lit2):
-        self.literals = [lit1, lit2]
-        self.metadata = None
-
-    def __and__(self, other):
-        from neuralogic.core.constructs.relation import BaseRelation
-
-        if isinstance(other, BaseRelation):
-            self.literals.append(other)
-            return self
-        raise NotImplementedError
-
-    def __str__(self) -> str:
-        return ", ".join(atom.to_str() for atom in self.literals)
-
-    def __repr__(self) -> str:
-        return self.__str__()
-
-    def __or__(self, other) -> "RuleBody":
-        if isinstance(other, Iterable):
-            other = Metadata.from_iterable(other)
-        elif not isinstance(other, Metadata):
-            raise NotImplementedError
-
-        self.metadata = other
-        return self
-
-
 class Rule:
-    __slots__ = "head", "body", "metadata"
+    __slots__ = "head", "body", "metadata", "tree"
 
     def __init__(self, head, body):
         from neuralogic.core import Relation
 
         self.head = head
-        self.metadata: Optional[Metadata] = None
 
         if head.function is not None:
             raise NotImplementedError(f"Rule head {head} cannot have a function attached")
-
-        if isinstance(body, RuleBody):
-            if body.metadata is not None:
-                self._set_metadata(body.metadata)
-            body = body.literals
 
         if not isinstance(body, Iterable):
             body = [body]
 
         self.body = list(body)
+        self.metadata: Optional[Metadata] = None
+        self.tree = None
 
         if self.is_ellipsis_templated():
             variable_set = {term for term in head.terms if term is not Ellipsis and str(term)[0].isupper()}
@@ -97,12 +62,9 @@ class Rule:
     def to_str(self, _: bool = False) -> str:
         return str(self)
 
-    def __str__(self) -> str:
+    def __str__(self):
         metadata = "" if self.metadata is None is None else f" {self.metadata}"
         return f"{self.head.to_str()} :- {', '.join(atom.to_str() for atom in self.body)}.{metadata}"
-
-    def __repr__(self) -> str:
-        return self.to_str()
 
     def __and__(self, other) -> "Rule":
         if isinstance(other, Iterable):
@@ -112,37 +74,34 @@ class Rule:
         return self
 
     def __or__(self, other) -> "Rule":
+        print("printing metadata")
+        print(other)
+
         if isinstance(other, Iterable):
+            # yes
             other = Metadata.from_iterable(other)
+            # just creates information (other==metadata) about how to combine atoms
         elif not isinstance(other, Metadata):
             raise NotImplementedError
 
-        self._set_metadata(other)
+        if other.aggregation is not None and other.aggregation.rule_head_dependant():
+            # no
+            other = other.copy()
+            other.aggregation = other.aggregation.process_head(self.head)
+
+        self.metadata = other
         return self
 
 
-    def _set_metadata(self, metadata: Metadata):
-        if metadata.aggregation is not None and metadata.aggregation.rule_head_dependant():
-            metadata = metadata.copy()
-            metadata.aggregation = metadata.aggregation.process_head(self.head)
-
-        self.metadata = metadata
-    # mine
     def __rshift__(self, tree):
-        # tree is assigned to rule
-        # self.metadata = None
 
-        USE_PYTORCH_EVAL = 1
-        USE_JAVA_EVAL = 0
+        if isinstance(tree, Iterable):
+            return self.__or__(tree)
 
-        if USE_PYTORCH_EVAL:
-            print(tree.print_tree())
+        elif isinstance(tree, FunctionalTree):
+            metadata = tree.create_metadata()
+            return self.__or__(metadata)
 
-        elif USE_JAVA_EVAL:
-            if isinstance(tree, Iterable):
-                raise NotImplementedError("Wrong syntax, use '|' instead of '>>'!")
-            elif isinstance(tree, FunctionalTree):
-                self.tree = tree
+        
 
-            return self
-
+        
