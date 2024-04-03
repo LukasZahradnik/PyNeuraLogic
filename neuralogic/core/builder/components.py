@@ -33,7 +33,7 @@ class NeuralSample:
     def target(self):
         return ValueFactory.from_java(self.java_sample.target, SettingsProxy.number_format())
 
-    def get_grounded_literal(self, literal):
+    def get_atom(self, literal):
         literal_name = literal.predicate.name
         literal_arity = literal.predicate.arity
 
