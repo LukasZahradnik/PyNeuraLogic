@@ -4,55 +4,121 @@ from typing import Any, Dict, Optional, List
 import jpype
 import numpy as np
 
+from neuralogic.core.settings.settings_proxy import SettingsProxy
 from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.utils.visualize import draw_sample, draw_grounding
 
 
+class Atom:
+    __slots__ = "substitutions", "_atom"
+
+    def __init__(self, atom, substitutions: Dict):
+        self.substitutions = substitutions
+        self._atom = atom
+
+    @property
+    def value(self):
+        return ValueFactory.from_java(self._atom.getRawState().getValue(), SettingsProxy.number_format())
+
+
 class NeuralSample:
-    __slots__ = "java_sample", "fact_cache", "grounding"
+    __slots__ = "java_sample", "grounding", "literal_cache"
 
     def __init__(self, sample, grounding):
         self.java_sample = sample
         self.grounding = grounding
-        self.fact_cache = {}
+        self.literal_cache = None
 
     @property
     def target(self):
-        return ValueFactory.from_java(self.java_sample.target)
+        return ValueFactory.from_java(self.java_sample.target, SettingsProxy.number_format())
 
-    def _find_fact(self, fact_str):
-        for sample_fact in self.java_sample.query.evidence.allNeuronsTopologic:
-            if str(sample_fact.getClass().getSimpleName()) != "FactNeuron":
+    def get_grounded_literal(self, literal):
+        literal_name = literal.predicate.name
+        literal_arity = literal.predicate.arity
+
+        if self.literal_cache is None:
+            self.literal_cache = self._get_literals()
+
+        if literal_name not in self.literal_cache:
+            return None
+
+        atoms = []
+
+        for subs, value in self.literal_cache[literal_name].items():
+            if len(subs) != literal_arity:
                 continue
 
-            name = str(sample_fact.name).strip()
-            space_index = name.rfind(" ")
+            literal_subs = {}
+            for term, sub in zip(literal.terms, subs):
+                term_str = str(term)
 
-            while True:
-                if space_index == -1:
-                    break
-
-                if name[space_index - 1] == ",":
-                    space_index = name.rfind(" ", __end=space_index)
+                if term_str[0] == term_str[0].upper() and term_str[0] != term_str[0].lower():
+                    if term_str in literal_subs and sub != literal_subs[term_str]:
+                        break
+                    literal_subs[str(term)] = sub
                     continue
 
-                if name[space_index + 1 :] == fact_str:
-                    self.fact_cache[fact_str] = sample_fact
-                    return sample_fact
-                break
+                if str(term) != sub:
+                    break
+            else:
+                atoms.append(Atom(value, literal_subs))
+        return atoms
 
-        return None
+    def _get_literals(self, expected_types=("WeightedAtomNeuron", "AtomNeuron", "FactNeuron")):
+        literals = {}
+
+        for atom in self.java_sample.query.evidence.allNeuronsTopologic:
+            atom_type = str(atom.getClass().getSimpleName())
+
+            if atom_type not in expected_types:
+                continue
+
+            name = str(atom.name).strip()
+            bracket = name.rfind("(")
+            space = name.rfind(" ", 0, bracket if bracket != -1 else None)
+
+            substitutions = tuple()
+
+            if bracket != -1:
+                subs = name[bracket + 1 :]
+                name = name[space + 1 : bracket]
+
+                r_bracket = subs.find(")")
+                substitutions = tuple(subs[:r_bracket].split(", "))
+            elif space != -1:
+                name = name[space + 1 :]
+
+            if name not in literals:
+                literals[name] = {}
+
+            literals[name][substitutions] = atom
+        return literals
 
     def get_fact(self, fact):
-        fact_str = fact.predicate.to_str()
+        name = fact.predicate.name
+        arity = fact.predicate.arity
 
-        if fact_str in self.fact_cache:
-            return self.fact_cache[fact_str]
-        return self._find_fact(fact_str)
+        for term in fact.terms:
+            term_str = str(term)
+
+            if term_str[0] == term_str[0].upper() and term_str[0] != term_str[0].lower():
+                raise ValueError(f"{fact} is not a fact")
+
+        if name not in self.literal_cache:
+            return None
+
+        term_tuple = tuple(str(term) for term in fact.terms)
+        for subs, atom in self.literal_cache[name].items():
+            if len(subs) == arity and term_tuple == subs:
+                return atom
+        return None
 
     def set_fact_value(self, fact, value) -> int:
-        fact_str = fact.predicate.to_str()
-        sample_fact = self.fact_cache[fact_str] if fact_str in self.fact_cache else self._find_fact(fact_str)
+        if self.literal_cache is None:
+            self.literal_cache = self._get_literals()
+
+        sample_fact = self.get_fact(fact)
         sample_fact.getRawState().setValue(value)
         sample_fact.offset.value = value
         return sample_fact.index
