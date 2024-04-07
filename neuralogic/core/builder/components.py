@@ -199,17 +199,20 @@ class Weight:
 class BuiltDataset:
     """BuiltDataset represents an already built dataset - that is, a dataset that has been grounded and neuralized."""
 
-    __slots__ = "samples", "batch_size"
+    __slots__ = "_samples", "_batch_size"
 
     def __init__(self, samples: List[NeuralSample], batch_size: int):
-        self.samples = samples
-        self.batch_size = batch_size
+        self._samples = samples
+        self._batch_size = batch_size
 
     def __len__(self):
-        return len(self.samples)
+        return len(self._samples)
 
     def __getitem__(self, item):
-        return self.samples[item]
+        return self._samples[item]
+
+    def __iter__(self):
+        return iter(self._samples)
 
 
 class Grounding:

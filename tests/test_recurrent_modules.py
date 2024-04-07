@@ -69,7 +69,7 @@ def test_gru_module(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model.train(bd.samples)
+        result, _ = model.train(bd)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
 
 
@@ -127,7 +127,7 @@ def test_rnn_module(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model.train(bd.samples)
+        result, _ = model.train(bd)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
 
 
@@ -194,7 +194,7 @@ def test_lstm_module(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model.train(bd.samples)
+        result, _ = model.train(bd)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
 
 
@@ -225,7 +225,6 @@ def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
 
     model.load_state_dict(parameters)
 
-    pynelo_torch_optim = torch.optim.Adam(params=model.tensor_parameters(), lr=0.001)
     dataset = Dataset(
         [
             Sample(
@@ -241,6 +240,7 @@ def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
     bd = model.build_dataset(dataset)
 
     optimizer = torch.optim.Adam(rnn.parameters(), lr=0.001)
+    pynelo_torch_optim = torch.optim.Adam(params=model.tensor_parameters(), lr=0.001)
     loss_fun = torch.nn.MSELoss()
     pynelo_loss_fun = torch.nn.MSELoss()
 
@@ -252,7 +252,7 @@ def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result = model(bd.samples)
+        result = model(bd)
         pynelo_loss = pynelo_loss_fun(result[-1], target)
 
         pynelo_loss.backward()

@@ -262,10 +262,10 @@ class NeuralModule:
     def _dataset_to_samples(self, dataset):
         if isinstance(dataset, Dataset):
             dataset = self.build_dataset(dataset)
-            return dataset.samples, dataset.batch_size
+            return dataset._samples, dataset._batch_size
 
         if isinstance(dataset, BuiltDataset):
-            return dataset.samples, dataset.batch_size
+            return dataset._samples, dataset._batch_size
         return dataset, 1
 
     def _set_hooks(self):
