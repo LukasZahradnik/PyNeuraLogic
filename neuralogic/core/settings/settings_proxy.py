@@ -10,6 +10,8 @@ from neuralogic.optim import Optimizer
 
 
 class SettingsProxy:
+    _number_format = None
+
     def __init__(
         self,
         *,
@@ -50,6 +52,12 @@ class SettingsProxy:
         self.settings.loggingLevel = jpype.JClass("java.util.logging.Level").OFF
 
         self._setup_random_generator()
+
+    @staticmethod
+    def number_format():
+        if SettingsProxy._number_format is None:
+            SettingsProxy._number_format = jpype.JClass("cz.cvut.fel.ida.setup.Settings").superDetailedNumberFormat
+        return SettingsProxy._number_format
 
     def _setup_random_generator(self):
         if neuralogic._rnd_generator is None:
