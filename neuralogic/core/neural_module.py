@@ -60,6 +60,7 @@ class NeuralModule:
         self._backpropagation = None
 
         self._weight_updater = None
+        self._tensor_parameters = None
 
     def ground(
         self,
@@ -122,7 +123,10 @@ class NeuralModule:
         return self(dataset)
 
     def train(self, dataset, epochs: int = 1) -> Tuple[Value, int]:
-        return self._train_test(dataset, True, epochs)
+        res = self._train_test(dataset, True, epochs)
+        self._update_tensor_parameters()
+
+        return res
 
     def test(self, dataset, epochs: int = 1) -> Value:
         return self._train_test(dataset, False, epochs)
@@ -167,20 +171,31 @@ class NeuralModule:
         }
 
     def tensor_parameters(self) -> List[NeuralogicOptTensor]:
-        return [
-            NeuralogicOptTensor.create(
-                weight,
-                ValueFactory.from_java(weight.value, self._number_format),
-                self._weight_updater,
-                self._value_factory,
-                self._number_format,
-            )
-            for weight in self._neural_model.getAllWeights()
-            if weight.isLearnable
-        ]
+        if self._tensor_parameters is None:
+            self._tensor_parameters = [
+                NeuralogicOptTensor.create(
+                    weight,
+                    ValueFactory.from_java(weight.value, self._number_format),
+                    self._weight_updater,
+                    self._value_factory,
+                    self._number_format,
+                )
+                for weight in self._neural_model.getAllWeights()
+                if weight.isLearnable
+            ]
+
+        return list(self._tensor_parameters)
+
+    def _update_tensor_parameters(self):
+        if self._tensor_parameters is None:
+            return
+
+        for param in self._tensor_parameters:
+            param.data = torch.tensor(ValueFactory.from_java(param._neuralogic_weight.value, self._number_format))
 
     def load_state_dict(self, state_dict: Dict):
         self._sync_template(state_dict, self._neural_model.getAllWeights())
+        self._update_tensor_parameters()
 
     def draw(
         self,

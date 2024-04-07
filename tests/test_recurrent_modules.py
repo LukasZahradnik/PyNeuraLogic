@@ -218,6 +218,8 @@ def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
     model = template.build(Settings(chain_pruning=False, iso_value_compression=False, error_function=MSE()))
 
     parameters = model.parameters()
+    pyneuralogic_tensor_parameters = model.tensor_parameters()
+
     torch_parameters = [parameter.tolist() for parameter in rnn.parameters()]
 
     parameters["weights"][0] = torch_parameters[0]
@@ -240,7 +242,7 @@ def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
     bd = model.build_dataset(dataset)
 
     optimizer = torch.optim.Adam(rnn.parameters(), lr=0.001)
-    pynelo_torch_optim = torch.optim.Adam(params=model.tensor_parameters(), lr=0.001)
+    pynelo_torch_optim = torch.optim.Adam(params=pyneuralogic_tensor_parameters, lr=0.001)
     loss_fun = torch.nn.MSELoss()
     pynelo_loss_fun = torch.nn.MSELoss()
 
