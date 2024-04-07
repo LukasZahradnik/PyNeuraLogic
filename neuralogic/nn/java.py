@@ -117,7 +117,7 @@ class NeuraLogic(AbstractNeuraLogic):
 
         for weight in weights:
             if weight.isLearnable:
-                weights_dict[weight.index] = ValueFactory.from_java(weight.value)
+                weights_dict[weight.index] = ValueFactory.from_java(weight.value, SettingsProxy.number_format())
                 weight_names[weight.index] = weight.name
         return {
             "weights": weights_dict,
