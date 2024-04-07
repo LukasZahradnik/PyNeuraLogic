@@ -2,13 +2,14 @@ from typing import Optional, Union, Callable, Dict, Any, Set, Collection, List, 
 import json
 
 import jpype
+import torch
 
 from neuralogic import is_initialized, initialize
 from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core.builder.components import BuiltDataset, GroundedDataset
-from neuralogic.core.result import Results, Result
+from neuralogic.core.network_output import PyNeuraLogicNetworkOutput
 from neuralogic.core.settings.settings_proxy import SettingsProxy
 from neuralogic.core.tensor import NeuralogicOptTensor
 from neuralogic.dataset import Dataset
@@ -90,33 +91,34 @@ class NeuralModule:
             progress=progress,
         )
 
-    def __call__(self, dataset=None) -> Union[Results, Result]:
+    def __call__(self, dataset=None) -> torch.Tensor:
         self._set_hooks()
         samples, _ = self._dataset_to_samples(dataset)
+        sample_collection = samples
 
-        if isinstance(samples, Collection):
-            results = []
+        if not isinstance(samples, Collection):
+            sample_collection = [samples]
 
-            for sample in samples:
-                self._trainer.invalidateSample(self._invalidation, sample._java_sample)
+        for sample in sample_collection:
+            self._trainer.invalidateSample(self._invalidation, sample._java_sample)
 
-                results.append(
-                    Result(
-                        self._trainer.evaluateSample(self._evaluation, sample._java_sample),
-                        sample._java_sample,
-                        self,
-                        self._number_format,
-                    )
-                )
-            return Results(results)
+        results = [
+            self._value_factory.from_java(
+                self._trainer.evaluateSample(self._evaluation, sample._java_sample).getOutput(),
+                SettingsProxy.number_format(),
+            )
+            for sample in sample_collection
+        ]
 
-        sample = samples
-        self._trainer.invalidateSample(self._invalidation, sample._java_sample)
-        result = self._trainer.evaluateSample(self._evaluation, sample._java_sample)
+        if not isinstance(samples, Collection):
+            return PyNeuraLogicNetworkOutput.apply(
+                samples, self, torch.tensor(results[0], dtype=torch.float, requires_grad=True)
+            )
+        return PyNeuraLogicNetworkOutput.apply(
+            samples, self, torch.tensor(results, dtype=torch.float, requires_grad=True)
+        )
 
-        return Result(result, sample._java_sample, self, self._number_format)
-
-    def forward(self, dataset) -> Union[Results, Result]:
+    def forward(self, dataset) -> torch.Tensor:
         return self(dataset)
 
     def train(self, dataset, epochs: int = 1) -> Tuple[Value, int]:

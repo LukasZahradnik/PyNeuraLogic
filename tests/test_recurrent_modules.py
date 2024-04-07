@@ -201,7 +201,7 @@ def test_lstm_module(input_size, hidden_size, sequence_len, epochs):
 @pytest.mark.parametrize(
     "input_size, hidden_size, sequence_len, epochs",
     [
-        (10, 5, 10, 500),
+        (5, 5, 10, 500),
     ],
 )
 def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
@@ -242,6 +242,7 @@ def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
 
     optimizer = torch.optim.Adam(rnn.parameters(), lr=0.001)
     loss_fun = torch.nn.MSELoss()
+    pynelo_loss_fun = torch.nn.MSELoss()
 
     for _ in range(epochs):
         output, _ = rnn(torch_input, h0)
@@ -252,7 +253,9 @@ def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
         optimizer.step()
 
         result = model(bd.samples)
-        assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result.values()[0]], atol=10e-5)
+        pynelo_loss = pynelo_loss_fun(result[-1], target)
 
-        result.backward()
+        pynelo_loss.backward()
         pynelo_torch_optim.step()
+
+        assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[-1]], atol=10e-5)
