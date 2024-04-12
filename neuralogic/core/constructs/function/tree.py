@@ -11,34 +11,29 @@ class FunctionalTree:
         self.operation = None
         self.left_value = None
         self.right_value = None
+        self.combination_done = False
+        self.transformation_done = False
 
     def __add__(self, other):
         n = FunctionalTree()
-        n.operation = "+"
+        n.operation = Combination.SUM
         n.left_value = self
         n.right_value = other
-        return n
-
-    def __sub__(self, other):
-        n = FunctionalTree()
-        n.operation = "-"
-        n.left_value = self
-        n.right_value = other
+        n.combination_done = True
         return n
 
     def __mul__(self, other):
         n = FunctionalTree()
-        n.operation = "*"
+        n.operation = Combination.PRODUCT
         n.left_value = self
         n.right_value = other
+        n.combination_done = True
         return n
+    
+    def copy_values_from(self, other):
+        self.combination_done = other.combination_done
+        self.transformation_done = other.transformation_done
 
-    def __xor__(self, other):
-        n = FunctionalTree()
-        n.operation = "^"
-        n.left_value = self
-        n.right_value = other
-        return n
 
     def print_tree(self) -> str:
         if self.left_value == None:
@@ -58,11 +53,10 @@ class FunctionalTree:
 
         operations = self.mark_operations()
         operations.reverse()    # Right eval order is comb, trans, agg
-        print("printing operations")
-        print(operations)
-        metadata = self.map_operations_to_classes(operations)
+        # following line is outdated
+        # metadata = self.map_operations_to_classes(operations)
 
-        return metadata
+        return operations
 
 
     def mark_operations(self):
@@ -85,6 +79,7 @@ class FunctionalTree:
         
 
     def map_operations_to_classes(self, operations):
+        # outdated function, keeping just for overview
         operation_mapping = {
             # Aggregations
             "avg_a" : Aggregation.AVG,
@@ -146,10 +141,9 @@ class FunctionalTree:
     
 
 class FunctionContainer:
-    # all functions available for functional syntax type, includes combinations, aggregations and transformations
-    # if input value is torch tensor, evaluate it directly
     # TODO: more effective dictionary-like approach, maybe delete whole class and use funcions directly, instead of F.relu just relu
-    
+    # TODO: change the operation assignation order (avg_a)
+
     class FunctionCallSimulator:
         def __init__(self, function):
             self.function = function
@@ -171,6 +165,10 @@ class FunctionContainer:
     @property
     def avg(self):
         return self.FunctionCallSimulator(self._avg_private)
+    
+    @property
+    def softmax(self):
+        return self.FunctionCallSimulator(self._softmax_private)
         
         
     def _avg_private(self, value):      
@@ -179,7 +177,28 @@ class FunctionContainer:
             return torch.mean(value)
         else:
             n = FunctionalTree()
-            n.operation = "avg_a"
+            n.copy_values_from(value)
+            if value.combination_done:
+                n.operation = Aggregation.AVG
+                n.combination_done = True
+            else:
+                n.operation = Combination.AVG
+                n.combination_done = True
+            n.left_value = value
+            return n
+        
+    def _softmax_private(self, value):      
+        if torch.is_tensor(value):
+            # this is probably wrong
+            return torch.softmax(value)
+        else:
+            n = FunctionalTree()
+            n.copy_values_from(value)
+            if value.transformation_done:
+                n.operation = Aggregation.SOFTMAX
+            else:
+                n.operation = Transformation.SOFTMAX
+                n.transformation_done = True
             n.left_value = value
             return n
 
@@ -188,7 +207,9 @@ class FunctionContainer:
             return torch.relu(value)
         else:
             n = FunctionalTree()
-            n.operation = "relu"
+            n.copy_values_from(value)
+            n.transformation_done = True
+            n.operation = Transformation.RELU
             n.left_value = value
             return n
     
@@ -197,7 +218,9 @@ class FunctionContainer:
             return value
         else:
             n = FunctionalTree()
-            n.operation = "identity"
+            n.copy_values_from(value)
+            n.transformation_done = True
+            n.operation = Transformation.IDENTITY
             n.left_value = value
             return n
         
