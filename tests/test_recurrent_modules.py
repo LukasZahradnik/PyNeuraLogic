@@ -261,3 +261,68 @@ def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
         pynelo_torch_optim.step()
 
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[-1]], atol=10e-5)
+
+
+@pytest.mark.parametrize(
+    "input_size, hidden_size, sequence_len, epochs",
+    [
+        (1, 1, 2, 5),
+    ],
+)
+def test_rnn_custom(input_size, hidden_size, sequence_len, epochs):
+    """
+    Test alignment on a manually crafted example that's easier to precisely debug on a piece of paper
+        THIS IS IN THE OLD SYNTAX, NEEDS REWRITING TO THE NEW ONE:)
+    """
+
+    torch_input = torch.tensor([[1.0], [2.0]])  # manual input setup
+    h0 = torch.tensor([[0.0]])
+    target = torch.tensor([[1.0]])
+
+    rnn = torch.nn.RNN(input_size, hidden_size, 1, bias=False, nonlinearity='relu')
+
+    template = Template()
+    template += RNN(input_size, hidden_size, "h", "f", "h0", arity=0, activation=Transformation.RELU)
+
+    model = template.build(
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=SGD(lr=0.001), error_function=MSE())
+    )
+
+    parameters = model.parameters()
+    for parameter in rnn.parameters():
+        parameter.data = torch.tensor([[0.5]])  # manual weight setup
+    torch_parameters = [parameter.tolist() for parameter in rnn.parameters()]
+
+    parameters["weights"][0] = torch_parameters[0]
+    parameters["weights"][1] = torch_parameters[1]
+    model.load_state_dict(parameters)
+    # template.draw()
+
+    dataset = Dataset(
+        [
+            Sample(
+                R.h(sequence_len)[target.detach().numpy().tolist()],
+                [
+                    R.h0[[float(h) for h in h0[0]]],
+                    *[R.f(i + 1)[[float(h) for h in torch_input[i]]] for i in range(sequence_len)],
+                ],
+            ),
+        ]
+    )
+
+    bd = model.build_dataset(dataset)
+    # bd.samples[0].draw(filename="sample0.png")
+
+    optimizer = torch.optim.SGD(rnn.parameters(), lr=0.001)
+    loss_fun = torch.nn.MSELoss()
+
+    for _ in range(epochs):
+        output, _ = rnn(torch_input, h0)
+        loss = loss_fun(output[-1], target)
+
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+
+        result, _ = model(bd.samples)
+        assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
