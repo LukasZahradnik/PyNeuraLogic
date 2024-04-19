@@ -5,10 +5,9 @@ import numpy as np
 from neuralogic.core.constructs.predicate import Predicate
 from neuralogic.core.constructs import rule, factories
 from neuralogic.core.constructs.function import Transformation, Combination
-from neuralogic.core.constructs.function.tree import FunctionalTree
 
 
-class BaseRelation(FunctionalTree):
+class BaseRelation:
     __slots__ = "predicate", "function", "terms", "negated"
 
     def __init__(
@@ -18,7 +17,6 @@ class BaseRelation(FunctionalTree):
         function: Union[Transformation, Combination] = None,
         negated: bool = False,
     ):
-        super().__init__()
         self.predicate = predicate
         self.function = function
         self.terms = terms
@@ -79,12 +77,8 @@ class BaseRelation(FunctionalTree):
             raise ValueError(f"Special/Hidden relation {self} cannot have learnable parameters.")
         return WeightedRelation(item, self.predicate, False, self.terms, self.function)
 
-    def __le__(self, other: Union[Iterable["BaseRelation"], "BaseRelation", "FunctionalTree"]) -> rule.Rule:
-        # TODO this is obviously wrong
-        if isinstance(other, FunctionalTree):
-            print(other.print_tree())
-        else:
-            return rule.Rule(self, other)
+    def __le__(self, other: Union[Iterable["BaseRelation"], "BaseRelation"]) -> rule.Rule:
+        return rule.Rule(self, other)
 
     def to_str(self, end=False) -> str:
         end = "." if end else ""

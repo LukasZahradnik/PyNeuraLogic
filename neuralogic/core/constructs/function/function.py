@@ -30,7 +30,6 @@ class Function:
     def process_head(self, head) -> "Function":
         pass
 
-# class CustomTransformation
 
 class Transformation(Function):
     # Element wise
