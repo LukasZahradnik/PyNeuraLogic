@@ -21,13 +21,14 @@ from neuralogic.optim import SGD
 )
 def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
     manual_seed(0)
-    max_number_of_max_vars = 20
 
     dataset = Dataset()
     template = Template()
 
-    template += R.xor_at(0) <= R.val_at(0)
-    template += R.xor_at(V.Y)["a":1, 8] <= (R.val_at(V.Y)["b":8, 1], R.xor_at(V.X)["c":8, 1], R.special.next(V.X, V.Y))
+    template += (R.xor_at(0) <= R.val_at(0)) | [Transformation.TANH]
+    template += (
+        R.xor_at(V.Y)["a":1, 8] <= (R.val_at(V.Y)["b":8, 1], R.xor_at(V.X)["c":8, 1], R.special.next(V.X, V.Y))
+    ) | [Transformation.TANH]
 
     dataset.add_samples(
         [
@@ -38,9 +39,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
         ]
     )
 
-    settings = Settings(
-        epochs=5000, rule_transformation=Transformation.TANH, relation_transformation=Transformation.IDENTITY
-    )
+    settings = Settings(epochs=5000)
 
     evaluator = get_evaluator(template, settings)
     evaluator.train(dataset, generator=False)
@@ -74,17 +73,20 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
     template.add_rules([
 
         # This rule does xor for the last pair
-        R.xor(V.X, V.Y)["a":1, 8] <= (
+        (R.xor(V.X, V.Y)["a":1, 8] <= (
             R.x(V.X)["b":8, 1], R.x(V.Y)["c":8, 1], R.hidden.xy(V.X, V.Y), R.hidden.n(V.Y)
-        ),
+        )) | [Transformation.TANH],
 
         # This rule recursively evaluates xor for X and xor(Y, Z)
-        R.xor(V.X, V.Y)["a":1, 8] <= (
+        (R.xor(V.X, V.Y)["a":1, 8] <= (
             R.x(V.X)["b":8, 1], R.xor(V.Y, V.Z)["c":8, 1], R.hidden.xy(V.X, V.Y), R.hidden.xy(V.Y, V.Z)
-        ),
+        )) | [Transformation.TANH],
 
         # Helper rule so that queries are just R.xor
-        (R.xor <= R.xor(0, V.X))
+        (R.xor <= R.xor(0, V.X)) | [Transformation.TANH],
+
+        R.xor / 2 | [Transformation.TANH],
+        R.xor / 0 | [Transformation.TANH],
     ])
 
     # The training dataset to train xor on two inputs x(0) and x(1), n(1) is means the max index of input is 1
