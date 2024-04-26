@@ -56,9 +56,15 @@ class VariableFactory:
     def __getattr__(self, item: str) -> str:
         return item.capitalize()
 
+    def get(self, item: str) -> str:
+        return item.capitalize()
+
 
 class ConstantFactory:
     def __getattr__(self, item: str) -> str:
+        return item.lower()
+
+    def get(self, item: str) -> str:
         return item.lower()
 
 
