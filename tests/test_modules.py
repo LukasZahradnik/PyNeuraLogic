@@ -44,7 +44,7 @@ def test_gcnconv():
     template += GCNConv(1, 2, "h1", "h0", "edge")
     template_str = str(template).split("\n")
 
-    assert template_str[0] == "h1__edge(I, I)."
+    assert template_str[0] == "<1.0> h1__edge(I, I)."
     assert template_str[1] == "h1__edge(I, J) :- edge(I, J). [transformation=identity]"
     assert template_str[2] == "h1__edge/2 [transformation=identity]"
     assert template_str[3] == "h1__edge_count(I, J) :- h1__edge(J, X). [transformation=identity, aggregation=count]"
