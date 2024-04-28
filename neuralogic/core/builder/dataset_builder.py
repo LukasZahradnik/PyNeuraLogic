@@ -134,7 +134,6 @@ class DatasetBuilder:
             settings.settings.parallelTraining = True
 
         builder = Builder(settings)
-        length = None
 
         if isinstance(dataset, datasets.Dataset):
             self.examples_counter = 0
@@ -171,7 +170,6 @@ class DatasetBuilder:
                 queries, examples, one_query_per_example, example_queries
             )
 
-            length = len(logic_samples)
             groundings = builder.ground_from_logic_samples(self.parsed_template, logic_samples)
 
             self.java_factory.weight_factory = weight_factory
@@ -187,7 +185,7 @@ class DatasetBuilder:
         else:
             raise NotImplementedError
 
-        return GroundedDataset(groundings, length, builder)
+        return GroundedDataset(groundings, builder)
 
     def build_dataset(
         self,
