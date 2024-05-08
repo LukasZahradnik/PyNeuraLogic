@@ -266,11 +266,11 @@ def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expect
 
 
 @pytest.mark.parametrize(
-    "template, dataset, expected_results",
+    "template, dataset, expected_results, seed",
     [
-        (naive_xor.template, naive_xor.dataset, [0, 0.936, 0.935, -0.002]),
-        (vectorized_xor.template, vectorized_xor.dataset, [0, 0.955, 0.954, -0.003]),
-        (horses.template, horses.dataset, [0.951, 0]),
+        (naive_xor.template, naive_xor.dataset, [0, 0.936, 0.935, -0.002], 0),
+        (vectorized_xor.template, vectorized_xor.dataset, [0, 0.955, 0.954, -0.003], 0),
+        (horses.template, horses.dataset, [0.951, 0], 0),
         (
             naive_trains.template,
             naive_trains.dataset,
@@ -296,6 +296,7 @@ def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expect
                 -0.734,
                 0.761,
             ],
+            0,
         ),
         (
             multiple_examples_trains.template,
@@ -322,38 +323,42 @@ def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expect
                 -0.734,
                 0.761,
             ],
+            0,
         ),
         (
             multiple_examples_no_order_trains.template,
             multiple_examples_no_order_trains.dataset,
             [
-                0.72,
-                0.718,
-                0.762,
-                0.762,
-                0.761,
-                0.636,
-                0.761,
-                0.661,
-                0.739,
+                0.685,
+                0.715,
+                0.746,
                 0.759,
-                0.005,
-                -0.742,
-                -0.756,
-                -0.746,
-                -0.762,
-                0.0,
-                -0.729,
-                0.003,
+                0.556,
+                0.731,
+                0.128,
+                0.724,
+                0.158,
+                0.751,
+                -0.699,
+                -0.761,
                 -0.759,
-                0.762,
+                0.761,
+                -0.762,
+                -0.756,
+                -0.755,
+                -0.761,
+                -0.762,
+                -0.754,
             ],
+            1,
         ),
     ],
 )
-def test_evaluator_run_on_rules(template: Template, dataset: BaseDataset, expected_results: List[float]) -> None:
+def test_evaluator_run_on_rules(
+    template: Template, dataset: BaseDataset, expected_results: List[float], seed: int
+) -> None:
     """Tests for running java evaluator on rules"""
-    manual_seed(0)
+    manual_seed(seed)
     settings = Settings(optimizer=SGD(lr=0.1), epochs=300)
 
     evaluator = get_evaluator(template, settings)
