@@ -145,6 +145,15 @@ class Settings:
     def create_disconnected_proxy(self) -> SettingsProxy:
         return SettingsProxy(**self.params)
 
+    def __setitem__(self, key, value):
+        for proxy in self._proxies.copy():
+            proxy[key] = value
+
+    def __getitem__(self, item):
+        for proxy in self._proxies.copy():
+            return proxy[item]
+        raise ValueError("No Java background settings instance has been yet initialized")
+
     def _update(self, parameter: str, value: Any) -> None:
         if parameter not in self.params:
             raise NotImplementedError
