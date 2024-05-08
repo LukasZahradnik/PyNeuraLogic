@@ -19,13 +19,20 @@ class BaseRelation:
     ):
         self.predicate = predicate
         self.function = function
-        self.terms = terms
         self.negated = negated
+        self.terms = []
 
-        if self.terms is None:
-            self.terms = []
-        elif not isinstance(self.terms, Iterable):
-            self.terms = [self.terms]
+        if not isinstance(terms, Iterable) or isinstance(terms, str):
+            terms = [terms]
+
+        for term in terms:
+            if term is None:
+                continue
+
+            if isinstance(term, list):
+                self.terms.extend(term)
+            else:
+                self.terms.append(term)
 
     def __neg__(self) -> "BaseRelation":
         return self.attach_activation_function(Transformation.REVERSE)

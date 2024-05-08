@@ -5,6 +5,7 @@ import numpy as np
 import jpype
 
 from neuralogic import is_initialized, initialize
+from neuralogic.core.constructs.term import Variable, Constant
 from neuralogic.core.settings import SettingsProxy, Settings
 
 
@@ -128,6 +129,15 @@ class JavaFactory:
         return self.var_factory_class()
 
     def get_term(self, term, variable_factory):
+        if isinstance(term, Variable):
+            if term.type is None:
+                return variable_factory.construct(term.name)
+            return variable_factory.construct(term.name, term.type)
+        if isinstance(term, Constant):
+            if term.type is None:
+                return self.constant_factory.construct(term.name)
+            return self.constant_factory.construct(term.name, term.type)
+
         if isinstance(term, str):
             if term[0].islower() or term.isnumeric():
                 return self.constant_factory.construct(term)

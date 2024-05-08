@@ -368,7 +368,7 @@ def test_evaluator_run_on_rules(template: Template, dataset: BaseDataset, expect
     assert len(results) == len(expected_results)
 
     for result, expected_result in zip(results, expected_results):
-        assert expected_result == result
+        assert result == expected_result
 
 
 @pytest.mark.parametrize(

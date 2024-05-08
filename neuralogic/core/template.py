@@ -114,7 +114,6 @@ class Template:
         metadata_processor = metadata_processor(settings.settings)
 
         metadata_processor.processMetadata(template)
-        template.inferTemplateFacts()
 
         return template
 

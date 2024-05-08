@@ -1,6 +1,7 @@
-from typing import Dict
+from typing import Dict, Optional
 from neuralogic.core.constructs.predicate import Predicate
 from neuralogic.core.constructs import relation
+from neuralogic.core.constructs.term import Constant, Variable
 
 
 class AtomFactory:
@@ -53,25 +54,25 @@ class AtomFactory:
 
 
 class VariableFactory:
-    def __getattr__(self, item: str) -> str:
-        return item.capitalize()
+    def __getattr__(self, item: str) -> Variable:
+        return self.get(item)
 
-    def get(self, item: str) -> str:
-        return item.capitalize()
+    def get(self, item: str, var_type: Optional[str] = None) -> Variable:
+        return Variable(item.capitalize(), var_type)
 
 
 class ConstantFactory:
-    def __getattr__(self, item: str) -> str:
-        return item.lower()
+    def __getattr__(self, item: str) -> Constant:
+        return self.get(item)
 
-    def get(self, item: str) -> str:
-        return item.lower()
+    def get(self, item: str, const_type: Optional[str] = None) -> Constant:
+        return Constant(item.lower(), const_type)
 
 
 Var = VariableFactory()
 Relation = AtomFactory()
-Constant = ConstantFactory()
+Const = ConstantFactory()
 
 V = Var
-C = Constant
+C = Const
 R = Relation
