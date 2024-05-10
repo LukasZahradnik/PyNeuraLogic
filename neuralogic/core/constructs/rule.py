@@ -3,6 +3,7 @@ from typing import Iterable, Optional
 from neuralogic.core.constructs.metadata import Metadata
 
 
+
 class RuleBody:
     __slots__ = "literals", "metadata"
 
@@ -126,3 +127,13 @@ class Rule:
             metadata.aggregation = metadata.aggregation.process_head(self.head)
 
         self.metadata = metadata
+
+    def __rshift__(self, tree):
+        from neuralogic.core.constructs.function.tree import FunctionalTree
+
+        if isinstance(tree, Iterable):
+            return self.__or__(tree)
+
+        elif isinstance(tree, FunctionalTree):
+            metadata = tree.create_metadata()
+            return self.__or__(metadata)

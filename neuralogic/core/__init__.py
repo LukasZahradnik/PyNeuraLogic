@@ -27,4 +27,5 @@ __all__ = [
     "Settings",
     "SettingsProxy",
     "Metadata",
+    "FunctionalTree"
 ]

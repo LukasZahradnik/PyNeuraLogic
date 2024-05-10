@@ -5,6 +5,7 @@ import numpy as np
 from neuralogic.core.constructs.predicate import Predicate
 from neuralogic.core.constructs import rule, factories
 from neuralogic.core.constructs.function import Transformation, Combination
+from neuralogic.core.constructs.function.tree import FunctionalTree
 
 
 class BaseRelation:
@@ -26,6 +27,20 @@ class BaseRelation:
             self.terms = []
         elif not isinstance(self.terms, Iterable):
             self.terms = [self.terms]
+
+    def __add__(self, other):
+        n = FunctionalTree()
+        n.operation = Combination.SUM
+        n.left_value = self
+        n.right_value = other
+        return n
+
+    def __mul__(self, other):
+        n = FunctionalTree()
+        n.operation = Combination.PRODUCT
+        n.left_value = self
+        n.right_value = other
+        return n
 
     def __neg__(self) -> "BaseRelation":
         return self.attach_activation_function(Transformation.REVERSE)
@@ -76,9 +91,22 @@ class BaseRelation:
         if self.predicate.hidden or self.predicate.special:
             raise ValueError(f"Special/Hidden relation {self} cannot have learnable parameters.")
         return WeightedRelation(item, self.predicate, False, self.terms, self.function)
-
-    def __le__(self, other: Union[Iterable["BaseRelation"], "BaseRelation"]) -> rule.Rule:
-        return rule.Rule(self, other)
+        
+    def __le__(self, other: Union[Iterable["BaseRelation"], "BaseRelation", "FunctionalTree"]) -> rule.Rule:
+        if isinstance(other, BaseRelation) or isinstance(other, Iterable):
+            print(f"other: {other}")
+            return rule.Rule(self, other)
+        elif isinstance(other, FunctionalTree):
+            metadata = other.create_metadata()
+            leaves = other.get_leaves()
+            if len(leaves) > 0:
+                if isinstance(leaves[0], list):
+                    leaves = leaves[0]
+            print(f"leaves: {leaves}")
+            new_rule = rule.Rule(self, leaves) | metadata
+            return new_rule
+        else:
+            raise Exception(f"Operation '<=' called on unknown structure.")
 
     def to_str(self, end=False) -> str:
         end = "." if end else ""
