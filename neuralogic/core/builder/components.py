@@ -254,7 +254,7 @@ class GroundedDataset:
         self._to_list()
         return len(self._groundings_list)
 
-    def neuralize(self, progress: bool):
+    def neuralize(self, *, progress: bool = False):
         if self._groundings_list is not None:
             return self._builder.neuralize(self._groundings.stream(), progress, len(self))
         if progress:
