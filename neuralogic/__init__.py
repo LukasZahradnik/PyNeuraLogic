@@ -138,6 +138,7 @@ def initialize(
     max_memory_size: Optional[int] = None,
     log_handler: Optional[LogHandler] = None,
     jar_path: Optional[str] = None,
+    started_check: bool = True,
 ):
     """
     Initialize the NeuraLogic backend. This function is called implicitly when needed and should be called
@@ -163,11 +164,15 @@ def initialize(
         The handler for logging
     jar_path: Optional[str]
         The path to NeuraLogic java backend
+    started_check: bool
+        Whether to check if the NeuraLogic has been started. If true and it has been started - raise an Exception
     """
     global _is_initialized
 
-    if _is_initialized:
+    if _is_initialized and started_check:
         raise Exception("NeuraLogic already initialized")
+    if _is_initialized:
+        return
 
     if seed is not None:
         manual_seed(seed)
