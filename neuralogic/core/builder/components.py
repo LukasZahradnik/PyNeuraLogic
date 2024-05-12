@@ -218,7 +218,7 @@ class Grounding:
     def __init__(self, grounding):
         self.grounding = grounding
 
-    def draw_grounding(
+    def draw(
         self,
         filename: Optional[str] = None,
         show=True,
@@ -246,11 +246,11 @@ class GroundedDataset:
             self._groundings = self._groundings.collect(jpype.JClass("java.util.stream.Collectors").toList())
             self._groundings_list = [Grounding(g) for g in self._groundings]
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> Grounding:
         self._to_list()
         return self._groundings_list[item]
 
-    def __len__(self):
+    def __len__(self) -> int:
         self._to_list()
         return len(self._groundings_list)
 

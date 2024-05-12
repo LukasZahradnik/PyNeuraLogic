@@ -237,9 +237,15 @@ class JavaFactory:
     def get_query(self, query):
         variable_factory = self.get_variable_factory()
 
+        if query is None:
+            return None, None
+
         if not isinstance(query, self.rule_type):
             if not isinstance(query, Iterable):
                 query = [query]
+            if len(query) == 1 and query[0] is None:
+                return None, None
+
             return None, [self.get_valued_fact(relation, variable_factory, 1.0, True) for relation in query]
         return self.get_relation(query.head, variable_factory, True), [
             self.get_valued_fact(relation, variable_factory, True) for relation in query.body

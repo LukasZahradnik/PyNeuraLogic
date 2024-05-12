@@ -55,7 +55,7 @@ class DatasetBuilder:
                             for f in facts
                         ]
                     )
-            else:
+            elif facts is not None:
                 id = str(self.query_counter)
                 if len(facts) > 1:
                     one_query_per_example = False
@@ -63,6 +63,8 @@ class DatasetBuilder:
                 logic_samples.extend(
                     [self.logic_sample(f.getValue(), query_builder.createQueryAtom(id, f), True) for f in facts]
                 )
+            else:
+                logic_samples.append(None)
             self.query_counter += 1
         return logic_samples, one_query_per_example
 
@@ -211,7 +213,7 @@ class DatasetBuilder:
             grounded_dataset = self.ground_dataset(
                 dataset, settings, batch_size=batch_size, learnable_facts=learnable_facts
             )
-        return BuiltDataset(grounded_dataset.neuralize(progress), batch_size)
+        return BuiltDataset(grounded_dataset.neuralize(progress=progress), batch_size)
 
     @staticmethod
     def merge_queries_with_examples(queries, examples, one_query_per_example, example_queries=True):
@@ -227,6 +229,9 @@ class DatasetBuilder:
         if len(examples) == 1:
             logic_samples = []
             for query in queries:
+                if query is None:
+                    logic_samples.append(examples[0])
+                    continue
                 example = examples[0] if query.query.evidence is None else query
                 query_object = query if query.isQueryOnly else examples[0]
                 query_object.query.evidence = example.query.evidence
@@ -243,6 +248,9 @@ class DatasetBuilder:
             logic_samples = []
 
             for query, example in zip(queries, examples):
+                if query is None:
+                    logic_samples.append(example)
+                    continue
                 example_object = example if query.query.evidence is None else query
                 query_object = query if query.isQueryOnly else example
                 query_object.query.evidence = example_object.query.evidence
