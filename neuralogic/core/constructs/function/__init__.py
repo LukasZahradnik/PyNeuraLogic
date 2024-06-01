@@ -1,3 +1,5 @@
+from typing import Dict
+
 import jpype
 
 from neuralogic.core.constructs.function.concat import ConcatComb, Concat
@@ -73,10 +75,10 @@ class CombinationWrap:
             yield self.right
 
     def to_combination(self) -> Combination:
-        combination_graph, _ = self._get_combination_node()
+        combination_graph = self._get_combination_node({}, 0)
         return MixedCombination(name=self.to_str(), combination_graph=combination_graph)
 
-    def _get_combination_node(self, input_counter: int = 0):
+    def _get_combination_node(self, input_counter: Dict[int, int], start_index: int = 0):
         left_node = None
         right_node = None
 
@@ -84,23 +86,22 @@ class CombinationWrap:
         right_index = -1
 
         if isinstance(self.left, CombinationWrap):
-            left_node, input_counter = self.left._get_combination_node(input_counter)
+            left_node = self.left._get_combination_node(input_counter)
         else:
-            left_index = input_counter
-            input_counter += 1
+            if id(self.left) not in input_counter:
+                input_counter[id(self.left)] = len(input_counter) + start_index
+            left_index = input_counter[id(self.left)]
 
         if isinstance(self.right, CombinationWrap):
-            right_node, input_counter = self.right._get_combination_node(input_counter)
+            right_node = self.right._get_combination_node(input_counter)
         else:
-            right_index = input_counter
-            input_counter += 1
+            if id(self.right) not in input_counter:
+                input_counter[id(self.right)] = len(input_counter) + start_index
+            right_index = input_counter[id(self.right)]
 
         class_name = "cz.cvut.fel.ida.algebra.functions.combination.MixedCombination.MixedCombinationNode"
 
-        return (
-            jpype.JClass(class_name)(self.combination.get(), left_node, right_node, left_index, right_index),
-            input_counter,
-        )
+        return jpype.JClass(class_name)(self.combination.get(), left_node, right_node, left_index, right_index)
 
     def to_str(self):
         return self.__str__()

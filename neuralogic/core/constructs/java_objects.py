@@ -308,7 +308,16 @@ class JavaFactory:
         else:
             java_rule.setWeight(weight)
 
-        body_relation = [self.get_relation(relation, variable_factory) for relation in rule.body]
+        if isinstance(rule.body, CombinationWrap):
+            processed_relations = {}
+            body_relation = []
+            for relation in rule.body:
+                if id(relation) in processed_relations:
+                    continue
+                body_relation.append(self.get_relation(relation, variable_factory))
+                processed_relations[id(relation)] = True
+        else:
+            body_relation = [self.get_relation(relation, variable_factory) for relation in rule.body]
         body_relation_list = jpype.java.util.ArrayList(body_relation)
 
         java_rule.setHead(self.head_atom(head_relation))
