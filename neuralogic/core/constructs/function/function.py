@@ -1,3 +1,6 @@
+import jpype
+
+
 class Function:
     __slots__ = ("name",)
 
@@ -82,6 +85,16 @@ class Combination(Function):
     CROSSSUM: "Combination"
     CONCAT: "Combination"
     COSSIM: "Combination"
+
+    def get(self):
+        name = self.name.capitalize()
+
+        if name in ("Sum", "Max", "Min", "Avg", "Count"):
+            return jpype.JClass(f"cz.cvut.fel.ida.algebra.functions.aggregation.{name}")()
+        if name == "Elproduct":
+            name = "ElementProduct"
+
+        return jpype.JClass(f"cz.cvut.fel.ida.algebra.functions.combination.{name}")()
 
 
 class Aggregation(Function):

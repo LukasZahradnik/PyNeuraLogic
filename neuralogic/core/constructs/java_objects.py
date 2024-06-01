@@ -5,6 +5,7 @@ import numpy as np
 import jpype
 
 from neuralogic import is_initialized, initialize
+from neuralogic.core.constructs.function import CombinationWrap
 from neuralogic.core.constructs.term import Variable, Constant
 from neuralogic.core.settings import SettingsProxy, Settings
 
@@ -320,7 +321,12 @@ class JavaFactory:
         if rule.metadata is not None:
             java_rule.allowDuplicitGroundings = bool(rule.metadata.duplicit_grounding)
 
-        java_rule.setMetadata(self.get_metadata(rule.metadata, self.rule_metadata))
+        metadata = rule.metadata
+        if isinstance(rule.body, CombinationWrap):
+            metadata = metadata.copy()
+            metadata.combination = rule.body.to_combination()
+
+        java_rule.setMetadata(self.get_metadata(metadata, self.rule_metadata))
 
         return java_rule
 

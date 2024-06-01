@@ -1,5 +1,6 @@
 from typing import Iterable, Optional
 
+from neuralogic.core.constructs.function import CombinationWrap
 from neuralogic.core.constructs.metadata import Metadata
 
 
@@ -54,7 +55,10 @@ class Rule:
         if not isinstance(body, Iterable):
             body = [body]
 
-        self.body = list(body)
+        self.body = body
+
+        if not isinstance(self.body, CombinationWrap):
+            self.body = list(body)
 
         if self.is_ellipsis_templated():
             variable_set = {term for term in head.terms if term is not Ellipsis and str(term)[0].isupper()}
@@ -86,12 +90,12 @@ class Rule:
                     self.body[atom_index] = Relation.special.alldiff(*new_terms)
 
     def is_ellipsis_templated(self) -> bool:
-        for body_atom in self.body:
-            if not body_atom.predicate.special or body_atom.predicate.name != "alldiff":
-                continue
-            for term in body_atom.terms:
-                if term is Ellipsis:
-                    return True
+        # for body_atom in self.body:
+        #     if not body_atom.predicate.special or body_atom.predicate.name != "alldiff":
+        #         continue
+        #     for term in body_atom.terms:
+        #         if term is Ellipsis:
+        #             return True
         return False
 
     def to_str(self, _: bool = False) -> str:
