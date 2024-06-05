@@ -5,7 +5,7 @@ import numpy as np
 import jpype
 
 from neuralogic import is_initialized, initialize
-from neuralogic.core.constructs.function import CombinationWrap
+from neuralogic.core.constructs.function import FContainer
 from neuralogic.core.constructs.term import Variable, Constant
 from neuralogic.core.settings import SettingsProxy, Settings
 
@@ -308,7 +308,7 @@ class JavaFactory:
         else:
             java_rule.setWeight(weight)
 
-        if isinstance(rule.body, CombinationWrap):
+        if isinstance(rule.body, FContainer):
             processed_relations = {}
             body_relation = []
             for relation in rule.body:
@@ -331,9 +331,9 @@ class JavaFactory:
             java_rule.allowDuplicitGroundings = bool(rule.metadata.duplicit_grounding)
 
         metadata = rule.metadata
-        if isinstance(rule.body, CombinationWrap):
+        if isinstance(rule.body, FContainer):
             metadata = metadata.copy()
-            metadata.combination = rule.body.to_combination()
+            metadata.combination = rule.body.to_function()
 
         java_rule.setMetadata(self.get_metadata(metadata, self.rule_metadata))
 

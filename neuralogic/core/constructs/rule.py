@@ -1,6 +1,6 @@
 from typing import Iterable, Optional
 
-from neuralogic.core.constructs.function import CombinationWrap
+from neuralogic.core.constructs.function import FContainer
 from neuralogic.core.constructs.metadata import Metadata
 
 
@@ -57,7 +57,7 @@ class Rule:
 
         self.body = body
 
-        if not isinstance(self.body, CombinationWrap):
+        if not isinstance(self.body, FContainer):
             self.body = list(body)
 
         if self.is_ellipsis_templated():

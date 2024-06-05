@@ -4,7 +4,7 @@ import numpy as np
 
 from neuralogic.core.constructs.predicate import Predicate
 from neuralogic.core.constructs import rule, factories
-from neuralogic.core.constructs.function import Transformation, Combination, CombinationWrap
+from neuralogic.core.constructs.function import Transformation, Combination, FContainer
 
 
 class BaseRelation:
@@ -127,13 +127,13 @@ class BaseRelation:
         raise NotImplementedError
 
     def __add__(self, other):
-        return CombinationWrap(self, other, Combination.SUM)
+        return FContainer((self, other), Combination.SUM)
 
     def __mul__(self, other):
-        return CombinationWrap(self, other, Combination.ELPRODUCT)
+        return FContainer((self, other), Combination.ELPRODUCT)
 
     def __matmul__(self, other):
-        return CombinationWrap(self, other, Combination.PRODUCT)
+        return FContainer((self, other), Combination.PRODUCT)
 
 
 class WeightedRelation(BaseRelation):
