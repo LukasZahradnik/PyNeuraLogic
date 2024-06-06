@@ -68,22 +68,43 @@ class FContainer:
         return FunctionGraph(name=self.name, function_graph=graph)
 
     def _get_function_node(self, input_counter: Dict[int, int], start_index: int = 0):
+        from neuralogic.core.constructs.relation import BaseRelation
+
         next_indices = [-1] * len(self.nodes)
         next_nodes = [None] * len(self.nodes)
 
         for i, node in enumerate(self.nodes):
             if isinstance(node, FContainer):
-                next_nodes[i] = node._get_function_node(input_counter)
-            else:
+                next_node = node._get_function_node(input_counter)
+                if next_node is None:
+                    continue
+                next_nodes[i] = next_node
+            elif isinstance(node, BaseRelation):
                 idx = id(node)
+
+                if node.predicate.hidden or node.predicate.special or node.predicate.name.startswith("_"):
+                    continue
 
                 if idx not in input_counter:
                     input_counter[idx] = len(input_counter) + start_index
                 next_indices[i] = input_counter[idx]
+            else:
+                raise ValueError(f"{node} of type {type(node)} inside of body function is not supported")
+
+        filtered_next_node = []
+        filtered_next_indices = []
+
+        for i, (node, index) in enumerate(zip(next_nodes, next_indices)):
+            if node is not None or index != -1:
+                filtered_next_node.append(node)
+                filtered_next_indices.append(index)
+
+        if not filtered_next_node or not filtered_next_indices:
+            return None
 
         class_name = "cz.cvut.fel.ida.algebra.functions.combination.FunctionGraph.FunctionGraphNode"
 
-        return jpype.JClass(class_name)(self.function.get(), next_nodes, next_indices)
+        return jpype.JClass(class_name)(self.function.get(), filtered_next_node, filtered_next_indices)
 
     def to_str(self):
         return self.__str__()
