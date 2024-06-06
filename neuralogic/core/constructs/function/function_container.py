@@ -23,6 +23,17 @@ class FContainer:
         return FContainer((self, other), Combination.PRODUCT)
 
     def __str__(self):
+        if self.function.operator is not None:
+            return f" {self.function.operator} ".join(node.to_str() for node in self.nodes)
+
+        args = ", ".join(node.to_str() for node in self.nodes)
+
+        if args:
+            return f"{self.function}({args})"
+        return f"{self.function}"
+
+    @property
+    def name(self):
         args = ", ".join(node.to_str() for node in self.nodes if isinstance(node, FContainer))
 
         if args:
@@ -39,7 +50,7 @@ class FContainer:
 
     def to_function(self) -> Function:
         graph = self._get_function_node({}, 0)
-        return FunctionGraph(name=self.to_str(), function_graph=graph)
+        return FunctionGraph(name=self.name, function_graph=graph)
 
     def _get_function_node(self, input_counter: Dict[int, int], start_index: int = 0):
         next_indices = [-1] * len(self.nodes)

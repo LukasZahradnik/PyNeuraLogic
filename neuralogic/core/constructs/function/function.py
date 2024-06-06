@@ -1,11 +1,14 @@
+from typing import Optional
+
 import jpype
 
 
 class Function:
-    __slots__ = ("name",)
+    __slots__ = "name", "operator"
 
     def __init__(self, name: str):
         self.name: str = name.lower()
+        self.operator: Optional[str] = None
 
     def __str__(self):
         return self.name

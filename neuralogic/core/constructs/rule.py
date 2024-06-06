@@ -60,7 +60,7 @@ class Rule:
         if not isinstance(self.body, FContainer):
             self.body = list(body)
 
-        if self.is_ellipsis_templated():
+        if self._is_ellipsis_templated():
             variable_set = {term for term in head.terms if term is not Ellipsis and str(term)[0].isupper()}
 
             for body_atom in self.body:
@@ -89,7 +89,7 @@ class Rule:
                 if found_replacement:
                     self.body[atom_index] = Relation.special.alldiff(*new_terms)
 
-    def is_ellipsis_templated(self) -> bool:
+    def _is_ellipsis_templated(self) -> bool:
         # for body_atom in self.body:
         #     if not body_atom.predicate.special or body_atom.predicate.name != "alldiff":
         #         continue
@@ -103,6 +103,8 @@ class Rule:
 
     def __str__(self) -> str:
         metadata = "" if self.metadata is None is None else f" {self.metadata}"
+        if isinstance(self.body, FContainer):
+            return f"{self.head.to_str()} :- {self.body.to_str()}.{metadata}"
         return f"{self.head.to_str()} :- {', '.join(atom.to_str() for atom in self.body)}.{metadata}"
 
     def __repr__(self) -> str:

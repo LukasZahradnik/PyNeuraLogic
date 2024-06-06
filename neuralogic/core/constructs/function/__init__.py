@@ -21,6 +21,10 @@ for function_name in Combination.__annotations__:
 
 Combination.CONCAT = ConcatComb("CONCAT")
 
+Combination.SUM.operator = "+"
+Combination.ELPRODUCT.operator = "*"
+Combination.PRODUCT.operator = "@"
+
 
 for function_name in Aggregation.__annotations__:
     setattr(Aggregation, function_name, Aggregation(function_name))
