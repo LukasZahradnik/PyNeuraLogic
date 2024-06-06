@@ -15,9 +15,9 @@ class ConcatComb(Combination):
         super().__init__(name)
         self.axis = axis
 
-    def __call__(self, entity=None, *, axis: int = -1):
+    def __call__(self, *entities, axis: int = -1):
         concat = ConcatComb(self.name, axis=axis)
-        return Combination.__call__(concat, entity)
+        return Combination.__call__(concat, *entities)
 
     def is_parametrized(self) -> bool:
         return self.axis != -1
