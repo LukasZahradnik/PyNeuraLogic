@@ -11,7 +11,22 @@ class FContainer:
 
     def __init__(self, nodes, function: Function):
         self.function = function
-        self.nodes = nodes
+
+        if self.function.is_parametrized():
+            self.nodes = nodes
+            return
+
+        new_nodes = []
+        for node in nodes:
+            if not isinstance(node, FContainer):
+                new_nodes.append(node)
+                continue
+
+            if node.function.name == function.name:
+                new_nodes.extend(node.nodes)
+            else:
+                new_nodes.append(node)
+        self.nodes = tuple(new_nodes)
 
     def __add__(self, other):
         return FContainer((self, other), Combination.SUM)
