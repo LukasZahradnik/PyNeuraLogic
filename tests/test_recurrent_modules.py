@@ -2,12 +2,12 @@ import numpy as np
 import pytest
 import torch
 
-from neuralogic.core import Template, Settings, R
+from neuralogic.core import Template, Settings, R, Transformation
 from neuralogic.dataset import Dataset, Sample
 from neuralogic.nn.loss import MSE
 
 from neuralogic.nn.module import GRU, RNN, LSTM
-from neuralogic.optim import Adam
+from neuralogic.optim import Adam, SGD
 
 
 @pytest.mark.parametrize(
@@ -279,7 +279,7 @@ def test_rnn_custom(input_size, hidden_size, sequence_len, epochs):
     h0 = torch.tensor([[0.0]])
     target = torch.tensor([[1.0]])
 
-    rnn = torch.nn.RNN(input_size, hidden_size, 1, bias=False, nonlinearity='relu')
+    rnn = torch.nn.RNN(input_size, hidden_size, 1, bias=False, nonlinearity="relu")
 
     template = Template()
     template += RNN(input_size, hidden_size, "h", "f", "h0", arity=0, activation=Transformation.RELU)
@@ -296,7 +296,6 @@ def test_rnn_custom(input_size, hidden_size, sequence_len, epochs):
     parameters["weights"][0] = torch_parameters[0]
     parameters["weights"][1] = torch_parameters[1]
     model.load_state_dict(parameters)
-    # template.draw()
 
     dataset = Dataset(
         [
@@ -311,7 +310,6 @@ def test_rnn_custom(input_size, hidden_size, sequence_len, epochs):
     )
 
     bd = model.build_dataset(dataset)
-    # bd.samples[0].draw(filename="sample0.png")
 
     optimizer = torch.optim.SGD(rnn.parameters(), lr=0.001)
     loss_fun = torch.nn.MSELoss()
@@ -324,5 +322,5 @@ def test_rnn_custom(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model(bd.samples)
+        result, _ = model.train(bd, epochs=1)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
