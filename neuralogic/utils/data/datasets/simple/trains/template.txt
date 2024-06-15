@@ -1,34 +1,41 @@
-shape(X, Y) :- {1} shape(X, Y, ellipse).
-shape(X, Y) :- {1} shape(X, Y, rectangle).
-shape(X, Y) :- {1} shape(X, Y, bucket).
-shape(X, Y) :- {1} shape(X, Y, hexagon).
-shape(X, Y) :- {1} shape(X, Y, u_shaped).
+shape(X, Y) :- {1} shape(X, Y, ellipse). [activation=tanh]
+shape(X, Y) :- {1} shape(X, Y, rectangle). [activation=tanh]
+shape(X, Y) :- {1} shape(X, Y, bucket). [activation=tanh]
+shape(X, Y) :- {1} shape(X, Y, hexagon). [activation=tanh]
+shape(X, Y) :- {1} shape(X, Y, u_shaped). [activation=tanh]
+shape / 2 [activation=tanh]
 
-length(X, Y) :- {1} length(X, Y, short).
-length(X, Y) :- {1} length(X, Y, long).
+length(X, Y) :- {1} length(X, Y, short). [activation=tanh]
+length(X, Y) :- {1} length(X, Y, long). [activation=tanh]
+length / 2 [activation=tanh]
 
-sides(X, Y) :- {1} sides(X, Y, not_double).
-sides(X, Y) :- {1} sides(X, Y, double).
+sides(X, Y) :- {1} sides(X, Y, not_double). [activation=tanh]
+sides(X, Y) :- {1} sides(X, Y, double). [activation=tanh]
+sides / 2 [activation=tanh]
 
-roof(X, Y) :- {1} roof(X, Y, jagged).
-roof(X, Y) :- {1} roof(X, Y, arc).
-roof(X, Y) :- {1} roof(X, Y, none).
-roof(X, Y) :- {1} roof(X, Y, flat).
-roof(X, Y) :- {1} roof(X, Y, peaked).
+roof(X, Y) :- {1} roof(X, Y, jagged). [activation=tanh]
+roof(X, Y) :- {1} roof(X, Y, arc). [activation=tanh]
+roof(X, Y) :- {1} roof(X, Y, none). [activation=tanh]
+roof(X, Y) :- {1} roof(X, Y, flat). [activation=tanh]
+roof(X, Y) :- {1} roof(X, Y, peaked). [activation=tanh]
+roof / 2 [activation=tanh]
 
-wheels(X, Y) :- {1} wheels(X, Y, 2).
-wheels(X, Y) :- {1} wheels(X, Y, 3).
+wheels(X, Y) :- {1} wheels(X, Y, 2). [activation=tanh]
+wheels(X, Y) :- {1} wheels(X, Y, 3). [activation=tanh]
+wheels / 2 [activation=tanh]
 
-loadnum(X, Y) :- {1} loadnum(X, Y, 0).
-loadnum(X, Y) :- {1} loadnum(X, Y, 1).
-loadnum(X, Y) :- {1} loadnum(X, Y, 2).
-loadnum(X, Y) :- {1} loadnum(X, Y, 3).
+loadnum(X, Y) :- {1} loadnum(X, Y, 0). [activation=tanh]
+loadnum(X, Y) :- {1} loadnum(X, Y, 1). [activation=tanh]
+loadnum(X, Y) :- {1} loadnum(X, Y, 2). [activation=tanh]
+loadnum(X, Y) :- {1} loadnum(X, Y, 3). [activation=tanh]
+loadnum / 2 [activation=tanh]
 
-loadshape(X, Y) :- {1} loadshape(X, Y, hexagon).
-loadshape(X, Y) :- {1} loadshape(X, Y, triangle).
-loadshape(X, Y) :- {1} loadshape(X, Y, diamond).
-loadshape(X, Y) :- {1} loadshape(X, Y, rectangle).
-loadshape(X, Y) :- {1} loadshape(X, Y, circle).
+loadshape(X, Y) :- {1} loadshape(X, Y, hexagon). [activation=tanh]
+loadshape(X, Y) :- {1} loadshape(X, Y, triangle). [activation=tanh]
+loadshape(X, Y) :- {1} loadshape(X, Y, diamond). [activation=tanh]
+loadshape(X, Y) :- {1} loadshape(X, Y, rectangle). [activation=tanh]
+loadshape(X, Y) :- {1} loadshape(X, Y, circle). [activation=tanh]
+loadshape / 2 [activation=tanh]
 
 vagon(X, Y) :-
     {1} shape(X, Y),
@@ -37,11 +44,14 @@ vagon(X, Y) :-
     {1} wheels(X, Y),
     {1} loadnum(X, Y),
     {1} loadshape(X, Y),
-    {1} roof(X, Y).
+    {1} roof(X, Y). [activation=tanh]
+vagon / 2 [activation=tanh]
 
-train(X) :- {1} vagon(X, 1).
-train(X) :- {1} vagon(X, 2).
-train(X) :- {1} vagon(X, 3).
-train(X) :- {1} vagon(X, 4).
+train(X) :- {1} vagon(X, 1). [activation=tanh]
+train(X) :- {1} vagon(X, 2). [activation=tanh]
+train(X) :- {1} vagon(X, 3). [activation=tanh]
+train(X) :- {1} vagon(X, 4). [activation=tanh]
+train / 1 [activation=tanh]
 
-direction(X) :- {1} train(X).
+direction(X) :- {1} train(X). [activation=tanh]
+direction / 1 [activation=tanh]

@@ -248,14 +248,13 @@ import pytest
 def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expected_results: List[float]) -> None:
     """Tests for running java evaluator on files"""
     manual_seed(0)
-    settings = Settings(optimizer=SGD(0.1), epochs=50, iso_value_compression=False, chain_pruning=False)
+    settings = Settings(optimizer=SGD(0.1), epochs=50)
 
     evaluator = get_evaluator(template, settings)
 
     built_dataset = evaluator.build_dataset(dataset)
     evaluator.train(built_dataset, generator=False)
 
-    built_dataset.samples[0].draw("xxd.svg", img_type="svg")
     results = []
     for predicted in evaluator.test(built_dataset):
         results.append(round(predicted, 3))
