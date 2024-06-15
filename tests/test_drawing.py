@@ -18,7 +18,7 @@ def test_draw_sample():
     model = template.build(Settings())
 
     built_dataset = model.build_dataset(dataset)
-    result = draw_sample(built_dataset.samples[0], show=False)
+    result = draw_sample(built_dataset[0], show=False)
 
     assert isinstance(result, bytes)
     assert len(result) > 0
@@ -29,7 +29,7 @@ def test_draw_sample_from_raw_sample():
     model = template.build(Settings())
 
     built_dataset = model.build_dataset(dataset)
-    result = built_dataset.samples[0].draw(show=False)
+    result = built_dataset[0].draw(show=False)
 
     assert isinstance(result, bytes)
     assert len(result) > 0

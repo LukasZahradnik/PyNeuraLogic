@@ -2,14 +2,16 @@ from typing import Optional, Union, Callable, Dict, Any, Set, Collection, List, 
 import json
 
 import jpype
+import torch
 
 from neuralogic import is_initialized, initialize
 from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core.builder.components import BuiltDataset, GroundedDataset
-from neuralogic.core.result import Results, Result
+from neuralogic.core.network_output import PyNeuraLogicNetworkOutput
 from neuralogic.core.settings.settings_proxy import SettingsProxy
+from neuralogic.core.tensor import NeuralogicOptTensor
 from neuralogic.dataset import Dataset
 from neuralogic.dataset.base import BaseDataset
 
@@ -25,8 +27,6 @@ class NeuralModule:
             initialize()
 
         self._need_sync = False
-
-        self._number_format = jpype.JClass("cz.cvut.fel.ida.setup.Settings").superDetailedNumberFormat
         self._value_factory = ValueFactory()
 
         @jpype.JImplements(
@@ -56,6 +56,9 @@ class NeuralModule:
         self._invalidation = None
         self._evaluation = None
         self._backpropagation = None
+
+        self._weight_updater = None
+        self._tensor_parameters = None
 
     def ground(
         self,
@@ -87,37 +90,41 @@ class NeuralModule:
             progress=progress,
         )
 
-    def __call__(self, dataset=None) -> Union[Results, Result]:
+    def __call__(self, dataset=None) -> torch.Tensor:
         self._set_hooks()
         samples, _ = self._dataset_to_samples(dataset)
+        sample_collection = samples
 
-        if isinstance(samples, Collection):
-            results = []
+        if not isinstance(samples, Collection):
+            sample_collection = [samples]
 
-            for sample in samples:
-                self._trainer.invalidateSample(self._invalidation, sample._java_sample)
+        for sample in sample_collection:
+            self._trainer.invalidateSample(self._invalidation, sample._java_sample)
 
-                results.append(
-                    Result(
-                        self._trainer.evaluateSample(self._evaluation, sample._java_sample),
-                        sample._java_sample,
-                        self,
-                        self._number_format,
-                    )
-                )
-            return Results(results)
+        results = [
+            self._value_factory.from_java(
+                self._trainer.evaluateSample(self._evaluation, sample._java_sample).getOutput(),
+                SettingsProxy.number_format(),
+            )
+            for sample in sample_collection
+        ]
 
-        sample = samples
-        self._trainer.invalidateSample(self._invalidation, sample._java_sample)
-        result = self._trainer.evaluateSample(self._evaluation, sample._java_sample)
+        if not isinstance(samples, Collection):
+            return PyNeuraLogicNetworkOutput.apply(
+                samples, self, torch.tensor(results[0], dtype=torch.float, requires_grad=True)
+            )
+        return PyNeuraLogicNetworkOutput.apply(
+            samples, self, torch.tensor(results, dtype=torch.float, requires_grad=True)
+        )
 
-        return Result(result, sample._java_sample, self, self._number_format)
-
-    def forward(self, dataset) -> Union[Results, Result]:
+    def forward(self, dataset) -> torch.Tensor:
         return self(dataset)
 
     def train(self, dataset, epochs: int = 1) -> Tuple[Value, int]:
-        return self._train_test(dataset, True, epochs)
+        res = self._train_test(dataset, True, epochs)
+        self._update_tensor_parameters()
+
+        return res
 
     def test(self, dataset, epochs: int = 1) -> Value:
         return self._train_test(dataset, False, epochs)
@@ -161,8 +168,34 @@ class NeuralModule:
             "weight_names": weight_names,
         }
 
+    def tensor_parameters(self) -> List[NeuralogicOptTensor]:
+        if self._tensor_parameters is None:
+            self._tensor_parameters = [
+                NeuralogicOptTensor.create(
+                    weight,
+                    ValueFactory.from_java(weight.value, SettingsProxy.number_format()),
+                    self._weight_updater,
+                    self._value_factory,
+                    SettingsProxy.number_format(),
+                )
+                for weight in self._neural_model.getAllWeights()
+                if weight.isLearnable
+            ]
+
+        return list(self._tensor_parameters)
+
+    def _update_tensor_parameters(self):
+        if self._tensor_parameters is None:
+            return
+
+        for param in self._tensor_parameters:
+            param.data = torch.tensor(
+                ValueFactory.from_java(param._neuralogic_weight.value, SettingsProxy.number_format())
+            )
+
     def load_state_dict(self, state_dict: Dict):
         self._sync_template(state_dict, self._neural_model.getAllWeights())
+        self._update_tensor_parameters()
 
     def draw(
         self,
@@ -233,6 +266,7 @@ class NeuralModule:
         self._invalidation = self._trainer.getInvalidation()
         self._evaluation = self._trainer.getEvaluation()
         self._backpropagation = self._trainer.getBackpropagation()
+        self._weight_updater = self._backpropagation.weightUpdater
 
         self.reset_parameters()
 
@@ -243,10 +277,10 @@ class NeuralModule:
     def _dataset_to_samples(self, dataset):
         if isinstance(dataset, Dataset):
             dataset = self.build_dataset(dataset)
-            return dataset.samples, dataset.batch_size
+            return dataset._samples, dataset._batch_size
 
         if isinstance(dataset, BuiltDataset):
-            return dataset.samples, dataset.batch_size
+            return dataset._samples, dataset._batch_size
         return dataset, 1
 
     def _set_hooks(self):
