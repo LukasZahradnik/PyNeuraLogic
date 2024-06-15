@@ -2,9 +2,8 @@ import torch
 from torch.nn import Sequential
 
 import neuralogic
-from neuralogic.core import Relation, Template, R
+from neuralogic.core import Relation, Template, R, F
 from neuralogic.nn.torch_function import NeuraLogic
-import neuralogic.nn.functional as F
 
 
 def test_torch_function_with_parameters():
@@ -30,11 +29,7 @@ def test_torch_function_with_parameters():
         torch.nn.Tanh(),
         NeuraLogic(
             template,
-            [
-                R.xy[
-                    8,
-                ]
-            ],
+            [R.xy[8,]],
             R.xor,
             to_logic,
         ),
@@ -83,11 +78,7 @@ def test_torch_function_without_parameters():
         torch.nn.Tanh(),
         NeuraLogic(
             template,
-            [
-                R.xy[
-                    8,
-                ]
-            ],
+            [R.xy[8,]],
             R.xor,
             to_logic,
         ),

@@ -3,8 +3,8 @@ import pytest
 import torch
 import numpy as np
 
-import neuralogic.nn.functional as F
 from neuralogic.core import Template, R, Settings
+from neuralogic.core import F
 from neuralogic.dataset import Dataset, Sample
 
 

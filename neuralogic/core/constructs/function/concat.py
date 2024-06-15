@@ -3,7 +3,7 @@ import jpype
 from neuralogic.core.constructs.function.function import AggregationFunction, CombinationFunction
 
 
-class ConcatComb(CombinationFunction):
+class ConcatCombination(CombinationFunction):
     __slots__ = ("axis",)
 
     def __init__(
@@ -16,7 +16,7 @@ class ConcatComb(CombinationFunction):
         self.axis = axis
 
     def __call__(self, *entities, axis: int = -1):
-        concat = ConcatComb(self.name, axis=axis)
+        concat = ConcatCombination(self.name, axis=axis)
         return CombinationFunction.__call__(concat, *entities)
 
     def is_parametrized(self) -> bool:
@@ -31,7 +31,7 @@ class ConcatComb(CombinationFunction):
         return f"concat(axis={self.axis})"
 
 
-class Concat(AggregationFunction):
+class ConcatAggregation(AggregationFunction):
     __slots__ = ("axis",)
 
     def __init__(
@@ -44,7 +44,7 @@ class Concat(AggregationFunction):
         self.axis = axis
 
     def __call__(self, entity=None, *, axis: int = -1):
-        concat = Concat(self.name, axis=axis)
+        concat = ConcatAggregation(self.name, axis=axis)
         return AggregationFunction.__call__(concat, entity)
 
     def is_parametrized(self) -> bool:

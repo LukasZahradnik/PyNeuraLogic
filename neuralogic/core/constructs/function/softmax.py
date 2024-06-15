@@ -5,7 +5,7 @@ import jpype
 from neuralogic.core.constructs.function.function import AggregationFunction
 
 
-class Softmax(AggregationFunction):
+class SoftmaxAggregation(AggregationFunction):
     __slots__ = ("agg_terms", "var_terms")
 
     def __init__(
@@ -19,7 +19,7 @@ class Softmax(AggregationFunction):
         self.agg_terms = agg_terms
 
     def __call__(self, entity=None, *, agg_terms: Sequence[int] = None):
-        softmax = Softmax(self.name, agg_terms=agg_terms)
+        softmax = SoftmaxAggregation(self.name, agg_terms=agg_terms)
         return AggregationFunction.__call__(softmax, entity)
 
     def is_parametrized(self) -> bool:
@@ -36,7 +36,7 @@ class Softmax(AggregationFunction):
     def rule_head_dependant(self) -> bool:
         return self.agg_terms is not None
 
-    def process_head(self, head) -> "Softmax":
+    def process_head(self, head) -> "SoftmaxAggregation":
         term_indices = []
 
         for agg_term in set(self.agg_terms):
@@ -48,7 +48,7 @@ class Softmax(AggregationFunction):
                     term_indices.append(i)
                     break
 
-        aggregation = Softmax(self.name, agg_terms=self.agg_terms)
+        aggregation = SoftmaxAggregation(self.name, agg_terms=self.agg_terms)
         aggregation.term_indices = term_indices
 
         return aggregation
