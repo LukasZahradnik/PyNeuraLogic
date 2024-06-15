@@ -27,7 +27,5 @@ jobs:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
-        touch neuralogic/__version__.py
-        echo "__version__ = \"${GITHUB_REF:10}\"" >> neuralogic/__version__.py
         python setup.py sdist bdist_wheel
         twine upload dist/*

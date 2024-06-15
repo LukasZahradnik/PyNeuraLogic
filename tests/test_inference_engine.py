@@ -74,8 +74,8 @@ def test_inference_engine_london() -> None:
     # Should yield two substitutions for x (green_park and bond_street)
     substitutions = list(engine.q(R.nearby(V.X, C.oxford_circus)))
 
-    assert substitutions[0]["X"] == "green_park"
-    assert substitutions[1]["X"] == "bond_street"
+    assert substitutions[0]["X"] == "bond_street"
+    assert substitutions[1]["X"] == "green_park"
     assert len(substitutions) == 2 and len(substitutions[0]) == 1 and len(substitutions[1]) == 1
 
     # Run query for nearby(X, tottenham_court_road)

@@ -5,6 +5,7 @@ import numpy as np
 import jpype
 
 from neuralogic import is_initialized, initialize
+from neuralogic.core.constructs.term import Variable, Constant
 from neuralogic.core.settings import SettingsProxy, Settings
 
 
@@ -128,6 +129,15 @@ class JavaFactory:
         return self.var_factory_class()
 
     def get_term(self, term, variable_factory):
+        if isinstance(term, Variable):
+            if term.type is None:
+                return variable_factory.construct(term.name)
+            return variable_factory.construct(term.name, term.type)
+        if isinstance(term, Constant):
+            if term.type is None:
+                return self.constant_factory.construct(term.name)
+            return self.constant_factory.construct(term.name, term.type)
+
         if isinstance(term, str):
             if term[0].islower() or term.isnumeric():
                 return self.constant_factory.construct(term)
@@ -227,9 +237,15 @@ class JavaFactory:
     def get_query(self, query):
         variable_factory = self.get_variable_factory()
 
+        if query is None:
+            return None, None
+
         if not isinstance(query, self.rule_type):
             if not isinstance(query, Iterable):
                 query = [query]
+            if len(query) == 1 and query[0] is None:
+                return None, None
+
             return None, [self.get_valued_fact(relation, variable_factory, 1.0, True) for relation in query]
         return self.get_relation(query.head, variable_factory, True), [
             self.get_valued_fact(relation, variable_factory, True) for relation in query.body

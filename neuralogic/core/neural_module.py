@@ -27,8 +27,6 @@ class NeuralModule:
             initialize()
 
         self._need_sync = False
-
-        self._number_format = jpype.JClass("cz.cvut.fel.ida.setup.Settings").superDetailedNumberFormat
         self._value_factory = ValueFactory()
 
         @jpype.JImplements(
@@ -163,7 +161,7 @@ class NeuralModule:
 
         for weight in weights:
             if weight.isLearnable:
-                weights_dict[weight.index] = ValueFactory.from_java(weight.value, self._number_format)
+                weights_dict[weight.index] = ValueFactory.from_java(weight.value, SettingsProxy.number_format())
                 weight_names[weight.index] = weight.name
         return {
             "weights": weights_dict,
@@ -175,10 +173,10 @@ class NeuralModule:
             self._tensor_parameters = [
                 NeuralogicOptTensor.create(
                     weight,
-                    ValueFactory.from_java(weight.value, self._number_format),
+                    ValueFactory.from_java(weight.value, SettingsProxy.number_format()),
                     self._weight_updater,
                     self._value_factory,
-                    self._number_format,
+                    SettingsProxy.number_format(),
                 )
                 for weight in self._neural_model.getAllWeights()
                 if weight.isLearnable
@@ -191,7 +189,9 @@ class NeuralModule:
             return
 
         for param in self._tensor_parameters:
-            param.data = torch.tensor(ValueFactory.from_java(param._neuralogic_weight.value, self._number_format))
+            param.data = torch.tensor(
+                ValueFactory.from_java(param._neuralogic_weight.value, SettingsProxy.number_format())
+            )
 
     def load_state_dict(self, state_dict: Dict):
         self._sync_template(state_dict, self._neural_model.getAllWeights())
