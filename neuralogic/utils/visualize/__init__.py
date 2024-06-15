@@ -104,7 +104,9 @@ def draw(drawer, obj, filename: Optional[str] = None, show=True, img_type="png",
 
             img = mpimg.imread(io.BytesIO(data), format=img_type)
             fig = plt.figure()
-            fig.canvas.set_window_title(kwargs.get("title", ""))
+
+            if hasattr(fig.canvas, "set_window_title"):
+                fig.canvas.set_window_title(kwargs.get("title", ""))
 
             ax = fig.add_axes([0, 0, 1, 1])
             ax.axis("off")

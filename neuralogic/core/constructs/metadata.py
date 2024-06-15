@@ -54,6 +54,20 @@ class Metadata:
     def __repr__(self) -> str:
         return self.__str__()
 
+    def combine(self, other: "Metadata") -> "Metadata":
+        return Metadata(
+            learnable=other.learnable if other.learnable is not None else self.learnable,
+            transformation=other.transformation if other.transformation is not None else self.transformation,
+            combination=other.combination if other.combination is not None else self.combination,
+            aggregation=other.aggregation if other.aggregation is not None else self.aggregation,
+            duplicit_grounding=other.duplicit_grounding
+            if other.duplicit_grounding is not None
+            else self.duplicit_grounding,
+        )
+
+    def __add__(self, other: "Metadata") -> "Metadata":
+        return self.combine(other)
+
     def copy(self) -> "Metadata":
         return Metadata(
             learnable=self.learnable,

@@ -18,8 +18,6 @@ class InferenceEngine:
         self.settings = Settings().create_disconnected_proxy() if settings is None else settings.create_proxy()
         self.java_factory = JavaFactory()
 
-        self.settings.settings.inferTemplateFacts = False
-
         self.parsed_template = template._get_parsed_template(self.settings, self.java_factory)
         self.dataset_builder = DatasetBuilder(self.parsed_template, self.java_factory)
 

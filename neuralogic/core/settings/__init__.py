@@ -31,6 +31,8 @@ class Settings:
         self.params.pop("self")
         self._proxies: weakref.WeakSet[SettingsProxy] = weakref.WeakSet()
 
+        self.kw_params = {}
+
     @property
     def iso_value_compression(self) -> bool:
         return self.params["iso_value_compression"]
@@ -139,10 +141,24 @@ class Settings:
         proxy = SettingsProxy(**self.params)
         self._proxies.add(proxy)
 
+        for k, v in self.kw_params.items():
+            proxy[k] = v
+
         return proxy
 
     def create_disconnected_proxy(self) -> SettingsProxy:
-        return SettingsProxy(**self.params)
+        proxy = SettingsProxy(**self.params)
+        for k, v in self.kw_params.items():
+            proxy[k] = v
+        return proxy
+
+    def __setitem__(self, key, value):
+        for proxy in self._proxies.copy():
+            proxy[key] = value
+        self.kw_params[key] = value
+
+    def __getitem__(self, item):
+        return self.kw_params[item]
 
     def _update(self, parameter: str, value: Any) -> None:
         if parameter not in self.params:
