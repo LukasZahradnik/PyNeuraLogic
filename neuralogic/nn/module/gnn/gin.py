@@ -1,3 +1,4 @@
+from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
@@ -12,8 +13,8 @@ class GINConv(Module):
         output_name: str,
         feature_name: str,
         edge_name: str,
-        activation: Transformation = Transformation.IDENTITY,
-        aggregation: Aggregation = Aggregation.SUM,
+        activation: TransformationFunction = Transformation.IDENTITY,
+        aggregation: AggregationFunction = Aggregation.SUM,
     ):
         self.output_name = output_name
         self.feature_name = feature_name

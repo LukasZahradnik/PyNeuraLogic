@@ -248,6 +248,6 @@ class GRU(Module):
         terms = [f"X{i}" for i in range(self.arity)]
 
         return [
-            (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Transformation.IDENTITY],
+            R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms),
             *recursive_cell(),
         ]

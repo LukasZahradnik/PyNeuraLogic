@@ -1,3 +1,4 @@
+from neuralogic.core.constructs.function.function import TransformationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation, Combination
 from neuralogic.core.constructs.factories import R, V
@@ -23,7 +24,7 @@ class GATv2Conv(Module):
         Edge predicate name to use for neighborhood relations.
     share_weights : bool
         Share weights in attention. Default: ``False``
-    activation : Transformation
+    activation : TransformationFunction
         Activation function of the output.
         Default: ``Transformation.IDENTITY``
 
@@ -37,7 +38,7 @@ class GATv2Conv(Module):
         feature_name: str,
         edge_name: str,
         share_weights: bool = False,
-        activation: Transformation = Transformation.IDENTITY,
+        activation: TransformationFunction = Transformation.IDENTITY,
     ):
         self.output_name = output_name
         self.feature_name = feature_name

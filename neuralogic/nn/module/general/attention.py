@@ -59,12 +59,11 @@ class Attention(Module):
         dk_rel = R.get(f"{self.output_name}__dk")
         dot_rel = R.get(f"{self.output_name}__dot")
 
-        metadata = [Combination.PRODUCT, Transformation.IDENTITY, Aggregation.SOFTMAX(agg_terms=["Y"])]
-        out_metadata = [Combination.PRODUCT, Aggregation.SUM, Transformation.IDENTITY]
+        metadata = [Combination.PRODUCT, Aggregation.SOFTMAX(agg_terms=["Y"])]
+        out_metadata = [Combination.PRODUCT, Aggregation.SUM]
 
         attention_product_rules = [
             (dot_rel(h_terms) <= (dk_rel, R.get(self.key_name)(k_terms).T, R.get(self.query_name)(q_terms))) | metadata,
-            dot_rel / (self.arity + 1) | [Transformation.IDENTITY],
         ]
 
         if self.mask_name is not None:
@@ -74,7 +73,6 @@ class Attention(Module):
             dk_rel[d_k].fixed(),
             *attention_product_rules,
             (R.get(self.output_name)(q_terms) <= (dot_rel(h_terms), R.get(self.value_name)(k_terms))) | out_metadata,
-            R.get(self.output_name) / self.arity | [Transformation.IDENTITY],
         ]
 
 

@@ -1,5 +1,6 @@
 from typing import Optional
 
+from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation, Combination
 from neuralogic.core.constructs.factories import R, V
@@ -24,10 +25,10 @@ class GCNConv(Module):
         Feature predicate name to get features from.
     edge_name : str
         Edge predicate name to use for neighborhood relations.
-    activation : Transformation
+    activation : TransformationFunction
         Activation function of the output.
         Default: ``Transformation.IDENTITY``
-    aggregation : Aggregation
+    aggregation : AggregationFunction
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.SUM``
     add_self_loops : Optional[bool]
@@ -45,8 +46,8 @@ class GCNConv(Module):
         output_name: str,
         feature_name: str,
         edge_name: str,
-        activation: Transformation = Transformation.IDENTITY,
-        aggregation: Aggregation = Aggregation.SUM,
+        activation: TransformationFunction = Transformation.IDENTITY,
+        aggregation: AggregationFunction = Aggregation.SUM,
         add_self_loops: Optional[bool] = None,
         normalize: bool = True,
     ):

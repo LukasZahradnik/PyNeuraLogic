@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
@@ -35,10 +36,10 @@ class MetaConv(Module):
         Role predicate name to use for role relations. When :code:`None`, elements from :code:`roles` are used instead.
     roles : List[str]
         List of relations' names
-    activation : Transformation
+    activation : TransformationFunction
         Activation function of the output.
         Default: ``Transformation.SIGMOID``
-    aggregation : Aggregation
+    aggregation : AggregationFunction
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.AVG``
 
@@ -52,8 +53,8 @@ class MetaConv(Module):
         feature_name: str,
         role_name: Optional[str],
         roles: List[str],
-        activation: Transformation = Transformation.SIGMOID,
-        aggregation: Aggregation = Aggregation.AVG,
+        activation: TransformationFunction = Transformation.SIGMOID,
+        aggregation: AggregationFunction = Aggregation.AVG,
     ):
         self.output_name = output_name
         self.feature_name = feature_name

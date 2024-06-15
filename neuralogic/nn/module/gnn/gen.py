@@ -1,5 +1,6 @@
 from typing import Optional
 
+from neuralogic.core.constructs.function.function import AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation, Combination
 from neuralogic.core.constructs.factories import R, V
@@ -24,7 +25,7 @@ class GENConv(Module):
         Feature predicate name to get features from.
     edge_name : str
         Edge predicate name to use for neighborhood relations.
-    aggregation : Aggregation
+    aggregation : AggregationFunction
         The aggregation function.
         Default: ``Aggregation.SOFTMAX``
     num_layers : int
@@ -51,7 +52,7 @@ class GENConv(Module):
         output_name: str,
         feature_name: str,
         edge_name: str,
-        aggregation: Aggregation = Aggregation.SOFTMAX,
+        aggregation: AggregationFunction = Aggregation.SOFTMAX,
         num_layers: int = 2,
         expansion: int = 2,
         eps: float = 1e-7,

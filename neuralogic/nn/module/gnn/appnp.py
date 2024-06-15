@@ -1,3 +1,4 @@
+from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
@@ -73,10 +74,10 @@ class APPNPConv(Module):
         Number of iterations
     alpha : float
         Teleport probability
-    activation : Transformation
+    activation : TransformationFunction
         Activation function of the output.
         Default: ``Transformation.IDENTITY``
-    aggregation : Aggregation
+    aggregation : AggregationFunction
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.SUM``
 
@@ -89,8 +90,8 @@ class APPNPConv(Module):
         edge_name: str,
         k: int,
         alpha: float,
-        activation: Transformation = Transformation.IDENTITY,
-        aggregation: Aggregation = Aggregation.SUM,
+        activation: TransformationFunction = Transformation.IDENTITY,
+        aggregation: AggregationFunction = Aggregation.SUM,
     ):
         self.output_name = output_name
         self.feature_name = feature_name

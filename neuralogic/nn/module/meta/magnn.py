@@ -1,5 +1,6 @@
 from typing import Optional, List
 
+from neuralogic.core.constructs.function.function import AggregationFunction, TransformationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
@@ -36,9 +37,12 @@ class MAGNNMean(Module):
         Metapath type predicate name. If none, ``meta_paths`` will be used instead.
     meta_paths : List[str]
         Name of types forming a single metapath.
-    activation : Transformation
+    activation : TransformationFunction
         Activation function of the output.
         Default: ``Transformation.SIGMOID``
+    aggregation : AggregationFunction
+        Aggregation function of the output.
+        Default: ``Aggreagtion.SUM``
     """
 
     def __init__(
@@ -48,8 +52,8 @@ class MAGNNMean(Module):
         relation_name: str,
         type_name: Optional[str],
         meta_paths: List[str],
-        activation: Transformation = Transformation.SIGMOID,
-        aggregation: Aggregation = Aggregation.SUM,
+        activation: TransformationFunction = Transformation.SIGMOID,
+        aggregation: AggregationFunction = Aggregation.SUM,
     ):
         self.output_name = output_name
         self.feature_name = feature_name
@@ -122,6 +126,9 @@ class MAGNNLinear(MAGNNMean):
     activation : Transformation
         Activation function of the output.
         Default: ``Transformation.SIGMOID``
+    aggregation : AggregationFunction
+        Aggregation function of the output.
+        Default: ``Aggreagtion.SUM``
     """
 
     def __init__(
@@ -133,8 +140,8 @@ class MAGNNLinear(MAGNNMean):
         relation_name: str,
         type_name: Optional[str],
         meta_paths: List[str],
-        activation: Transformation = Transformation.SIGMOID,
-        aggregation: Aggregation = Aggregation.SUM,
+        activation: TransformationFunction = Transformation.SIGMOID,
+        aggregation: AggregationFunction = Aggregation.SUM,
     ):
         super().__init__(output_name, feature_name, relation_name, type_name, meta_paths, activation, aggregation)
         self.in_channels = in_channels

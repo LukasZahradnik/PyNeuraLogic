@@ -1,3 +1,4 @@
+from neuralogic.core.constructs.function.function import TransformationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation
 from neuralogic.core.constructs.factories import R, V
@@ -20,7 +21,7 @@ class RNNCell(Module):
         Input feature predicate name to get features from.
     hidden_input_name : str
         Predicate name to get hidden state from.
-    activation : Transformation
+    activation : TransformationFunction
         Activation function.
         Default: ``Transformation.TANH``
     arity : int
@@ -34,7 +35,7 @@ class RNNCell(Module):
         output_name: str,
         input_name: str,
         hidden_input_name: str,
-        activation: Transformation = Transformation.TANH,
+        activation: TransformationFunction = Transformation.TANH,
         arity: int = 1,
     ):
         self.input_size = input_size
@@ -105,7 +106,7 @@ class RNN(Module):
         Input feature predicate name to get features from.
     hidden_0_name : str
         Predicate name to get initial hidden state from.
-    activation : Transformation
+    activation : TransformationFunction
         Activation function.
         Default: ``Transformation.TANH``
     arity : int
@@ -119,7 +120,7 @@ class RNN(Module):
         output_name: str,
         input_name: str,
         hidden_0_name: str,
-        activation: Transformation = Transformation.TANH,
+        activation: TransformationFunction = Transformation.TANH,
         arity: int = 1,
     ):
         self.input_size = input_size
