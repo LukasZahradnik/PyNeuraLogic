@@ -159,12 +159,7 @@ class MultiheadAttention(Module):
             attention.arity += 1
 
             attention_concat = []
-            multihead_rules = [
-                q_proj / (self.arity + 1) | [Transformation.IDENTITY],
-                k_proj / (self.arity + 1) | [Transformation.IDENTITY],
-                v_proj / (self.arity + 1) | [Transformation.IDENTITY],
-                output_rel / self.arity | [Transformation.IDENTITY],
-            ]
+            multihead_rules = []
 
             for i in range(self.num_heads):
                 meta = [Transformation.SLICE(rows=(i * size, (i + 1) * size))]
@@ -173,19 +168,13 @@ class MultiheadAttention(Module):
                 multihead_rules.append((k_proj(i, *terms) <= R.get(self.keys)(terms)[k_weight:dim, self.kdim]) | meta)
                 attention_concat.append(R.get(attention_name)(i, *terms))
 
-            multihead_rules.append(
-                (output_rel(terms)[dim, dim] <= attention_concat) | [Transformation.IDENTITY, Combination.CONCAT]
-            )
+            multihead_rules.append((output_rel(terms)[dim, dim] <= attention_concat) | [Combination.CONCAT])
         else:
             multihead_rules = [
-                (q_proj(terms)[q_weight:dim, dim] <= R.get(self.queries)(terms)) | [Transformation.IDENTITY],
-                q_proj / self.arity | [Transformation.IDENTITY],
-                (v_proj(terms)[v_weight:dim, self.vdim] <= R.get(self.values)(terms)) | [Transformation.IDENTITY],
-                v_proj / self.arity | [Transformation.IDENTITY],
-                (k_proj(terms)[k_weight:dim, self.kdim] <= R.get(self.keys)(terms)) | [Transformation.IDENTITY],
-                k_proj / self.arity | [Transformation.IDENTITY],
-                (output_rel(terms)[dim, dim] <= R.get(attention_name)(terms)) | [Transformation.IDENTITY],
-                output_rel / self.arity | [Transformation.IDENTITY],
+                q_proj(terms)[q_weight:dim, dim] <= R.get(self.queries)(terms),
+                v_proj(terms)[v_weight:dim, self.vdim] <= R.get(self.values)(terms),
+                k_proj(terms)[k_weight:dim, self.kdim] <= R.get(self.keys)(terms),
+                output_rel(terms)[dim, dim] <= R.get(attention_name)(terms),
             ]
 
         return [*attention(), *multihead_rules]

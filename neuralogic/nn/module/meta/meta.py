@@ -71,24 +71,19 @@ class MetaConv(Module):
         head = R.get(self.output_name)(V.I)
         role_head = R.get(f"{self.output_name}__roles")
 
-        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(aggregation=self.aggregation)
         feature = R.get(self.feature_name)(V.J)[self.out_channels, self.in_channels]
 
         if self.role_name is not None:
             role_rules = [
-                ((role_head(V.I, role) <= (feature, R.get(self.role_name)(V.J, role, V.I))) | [Transformation.IDENTITY])
-                for role in self.roles
+                (role_head(V.I, role) <= (feature, R.get(self.role_name)(V.J, role, V.I))) for role in self.roles
             ]
         else:
-            role_rules = [
-                ((role_head(V.I, role) <= (feature, R.get(role)(V.J, V.I))) | [Transformation.IDENTITY])
-                for role in self.roles
-            ]
+            role_rules = [(role_head(V.I, role) <= (feature, R.get(role)(V.J, V.I))) for role in self.roles]
 
         return [
             (head <= role_head(V.I, V.R)) | metadata,
             (head <= R.get(self.feature_name)(V.I)[self.out_channels, self.in_channels]) | metadata,
             *role_rules,
             R.get(self.output_name) / 1 | Metadata(transformation=self.activation),
-            role_head / 2 | [Transformation.IDENTITY],
         ]

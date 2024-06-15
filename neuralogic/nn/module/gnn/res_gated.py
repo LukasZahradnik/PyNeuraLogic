@@ -103,14 +103,12 @@ class ResGatedGraphConv(Module):
         gate = R.get(f"{self.output_name}__gate")
 
         w = self.out_channels, self.in_channels
-        prod_metadata = Metadata(
-            combination=Combination.ELPRODUCT, transformation=Transformation.IDENTITY, aggregation=self.aggregation
-        )
+        prod_metadata = Metadata(combination=Combination.ELPRODUCT, aggregation=self.aggregation)
 
         return [
-            (gate(V.I, V.J) <= (feature(V.I)[w], feature(V.J)[w])) | [Transformation.IDENTITY],
+            gate(V.I, V.J) <= (feature(V.I)[w], feature(V.J)[w]),
             gate / 2 | Metadata(transformation=self.gating_activation),
-            (head <= feature(V.I)[w]) | [Transformation.IDENTITY],
+            head <= feature(V.I)[w],
             (head <= (gate(V.I, V.J), feature(V.J)[w], R.get(self.edge_name)(V.J, V.I))) | prod_metadata,
             R.get(self.output_name) / 1 | Metadata(transformation=self.activation),
         ]

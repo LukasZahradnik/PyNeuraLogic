@@ -60,7 +60,6 @@ class RNNCell(Module):
 
         return [
             rnn_rule | Metadata(transformation=self.activation),
-            output / (self.arity + 1) | [Transformation.IDENTITY],
         ]
 
 
@@ -147,6 +146,6 @@ class RNN(Module):
         terms = [f"X{i}" for i in range(self.arity)]
 
         return [
-            (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Transformation.IDENTITY],
+            R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms),
             *recursive_cell(),
         ]

@@ -68,11 +68,7 @@ class GCNConv(Module):
 
     def __call__(self):
         head = R.get(self.output_name)(V.I)[self.out_channels, self.in_channels]
-        metadata = Metadata(
-            transformation=Transformation.IDENTITY, aggregation=self.aggregation, combination=Combination.PRODUCT
-        )
-
-        id_metadata = Metadata(transformation=Transformation.IDENTITY)
+        metadata = Metadata(aggregation=self.aggregation, combination=Combination.PRODUCT)
 
         edge = R.get(self.edge_name)
         edge_count = R.get(f"{self.output_name}__edge_count")
@@ -86,12 +82,11 @@ class GCNConv(Module):
 
             self_loops = [
                 edge(V.I, V.I)[1.0].fixed(),
-                (edge(V.I, V.J) <= (R.get(self.edge_name)(V.I, V.J))) | id_metadata,
-                edge / 2 | id_metadata,
+                edge(V.I, V.J) <= (R.get(self.edge_name)(V.I, V.J)),
             ]
 
         if self.normalize:
-            count_metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=Aggregation.COUNT)
+            count_metadata = Metadata(aggregation=Aggregation.COUNT)
             body = [R.get(self.feature_name)(V.J), edge(V.J, V.I), Transformation.SQRT(edge_count(V.J, V.I))]
 
             normalization = [

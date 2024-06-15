@@ -79,6 +79,6 @@ class Linear(Module):
         head = R.get(self.output_name)(terms)[self.out_channels, self.in_channels]
 
         return [
-            (head <= R.get(self.input_name)(terms)) | [Transformation.IDENTITY],
+            head <= R.get(self.input_name)(terms),
             R.get(self.output_name) / len(terms) | Metadata(transformation=self.activation),
         ]

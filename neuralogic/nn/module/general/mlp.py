@@ -49,7 +49,7 @@ class MLP(Module):
 
         if isinstance(self.activation, Sequence):
             metadata = [Metadata(transformation=act) for act in self.activation]
-            metadata.extend([Metadata(transformation=Transformation.IDENTITY)] * (iters - len(metadata)))
+            metadata.extend([Metadata()] * (iters - len(metadata)))
         else:
             metadata = [Metadata(transformation=self.activation)] * (iters + 1)
 
@@ -67,7 +67,7 @@ class MLP(Module):
                 if index < len(self.activation):
                     body_metadata = Metadata(transformation=self.activation[index])
                 else:
-                    body_metadata = [Transformation.IDENTITY]
+                    body_metadata = []
 
             if index + 2 < len(self.units):
                 in_channels, out_channels = self.units[index + 1], self.units[index + 2]

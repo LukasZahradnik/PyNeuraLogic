@@ -104,7 +104,7 @@ class APPNPConv(Module):
 
     def __call__(self):
         head = R.get(self.output_name)(V.I)
-        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(aggregation=self.aggregation)
         edge = R.get(self.edge_name)
         feature = R.get(self.feature_name)
 
@@ -120,8 +120,6 @@ class APPNPConv(Module):
                     (k_head <= (R.get(f"{self.output_name}__{k - 1}")(V.J)[1 - self.alpha].fixed(), edge(V.J, V.I)))
                     | metadata
                 )
-            rules.append(R.get(f"{self.output_name}__{k}") / 1 | Metadata(transformation=Transformation.IDENTITY))
-
         if self.k == 1:
             output_rule = head <= (feature(V.J)[1 - self.alpha].fixed(), edge(V.J, V.I))
         else:

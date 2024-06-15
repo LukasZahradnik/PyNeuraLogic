@@ -73,7 +73,6 @@ class RvNN(Module):
 
         rules = [
             (output_rel(head_terms) <= (input_rel(head_terms), parent_map_rel(V.P))) | metadata,
-            output_rel / len(head_terms) | [Transformation.IDENTITY],
         ]
 
         body = []

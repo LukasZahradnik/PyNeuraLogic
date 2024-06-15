@@ -55,9 +55,7 @@ class GATv2Conv(Module):
 
         attention = R.get(f"{self.output_name}__attention")
         attention_metadata = Metadata(transformation=Transformation.LEAKY_RELU)
-        metadata = Metadata(
-            transformation=Transformation.IDENTITY, aggregation=Aggregation.SUM, combination=Combination.PRODUCT
-        )
+        metadata = Metadata(aggregation=Aggregation.SUM, combination=Combination.PRODUCT)
 
         head = R.get(self.output_name)
         feature = R.get(self.feature_name)

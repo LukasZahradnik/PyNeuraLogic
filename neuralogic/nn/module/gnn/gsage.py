@@ -66,7 +66,7 @@ class SAGEConv(Module):
 
     def __call__(self):
         head = R.get(self.output_name)(V.I)[self.out_channels, self.in_channels]
-        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(aggregation=self.aggregation)
 
         return [
             (head <= (R.get(self.feature_name)(V.J), R.get(self.edge_name)(V.J, V.I))) | metadata,

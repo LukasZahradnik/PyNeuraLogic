@@ -96,7 +96,7 @@ class TAGConv(Module):
         self.aggregation = aggregation
 
     def __call__(self):
-        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(aggregation=self.aggregation)
         head = R.get(self.output_name)
         feature = R.get(self.feature_name)
         edge = R.get(self.edge_name)

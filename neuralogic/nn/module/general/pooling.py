@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.constructs.function import Transformation, Aggregation
+from neuralogic.core.constructs.function import Aggregation
 from neuralogic.core.constructs.factories import R
 from neuralogic.nn.module.module import Module
 
@@ -68,11 +68,10 @@ class Pooling(Module):
         self.aggregation = aggregation
 
     def __call__(self):
-        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(aggregation=self.aggregation)
 
         return [
             (R.get(self.output_name) <= R.get(self.input_name)(f"X{i}" for i in range(self.input_arity))) | metadata,
-            R.get(self.output_name) / 0 | [Transformation.IDENTITY],
         ]
 
 
