@@ -218,21 +218,14 @@ def test_lstm_module_simple(input_size, hidden_size, sequence_len, epochs):
     template = Template()
 
     template += [
-        (R.h(0) <= R.h0) | [Transformation.IDENTITY],
-        (R.h__c(0) <= R.c0) | [Transformation.IDENTITY],
+        R.h(0) <= R.h0,
+        R.h__c(0) <= R.c0,
         (R.h__i(V.T) <= R.f(V.T)[5, 10] + R.h(V.Z)[5, 5] + R.special.next(V.Z, V.T)) | [Transformation.SIGMOID],
         (R.h__f(V.T) <= R.f(V.T)[5, 10] + R.h(V.Z)[5, 5] + R.special.next(V.Z, V.T)) | [Transformation.SIGMOID],
         (R.h__o(V.T) <= R.f(V.T)[5, 10] + R.h(V.Z)[5, 5] + R.special.next(V.Z, V.T)) | [Transformation.SIGMOID],
         (R.h__n(V.T) <= R.f(V.T)[5, 10] + R.h(V.Z)[5, 5] + R.special.next(V.Z, V.T)) | [Transformation.TANH],
-        (R.h__c(V.T) <= R.h__f(V.T) * R.h__c(V.Z) + R.h__i(V.T) * R.h__n(V.T) + R.special.next(V.Z, V.T))
-        | [Transformation.IDENTITY],
-        (R.h(V.T) <= R.h__o(V.T) * Transformation.TANH(R.h__c(V.T))) | [Transformation.IDENTITY],
-        R.h / 1 | [Transformation.IDENTITY],
-        R.h__f / 1 | [Transformation.IDENTITY],
-        R.h__i / 1 | [Transformation.IDENTITY],
-        R.h__o / 1 | [Transformation.IDENTITY],
-        R.h__n / 1 | [Transformation.IDENTITY],
-        R.h__c / 1 | [Transformation.IDENTITY],
+        R.h__c(V.T) <= R.h__f(V.T) * R.h__c(V.Z) + R.h__i(V.T) * R.h__n(V.T) + R.special.next(V.Z, V.T),
+        R.h(V.T) <= R.h__o(V.T) * Transformation.TANH(R.h__c(V.T)),
     ]
 
     model = template.build(

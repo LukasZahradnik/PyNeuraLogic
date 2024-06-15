@@ -118,7 +118,7 @@ class RGCNConv(Module):
 
     def __call__(self):
         head = R.get(self.output_name)(V.I)
-        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(aggregation=self.aggregation)
         feature = R.get(self.feature_name)(V.J)[self.out_channels, self.in_channels]
 
         if self.edge_name is not None:

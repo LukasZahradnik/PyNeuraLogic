@@ -18,10 +18,10 @@ def test_rgcnconv():
     template += RGCNConv(1, 2, "h1", "h0", "_edge", ["a", "b", "c"])
     template_str = str(template).split("\n")
 
-    assert template_str[0] == "h1(I) :- {2, 1} h0(I). [transformation=identity, aggregation=avg]"
-    assert template_str[1] == "h1(I) :- {2, 1} h0(J), *edge(J, a, I). [transformation=identity, aggregation=avg]"
-    assert template_str[2] == "h1(I) :- {2, 1} h0(J), *edge(J, b, I). [transformation=identity, aggregation=avg]"
-    assert template_str[3] == "h1(I) :- {2, 1} h0(J), *edge(J, c, I). [transformation=identity, aggregation=avg]"
+    assert template_str[0] == "h1(I) :- {2, 1} h0(I). [aggregation=avg]"
+    assert template_str[1] == "h1(I) :- {2, 1} h0(J), *edge(J, a, I). [aggregation=avg]"
+    assert template_str[2] == "h1(I) :- {2, 1} h0(J), *edge(J, b, I). [aggregation=avg]"
+    assert template_str[3] == "h1(I) :- {2, 1} h0(J), *edge(J, c, I). [aggregation=avg]"
     assert template_str[4] == "h1/1 [transformation=identity]"
 
 
@@ -31,10 +31,10 @@ def test_rgcnconv_relations_edge_replace():
     template += RGCNConv(1, 2, "h1", "h0", None, ["a", "b", "c"], Transformation.SIGMOID)
     template_str = str(template).split("\n")
 
-    assert template_str[0] == "h1(I) :- {2, 1} h0(I). [transformation=identity, aggregation=avg]"
-    assert template_str[1] == "h1(I) :- {2, 1} h0(J), a(J, I). [transformation=identity, aggregation=avg]"
-    assert template_str[2] == "h1(I) :- {2, 1} h0(J), b(J, I). [transformation=identity, aggregation=avg]"
-    assert template_str[3] == "h1(I) :- {2, 1} h0(J), c(J, I). [transformation=identity, aggregation=avg]"
+    assert template_str[0] == "h1(I) :- {2, 1} h0(I). [aggregation=avg]"
+    assert template_str[1] == "h1(I) :- {2, 1} h0(J), a(J, I). [aggregation=avg]"
+    assert template_str[2] == "h1(I) :- {2, 1} h0(J), b(J, I). [aggregation=avg]"
+    assert template_str[3] == "h1(I) :- {2, 1} h0(J), c(J, I). [aggregation=avg]"
     assert template_str[4] == "h1/1 [transformation=sigmoid]"
 
 

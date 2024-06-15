@@ -5,6 +5,7 @@ import numpy as np
 import jpype
 
 from neuralogic import is_initialized, initialize
+from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import FContainer
 from neuralogic.core.constructs.term import Variable, Constant
 from neuralogic.core.settings import SettingsProxy, Settings
@@ -332,7 +333,7 @@ class JavaFactory:
 
         metadata = rule.metadata
         if isinstance(rule.body, FContainer):
-            metadata = metadata.copy()
+            metadata = metadata.copy() if metadata is not None else Metadata()
             metadata.combination = rule.body.to_function()
 
         java_rule.setMetadata(self.get_metadata(metadata, self.rule_metadata))

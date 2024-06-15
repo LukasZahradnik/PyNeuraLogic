@@ -11,8 +11,7 @@ def test_torch_function_with_parameters():
     neuralogic.manual_seed(1)
 
     template = Template()
-    template += (Relation.xor[1, 8] <= Relation.xy) | [F.identity]
-    template += Relation.xor / 0 | [F.identity]
+    template += Relation.xor[1, 8] <= Relation.xy
 
     def to_logic(tensor_data):
         return [Relation.xy[tensor_data]]
@@ -60,8 +59,7 @@ def test_torch_function_without_parameters():
     neuralogic.manual_seed(1)
 
     template = Template()
-    template += (Relation.xor <= Relation.xy) | [F.identity]
-    template += Relation.xor / 0 | [F.identity]
+    template += Relation.xor <= Relation.xy
 
     def to_logic(tensor_data):
         return [Relation.xy[tensor_data]]
