@@ -12,11 +12,10 @@ class FContainer:
 
     def __init__(self, nodes, function: Function):
         self.function = function
+        self.nodes = nodes if not self.function.can_flatten else self.get_flattened_nodes(nodes, function)
 
-        if self.function.is_parametrized():
-            self.nodes = nodes
-            return
-
+    @staticmethod
+    def get_flattened_nodes(nodes, function: Function):
         new_nodes = []
         for node in nodes:
             if not isinstance(node, FContainer):
@@ -27,7 +26,7 @@ class FContainer:
                 new_nodes.extend(node.nodes)
             else:
                 new_nodes.append(node)
-        self.nodes = tuple(new_nodes)
+        return tuple(new_nodes)
 
     def __add__(self, other):
         return FContainer((self, other), Combination.SUM)

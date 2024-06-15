@@ -14,46 +14,49 @@ class Transformation:
     SIGMOID: TransformationFunction = TransformationFunction("SIGMOID")
     TANH: TransformationFunction = TransformationFunction("TANH")
     SIGNUM: TransformationFunction = TransformationFunction("SIGNUM")
-    RELU: TransformationFunction = TransformationFunction("RELU")
-    LEAKY_RELU: TransformationFunction = TransformationFunction("LEAKYRELU")
-    LUKASIEWICZ: TransformationFunction = TransformationFunction("LUKASIEWICZ")
-    EXP: TransformationFunction = TransformationFunction("EXP")
-    SQRT: TransformationFunction = TransformationFunction("SQRT")
+    RELU: TransformationFunction = TransformationFunction("RELU", namespace="transformation.elementwise.Exponentiation")
+    LEAKY_RELU: TransformationFunction = TransformationFunction(
+        "LEAKYRELU", namespace="transformation.elementwise.LeakyReLu"
+    )
+    LUKASIEWICZ: TransformationFunction = TransformationFunction(
+        "LUKASIEWICZ", namespace="transformation.elementwise.LukasiewiczSigmoid"
+    )
+    EXP: TransformationFunction = TransformationFunction("EXP", namespace="transformation.elementwise.Exponentiation")
+    SQRT: TransformationFunction = TransformationFunction("SQRT", namespace="transformation.elementwise.SquareRoot")
     INVERSE: TransformationFunction = TransformationFunction("INVERSE")
     REVERSE: TransformationFunction = TransformationFunction("REVERSE")
-    LOG: TransformationFunction = TransformationFunction("LOG")
+    LOG: TransformationFunction = TransformationFunction("LOG", namespace="transformation.elementwise.Logarithm")
 
     # Transformation
-    IDENTITY: TransformationFunction = TransformationFunction("IDENTITY")
-    TRANSP: TransformationFunction = TransformationFunction("TRANSPOSE")
-    SOFTMAX: TransformationFunction = TransformationFunction("SOFTMAX")
-    SPARSEMAX: TransformationFunction = TransformationFunction("SPARSEMAX")
-    NORM: TransformationFunction = TransformationFunction("NORM")
+    IDENTITY: TransformationFunction = TransformationFunction("IDENTITY", namespace="transformation.join.{name}")
+    TRANSP: TransformationFunction = TransformationFunction("TRANSPOSE", namespace="transformation.join.Transposition")
+    SOFTMAX: TransformationFunction = TransformationFunction("SOFTMAX", namespace="transformation.join.{name}")
+    SPARSEMAX: TransformationFunction = TransformationFunction("SPARSEMAX", namespace="transformation.join.{name}")
+    NORM: TransformationFunction = TransformationFunction("NORM", namespace="transformation.join.Normalization")
     SLICE: Slice = Slice("SLICE")
     RESHAPE: Reshape = Reshape("RESHAPE")
 
 
 class Combination:
     # Aggregation
-    AVG: CombinationFunction = CombinationFunction("AVG")
-    MAX: CombinationFunction = CombinationFunction("MAX")
-    MIN: CombinationFunction = CombinationFunction("MIN")
-    SUM: CombinationFunction = CombinationFunction("SUM")
-    COUNT: CombinationFunction = CombinationFunction("COUNT")
+    AVG: CombinationFunction = CombinationFunction("AVG", namespace="aggregation.{name}")
+    MAX: CombinationFunction = CombinationFunction("MAX", can_flatten=True, namespace="aggregation.{name}")
+    MIN: CombinationFunction = CombinationFunction("MIN", can_flatten=True, namespace="aggregation.{name}")
+    SUM: CombinationFunction = CombinationFunction(
+        "SUM", operator="+", can_flatten=True, namespace="aggregation.{name}"
+    )
+    COUNT: CombinationFunction = CombinationFunction("COUNT", namespace="aggregation.{name}")
 
     # Combination
-    PRODUCT: CombinationFunction = CombinationFunction("PRODUCT")
-    ELPRODUCT: CombinationFunction = CombinationFunction("ELPRODUCT")
+    PRODUCT: CombinationFunction = CombinationFunction("PRODUCT", operator="@")
+    ELPRODUCT: CombinationFunction = CombinationFunction(
+        "ELPRODUCT", operator="*", can_flatten=True, namespace="combination.ElementProduct"
+    )
     SOFTMAX: CombinationFunction = CombinationFunction("SOFTMAX")
     SPARSEMAX: CombinationFunction = CombinationFunction("SPARSEMAX")
     CROSSSUM: CombinationFunction = CombinationFunction("CROSSSUM")
     CONCAT: ConcatCombination = ConcatCombination("CONCAT")
     COSSIM: CombinationFunction = CombinationFunction("COSSIM")
-
-
-Combination.SUM.operator = "+"
-Combination.ELPRODUCT.operator = "*"
-Combination.PRODUCT.operator = "@"
 
 
 class Aggregation:

@@ -4,11 +4,13 @@ import jpype
 
 
 class Function:
-    __slots__ = "name", "operator"
+    __slots__ = "name", "operator", "can_flatten", "namespace"
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, *, namespace: str = "", operator: Optional[str] = None, can_flatten: bool = False):
         self.name: str = name.lower()
         self.operator: Optional[str] = None
+        self.can_flatten = can_flatten
+        self.namespace = namespace
 
     def __str__(self):
         return self.name
@@ -27,28 +29,29 @@ class Function:
     def is_parametrized(self) -> bool:
         return False
 
-    def get(self):
-        raise NotImplementedError
-
     def rule_head_dependant(self) -> bool:
         return False
 
     def process_head(self, head) -> "Function":
         pass
 
-
-class TransformationFunction(Function):
     def get(self):
         name = "".join(s.capitalize() for s in self.name.split("_"))
+        formatted_namespace = self.namespace.format(name=name)
 
-        if name == "Transp":
-            name = "Transposition"
-        if name == "Norm":
-            name = "Normalization"
+        return jpype.JClass(f"cz.cvut.fel.ida.algebra.functions.{formatted_namespace}")()
 
-        if name in ("Identity", "Transposition", "Softmax", "Sparsemax", "Normalization", "Slice", "Reshape"):
-            return jpype.JClass(f"cz.cvut.fel.ida.algebra.functions.transformation.joint.{name}")()
-        return jpype.JClass(f"cz.cvut.fel.ida.algebra.functions.transformation.elementwise.{name}")()
+
+class TransformationFunction(Function):
+    def __init__(
+        self,
+        name: str,
+        *,
+        namespace: str = "transformation.elementwise.{name}",
+        operator: Optional[str] = None,
+        can_flatten: bool = False,
+    ):
+        super().__init__(name, namespace=namespace, operator=operator, can_flatten=can_flatten)
 
     def __call__(self, *args, **kwargs):
         from neuralogic.core.constructs import relation
@@ -58,23 +61,23 @@ class TransformationFunction(Function):
             return self
 
         arg = args[0]
-        if isinstance(arg, relation.BaseRelation):
-            if arg.function is not None:
+        if isinstance(arg, relation.BaseRelation) and not isinstance(arg, relation.WeightedRelation):
+            if arg.negated or arg.function is not None:
                 return FContainer((arg,), self)
             return arg.attach_activation_function(self)
         return FContainer(args, self)
 
 
 class CombinationFunction(Function):
-    def get(self):
-        name = "".join(s.capitalize() for s in self.name.split("_"))
-
-        if name in ("Sum", "Max", "Min", "Avg", "Count"):
-            return jpype.JClass(f"cz.cvut.fel.ida.algebra.functions.aggregation.{name}")()
-        if name == "Elproduct":
-            name = "ElementProduct"
-
-        return jpype.JClass(f"cz.cvut.fel.ida.algebra.functions.combination.{name}")()
+    def __init__(
+        self,
+        name: str,
+        *,
+        namespace: str = "combination.{name}",
+        operator: Optional[str] = None,
+        can_flatten: bool = False,
+    ):
+        super().__init__(name, namespace=namespace, operator=operator, can_flatten=can_flatten)
 
     def __call__(self, *args, **kwargs):
         from neuralogic.core.constructs.function.function_container import FContainer
@@ -85,4 +88,5 @@ class CombinationFunction(Function):
 
 
 class AggregationFunction(Function):
-    pass
+    def get(self):
+        raise NotImplementedError
