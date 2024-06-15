@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 from shutil import copyfileobj
 
@@ -26,6 +27,11 @@ class FileDataset(BaseDataset):
     ):
         self.examples_file = examples_file
         self.queries_file = queries_file
+
+        if self.examples_file is not None:
+            self.examples_file = os.path.abspath(self.examples_file)
+        if self.queries_file is not None:
+            self.queries_file = os.path.abspath(self.queries_file)
 
     def dump(
         self,

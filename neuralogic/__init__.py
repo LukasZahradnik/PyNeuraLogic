@@ -137,6 +137,8 @@ def initialize(
     graphviz_path: Optional[str] = None,
     max_memory_size: Optional[int] = None,
     log_handler: Optional[LogHandler] = None,
+    jar_path: Optional[str] = None,
+    started_check: bool = True,
 ):
     """
     Initialize the NeuraLogic backend. This function is called implicitly when needed and should be called
@@ -160,11 +162,17 @@ def initialize(
         The maximum memory size (in gigabytes)
     log_handler: Optional[LogHandler]
         The handler for logging
+    jar_path: Optional[str]
+        The path to NeuraLogic java backend
+    started_check: bool
+        Whether to check if the NeuraLogic has been started. If true and it has been started - raise an Exception
     """
     global _is_initialized
 
-    if _is_initialized:
+    if _is_initialized and started_check:
         raise Exception("NeuraLogic already initialized")
+    if _is_initialized:
+        return
 
     if seed is not None:
         manual_seed(seed)
@@ -184,6 +192,10 @@ def initialize(
     if _max_memory_size is not None:
         options.append(f"-Xmx{_max_memory_size}g")
 
+    params = {**jvm_params}
+    if jar_path is not None:
+        params["classpath"] = jar_path
+
     if debug_mode:
         port = int(debug_port)
         server = "y" if is_debug_server else "n"
@@ -196,7 +208,7 @@ def initialize(
             f"-Xrunjdwp:transport=dt_socket,server={server},address={port},suspend={suspend}",
         ]
 
-        jpype.startJVM(*options, *debug_params, **jvm_params)
+        jpype.startJVM(*options, *debug_params, **params)
     else:
-        jpype.startJVM(*options, **jvm_params)
+        jpype.startJVM(*options, **params)
     _init_logging()

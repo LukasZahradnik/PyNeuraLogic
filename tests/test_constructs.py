@@ -1,7 +1,5 @@
-import copy
-
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
-from neuralogic.core import R, Transformation, Aggregation, Metadata, Combination, V
+from neuralogic.core import R, Transformation, Aggregation, Metadata, Combination, V, C
 from neuralogic.core.constructs.rule import Rule
 
 
@@ -189,3 +187,16 @@ def test_rules_and_with_metadata():
     my_rule: Rule = R.a(V.X) <= R.b(V.Y) & R.c(V.Z) & R.d | [Transformation.SIGMOID]
 
     assert str(my_rule) == "a(X) :- b(Y), c(Z), d. [transformation=sigmoid]"
+
+
+def test_var_and_const():
+    assert V.get("abc") == "Abc"
+    assert V.get("abc", "type") == "type:Abc"
+
+    assert C.get("Abc") == "abc"
+    assert C.get("Abc", "type") == "type:abc"
+
+    assert str(R.head(V.get("abc", "type")[1:3], V.X)) == "head(type:Abc1, type:Abc2, X)."
+
+    # With step
+    assert str(R.head(V.get("abc", "type")[1:6:2], V.X)) == "head(type:Abc1, type:Abc3, type:Abc5, X)."

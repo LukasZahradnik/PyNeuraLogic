@@ -1,4 +1,4 @@
-from neuralogic.core.constructs.factories import Var, Constant, Relation, V, C, R
+from neuralogic.core.constructs.factories import Var, Const, Relation, V, C, R
 from neuralogic.core.constructs.rule import Rule, RuleBody
 from neuralogic.core.template import Template
 from neuralogic.core.builder import BuiltDataset, GroundedDataset
@@ -11,7 +11,7 @@ from neuralogic.core.constructs.function import Transformation, Aggregation, Com
 __all__ = [
     "Var",
     "V",
-    "Constant",
+    "Const",
     "C",
     "Relation",
     "R",
