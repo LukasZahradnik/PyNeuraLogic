@@ -22,30 +22,30 @@ class Atom:
 
 
 class NeuralSample:
-    __slots__ = "java_sample", "grounding", "literal_cache"
+    __slots__ = "_java_sample", "_grounding", "_literal_cache"
 
     def __init__(self, sample, grounding):
-        self.java_sample = sample
-        self.grounding = grounding
-        self.literal_cache = None
+        self._java_sample = sample
+        self._grounding = grounding
+        self._literal_cache = None
 
     @property
     def target(self):
-        return ValueFactory.from_java(self.java_sample.target, SettingsProxy.number_format())
+        return ValueFactory.from_java(self._java_sample.target, SettingsProxy.number_format())
 
     def get_atom(self, literal):
         literal_name = literal.predicate.name
         literal_arity = literal.predicate.arity
 
-        if self.literal_cache is None:
-            self.literal_cache = self._get_literals()
+        if self._literal_cache is None:
+            self._literal_cache = self._get_literals()
 
-        if literal_name not in self.literal_cache:
+        if literal_name not in self._literal_cache:
             return None
 
         atoms = []
 
-        for subs, value in self.literal_cache[literal_name].items():
+        for subs, value in self._literal_cache[literal_name].items():
             if len(subs) != literal_arity:
                 continue
 
@@ -68,7 +68,7 @@ class NeuralSample:
     def _get_literals(self, expected_types=("WeightedAtomNeuron", "AtomNeuron", "FactNeuron")):
         literals = {}
 
-        for atom in self.java_sample.query.evidence.allNeuronsTopologic:
+        for atom in self._java_sample.query.evidence.allNeuronsTopologic:
             atom_type = str(atom.getClass().getSimpleName())
 
             if atom_type not in expected_types:
@@ -105,18 +105,18 @@ class NeuralSample:
             if term_str[0] == term_str[0].upper() and term_str[0] != term_str[0].lower():
                 raise ValueError(f"{fact} is not a fact")
 
-        if name not in self.literal_cache:
+        if name not in self._literal_cache:
             return None
 
         term_tuple = tuple(str(term) for term in fact.terms)
-        for subs, atom in self.literal_cache[name].items():
+        for subs, atom in self._literal_cache[name].items():
             if len(subs) == arity and term_tuple == subs:
                 return atom
         return None
 
     def set_fact_value(self, fact, value) -> int:
-        if self.literal_cache is None:
-            self.literal_cache = self._get_literals()
+        if self._literal_cache is None:
+            self._literal_cache = self._get_literals()
 
         sample_fact = self.get_fact(fact)
         sample_fact.getRawState().setValue(value)
@@ -199,17 +199,20 @@ class Weight:
 class BuiltDataset:
     """BuiltDataset represents an already built dataset - that is, a dataset that has been grounded and neuralized."""
 
-    __slots__ = "samples", "batch_size"
+    __slots__ = "_samples", "_batch_size"
 
     def __init__(self, samples: List[NeuralSample], batch_size: int):
-        self.samples = samples
-        self.batch_size = batch_size
+        self._samples = samples
+        self._batch_size = batch_size
 
     def __len__(self):
-        return len(self.samples)
+        return len(self._samples)
 
     def __getitem__(self, item):
-        return self.samples[item]
+        return self._samples[item]
+
+    def __iter__(self):
+        return iter(self._samples)
 
 
 class Grounding:

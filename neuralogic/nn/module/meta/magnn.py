@@ -61,7 +61,7 @@ class MAGNNMean(Module):
         self.activation = activation
 
     def __call__(self):
-        metadata = Metadata(duplicit_grounding=True, transformation=Transformation.IDENTITY)
+        metadata = Metadata(duplicate_grounding=True, transformation=Transformation.IDENTITY)
         length = len(self.meta_paths)
         feature = R.get(self.feature_name)
         relation = R.get(self.relation_name)

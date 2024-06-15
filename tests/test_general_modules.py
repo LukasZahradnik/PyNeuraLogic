@@ -37,8 +37,8 @@ def test_linear_module(feature_size: int, output_size: int, num_of_inputs: int, 
     samples = [Sample(R.h(index), [R.f(index)[row.detach().numpy()]]) for index, row in enumerate(linear_input)]
     built_dataset = model.build_dataset(Dataset(samples))
 
-    for sample, row in zip(built_dataset.samples, linear_output):
-        results = model(sample, train=False)
+    for sample, row in zip(built_dataset, linear_output):
+        results = model.test(sample)
 
         assert len(results) == len(row)
 

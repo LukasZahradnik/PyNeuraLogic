@@ -94,7 +94,7 @@ class SGConv(Module):
     def __call__(self):
         head = R.get(self.output_name)(V.I0)[self.out_channels, self.in_channels]
         metadata = Metadata(
-            transformation=Transformation.IDENTITY, aggregation=self.aggregation, duplicit_grounding=True
+            transformation=Transformation.IDENTITY, aggregation=self.aggregation, duplicate_grounding=True
         )
         edge = R.get(self.edge_name)
         feature = R.get(self.feature_name)

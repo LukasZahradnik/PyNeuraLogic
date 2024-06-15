@@ -2,12 +2,12 @@ import numpy as np
 import pytest
 import torch
 
-from neuralogic.core import Template, Settings, R
+from neuralogic.core import Template, Settings, R, Transformation
 from neuralogic.dataset import Dataset, Sample
 from neuralogic.nn.loss import MSE
 
 from neuralogic.nn.module import GRU, RNN, LSTM
-from neuralogic.optim import Adam
+from neuralogic.optim import Adam, SGD
 
 
 @pytest.mark.parametrize(
@@ -69,7 +69,7 @@ def test_gru_module(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model(bd.samples)
+        result, _ = model.train(bd)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
 
 
@@ -127,7 +127,7 @@ def test_rnn_module(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model(bd.samples)
+        result, _ = model.train(bd)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
 
 
@@ -194,5 +194,133 @@ def test_lstm_module(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model(bd.samples)
+        result, _ = model.train(bd)
+        assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
+
+
+@pytest.mark.parametrize(
+    "input_size, hidden_size, sequence_len, epochs",
+    [
+        (5, 5, 10, 500),
+    ],
+)
+def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
+    """Test that PyNeuraLogic RNN layer computes the same as PyTorch RNN layer (with backprop)"""
+    torch_input = torch.randn((sequence_len, input_size))
+    h0 = torch.randn((1, hidden_size))
+    target = torch.randn((hidden_size,))
+
+    rnn = torch.nn.RNN(input_size, hidden_size, 1, bias=False)
+
+    template = Template()
+    template += RNN(input_size, hidden_size, "h", "f", "h0", arity=0)
+
+    model = template.build(Settings(chain_pruning=False, iso_value_compression=False, error_function=MSE()))
+
+    parameters = model.parameters()
+    pyneuralogic_tensor_parameters = model.tensor_parameters()
+
+    torch_parameters = [parameter.tolist() for parameter in rnn.parameters()]
+
+    parameters["weights"][0] = torch_parameters[0]
+    parameters["weights"][1] = torch_parameters[1]
+
+    model.load_state_dict(parameters)
+
+    dataset = Dataset(
+        [
+            Sample(
+                R.h(sequence_len)[target.detach().numpy().tolist()],
+                [
+                    R.h0[[float(h) for h in h0[0]]],
+                    *[R.f(i + 1)[[float(h) for h in torch_input[i]]] for i in range(sequence_len)],
+                ],
+            ),
+        ]
+    )
+
+    bd = model.build_dataset(dataset)
+
+    optimizer = torch.optim.Adam(rnn.parameters(), lr=0.001)
+    pynelo_torch_optim = torch.optim.Adam(params=pyneuralogic_tensor_parameters, lr=0.001)
+    loss_fun = torch.nn.MSELoss()
+    pynelo_loss_fun = torch.nn.MSELoss()
+
+    for _ in range(epochs):
+        output, _ = rnn(torch_input, h0)
+        loss = loss_fun(output[-1], target)
+
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+
+        result = model(bd)
+        pynelo_loss = pynelo_loss_fun(result[-1], target)
+
+        pynelo_loss.backward()
+        pynelo_torch_optim.step()
+
+        assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[-1]], atol=10e-5)
+
+
+@pytest.mark.parametrize(
+    "input_size, hidden_size, sequence_len, epochs",
+    [
+        (1, 1, 2, 5),
+    ],
+)
+def test_rnn_custom(input_size, hidden_size, sequence_len, epochs):
+    """
+    Test alignment on a manually crafted example that's easier to precisely debug on a piece of paper
+        THIS IS IN THE OLD SYNTAX, NEEDS REWRITING TO THE NEW ONE:)
+    """
+
+    torch_input = torch.tensor([[1.0], [2.0]])  # manual input setup
+    h0 = torch.tensor([[0.0]])
+    target = torch.tensor([[1.0]])
+
+    rnn = torch.nn.RNN(input_size, hidden_size, 1, bias=False, nonlinearity="relu")
+
+    template = Template()
+    template += RNN(input_size, hidden_size, "h", "f", "h0", arity=0, activation=Transformation.RELU)
+
+    model = template.build(
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=SGD(lr=0.001), error_function=MSE())
+    )
+
+    parameters = model.parameters()
+    for parameter in rnn.parameters():
+        parameter.data = torch.tensor([[0.5]])  # manual weight setup
+    torch_parameters = [parameter.tolist() for parameter in rnn.parameters()]
+
+    parameters["weights"][0] = torch_parameters[0]
+    parameters["weights"][1] = torch_parameters[1]
+    model.load_state_dict(parameters)
+
+    dataset = Dataset(
+        [
+            Sample(
+                R.h(sequence_len)[target.detach().numpy().tolist()],
+                [
+                    R.h0[[float(h) for h in h0[0]]],
+                    *[R.f(i + 1)[[float(h) for h in torch_input[i]]] for i in range(sequence_len)],
+                ],
+            ),
+        ]
+    )
+
+    bd = model.build_dataset(dataset)
+
+    optimizer = torch.optim.SGD(rnn.parameters(), lr=0.001)
+    loss_fun = torch.nn.MSELoss()
+
+    for _ in range(epochs):
+        output, _ = rnn(torch_input, h0)
+        loss = loss_fun(output[-1], target)
+
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+
+        result, _ = model.train(bd, epochs=1)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
