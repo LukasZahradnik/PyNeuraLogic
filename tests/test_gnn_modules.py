@@ -178,7 +178,7 @@ def test_gcn_module(input_size, output_size):
     parameters = model.parameters()
     torch_parameters = [parameter.tolist() for parameter in gcn.parameters()]
 
-    parameters["weights"][0] = [torch_parameters[0][i] for i in range(0, output_size)]
+    parameters["weights"][1] = [torch_parameters[0][i] for i in range(0, output_size)]
     model.load_state_dict(parameters)
 
     example = [

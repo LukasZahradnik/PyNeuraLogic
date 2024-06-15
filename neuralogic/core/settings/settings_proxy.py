@@ -268,5 +268,11 @@ class SettingsProxy:
         transformation_name = str(transformation)
         return self.settings_class.parseTransformation(transformation_name)
 
+    def __setitem__(self, key, value):
+        setattr(self.settings, key, value)
+
+    def __getitem__(self, item):
+        return getattr(self.settings, item)
+
     def to_json(self) -> str:
         return self.settings.exportToJson()
