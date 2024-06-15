@@ -2,8 +2,9 @@ from typing import Dict
 
 import jpype
 
+from neuralogic.core.constructs.function.enum import Combination
 from neuralogic.core.constructs.function.function_graph import FunctionGraph
-from neuralogic.core.constructs.function.function import Function, Combination
+from neuralogic.core.constructs.function.function import Function
 
 
 class FContainer:

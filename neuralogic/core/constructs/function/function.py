@@ -37,29 +37,7 @@ class Function:
         pass
 
 
-class Transformation(Function):
-    # Element wise
-    SIGMOID: "Transformation"
-    TANH: "Transformation"
-    SIGNUM: "Transformation"
-    RELU: "Transformation"
-    LEAKY_RELU: "Transformation"
-    LUKASIEWICZ: "Transformation"
-    EXP: "Transformation"
-    SQRT: "Transformation"
-    INVERSE: "Transformation"
-    REVERSE: "Transformation"
-    LOG: "Transformation"
-
-    # Transformation
-    IDENTITY: "Transformation"
-    TRANSP: "Transformation"
-    SOFTMAX: "Transformation"
-    SPARSEMAX: "Transformation"
-    NORM: "Transformation"
-    SLICE: "Transformation"
-    RESHAPE: "Transformation"
-
+class TransformationFunction(Function):
     def get(self):
         name = "".join(s.capitalize() for s in self.name.split("_"))
 
@@ -87,23 +65,7 @@ class Transformation(Function):
         return FContainer(args, self)
 
 
-class Combination(Function):
-    # Aggregation
-    AVG: "Combination"
-    MAX: "Combination"
-    MIN: "Combination"
-    SUM: "Combination"
-    COUNT: "Combination"
-
-    # Combination
-    PRODUCT: "Combination"
-    ELPRODUCT: "Combination"
-    SOFTMAX: "Combination"
-    SPARSEMAX: "Combination"
-    CROSSSUM: "Combination"
-    CONCAT: "Combination"
-    COSSIM: "Combination"
-
+class CombinationFunction(Function):
     def get(self):
         name = "".join(s.capitalize() for s in self.name.split("_"))
 
@@ -122,11 +84,5 @@ class Combination(Function):
         return FContainer(args, self)
 
 
-class Aggregation(Function):
-    AVG: "Aggregation"
-    MAX: "Aggregation"
-    MIN: "Aggregation"
-    SUM: "Aggregation"
-    COUNT: "Aggregation"
-    CONCAT: "Aggregation"
-    SOFTMAX: "Aggregation"
+class AggregationFunction(Function):
+    pass

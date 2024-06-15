@@ -2,10 +2,10 @@ from typing import Union, Tuple
 
 import jpype
 
-from neuralogic.core.constructs.function.function import Transformation
+from neuralogic.core.constructs.function.function import TransformationFunction
 
 
-class Slice(Transformation):
+class Slice(TransformationFunction):
     __slots__ = ("rows", "cols")
 
     def __init__(
@@ -34,7 +34,7 @@ class Slice(Transformation):
         cols: Union[type(Ellipsis), Tuple[int, int]] = ...,
     ):
         slice = Slice(self.name, rows=rows, cols=cols)
-        return Transformation.__call__(slice, entity)
+        return TransformationFunction.__call__(slice, entity)
 
     def is_parametrized(self) -> bool:
         return True

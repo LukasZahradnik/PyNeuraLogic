@@ -1,6 +1,11 @@
 from typing import Union, Iterable, Callable, Optional
 
 from neuralogic.core.constructs.function import Transformation, Combination, Aggregation, Function
+from neuralogic.core.constructs.function.function import (
+    AggregationFunction,
+    TransformationFunction,
+    CombinationFunction,
+)
 
 
 class Metadata:
@@ -27,11 +32,11 @@ class Metadata:
         for entry in iterable:
             if isinstance(entry, Callable) and not isinstance(entry, Function):
                 entry = entry()
-            if isinstance(entry, Aggregation):
+            if isinstance(entry, AggregationFunction):
                 metadata.aggregation = entry
-            elif isinstance(entry, Transformation):
+            elif isinstance(entry, TransformationFunction):
                 metadata.transformation = entry
-            elif isinstance(entry, Combination):
+            elif isinstance(entry, CombinationFunction):
                 metadata.combination = entry
             else:
                 raise ValueError(f"Invalid entry for metadata: {entry}")

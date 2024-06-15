@@ -2,10 +2,10 @@ from typing import Sequence
 
 import jpype
 
-from neuralogic.core.constructs.function.function import Aggregation
+from neuralogic.core.constructs.function.function import AggregationFunction
 
 
-class Softmax(Aggregation):
+class Softmax(AggregationFunction):
     __slots__ = ("agg_terms", "var_terms")
 
     def __init__(
@@ -20,7 +20,7 @@ class Softmax(Aggregation):
 
     def __call__(self, entity=None, *, agg_terms: Sequence[int] = None):
         softmax = Softmax(self.name, agg_terms=agg_terms)
-        return Aggregation.__call__(softmax, entity)
+        return AggregationFunction.__call__(softmax, entity)
 
     def is_parametrized(self) -> bool:
         return self.agg_terms is not None
