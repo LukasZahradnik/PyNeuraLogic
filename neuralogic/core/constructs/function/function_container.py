@@ -51,7 +51,7 @@ class FContainer:
 
     @property
     def name(self):
-        args = ", ".join(node.to_str() for node in self.nodes if isinstance(node, FContainer))
+        args = ", ".join(str(node.function) for node in self.nodes if isinstance(node, FContainer))
 
         if args:
             return f"{self.function}({args})"

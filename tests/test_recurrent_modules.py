@@ -220,10 +220,26 @@ def test_lstm_module_simple(input_size, hidden_size, sequence_len, epochs):
     template += [
         R.h(0) <= R.h0,
         R.h__c(0) <= R.c0,
-        (R.h__i(V.T) <= R.f(V.T)[5, 10] + R.h(V.Z)[5, 5] + R.special.next(V.Z, V.T)) | [Transformation.SIGMOID],
-        (R.h__f(V.T) <= R.f(V.T)[5, 10] + R.h(V.Z)[5, 5] + R.special.next(V.Z, V.T)) | [Transformation.SIGMOID],
-        (R.h__o(V.T) <= R.f(V.T)[5, 10] + R.h(V.Z)[5, 5] + R.special.next(V.Z, V.T)) | [Transformation.SIGMOID],
-        (R.h__n(V.T) <= R.f(V.T)[5, 10] + R.h(V.Z)[5, 5] + R.special.next(V.Z, V.T)) | [Transformation.TANH],
+        (
+            R.h__i(V.T)
+            <= R.f(V.T)[hidden_size, input_size] + R.h(V.Z)[hidden_size, hidden_size] + R.special.next(V.Z, V.T)
+        )
+        | [Transformation.SIGMOID],
+        (
+            R.h__f(V.T)
+            <= R.f(V.T)[hidden_size, input_size] + R.h(V.Z)[hidden_size, hidden_size] + R.special.next(V.Z, V.T)
+        )
+        | [Transformation.SIGMOID],
+        (
+            R.h__o(V.T)
+            <= R.f(V.T)[hidden_size, input_size] + R.h(V.Z)[hidden_size, hidden_size] + R.special.next(V.Z, V.T)
+        )
+        | [Transformation.SIGMOID],
+        (
+            R.h__n(V.T)
+            <= R.f(V.T)[hidden_size, input_size] + R.h(V.Z)[hidden_size, hidden_size] + R.special.next(V.Z, V.T)
+        )
+        | [Transformation.TANH],
         R.h__c(V.T) <= R.h__f(V.T) * R.h__c(V.Z) + R.h__i(V.T) * R.h__n(V.T) + R.special.next(V.Z, V.T),
         R.h(V.T) <= R.h__o(V.T) * Transformation.TANH(R.h__c(V.T)),
     ]
@@ -267,6 +283,85 @@ def test_lstm_module_simple(input_size, hidden_size, sequence_len, epochs):
 
     for _ in range(epochs):
         output, _ = rnn(torch_input, (h0, c0))
+        loss = loss_fun(output[-1], target)
+
+        optimizer.zero_grad(set_to_none=True)
+        loss.backward()
+        optimizer.step()
+
+        result, _ = model(bd.samples)
+        assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
+
+
+@pytest.mark.parametrize(
+    "input_size, hidden_size, sequence_len, epochs",
+    [
+        (10, 5, 10, 500),
+    ],
+)
+def test_gru_module_simple(input_size, hidden_size, sequence_len, epochs):
+    """Test that PyNeuraLogic GRU layer computes the same as PyTorch GRU layer (with backprop)"""
+    torch_input = torch.randn((sequence_len, input_size))
+    h0 = torch.randn((1, hidden_size))
+    target = torch.randn((hidden_size,))
+
+    rnn = torch.nn.GRU(input_size, hidden_size, 1, bias=False)
+
+    template = Template()
+
+    template += R.h(0) <= R.h0
+    template += (
+        R.h__r(V.T) <= R.f(V.T)[hidden_size, input_size] + R.h(V.Z)[hidden_size, hidden_size] + R.special.next(V.Z, V.T)
+    ) | [Transformation.SIGMOID]
+    template += (
+        R.h__z(V.T) <= R.f(V.T)[hidden_size, input_size] + R.h(V.Z)[hidden_size, hidden_size] + R.special.next(V.Z, V.T)
+    ) | [Transformation.SIGMOID]
+    template += (
+        R.h__n(V.T)
+        <= (R.h__r(V.T) * R.h(V.Z)[hidden_size, hidden_size])
+        + R.f(V.T)[hidden_size, input_size]
+        + R.special.next(V.Z, V.T)
+    ) | [Transformation.TANH]
+    template += R.h(V.T) <= (Transformation.REVERSE(R.h__z(V.T)) * R.h__n(V.T)) + (
+        R.h__z(V.T) * R.h(V.Z)
+    ) + R.special.next(V.Z, V.T)
+
+    model = template.build(
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
+    )
+
+    parameters = model.parameters()
+    torch_parameters = [parameter.tolist() for parameter in rnn.parameters()]
+
+    parameters["weights"][0] = [torch_parameters[0][i] for i in range(0, hidden_size)]
+    parameters["weights"][2] = [torch_parameters[0][i] for i in range(1 * hidden_size, 1 * hidden_size + hidden_size)]
+    parameters["weights"][5] = [torch_parameters[0][i] for i in range(2 * hidden_size, 2 * hidden_size + hidden_size)]
+
+    parameters["weights"][1] = [torch_parameters[1][i] for i in range(0, hidden_size)]
+    parameters["weights"][3] = [torch_parameters[1][i] for i in range(1 * hidden_size, 1 * hidden_size + hidden_size)]
+    parameters["weights"][4] = [torch_parameters[1][i] for i in range(2 * hidden_size, 2 * hidden_size + hidden_size)]
+
+    model.load_state_dict(parameters)
+
+    dataset = Dataset(
+        [
+            Sample(
+                R.h(sequence_len)[target.detach().numpy().tolist()],
+                [
+                    R.h0[[float(h) for h in h0[0]]],
+                    *[R.f(i + 1)[[float(h) for h in torch_input[i]]] for i in range(sequence_len)],
+                ],
+            )
+        ]
+    )
+
+    bd = model.build_dataset(dataset)
+
+    optimizer = torch.optim.Adam(rnn.parameters(), lr=0.001)
+    loss_fun = torch.nn.MSELoss()
+
+    for _ in range(epochs):
+        output, _ = rnn(torch_input, h0)
         loss = loss_fun(output[-1], target)
 
         optimizer.zero_grad(set_to_none=True)
