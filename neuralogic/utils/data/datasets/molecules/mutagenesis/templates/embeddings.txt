@@ -1,16 +1,18 @@
-{3,1} atom_embed(A) :- c(A).
-{3,1} atom_embed(A) :- o(A).
-{3,1} atom_embed(A) :- br(A).
-{3,1} atom_embed(A) :- i(A).
-{3,1} atom_embed(A) :- f(A).
-{3,1} atom_embed(A) :- h(A).
-{3,1} atom_embed(A) :- n(A).
-{3,1} atom_embed(A) :- cl(A).
-atom_embed/1 {3,1}
-{3,1} bond_embed(B) :- b_1(B).
-{3,1} bond_embed(B) :- b_2(B).
-{3,1} bond_embed(B) :- b_3(B).
-{3,1} bond_embed(B) :- b_4(B).
-{3,1} bond_embed(B) :- b_5(B).
-{3,1} bond_embed(B) :- b_7(B).
-bond_embed/1 {3,1}
+{3,1} atom_embed(A) :- c(A). [activation=tanh]
+{3,1} atom_embed(A) :- o(A). [activation=tanh]
+{3,1} atom_embed(A) :- br(A). [activation=tanh]
+{3,1} atom_embed(A) :- i(A). [activation=tanh]
+{3,1} atom_embed(A) :- f(A). [activation=tanh]
+{3,1} atom_embed(A) :- h(A). [activation=tanh]
+{3,1} atom_embed(A) :- n(A). [activation=tanh]
+{3,1} atom_embed(A) :- cl(A). [activation=tanh]
+atom_embed / 1 {3,1}
+{3,1} bond_embed(B) :- b_1(B). [activation=tanh]
+{3,1} bond_embed(B) :- b_2(B). [activation=tanh]
+{3,1} bond_embed(B) :- b_3(B). [activation=tanh]
+{3,1} bond_embed(B) :- b_4(B). [activation=tanh]
+{3,1} bond_embed(B) :- b_5(B). [activation=tanh]
+{3,1} bond_embed(B) :- b_7(B). [activation=tanh]
+bond_embed / 1 {3,1}
+bond_embed / 1 [activation=tanh]
+atom_embed / 1 [activation=tanh]
