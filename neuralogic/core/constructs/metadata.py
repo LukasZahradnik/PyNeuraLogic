@@ -1,7 +1,7 @@
 from typing import Union, Iterable, Callable, Optional
 
-from neuralogic.core.constructs.function import Transformation, Combination, Aggregation, Function
 from neuralogic.core.constructs.function.function import (
+    Function,
     AggregationFunction,
     TransformationFunction,
     CombinationFunction,
@@ -14,9 +14,9 @@ class Metadata:
     def __init__(
         self,
         learnable: bool = None,
-        transformation: Union[str, Transformation, Combination] = None,
-        combination: Union[str, Combination] = None,
-        aggregation: Union[str, Aggregation] = None,
+        transformation: Union[str, TransformationFunction, CombinationFunction] = None,
+        combination: Union[str, CombinationFunction] = None,
+        aggregation: Union[str, AggregationFunction] = None,
         duplicit_grounding: Optional[bool] = None,
     ):
         self.learnable = learnable

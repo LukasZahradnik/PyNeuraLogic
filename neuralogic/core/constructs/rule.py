@@ -14,7 +14,7 @@ class RuleBody:
     def __and__(self, other):
         from neuralogic.core.constructs.relation import BaseRelation
 
-        if isinstance(other, BaseRelation):
+        if isinstance(other, (BaseRelation, FContainer)):
             self.literals.append(other)
             return self
         raise NotImplementedError
@@ -58,7 +58,7 @@ class Rule:
         self.body = body
 
         if not isinstance(self.body, FContainer):
-            self.body = list(body)
+            self.body = list(self.body)
 
         if self._is_ellipsis_templated():
             variable_set = {term for term in head.terms if term is not Ellipsis and str(term)[0].isupper()}
@@ -88,6 +88,12 @@ class Rule:
                         new_terms.append(term)
                 if found_replacement:
                     self.body[atom_index] = Relation.special.alldiff(*new_terms)
+
+    def _contains_function_container(self):
+        for lit in self.body:
+            if isinstance(lit, FContainer):
+                return True
+        return False
 
     def _is_ellipsis_templated(self) -> bool:
         # for body_atom in self.body:

@@ -14,7 +14,7 @@ class Transformation:
     SIGMOID: TransformationFunction = TransformationFunction("SIGMOID")
     TANH: TransformationFunction = TransformationFunction("TANH")
     SIGNUM: TransformationFunction = TransformationFunction("SIGNUM")
-    RELU: TransformationFunction = TransformationFunction("RELU", namespace="transformation.elementwise.Exponentiation")
+    RELU: TransformationFunction = TransformationFunction("RELU", namespace="transformation.elementwise.ReLu")
     LEAKY_RELU: TransformationFunction = TransformationFunction(
         "LEAKYRELU", namespace="transformation.elementwise.LeakyReLu"
     )
@@ -39,9 +39,9 @@ class Transformation:
 
 class Combination:
     # Aggregation
-    AVG: CombinationFunction = CombinationFunction("AVG", namespace="aggregation.{name}")
-    MAX: CombinationFunction = CombinationFunction("MAX", can_flatten=True, namespace="aggregation.{name}")
-    MIN: CombinationFunction = CombinationFunction("MIN", can_flatten=True, namespace="aggregation.{name}")
+    AVG: CombinationFunction = CombinationFunction("AVG", namespace="aggregation.Average")
+    MAX: CombinationFunction = CombinationFunction("MAX", can_flatten=True, namespace="aggregation.Maximum")
+    MIN: CombinationFunction = CombinationFunction("MIN", can_flatten=True, namespace="aggregation.Minimum")
     SUM: CombinationFunction = CombinationFunction(
         "SUM", operator="+", can_flatten=True, namespace="aggregation.{name}"
     )

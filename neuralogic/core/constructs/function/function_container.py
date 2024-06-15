@@ -39,7 +39,9 @@ class FContainer:
 
     def __str__(self):
         if self.function.operator is not None:
-            return f" {self.function.operator} ".join(node.to_str() for node in self.nodes)
+            return f" {self.function.operator} ".join(
+                node.to_str(True) if isinstance(node, FContainer) else node.to_str() for node in self.nodes
+            )
 
         args = ", ".join(node.to_str() for node in self.nodes)
 
@@ -106,5 +108,7 @@ class FContainer:
 
         return jpype.JClass(class_name)(self.function.get(), filtered_next_node, filtered_next_indices)
 
-    def to_str(self):
+    def to_str(self, parentheses_wrap: bool = False):
+        if parentheses_wrap and self.function.operator is not None:
+            return f"({self})"
         return self.__str__()

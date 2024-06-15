@@ -8,7 +8,7 @@ class Function:
 
     def __init__(self, name: str, *, namespace: str = "", operator: Optional[str] = None, can_flatten: bool = False):
         self.name: str = name.lower()
-        self.operator: Optional[str] = None
+        self.operator: Optional[str] = operator
         self.can_flatten = can_flatten
         self.namespace = namespace
 
