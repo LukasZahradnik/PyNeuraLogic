@@ -2,10 +2,10 @@ from typing import Sequence
 
 import jpype
 
-from neuralogic.core.constructs.function.function import Aggregation
+from neuralogic.core.constructs.function.function import AggregationFunction
 
 
-class Softmax(Aggregation):
+class SoftmaxAggregation(AggregationFunction):
     __slots__ = ("agg_terms", "var_terms")
 
     def __init__(
@@ -18,9 +18,9 @@ class Softmax(Aggregation):
         self.term_indices = agg_terms
         self.agg_terms = agg_terms
 
-    def __call__(self, entity=None, *, agg_terms: Sequence[int] = None):
-        softmax = Softmax(self.name, agg_terms=agg_terms)
-        return Aggregation.__call__(softmax, entity)
+    def __call__(self, *, agg_terms: Sequence[int] = None):
+        softmax = SoftmaxAggregation(self.name, agg_terms=agg_terms)
+        return AggregationFunction.__call__(softmax)
 
     def is_parametrized(self) -> bool:
         return self.agg_terms is not None
@@ -36,7 +36,7 @@ class Softmax(Aggregation):
     def rule_head_dependant(self) -> bool:
         return self.agg_terms is not None
 
-    def process_head(self, head) -> "Softmax":
+    def process_head(self, head) -> "SoftmaxAggregation":
         term_indices = []
 
         for agg_term in set(self.agg_terms):
@@ -48,7 +48,7 @@ class Softmax(Aggregation):
                     term_indices.append(i)
                     break
 
-        aggregation = Softmax(self.name, agg_terms=self.agg_terms)
+        aggregation = SoftmaxAggregation(self.name, agg_terms=self.agg_terms)
         aggregation.term_indices = term_indices
 
         return aggregation

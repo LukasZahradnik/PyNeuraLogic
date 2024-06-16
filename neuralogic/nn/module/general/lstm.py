@@ -94,15 +94,11 @@ class LSTMCell(Module):
             *f(),
             *o(),
             *g(),
-            c_left | [Transformation.IDENTITY, Combination.ELPRODUCT],
-            c_right | [Transformation.IDENTITY, Combination.ELPRODUCT],
-            c_left.head.predicate | [Transformation.IDENTITY],
-            c_right.head.predicate | [Transformation.IDENTITY],
-            c | [Transformation.IDENTITY],
-            (R.get(c_name)([*terms, 0]) <= R.get(self.cell_state_0_name)(terms)) | [Transformation.IDENTITY],
-            c.head.predicate | [Transformation.IDENTITY],
-            h | [Transformation.IDENTITY, Combination.ELPRODUCT],
-            h.head.predicate | [Transformation.IDENTITY],
+            c_left | [Combination.ELPRODUCT],
+            c_right | [Combination.ELPRODUCT],
+            c,
+            R.get(c_name)([*terms, 0]) <= R.get(self.cell_state_0_name)(terms),
+            h | [Combination.ELPRODUCT],
         ]
 
 
@@ -188,6 +184,6 @@ class LSTM(Module):
         terms = [f"X{i}" for i in range(self.arity)]
 
         return [
-            (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Transformation.IDENTITY],
+            R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms),
             *recursive_cell(),
         ]

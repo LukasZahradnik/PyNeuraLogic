@@ -39,7 +39,7 @@ class SettingsProxy:
         for key, value in params.items():
             self.__setattr__(key, value)
 
-        self.rule_transformation = Transformation.TANH
+        self.rule_transformation = Transformation.IDENTITY
         self.relation_transformation = Transformation.IDENTITY
         self.rule_combination = Combination.SUM
         self.relation_combination = Combination.SUM

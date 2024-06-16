@@ -1,5 +1,6 @@
 from typing import Optional
 
+from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation, Combination
 from neuralogic.core.constructs.factories import R, V
@@ -24,10 +25,10 @@ class GCNConv(Module):
         Feature predicate name to get features from.
     edge_name : str
         Edge predicate name to use for neighborhood relations.
-    activation : Transformation
+    activation : TransformationFunction
         Activation function of the output.
         Default: ``Transformation.IDENTITY``
-    aggregation : Aggregation
+    aggregation : AggregationFunction
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.SUM``
     add_self_loops : Optional[bool]
@@ -45,8 +46,8 @@ class GCNConv(Module):
         output_name: str,
         feature_name: str,
         edge_name: str,
-        activation: Transformation = Transformation.IDENTITY,
-        aggregation: Aggregation = Aggregation.SUM,
+        activation: TransformationFunction = Transformation.IDENTITY,
+        aggregation: AggregationFunction = Aggregation.SUM,
         add_self_loops: Optional[bool] = None,
         normalize: bool = True,
     ):
@@ -68,11 +69,7 @@ class GCNConv(Module):
 
     def __call__(self):
         head = R.get(self.output_name)(V.I)[self.out_channels, self.in_channels]
-        metadata = Metadata(
-            transformation=Transformation.IDENTITY, aggregation=self.aggregation, combination=Combination.PRODUCT
-        )
-
-        id_metadata = Metadata(transformation=Transformation.IDENTITY)
+        metadata = Metadata(aggregation=self.aggregation, combination=Combination.PRODUCT)
 
         edge = R.get(self.edge_name)
         edge_count = R.get(f"{self.output_name}__edge_count")
@@ -86,12 +83,11 @@ class GCNConv(Module):
 
             self_loops = [
                 edge(V.I, V.I)[1.0].fixed(),
-                (edge(V.I, V.J) <= (R.get(self.edge_name)(V.I, V.J))) | id_metadata,
-                edge / 2 | id_metadata,
+                edge(V.I, V.J) <= (R.get(self.edge_name)(V.I, V.J)),
             ]
 
         if self.normalize:
-            count_metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=Aggregation.COUNT)
+            count_metadata = Metadata(aggregation=Aggregation.COUNT)
             body = [R.get(self.feature_name)(V.J), edge(V.J, V.I), Transformation.SQRT(edge_count(V.J, V.I))]
 
             normalization = [

@@ -1,5 +1,6 @@
 from typing import List, Union, Sequence
 
+from neuralogic.core.constructs.function.function import TransformationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation
 from neuralogic.core.constructs.factories import R
@@ -18,7 +19,7 @@ class MLP(Module):
         Output (head) predicate name of the module.
     input_name : str
         Input name.
-    activation : Union[Transformation, List[Transformation]]
+    activation : Union[TransformationFunction, List[TransformationFunction]]
         Activation function of all layers or list of activations for each layer.
         Default: ``Transformation.RELU``
     arity : int
@@ -30,14 +31,14 @@ class MLP(Module):
         units: List[int],
         output_name: str,
         input_name: str,
-        activation: Union[Transformation, List[Transformation]] = Transformation.RELU,
+        activation: Union[TransformationFunction, List[TransformationFunction]] = Transformation.RELU,
         arity: int = 1,
     ):
         self.output_name = output_name
         self.input_name = input_name
 
         self.units = units
-        self.activation: Union[Transformation, List[Transformation]] = activation
+        self.activation: Union[TransformationFunction, List[TransformationFunction]] = activation
         self.arity = arity
 
     def __call__(self):
@@ -49,7 +50,7 @@ class MLP(Module):
 
         if isinstance(self.activation, Sequence):
             metadata = [Metadata(transformation=act) for act in self.activation]
-            metadata.extend([Metadata(transformation=Transformation.IDENTITY)] * (iters - len(metadata)))
+            metadata.extend([Metadata()] * (iters - len(metadata)))
         else:
             metadata = [Metadata(transformation=self.activation)] * (iters + 1)
 
@@ -67,7 +68,7 @@ class MLP(Module):
                 if index < len(self.activation):
                     body_metadata = Metadata(transformation=self.activation[index])
                 else:
-                    body_metadata = [Transformation.IDENTITY]
+                    body_metadata = []
 
             if index + 2 < len(self.units):
                 in_channels, out_channels = self.units[index + 1], self.units[index + 2]

@@ -5,7 +5,7 @@ from neuralogic.core.builder import BuiltDataset, GroundedDataset
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.settings import Settings, SettingsProxy
 from neuralogic.core.enums import Grounder
-from neuralogic.core.constructs.function import Transformation, Aggregation, Combination
+from neuralogic.core.constructs.function import Transformation, Aggregation, Combination, F
 
 
 __all__ = [
@@ -15,6 +15,7 @@ __all__ = [
     "C",
     "Relation",
     "R",
+    "F",
     "Rule",
     "RuleBody",
     "Template",

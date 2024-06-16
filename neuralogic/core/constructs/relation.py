@@ -2,9 +2,11 @@ from typing import Iterable, Union
 
 import numpy as np
 
+from neuralogic.core.constructs.function.enum import Combination, Transformation
+from neuralogic.core.constructs.function import FContainer
 from neuralogic.core.constructs.predicate import Predicate
 from neuralogic.core.constructs import rule, factories
-from neuralogic.core.constructs.function import Transformation, Combination
+from neuralogic.core.constructs.function.function import TransformationFunction, CombinationFunction
 
 
 class BaseRelation:
@@ -14,7 +16,7 @@ class BaseRelation:
         self,
         predicate: Predicate,
         terms=None,
-        function: Union[Transformation, Combination] = None,
+        function: Union[TransformationFunction, CombinationFunction] = None,
         negated: bool = False,
     ):
         self.predicate = predicate
@@ -50,7 +52,7 @@ class BaseRelation:
     def T(self) -> "BaseRelation":
         return self.attach_activation_function(Transformation.TRANSP)
 
-    def attach_activation_function(self, function: Union[Transformation, Combination]):
+    def attach_activation_function(self, function: Union[TransformationFunction, CombinationFunction]):
         if self.negated:
             raise ValueError(f"Cannot attach function to negated relation {self}")
         relation = self.__copy__()
@@ -126,12 +128,26 @@ class BaseRelation:
             return rule.RuleBody(self, other)
         raise NotImplementedError
 
+    def __add__(self, other):
+        return FContainer((self, other), Combination.SUM)
+
+    def __mul__(self, other):
+        return FContainer((self, other), Combination.ELPRODUCT)
+
+    def __matmul__(self, other):
+        return FContainer((self, other), Combination.PRODUCT)
+
 
 class WeightedRelation(BaseRelation):
     __slots__ = "weight", "weight_name", "is_fixed"
 
     def __init__(
-        self, weight, predicate: Predicate, fixed=False, terms=None, function: Union[Transformation, Combination] = None
+        self,
+        weight,
+        predicate: Predicate,
+        fixed=False,
+        terms=None,
+        function: Union[TransformationFunction, CombinationFunction] = None,
     ):
         super().__init__(predicate, terms, function, False)
 

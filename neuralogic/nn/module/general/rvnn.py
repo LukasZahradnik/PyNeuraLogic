@@ -1,3 +1,4 @@
+from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
@@ -30,10 +31,10 @@ class RvNN(Module):
     max_children : int
         Maximum number of children (specify which <max_children>-ary tree will be considered).
         Default: ``2``
-    activation : Transformation
+    activation : TransformationFunction
         Activation function of all layers.
         Default: ``Transformation.TANH``
-    aggregation : Aggregation
+    aggregation : AggregationFunction
         Aggregation function of a layer.
         Default: ``Aggregation.SUM``
     arity : int
@@ -47,8 +48,8 @@ class RvNN(Module):
         input_name: str,
         parent_map_name: str,
         max_children: int = 2,
-        activation: Transformation = Transformation.TANH,
-        aggregation: Aggregation = Aggregation.SUM,
+        activation: TransformationFunction = Transformation.TANH,
+        aggregation: AggregationFunction = Aggregation.SUM,
         arity: int = 1,
     ):
         self.input_size = input_size
@@ -73,7 +74,6 @@ class RvNN(Module):
 
         rules = [
             (output_rel(head_terms) <= (input_rel(head_terms), parent_map_rel(V.P))) | metadata,
-            output_rel / len(head_terms) | [Transformation.IDENTITY],
         ]
 
         body = []

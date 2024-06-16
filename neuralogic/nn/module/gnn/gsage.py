@@ -1,3 +1,4 @@
+from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
@@ -35,10 +36,10 @@ class SAGEConv(Module):
         Feature predicate name to get features from.
     edge_name : str
         Edge predicate name to use for neighborhood relations.
-    activation : Transformation
+    activation : TransformationFunction
         Activation function of the output.
         Default: ``Transformation.IDENTITY``
-    aggregation : Aggregation
+    aggregation : AggregationFunction
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.AVG``
 
@@ -51,8 +52,8 @@ class SAGEConv(Module):
         output_name: str,
         feature_name: str,
         edge_name: str,
-        activation: Transformation = Transformation.IDENTITY,
-        aggregation: Aggregation = Aggregation.AVG,
+        activation: TransformationFunction = Transformation.IDENTITY,
+        aggregation: AggregationFunction = Aggregation.AVG,
     ):
         self.output_name = output_name
         self.feature_name = feature_name
@@ -66,7 +67,7 @@ class SAGEConv(Module):
 
     def __call__(self):
         head = R.get(self.output_name)(V.I)[self.out_channels, self.in_channels]
-        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(aggregation=self.aggregation)
 
         return [
             (head <= (R.get(self.feature_name)(V.J), R.get(self.edge_name)(V.J, V.I))) | metadata,

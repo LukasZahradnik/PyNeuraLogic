@@ -98,16 +98,11 @@ class GRUCell(Module):
         return [
             *r(),
             *z(),
-            n_helper | [Transformation.IDENTITY, Combination.ELPRODUCT],
-            n_helper.head.predicate | [Transformation.IDENTITY],
+            n_helper | [Combination.ELPRODUCT],
             n | [Transformation.TANH],
-            n.head.predicate | [Transformation.IDENTITY],
-            h_left | [Transformation.IDENTITY, Combination.ELPRODUCT],
-            h_left.head.predicate | [Transformation.IDENTITY],
-            h_right | [Transformation.IDENTITY, Combination.ELPRODUCT],
-            h_right.head.predicate | [Transformation.IDENTITY],
-            h | [Transformation.IDENTITY],
-            h.head.predicate | [Transformation.IDENTITY],
+            h_left | [Combination.ELPRODUCT],
+            h_right | [Combination.ELPRODUCT],
+            h,
         ]
 
 
@@ -253,6 +248,6 @@ class GRU(Module):
         terms = [f"X{i}" for i in range(self.arity)]
 
         return [
-            (R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms)) | [Transformation.IDENTITY],
+            R.get(self.output_name)([*terms, 0]) <= R.get(self.hidden_0_name)(terms),
             *recursive_cell(),
         ]

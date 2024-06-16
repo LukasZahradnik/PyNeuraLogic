@@ -143,16 +143,13 @@ class EncoderBlock(Module):
             return [
                 *attention(),
                 (R.get(norm_name)(terms) <= (R.get(attn_name)(terms), R.get(data_name)(terms))) | [Transformation.NORM],
-                R.get(norm_name) / self.arity | [Transformation.IDENTITY],
                 *mlp(),
                 (output_rel(terms) <= (R.get(norm_name)(terms), R.get(mlp_name)(terms))) | [Transformation.NORM],
-                output_rel / self.arity | [Transformation.IDENTITY],
             ]
 
         return [
             *attention(),
             (output_rel(terms) <= (R.get(attn_name)(terms), R.get(data_name)(terms))) | [Transformation.NORM],
-            output_rel / self.arity | [Transformation.IDENTITY],
         ]
 
 

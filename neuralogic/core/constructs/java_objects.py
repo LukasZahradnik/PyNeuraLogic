@@ -5,6 +5,10 @@ import numpy as np
 import jpype
 
 from neuralogic import is_initialized, initialize
+from neuralogic.core.constructs.function.enum import Combination
+from neuralogic.core.constructs.function.function import CombinationFunction
+from neuralogic.core.constructs.metadata import Metadata
+from neuralogic.core.constructs.function import FContainer
 from neuralogic.core.constructs.term import Variable, Constant
 from neuralogic.core.settings import SettingsProxy, Settings
 
@@ -67,6 +71,21 @@ class ValueFactory:
                 return True, value
 
         raise ValueError(f"Cannot create weight from type {type(weight)}, value {weight}")
+
+
+def _is_body_flat(body: FContainer):
+    if not isinstance(body.function, CombinationFunction):
+        return False
+
+    for node in body.nodes:
+        if isinstance(node, FContainer):
+            return False
+    return True
+
+
+def _flatten_rule_body(body, metadata: Metadata):
+    combination = Combination.SUM if metadata is None or metadata.combination is None else metadata.combination
+    return combination(*body)
 
 
 class JavaFactory:
@@ -307,7 +326,22 @@ class JavaFactory:
         else:
             java_rule.setWeight(weight)
 
-        body_relation = [self.get_relation(relation, variable_factory) for relation in rule.body]
+        body = rule.body
+        if not isinstance(body, FContainer) and rule._contains_function_container():
+            body = _flatten_rule_body(body, rule.metadata)
+
+        contains_refs = False
+        if isinstance(body, FContainer):
+            processed_relations = {}
+            body_relation = []
+            for relation in body:
+                if id(relation) in processed_relations:
+                    contains_refs = True
+                    continue
+                body_relation.append(self.get_relation(relation, variable_factory))
+                processed_relations[id(relation)] = True
+        else:
+            body_relation = [self.get_relation(relation, variable_factory) for relation in body]
         body_relation_list = jpype.java.util.ArrayList(body_relation)
 
         java_rule.setHead(self.head_atom(head_relation))
@@ -320,7 +354,17 @@ class JavaFactory:
         if rule.metadata is not None:
             java_rule.allowDuplicitGroundings = bool(rule.metadata.duplicit_grounding)
 
-        java_rule.setMetadata(self.get_metadata(rule.metadata, self.rule_metadata))
+        metadata = rule.metadata
+        if isinstance(body, FContainer):
+            metadata = metadata.copy() if metadata is not None else Metadata()
+
+            if not contains_refs and _is_body_flat(body):
+                metadata.combination = body.function
+                body = body.nodes
+            else:
+                metadata.combination = body.to_function()
+
+        java_rule.setMetadata(self.get_metadata(metadata, self.rule_metadata))
 
         return java_rule
 

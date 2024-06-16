@@ -1,5 +1,6 @@
 from typing import Iterable, Optional
 
+from neuralogic.core.constructs.function import FContainer
 from neuralogic.core.constructs.metadata import Metadata
 
 
@@ -13,7 +14,7 @@ class RuleBody:
     def __and__(self, other):
         from neuralogic.core.constructs.relation import BaseRelation
 
-        if isinstance(other, BaseRelation):
+        if isinstance(other, (BaseRelation, FContainer)):
             self.literals.append(other)
             return self
         raise NotImplementedError
@@ -54,9 +55,12 @@ class Rule:
         if not isinstance(body, Iterable):
             body = [body]
 
-        self.body = list(body)
+        self.body = body
 
-        if self.is_ellipsis_templated():
+        if not isinstance(self.body, FContainer):
+            self.body = list(self.body)
+
+        if self._is_ellipsis_templated():
             variable_set = {term for term in head.terms if term is not Ellipsis and str(term)[0].isupper()}
 
             for body_atom in self.body:
@@ -85,13 +89,19 @@ class Rule:
                 if found_replacement:
                     self.body[atom_index] = Relation.special.alldiff(*new_terms)
 
-    def is_ellipsis_templated(self) -> bool:
-        for body_atom in self.body:
-            if not body_atom.predicate.special or body_atom.predicate.name != "alldiff":
-                continue
-            for term in body_atom.terms:
-                if term is Ellipsis:
-                    return True
+    def _contains_function_container(self):
+        for lit in self.body:
+            if isinstance(lit, FContainer):
+                return True
+        return False
+
+    def _is_ellipsis_templated(self) -> bool:
+        # for body_atom in self.body:
+        #     if not body_atom.predicate.special or body_atom.predicate.name != "alldiff":
+        #         continue
+        #     for term in body_atom.terms:
+        #         if term is Ellipsis:
+        #             return True
         return False
 
     def to_str(self, _: bool = False) -> str:
@@ -99,6 +109,8 @@ class Rule:
 
     def __str__(self) -> str:
         metadata = "" if self.metadata is None is None else f" {self.metadata}"
+        if isinstance(self.body, FContainer):
+            return f"{self.head.to_str()} :- {self.body.to_str()}.{metadata}"
         return f"{self.head.to_str()} :- {', '.join(atom.to_str() for atom in self.body)}.{metadata}"
 
     def __repr__(self) -> str:
