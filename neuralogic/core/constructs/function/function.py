@@ -21,8 +21,8 @@ class Function:
     def pretty_str(self) -> str:
         return str(self).capitalize()
 
-    def __call__(self, *args, **kwargs):
-        if len(args) == 0 or args[0] is None:
+    def __call__(self, *args):
+        if len(args) == 0:
             return self
         raise NotImplementedError
 
@@ -53,19 +53,18 @@ class TransformationFunction(Function):
     ):
         super().__init__(name, namespace=namespace, operator=operator, can_flatten=can_flatten)
 
-    def __call__(self, *args, **kwargs):
-        from neuralogic.core.constructs import relation
+    def __call__(self, relation: Optional = None, **kwargs):
+        from neuralogic.core.constructs import relation as rel
         from neuralogic.core.constructs.function.function_container import FContainer
 
-        if len(args) == 0 or args[0] is None:
+        if relation is None:
             return self
 
-        arg = args[0]
-        if isinstance(arg, relation.BaseRelation) and not isinstance(arg, relation.WeightedRelation):
-            if arg.negated or arg.function is not None:
-                return FContainer((arg,), self)
-            return arg.attach_activation_function(self)
-        return FContainer(args, self)
+        if isinstance(relation, rel.BaseRelation) and not isinstance(relation, rel.WeightedRelation):
+            if relation.negated or relation.function is not None:
+                return FContainer((relation,), self)
+            return relation.attach_activation_function(self)
+        return FContainer(relation, self)
 
 
 class CombinationFunction(Function):
@@ -79,12 +78,12 @@ class CombinationFunction(Function):
     ):
         super().__init__(name, namespace=namespace, operator=operator, can_flatten=can_flatten)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *relations):
         from neuralogic.core.constructs.function.function_container import FContainer
 
-        if len(args) == 0 or args[0] is None:
+        if len(relations) == 0:
             return self
-        return FContainer(args, self)
+        return FContainer(relations, self)
 
 
 class AggregationFunction(Function):

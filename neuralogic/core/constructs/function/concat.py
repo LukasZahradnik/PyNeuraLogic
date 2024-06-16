@@ -15,9 +15,9 @@ class ConcatCombination(CombinationFunction):
         super().__init__(name)
         self.axis = axis
 
-    def __call__(self, *entities, axis: int = -1):
+    def __call__(self, *relations, axis: int = -1):
         concat = ConcatCombination(self.name, axis=axis)
-        return CombinationFunction.__call__(concat, *entities)
+        return CombinationFunction.__call__(concat, *relations)
 
     def is_parametrized(self) -> bool:
         return self.axis != -1
@@ -43,9 +43,9 @@ class ConcatAggregation(AggregationFunction):
         super().__init__(name)
         self.axis = axis
 
-    def __call__(self, entity=None, *, axis: int = -1):
+    def __call__(self, *, axis: int = -1):
         concat = ConcatAggregation(self.name, axis=axis)
-        return AggregationFunction.__call__(concat, entity)
+        return AggregationFunction.__call__(concat)
 
     def is_parametrized(self) -> bool:
         return self.axis != -1

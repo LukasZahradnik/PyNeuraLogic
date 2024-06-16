@@ -1,4 +1,4 @@
-from typing import Union, Tuple
+from typing import Union, Tuple, Optional
 
 import jpype
 
@@ -22,12 +22,12 @@ class Reshape(TransformationFunction):
 
     def __call__(
         self,
-        entity=None,
+        relation: Optional = None,
         *,
-        shape: Union[None, Tuple[int, int], int],
+        shape: Union[None, Tuple[int, int], int] = None,
     ):
         reshape = Reshape(self.name, shape=shape)
-        return TransformationFunction.__call__(reshape, entity)
+        return TransformationFunction.__call__(reshape, relation)
 
     def is_parametrized(self) -> bool:
         return True

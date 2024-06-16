@@ -1,4 +1,4 @@
-from typing import Union, Tuple
+from typing import Union, Tuple, Optional
 
 import jpype
 
@@ -28,13 +28,13 @@ class Slice(TransformationFunction):
 
     def __call__(
         self,
-        entity=None,
+        relation: Optional = None,
         *,
         rows: Union[type(Ellipsis), Tuple[int, int]] = ...,
         cols: Union[type(Ellipsis), Tuple[int, int]] = ...,
     ):
         slice = Slice(self.name, rows=rows, cols=cols)
-        return TransformationFunction.__call__(slice, entity)
+        return TransformationFunction.__call__(slice, relation)
 
     def is_parametrized(self) -> bool:
         return True
