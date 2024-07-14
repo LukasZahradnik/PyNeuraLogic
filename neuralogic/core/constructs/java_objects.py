@@ -5,6 +5,7 @@ import numpy as np
 import jpype
 
 from neuralogic import is_initialized, initialize
+from neuralogic.core.constructs.factories import R
 from neuralogic.core.constructs.term import Variable, Constant
 from neuralogic.core.settings import SettingsProxy, Settings
 
@@ -307,7 +308,35 @@ class JavaFactory:
         else:
             java_rule.setWeight(weight)
 
-        body_relation = [self.get_relation(relation, variable_factory) for relation in rule.body]
+        all_variables = {term for term in rule.head.terms if term is not Ellipsis and str(term)[0].isupper()}
+        body_relation = []
+        all_diff_index = []
+
+        for i, relation in enumerate(rule.body):
+            all_variables.update(term for term in relation.terms if term is not Ellipsis and str(term)[0].isupper())
+
+            if relation.predicate.special and relation.predicate.name == "alldiff":
+                found = False
+
+                for term in relation.terms:
+                    if term is Ellipsis:
+                        body_relation.append(R.special.alldiff(relation.terms))
+                        all_diff_index.append(i)
+                        found = True
+
+                        break
+                if found:
+                    continue
+
+            body_relation.append(self.get_relation(relation, variable_factory))
+
+        for index in all_diff_index:
+            terms = {term for term in body_relation[index].terms}
+            terms.update(term for term in all_variables)
+
+            print(", ".join(str(t) for t in terms))
+            body_relation[index] = self.get_relation(R.special.alldiff(terms), variable_factory)
+
         body_relation_list = jpype.java.util.ArrayList(body_relation)
 
         java_rule.setHead(self.head_atom(head_relation))
