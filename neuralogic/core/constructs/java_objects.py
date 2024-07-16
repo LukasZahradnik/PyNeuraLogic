@@ -334,7 +334,6 @@ class JavaFactory:
             terms = {term for term in body_relation[index].terms}
             terms.update(term for term in all_variables)
 
-            print(", ".join(str(t) for t in terms))
             body_relation[index] = self.get_relation(R.special.alldiff(terms), variable_factory)
 
         body_relation_list = jpype.java.util.ArrayList(body_relation)
