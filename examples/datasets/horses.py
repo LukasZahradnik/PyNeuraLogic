@@ -1,4 +1,4 @@
-from neuralogic.core import Relation, Template, Var, Const
+from neuralogic.core import Relation, Template, Var, Const, Transformation
 from neuralogic.dataset import Dataset
 
 
@@ -9,9 +9,11 @@ template = Template()
 
 template.add_rules(
     [
-        Relation.foal(Var.X)[1, ] <= (Relation.parent(Var.X, Var.Y), Relation.horse(Var.Y)),  # todo gusta: mozna prejmenovat Atom -> Predicate by odpovidalo skutecnosti prirozeneji?
-        Relation.foal(Var.X)[1, ] <= (Relation.sibling(Var.X, Var.Y), Relation.horse(Var.Y)),
-        Relation.negFoal(Var.X)[1, ] <= Relation.foal(Var.X),
+        (Relation.foal(Var.X)[1, ] <= (Relation.parent(Var.X, Var.Y), Relation.horse(Var.Y))) | [Transformation.TANH],
+        (Relation.foal(Var.X)[1, ] <= (Relation.sibling(Var.X, Var.Y), Relation.horse(Var.Y))) | [Transformation.TANH],
+        (Relation.negFoal(Var.X)[1, ] <= Relation.foal(Var.X)) | [Transformation.TANH],
+        Relation.foal / 1 | [Transformation.TANH],
+        Relation.negFoal / 1 | [Transformation.TANH],
     ]
 )
 

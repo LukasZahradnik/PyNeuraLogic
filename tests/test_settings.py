@@ -18,8 +18,6 @@ import pytest
             "error_function": SoftEntropy(),
             "initializer": Uniform(5.0),
             "initializer_uniform_scale": 5.0,
-            "rule_transformation": Transformation.SIGMOID,
-            "relation_transformation": Transformation.RELU,
         }
     ],
 )

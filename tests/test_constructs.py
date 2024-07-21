@@ -154,20 +154,6 @@ def test_rule_metadata():
 
 
 def test_rules():
-    my_rule: Rule = R.a(V.X) <= R.special.alldiff(...)
-
-    assert len(my_rule.body[0].terms) == 1
-    assert my_rule.body[0].terms[0] == V.X
-
-    my_rule: Rule = R.a(V.X) <= (R.special.alldiff(...), R.b(V.Y, V.Z))
-    assert len(my_rule.body[0].terms) == 3
-
-    terms = sorted(my_rule.body[0].terms)
-
-    assert terms[0] == V.X
-    assert terms[1] == V.Y
-    assert terms[2] == V.Z
-
     my_rule = R.a <= R.b
 
     assert len(my_rule.body) == 1

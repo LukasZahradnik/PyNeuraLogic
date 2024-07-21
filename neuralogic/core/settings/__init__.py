@@ -5,7 +5,6 @@ from neuralogic.core.enums import Grounder
 from neuralogic.nn.init import Initializer, Uniform
 from neuralogic.nn.loss import MSE, ErrorFunction
 from neuralogic.core.settings.settings_proxy import SettingsProxy
-from neuralogic.core.constructs.function import Transformation, Combination, Aggregation
 from neuralogic.optim import Optimizer, Adam
 
 
@@ -17,11 +16,6 @@ class Settings:
         epochs: int = 3000,
         error_function: ErrorFunction = MSE(),
         initializer: Initializer = Uniform(),
-        rule_transformation: Transformation = Transformation.TANH,
-        rule_combination: Combination = Combination.SUM,
-        rule_aggregation: Aggregation = Aggregation.AVG,
-        relation_transformation: Transformation = Transformation.TANH,
-        relation_combination: Combination = Combination.SUM,
         iso_value_compression: bool = True,
         chain_pruning: bool = True,
         prune_only_identities: bool = False,
@@ -96,46 +90,6 @@ class Settings:
     @initializer.setter
     def initializer(self, initializer: Initializer):
         self._update("initializer", initializer)
-
-    @property
-    def relation_transformation(self) -> Transformation:
-        return self.params["relation_transformation"]
-
-    @relation_transformation.setter
-    def relation_transformation(self, value: Transformation):
-        self._update("relation_transformation", value)
-
-    @property
-    def relation_combination(self) -> Combination:
-        return self.params["relation_combination"]
-
-    @relation_combination.setter
-    def relation_combination(self, value: Combination):
-        self._update("relation_combination", value)
-
-    @property
-    def rule_transformation(self) -> Transformation:
-        return self.params["rule_transformation"]
-
-    @rule_transformation.setter
-    def rule_transformation(self, value: Transformation):
-        self._update("rule_transformation", value)
-
-    @property
-    def rule_combination(self) -> Combination:
-        return self.params["rule_combination"]
-
-    @rule_combination.setter
-    def rule_combination(self, value: Combination):
-        self._update("rule_combination", value)
-
-    @property
-    def rule_aggregation(self) -> Aggregation:
-        return self.params["rule_aggregation"]
-
-    @rule_aggregation.setter
-    def rule_aggregation(self, value: Aggregation):
-        self._update("rule_aggregation", value)
 
     def create_proxy(self) -> SettingsProxy:
         proxy = SettingsProxy(**self.params)

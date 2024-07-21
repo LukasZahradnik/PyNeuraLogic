@@ -1,7 +1,12 @@
 import ./embeddings.txt
 
-l1_embed(X) :- {3,3} atom_embed(X), {3,3} atom_embed(Y), bond(X,Y,B), bond_embed(B).
-l2_embed(X) :- {3,3} l1_embed(X), {3,3} l1_embed(Y), bond(X,Y,B), bond_embed(B).
-l3_embed(X) :- {3,3} l2_embed(X), {3,3} l2_embed(Y), bond(X,Y,B), bond_embed(B).
+l1_embed(X) :- {3,3} atom_embed(X), {3,3} atom_embed(Y), bond(X,Y,B), bond_embed(B). [activation=tanh]
+l2_embed(X) :- {3,3} l1_embed(X), {3,3} l1_embed(Y), bond(X,Y,B), bond_embed(B). [activation=tanh]
+l3_embed(X) :- {3,3} l2_embed(X), {3,3} l2_embed(Y), bond(X,Y,B), bond_embed(B). [activation=tanh]
 
-{1,3} predict :- l3_embed(X).
+l1_embed / 1 [activation=tanh]
+l2_embed / 1 [activation=tanh]
+l3_embed / 1 [activation=tanh]
+
+{1,3} predict :- l3_embed(X). [activation=tanh]
+predict / 0 [activation=tanh]

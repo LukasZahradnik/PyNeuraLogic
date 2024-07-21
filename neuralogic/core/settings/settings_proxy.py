@@ -19,11 +19,6 @@ class SettingsProxy:
         epochs: int,
         error_function: ErrorFunction,
         initializer: Initializer,
-        rule_transformation: Transformation,
-        rule_combination: Combination,
-        rule_aggregation: Aggregation,
-        relation_transformation: Transformation,
-        relation_combination: Combination,
         iso_value_compression: bool,
         chain_pruning: bool,
         prune_only_identities: bool,
@@ -42,6 +37,12 @@ class SettingsProxy:
 
         for key, value in params.items():
             self.__setattr__(key, value)
+
+        self.rule_transformation = Transformation.TANH
+        self.relation_transformation = Transformation.IDENTITY
+        self.rule_combination = Combination.SUM
+        self.relation_combination = Combination.SUM
+        self.rule_aggregation = Aggregation.AVG
 
         self.settings.debugExporting = False
         self.settings.exportBlocks = []
