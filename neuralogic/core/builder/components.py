@@ -255,8 +255,10 @@ class GroundedDataset:
         return len(self._groundings_list)
 
     def neuralize(self, *, progress: bool = False):
+        self._to_list()
+
         if self._groundings_list is not None:
-            return self._builder.neuralize(self._groundings.stream(), progress, len(self))
+            return self._builder.neuralize(jpype.java.util.ArrayList(self._groundings).stream(), progress, len(self))
         if progress:
             return self._builder.neuralize(self._groundings, progress, len(self))
         return self._builder.neuralize(self._groundings, progress, 0)
