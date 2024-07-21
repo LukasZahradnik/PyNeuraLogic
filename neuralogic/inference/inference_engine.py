@@ -18,7 +18,7 @@ class InferenceEngine:
         self.settings = Settings().create_disconnected_proxy() if settings is None else settings.create_proxy()
         self.java_factory = JavaFactory()
 
-        self.parsed_template = template.get_parsed_template(self.settings, self.java_factory)
+        self.parsed_template = template._get_parsed_template(self.settings, self.java_factory)
         self.dataset_builder = DatasetBuilder(self.parsed_template, self.java_factory)
 
         self.examples: List[Union[BaseRelation, Rule]] = []
