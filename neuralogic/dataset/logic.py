@@ -1,5 +1,8 @@
 from typing import Optional, List, Union, Sequence
 
+import jpype
+
+from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.dataset.base import BaseDataset
@@ -99,3 +102,17 @@ class Dataset(BaseDataset):
 
     def set_queries(self, queries: List):
         self._queries = queries
+
+    def generate_features(self, feature_depth: int = 1, count_groundings: bool = True):
+        java_factory = JavaFactory()
+        clause = jpype.java.util.ArrayList([java_factory.to_clause(sample.example) for sample in self.samples])
+
+        namespace = "cz.cvut.fel.ida.logic.features.generation"
+
+        jpype.JClass(f"{namespace}.FeatureGenerationSettings").COUNT_GROUNDINGS = count_groundings
+        features = jpype.JClass(f"{namespace}.FeatureGenerator").generateFeatures(clause, feature_depth)
+
+        table = [[int(i) for i in feats] for feats in features.table]
+        clauses = [str(clause) for clause in features.features]
+
+        return table, clauses

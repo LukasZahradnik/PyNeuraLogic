@@ -160,6 +160,16 @@ class JavaFactory:
 
         return self.clause(literal_array)
 
+    def to_clause(self, atoms):
+        literal_array = self.literal[len(atoms)]
+
+        for i, atom in enumerate(atoms):
+            terms = [self.get_term(term, self.variable_factory) for term in atom.terms]
+            predicate_name = f"_{atom.predicate.name}" if atom.predicate.hidden else atom.predicate.name
+
+            literal_array[i] = self.literal(predicate_name, atom.negated, terms)
+        return self.clause(literal_array)
+
     def get_generic_relation(self, relation_class, relation, variable_factory, default_weight=None, is_example=False):
         predicate = self.get_predicate(relation.predicate)
 
