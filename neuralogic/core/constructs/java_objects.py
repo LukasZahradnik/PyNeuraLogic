@@ -5,6 +5,7 @@ import numpy as np
 import jpype
 
 from neuralogic import is_initialized, initialize
+from neuralogic.core.constructs.factories import R
 from neuralogic.core.constructs.function.enum import Combination
 from neuralogic.core.constructs.function.function import CombinationFunction
 from neuralogic.core.constructs.metadata import Metadata
@@ -178,6 +179,16 @@ class JavaFactory:
 
         return self.clause(literal_array)
 
+    def to_clause(self, atoms):
+        literal_array = self.literal[len(atoms)]
+
+        for i, atom in enumerate(atoms):
+            terms = [self.get_term(term, self.variable_factory) for term in atom.terms]
+            predicate_name = f"_{atom.predicate.name}" if atom.predicate.hidden else atom.predicate.name
+
+            literal_array[i] = self.literal(predicate_name, atom.negated, terms)
+        return self.clause(literal_array)
+
     def get_generic_relation(self, relation_class, relation, variable_factory, default_weight=None, is_example=False):
         predicate = self.get_predicate(relation.predicate)
 
@@ -331,17 +342,42 @@ class JavaFactory:
             body = _flatten_rule_body(body, rule.metadata)
 
         contains_refs = False
-        if isinstance(body, FContainer):
-            processed_relations = {}
-            body_relation = []
-            for relation in body:
+        all_variables = {term for term in rule.head.terms if term is not Ellipsis and str(term)[0].isupper()}
+        body_relation = []
+        all_diff_index = []
+        processed_relations = {}
+        is_fcontainer = isinstance(body, FContainer)
+
+        for i, relation in enumerate(rule.body):
+            all_variables.update(term for term in relation.terms if term is not Ellipsis and str(term)[0].isupper())
+
+            if is_fcontainer:
                 if id(relation) in processed_relations:
                     contains_refs = True
                     continue
-                body_relation.append(self.get_relation(relation, variable_factory))
                 processed_relations[id(relation)] = True
-        else:
-            body_relation = [self.get_relation(relation, variable_factory) for relation in body]
+
+            if relation.predicate.special and relation.predicate.name == "alldiff":
+                found = False
+
+                for term in relation.terms:
+                    if term is Ellipsis:
+                        body_relation.append(R.special.alldiff(relation.terms))
+                        all_diff_index.append(i)
+                        found = True
+
+                        break
+                if found:
+                    continue
+
+            body_relation.append(self.get_relation(relation, variable_factory))
+
+        for index in all_diff_index:
+            terms = {term for term in body_relation[index].terms}
+            terms.update(term for term in all_variables)
+
+            body_relation[index] = self.get_relation(R.special.alldiff(terms), variable_factory)
+
         body_relation_list = jpype.java.util.ArrayList(body_relation)
 
         java_rule.setHead(self.head_atom(head_relation))
