@@ -10,7 +10,7 @@
 [![Tweet](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fgithub.com%2FLukasZahradnik%2FPyNeuraLogic)](https://twitter.com/intent/tweet?text=Check%20out:&url=https%3A%2F%2Fgithub.com%2FLukasZahradnik%2FPyNeuraLogic)
 
 
-[Documentation](https://pyneuralogic.readthedocs.io/en/latest/) | [Examples](#-examples) | [Papers](#-papers)
+[Documentation](https://pyneuralogic.readthedocs.io/en/latest/) · [Examples](#-examples) · [Papers](#-papers) · [Report Bug](https://github.com/LukasZahradnik/PyNeuraLogic/issues/new?assignees=&labels=bug&projects=&template=bug_report.yaml&title=%5B%F0%9F%90%9B+Bug+Report%5D%3A+) · [Request Feature](https://github.com/LukasZahradnik/PyNeuraLogic/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.yaml&title=%5B%E2%9C%A8+Feature+Request%5D%3A+)
 
 PyNeuraLogic lets you use Python to write **Differentiable Logic Programs**
 
@@ -36,13 +36,13 @@ Many things! For instance - ever heard of [Graph Neural Networks](https://distil
 Or, a bit more 'formally':
 
 ```logtalk
-Relation.message2(Var.X) <= (Relation.message1(Var.Y), Relation.edge(Var.Y, Var.X))
+R.msg2(Var.X) <= (R.msg1(V.Y), R.edge(V.Y, V.X))
 ```
 
 ...and that's the actual _code_! Now for a classic learnable GNN layer, you'll want to add some weights, such as
 
 ```logtalk
-Relation.message2(Var.X)[5,10] <= (Relation.message1(Var.Y)[10,20], Relation.edge(Var.Y, Var.X))
+R.msg2(Var.X)[5,10] <= (R.msg1(V.Y)[10,20], R.edge(V.Y, V.X))
 ```
 
 to project your `[20,1]` input node embeddings ('message1') through a learnable ``[10,20]`` layer before the aggregation, and subsequently a `[5,10]` layer after the aggregation.
@@ -50,11 +50,29 @@ to project your `[20,1]` input node embeddings ('message1') through a learnable 
 If you don't like the default settings, you can of course [specify](https://pyneuralogic.readthedocs.io/en/latest/language.html) various additional details, such as the particular aggregation and activation functions
 
 ```logtalk
-(R.message2(V.X)[5,10] <= (R.message1(V.Y)[10,20], R.edge(V.Y, V.X))) | [Transformation.RELU, Aggregation.AVG]
+(R.msg2(V.X)[5,10] <= (R.msg1(V.Y)[10,20], R.edge(V.Y, V.X))) | [Transformation.RELU, Aggregation.AVG]
 ```
 
 to instantiate the classic GCN layer specification, which you can directly train now!
 
+```mermaid
+graph TD;
+    edge10[/"edge(1, 0)"\]-->RuleNeuron1("msg2(0) <= msg1(1), edge(1, 0).");
+    msg1[/"msg1(1)"\]-- w_1 -->RuleNeuron1;
+
+    edge00[/"edge(0, 0)"\]-->RuleNeuron2("msg2(0) <= msg1(0), edge(0, 0).");
+    msg0[/"msg1(0)"\]-- w_1 -->RuleNeuron2;
+
+    edge30[/"edge(3, 0)"\]-->RuleNeuron3("msg2(0) <= msg1(3), edge(3, 0).");
+    msg3[/"msg1(3)"\]-- w_1 -->RuleNeuron3;
+
+    RuleNeuron1-- ReLU -->AggregationNeuron[["Rules Aggregation (Average)"]]
+    RuleNeuron2-- ReLU -->AggregationNeuron[["Rules Aggregation (Average)"]]
+    RuleNeuron3-- ReLU -->AggregationNeuron[["Rules Aggregation (Average)"]]
+
+    AggregationNeuron-- w_2 -->OutputNeuron[\"Output Neuron (Tanh)"/]
+
+```
 
 ### How is it different from other GNN frameworks?
 
@@ -85,7 +103,7 @@ We hope you'll find the framework useful in designing _your own_ deep **relation
 Please let us know if you need some guidance or would like to cooperate!
 
 
-## 💡 Getting started
+## 🚀 Getting started
 
 
 ### Installation
@@ -106,7 +124,20 @@ Python >= 3.8
 Java >= 1.8
 ```
 
-In case you want to use visualization provided in the library, it is required to have [Graphviz](https://graphviz.org/download/) installed.
+> \[!TIP]
+>
+> In case you want to use visualization provided in the library, it is required to have [Graphviz](https://graphviz.org/download/) installed.
+
+<br />
+
+## 📦 Predefined Modules
+
+PyNeuraLogic has a set of predefined modules to get you quickly started with your experimenting!
+It contains, for example, predefined modules for:
+
+- Graph Neural Networks (GCNConv, SAGEConv, GINConv, RGCNConv, ...)
+- Meta graphs and meta paths (MetaConv, MAGNN, ...)
+- Transformer, LSTM, GRU, RNN, [...and more!](https://pyneuralogic.readthedocs.io/en/latest/zoo.html)
 
 ## 🔬 Examples
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/SimpleXOR.ipynb) [Simple XOR example](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/SimpleXOR.ipynb)
@@ -123,18 +154,6 @@ In case you want to use visualization provided in the library, it is required to
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingKRegularGraphs.ipynb) [Distinguishing k-regular graphs](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingKRegularGraphs.ipynb)
 <br />
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingNonRegularGraphs.ipynb) [Distinguishing non-regular graphs](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingNonRegularGraphs.ipynb)
-
-<br />
-
-
-## 📦 Predefined Modules
-
-PyNeuraLogic has a set of predefined modules to get you quickly started with your experimenting!
-It contains, for example, predefined modules for:
-
-- Graph Neural Networks (GNNConv, SAGEConv, GINConv, RGCNConv, ...)
-- Meta graphs and meta paths (MetaConv, MAGNN, ...)
-- Transformer, LSTM, GRU, RNN, [...and more!](https://pyneuralogic.readthedocs.io/en/latest/zoo.html)
 
 ## 📝 Papers
 

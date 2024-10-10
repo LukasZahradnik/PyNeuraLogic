@@ -1,5 +1,6 @@
 from typing import Iterable, Optional
 
+from neuralogic.core.constructs.function import FContainer
 from neuralogic.core.constructs.metadata import Metadata
 
 
@@ -13,7 +14,7 @@ class RuleBody:
     def __and__(self, other):
         from neuralogic.core.constructs.relation import BaseRelation
 
-        if isinstance(other, BaseRelation):
+        if isinstance(other, (BaseRelation, FContainer)):
             self.literals.append(other)
             return self
         raise NotImplementedError
@@ -52,13 +53,24 @@ class Rule:
         if not isinstance(body, Iterable):
             body = [body]
 
-        self.body = list(body)
+        self.body = body
+
+        if not isinstance(self.body, FContainer):
+            self.body = list(self.body)
+
+    def _contains_function_container(self):
+        for lit in self.body:
+            if isinstance(lit, FContainer):
+                return True
+        return False
 
     def to_str(self, _: bool = False) -> str:
         return str(self)
 
     def __str__(self) -> str:
         metadata = "" if self.metadata is None is None else f" {self.metadata}"
+        if isinstance(self.body, FContainer):
+            return f"{self.head.to_str()} :- {self.body.to_str()}.{metadata}"
         return f"{self.head.to_str()} :- {', '.join(atom.to_str() for atom in self.body)}.{metadata}"
 
     def __repr__(self) -> str:

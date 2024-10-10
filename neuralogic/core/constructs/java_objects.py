@@ -6,6 +6,10 @@ import jpype
 
 from neuralogic import is_initialized, initialize
 from neuralogic.core.constructs.factories import R
+from neuralogic.core.constructs.function.enum import Combination
+from neuralogic.core.constructs.function.function import CombinationFunction
+from neuralogic.core.constructs.metadata import Metadata
+from neuralogic.core.constructs.function import FContainer
 from neuralogic.core.constructs.term import Variable, Constant
 from neuralogic.core.settings import SettingsProxy, Settings
 
@@ -68,6 +72,21 @@ class ValueFactory:
                 return True, value
 
         raise ValueError(f"Cannot create weight from type {type(weight)}, value {weight}")
+
+
+def _is_body_flat(body: FContainer):
+    if not isinstance(body.function, CombinationFunction):
+        return False
+
+    for node in body.nodes:
+        if isinstance(node, FContainer):
+            return False
+    return True
+
+
+def _flatten_rule_body(body, metadata: Metadata):
+    combination = Combination.SUM if metadata is None or metadata.combination is None else metadata.combination
+    return combination(*body)
 
 
 class JavaFactory:
@@ -318,12 +337,25 @@ class JavaFactory:
         else:
             java_rule.setWeight(weight)
 
+        body = rule.body
+        if not isinstance(body, FContainer) and rule._contains_function_container():
+            body = _flatten_rule_body(body, rule.metadata)
+
+        contains_refs = False
         all_variables = {term for term in rule.head.terms if term is not Ellipsis and str(term)[0].isupper()}
         body_relation = []
         all_diff_index = []
+        processed_relations = {}
+        is_fcontainer = isinstance(body, FContainer)
 
         for i, relation in enumerate(rule.body):
             all_variables.update(term for term in relation.terms if term is not Ellipsis and str(term)[0].isupper())
+
+            if is_fcontainer:
+                if id(relation) in processed_relations:
+                    contains_refs = True
+                    continue
+                processed_relations[id(relation)] = True
 
             if relation.predicate.special and relation.predicate.name == "alldiff":
                 found = False
@@ -358,7 +390,17 @@ class JavaFactory:
         if rule.metadata is not None:
             java_rule.allowDuplicitGroundings = bool(rule.metadata.duplicit_grounding)
 
-        java_rule.setMetadata(self.get_metadata(rule.metadata, self.rule_metadata))
+        metadata = rule.metadata
+        if isinstance(body, FContainer):
+            metadata = metadata.copy() if metadata is not None else Metadata()
+
+            if not contains_refs and _is_body_flat(body):
+                metadata.combination = body.function
+                body = body.nodes
+            else:
+                metadata.combination = body.to_function()
+
+        java_rule.setMetadata(self.get_metadata(metadata, self.rule_metadata))
 
         return java_rule
 

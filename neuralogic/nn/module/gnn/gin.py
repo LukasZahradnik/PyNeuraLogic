@@ -1,3 +1,4 @@
+from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
@@ -12,8 +13,8 @@ class GINConv(Module):
         output_name: str,
         feature_name: str,
         edge_name: str,
-        activation: Transformation = Transformation.IDENTITY,
-        aggregation: Aggregation = Aggregation.SUM,
+        activation: TransformationFunction = Transformation.IDENTITY,
+        aggregation: AggregationFunction = Aggregation.SUM,
     ):
         self.output_name = output_name
         self.feature_name = feature_name
@@ -29,12 +30,11 @@ class GINConv(Module):
         head = R.get(self.output_name)(V.I)[self.out_channels, self.in_channels]
         embed = R.get(f"embed__{self.output_name}")
 
-        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(aggregation=self.aggregation)
 
         return [
             (head <= (R.get(self.feature_name)(V.J), R.get(self.edge_name)(V.J, V.I))) | metadata,
             (embed(V.I) <= R.get(self.feature_name)(V.I)) | metadata,
             (head <= embed(V.I)[self.in_channels, self.in_channels]) | Metadata(transformation=self.activation),
-            embed / 1 | Metadata(transformation=Transformation.IDENTITY),
             R.get(self.output_name) / 1 | Metadata(transformation=self.activation),
         ]

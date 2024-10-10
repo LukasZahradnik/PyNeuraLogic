@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
@@ -35,10 +36,10 @@ class MetaConv(Module):
         Role predicate name to use for role relations. When :code:`None`, elements from :code:`roles` are used instead.
     roles : List[str]
         List of relations' names
-    activation : Transformation
+    activation : TransformationFunction
         Activation function of the output.
         Default: ``Transformation.SIGMOID``
-    aggregation : Aggregation
+    aggregation : AggregationFunction
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.AVG``
 
@@ -52,8 +53,8 @@ class MetaConv(Module):
         feature_name: str,
         role_name: Optional[str],
         roles: List[str],
-        activation: Transformation = Transformation.SIGMOID,
-        aggregation: Aggregation = Aggregation.AVG,
+        activation: TransformationFunction = Transformation.SIGMOID,
+        aggregation: AggregationFunction = Aggregation.AVG,
     ):
         self.output_name = output_name
         self.feature_name = feature_name
@@ -71,24 +72,19 @@ class MetaConv(Module):
         head = R.get(self.output_name)(V.I)
         role_head = R.get(f"{self.output_name}__roles")
 
-        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(aggregation=self.aggregation)
         feature = R.get(self.feature_name)(V.J)[self.out_channels, self.in_channels]
 
         if self.role_name is not None:
             role_rules = [
-                ((role_head(V.I, role) <= (feature, R.get(self.role_name)(V.J, role, V.I))) | [Transformation.IDENTITY])
-                for role in self.roles
+                (role_head(V.I, role) <= (feature, R.get(self.role_name)(V.J, role, V.I))) for role in self.roles
             ]
         else:
-            role_rules = [
-                ((role_head(V.I, role) <= (feature, R.get(role)(V.J, V.I))) | [Transformation.IDENTITY])
-                for role in self.roles
-            ]
+            role_rules = [(role_head(V.I, role) <= (feature, R.get(role)(V.J, V.I))) for role in self.roles]
 
         return [
             (head <= role_head(V.I, V.R)) | metadata,
             (head <= R.get(self.feature_name)(V.I)[self.out_channels, self.in_channels]) | metadata,
             *role_rules,
             R.get(self.output_name) / 1 | Metadata(transformation=self.activation),
-            role_head / 2 | [Transformation.IDENTITY],
         ]

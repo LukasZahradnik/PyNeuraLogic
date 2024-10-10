@@ -1,11 +1,11 @@
-from typing import Union, Tuple
+from typing import Union, Tuple, Optional
 
 import jpype
 
-from neuralogic.core.constructs.function.function import Transformation
+from neuralogic.core.constructs.function.function import TransformationFunction
 
 
-class Reshape(Transformation):
+class Reshape(TransformationFunction):
     __slots__ = ("shape",)
 
     def __init__(
@@ -22,12 +22,12 @@ class Reshape(Transformation):
 
     def __call__(
         self,
-        entity=None,
+        relation: Optional = None,
         *,
-        shape: Union[None, Tuple[int, int], int],
+        shape: Union[None, Tuple[int, int], int] = None,
     ):
         reshape = Reshape(self.name, shape=shape)
-        return Transformation.__call__(reshape, entity)
+        return TransformationFunction.__call__(reshape, relation)
 
     def is_parametrized(self) -> bool:
         return True
