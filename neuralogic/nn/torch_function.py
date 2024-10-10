@@ -1,4 +1,3 @@
-import json
 from typing import Callable, Any, List, Union
 
 import torch
@@ -14,10 +13,9 @@ from neuralogic.dataset import Dataset, Sample
 
 class _NeuraLogicFunction(Function):
     @staticmethod
-    def forward(ctx, mapping, value_factory, sample, model, number_format, dtype, *inputs):
+    def forward(ctx, mapping, value_factory, sample, model, dtype, *inputs):
         ctx.model = model
         ctx.sample = sample
-        ctx.number_format = number_format
         ctx.dtype = dtype
         ctx.mapping = mapping
 
@@ -30,19 +28,12 @@ class _NeuraLogicFunction(Function):
     def backward(ctx: Any, *grad_outputs: Any) -> Any:
         model = ctx.model
         sample = ctx.sample
-        number_format = ctx.number_format
         dtype = ctx.dtype
 
         backproper, weight_updater = model.backprop(sample, -grad_outputs[0].detach().numpy())
-        state_index = backproper.stateIndex
 
         gradients = tuple(
-            -torch.tensor(
-                json.loads(
-                    str(sample.get_fact(fact).getComputationView(state_index).getGradient().toString(number_format))
-                ),
-                dtype=dtype,
-            ).reshape(fact.weight.shape)
+            -torch.tensor(sample.get_fact(fact)[0].gradient, dtype=dtype).reshape(fact.weight.shape)
             for fact in ctx.mapping
         )
 
@@ -50,7 +41,7 @@ class _NeuraLogicFunction(Function):
         trainer.updateWeights(model.strategy.getCurrentModel(), weight_updater)
         trainer.invalidateSample(trainer.getInvalidation(), sample.java_sample)
 
-        return (None, None, None, None, None, None, *gradients)
+        return (None, None, None, None, None, *gradients)
 
 
 class NeuraLogic(nn.Module):
@@ -74,7 +65,6 @@ class NeuraLogic(nn.Module):
         self.to_logic = to_logic
 
         self.model = template.build(settings)
-        self.number_format = self.model.settings.settings_class.superDetailedNumberFormat
 
         dataset = Dataset(Sample(output_relation, input_facts))
         self.sample = self.model.build_dataset(dataset, learnable_facts=True).samples[0]
@@ -91,7 +81,6 @@ class NeuraLogic(nn.Module):
             self.value_factory,
             self.sample,
             self.model,
-            self.number_format,
             self.dtype,
             *(fact.weight for fact in mapping),
         )

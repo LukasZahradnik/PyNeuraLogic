@@ -121,7 +121,7 @@ class NeuralSample:
             if term_str[0] == term_str[0].upper() and term_str[0] != term_str[0].lower():
                 raise ValueError(f"{fact} is not a fact")
 
-        return self.get_nodes(fact, "FactAtom")
+        return self.get_nodes(fact, "FactNeuron")
 
     def set_fact_value(self, fact, value) -> int:
         for term in fact.terms:
@@ -130,7 +130,7 @@ class NeuralSample:
             if term_str[0] == term_str[0].upper() and term_str[0] != term_str[0].lower():
                 raise ValueError(f"{fact} is not a fact")
 
-        node = self.get_nodes(fact, "FactAtom")
+        node = self.get_nodes(fact, "FactNeuron")
 
         if len(node) == 0:
             return -1
