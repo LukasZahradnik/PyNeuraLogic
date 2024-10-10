@@ -9,7 +9,7 @@ from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.utils.visualize import draw_sample, draw_grounding
 
 
-class Atom:
+class Node:
     __slots__ = "substitutions", "_atom"
 
     def __init__(self, atom, substitutions: Dict):
@@ -20,66 +20,82 @@ class Atom:
     def value(self):
         return ValueFactory.from_java(self._atom.getRawState().getValue(), SettingsProxy.number_format())
 
+    @property
+    def gradient(self):
+        return ValueFactory.from_java(self._atom.getRawState().getGradient(), SettingsProxy.number_format())
+
+    def node_type(self):
+        return self._atom.getClass().getSimpleName()
+
+    def __str__(self):
+        return str(self._atom)
+
 
 class NeuralSample:
-    __slots__ = "java_sample", "grounding", "literal_cache"
+    __slots__ = "java_sample", "grounding", "_nodes"
 
     def __init__(self, sample, grounding):
         self.java_sample = sample
         self.grounding = grounding
-        self.literal_cache = None
+        self._nodes = None
+
+    @property
+    def nodes(self):
+        if self._nodes is None:
+            self._nodes = self._get_nodes()
+        return self._nodes
 
     @property
     def target(self):
         return ValueFactory.from_java(self.java_sample.target, SettingsProxy.number_format())
 
-    def get_atom(self, literal):
+    def get_nodes(self, literal, node_type=None):
         literal_name = literal.predicate.name
         literal_arity = literal.predicate.arity
 
-        if self.literal_cache is None:
-            self.literal_cache = self._get_literals()
+        nodes = []
+        nodes_by_name_vals = []
 
-        if literal_name not in self.literal_cache:
-            return None
+        if node_type is None:
+            nodes_by_name_vals = self.nodes.values()
+        elif node_type in self.nodes:
+            nodes_by_name_vals = [self.nodes[node_type]]
 
-        atoms = []
-
-        for subs, value in self.literal_cache[literal_name].items():
-            if len(subs) != literal_arity:
+        for nodes_by_name in nodes_by_name_vals:
+            if literal_name not in nodes_by_name:
                 continue
 
-            literal_subs = {}
-            for term, sub in zip(literal.terms, subs):
-                term_str = str(term)
-
-                if term_str[0] == term_str[0].upper() and term_str[0] != term_str[0].lower():
-                    if term_str in literal_subs and sub != literal_subs[term_str]:
-                        break
-                    literal_subs[str(term)] = sub
+            for subs, value in nodes_by_name[literal_name].items():
+                if len(subs) != literal_arity:
                     continue
 
-                if str(term) != sub:
-                    break
-            else:
-                atoms.append(Atom(value, literal_subs))
-        return atoms
+                literal_subs = {}
+                for term, sub in zip(literal.terms, subs):
+                    term_str = str(term)
 
-    def _get_literals(self, expected_types=("WeightedAtomNeuron", "AtomNeuron", "FactNeuron")):
-        literals = {}
+                    if term_str[0] == term_str[0].upper() and term_str[0] != term_str[0].lower():
+                        if term_str in literal_subs and sub != literal_subs[term_str]:
+                            break
+                        literal_subs[str(term)] = sub
+                        continue
 
-        for atom in self.java_sample.query.evidence.allNeuronsTopologic:
-            atom_type = str(atom.getClass().getSimpleName())
+                    if str(term) != sub:
+                        break
+                else:
+                    nodes.append(Node(value, literal_subs))
+        return nodes
 
-            if atom_type not in expected_types:
-                continue
+    def _get_nodes(self):
+        nodes = {}
 
-            name = str(atom.name).strip()
+        for node in self.java_sample.query.evidence.allNeuronsTopologic:
+            node_type = str(node.getClass().getSimpleName())
+            name = str(node.name).strip()
+
             bracket = name.rfind("(")
             space = name.rfind(" ", 0, bracket if bracket != -1 else None)
 
             substitutions = tuple()
-
             if bracket != -1:
                 subs = name[bracket + 1 :]
                 name = name[space + 1 : bracket]
@@ -89,38 +105,40 @@ class NeuralSample:
             elif space != -1:
                 name = name[space + 1 :]
 
-            if name not in literals:
-                literals[name] = {}
+            if node_type not in nodes:
+                nodes[node_type] = {}
 
-            literals[name][substitutions] = atom
-        return literals
+            if name not in nodes[node_type]:
+                nodes[node_type][name] = {}
+
+            nodes[node_type][name][substitutions] = node
+        return nodes
 
     def get_fact(self, fact):
-        name = fact.predicate.name
-        arity = fact.predicate.arity
-
         for term in fact.terms:
             term_str = str(term)
 
             if term_str[0] == term_str[0].upper() and term_str[0] != term_str[0].lower():
                 raise ValueError(f"{fact} is not a fact")
 
-        if name not in self.literal_cache:
-            return None
-
-        term_tuple = tuple(str(term) for term in fact.terms)
-        for subs, atom in self.literal_cache[name].items():
-            if len(subs) == arity and term_tuple == subs:
-                return atom
-        return None
+        return self.get_nodes(fact, "FactAtom")
 
     def set_fact_value(self, fact, value) -> int:
-        if self.literal_cache is None:
-            self.literal_cache = self._get_literals()
+        for term in fact.terms:
+            term_str = str(term)
 
-        sample_fact = self.get_fact(fact)
+            if term_str[0] == term_str[0].upper() and term_str[0] != term_str[0].lower():
+                raise ValueError(f"{fact} is not a fact")
+
+        node = self.get_nodes(fact, "FactAtom")
+
+        if len(node) == 0:
+            return -1
+
+        sample_fact = node[0]._atom
         sample_fact.getRawState().setValue(value)
         sample_fact.offset.value = value
+
         return sample_fact.index
 
     def draw(
@@ -134,6 +152,9 @@ class NeuralSample:
         **kwargs,
     ):
         return draw_sample(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
+
+    def __str__(self):
+        return str(self.java_sample)
 
 
 class Neuron:
@@ -229,6 +250,9 @@ class Grounding:
         **kwargs,
     ):
         return draw_grounding(self.grounding, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
+
+    def __str__(self):
+        return str(self.grounding)
 
 
 class GroundedDataset:
