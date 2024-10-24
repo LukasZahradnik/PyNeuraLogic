@@ -48,7 +48,7 @@ class Data:
         self,
         x: Sequence,
         edge_index: Sequence,
-        y: Union[Sequence, float, int],
+        y: Union[Sequence, float, int] = 0.0,
         edge_attr: Optional[Sequence] = None,
         y_mask: Optional[Sequence] = None,
     ):
