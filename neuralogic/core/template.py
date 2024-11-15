@@ -2,7 +2,6 @@ from typing import Union, List, Optional, Set, Dict, Any, Callable, Iterable
 
 import jpype
 
-from neuralogic import is_initialized, initialize
 from neuralogic.core.builder import Builder, DatasetBuilder
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
@@ -86,6 +85,8 @@ class Template:
         self.add_rules(module())
 
     def get_parsed_template(self, settings: SettingsProxy, java_factory: JavaFactory):
+        from neuralogic import is_initialized, initialize
+
         if not is_initialized():
             initialize()
 

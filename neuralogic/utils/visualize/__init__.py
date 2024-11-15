@@ -5,7 +5,6 @@ from typing import Optional
 
 import jpype
 
-from neuralogic import get_default_graphviz_path
 from neuralogic.core.settings import Settings, SettingsProxy
 
 
@@ -13,6 +12,8 @@ def get_graphviz_path(path: Optional[str] = None) -> str:
     """
     Get the path to the Graphviz executable
     """
+    from neuralogic import get_default_graphviz_path
+
     if path is not None:
         return path
     return get_default_graphviz_path()

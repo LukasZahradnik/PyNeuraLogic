@@ -14,3 +14,5 @@ sphinx-tabs
 sphinx-copybutton
 
 torch_geometric
+
+git+https://github.com/neumannjan/nn-structural-graph-vectorizer-compiler.git

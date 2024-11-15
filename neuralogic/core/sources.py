@@ -2,13 +2,14 @@ from typing import List
 
 import jpype
 
-from neuralogic import is_initialized, initialize
 from neuralogic.core.settings import SettingsProxy
 
 
 class Sources:
     @staticmethod
     def from_settings(settings: SettingsProxy) -> "Sources":
+        from neuralogic import is_initialized, initialize
+
         if not is_initialized():
             initialize()
 
@@ -17,6 +18,8 @@ class Sources:
 
     @staticmethod
     def from_args(args: List[str], settings: SettingsProxy) -> "Sources":
+        from neuralogic import is_initialized, initialize
+
         if not is_initialized():
             initialize()
 

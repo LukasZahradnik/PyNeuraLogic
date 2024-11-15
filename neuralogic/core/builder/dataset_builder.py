@@ -3,7 +3,6 @@ from typing import Union, Set, Dict, List
 import jpype
 
 import neuralogic.dataset as datasets
-from neuralogic import is_initialized, initialize
 from neuralogic.core.builder.builder import Builder
 from neuralogic.core.builder.components import BuiltDataset, GroundedDataset
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
@@ -17,6 +16,8 @@ TemplateEntries = Union[BaseRelation, WeightedRelation, Rule]
 
 class DatasetBuilder:
     def __init__(self, parsed_template, java_factory: JavaFactory):
+        from neuralogic import is_initialized, initialize
+
         if not is_initialized():
             initialize()
 

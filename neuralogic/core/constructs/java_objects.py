@@ -4,7 +4,6 @@ from typing import Optional, Iterable, Sequence
 import numpy as np
 import jpype
 
-from neuralogic import is_initialized, initialize
 from neuralogic.core.constructs.factories import R
 from neuralogic.core.constructs.function.enum import Combination
 from neuralogic.core.constructs.function.function import CombinationFunction
@@ -91,6 +90,8 @@ def _flatten_rule_body(body, metadata: Metadata):
 
 class JavaFactory:
     def __init__(self, settings: Optional[SettingsProxy] = None):
+        from neuralogic import is_initialized, initialize
+
         from neuralogic.core.constructs.rule import Rule
         from neuralogic.core.constructs.relation import WeightedRelation
 

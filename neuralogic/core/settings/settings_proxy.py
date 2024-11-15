@@ -1,7 +1,6 @@
 import jpype
 
 import neuralogic
-from neuralogic import is_initialized, initialize
 from neuralogic.core.constructs.function import Transformation, Combination, Aggregation
 from neuralogic.core.enums import Grounder
 from neuralogic.nn.init import Initializer
@@ -25,6 +24,8 @@ class SettingsProxy:
         prune_only_identities: bool,
         grounder: Grounder,
     ):
+        from neuralogic import is_initialized, initialize
+
         if not is_initialized():
             initialize()
 

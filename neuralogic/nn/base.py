@@ -1,11 +1,19 @@
 from typing import Dict, Optional, Union, Callable, List
 
+
 from neuralogic.core.settings import Settings
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core import Template, BuiltDataset, SettingsProxy, GroundedDataset
 from neuralogic.dataset.base import BaseDataset
 
 from neuralogic.utils.visualize import draw_model
+
+import compute_graph_vectorize.engines.torch as torch_engine
+from compute_graph_vectorize.engines.torch.settings import TorchModuleSettings
+from compute_graph_vectorize.sources.builders import from_neuralogic
+from compute_graph_vectorize.sources.neuralogic_settings import NeuralogicSettings
+from compute_graph_vectorize.vectorize.pipeline.pipeline import create_vectorized_network_compiler
+from compute_graph_vectorize.vectorize.settings import VectorizeSettings
 
 
 class AbstractNeuraLogic:
@@ -37,6 +45,23 @@ class AbstractNeuraLogic:
             batch_size=batch_size,
             learnable_facts=learnable_facts,
         )
+
+    def vectorize(self, dataset: BaseDataset):
+        settings = NeuralogicSettings(chain_pruning=False, iso_value_compression=False)
+        built_dataset = self.dataset_builder.build_dataset(dataset, settings.create_proxy())
+        network = from_neuralogic(built_dataset.samples, settings)
+
+        vectorizer_settings = VectorizeSettings()
+        compiler = create_vectorized_network_compiler(
+            vectorizer_settings,
+            forward_pass_runner=torch_engine.torch_simple_forward_pass_runner,
+        )
+
+        vectorized_network = compiler(network)
+        t_settings = TorchModuleSettings()
+        torch_model = torch_engine.build_torch_model(vectorized_network, t_settings, debug=False)
+
+        return torch_model
 
     def build_dataset(
         self,
