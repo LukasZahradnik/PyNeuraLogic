@@ -30,19 +30,19 @@ class EvaluationInferenceEngine:
 
         try:
             built_dataset = self.model.build_dataset(self.dataset)
-            results = self.model(built_dataset.samples, train=False)
+            results = self.model.test(built_dataset)
         except Exception:
             self.dataset[0].example = global_examples
             return {}
 
         self.dataset[0].example = global_examples
 
-        if len(built_dataset.samples) != len(results):
+        if len(built_dataset) != len(results):
             raise Exception
 
         def generator():
-            for result, sample in zip(results, built_dataset.samples):
-                sub_query = str(sample.java_sample.query.neuron.getName())
+            for result, sample in zip(results, built_dataset):
+                sub_query = str(sample._java_sample.query.neuron.getName())
                 sub_query = sub_query.split("(")[1].strip()[:-1]
 
                 substitutions = sub_query.split(",")

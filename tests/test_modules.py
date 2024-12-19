@@ -130,7 +130,7 @@ def test_sgconv():
 
     template += SGConv(1, 2, "h1", "h0", "_edge", k=2)
     template_str = str(template).split("\n")
-    rule = "{2, 1} h1(I0) :- h0(I2), *edge(I1, I0), *edge(I2, I1). [transformation=identity, aggregation=sum, duplicit_grounding=True]"
+    rule = "{2, 1} h1(I0) :- h0(I2), *edge(I1, I0), *edge(I2, I1). [transformation=identity, aggregation=sum, duplicate_grounding=True]"
 
     assert template_str[0] == rule
     assert template_str[1] == "h1/1 [transformation=identity]"
@@ -139,7 +139,9 @@ def test_sgconv():
 
     template += SGConv(1, 2, "h1", "h0", "_edge")
     template_str = str(template).split("\n")
-    rule = "{2, 1} h1(I0) :- h0(I1), *edge(I1, I0). [transformation=identity, aggregation=sum, duplicit_grounding=True]"
+    rule = (
+        "{2, 1} h1(I0) :- h0(I1), *edge(I1, I0). [transformation=identity, aggregation=sum, duplicate_grounding=True]"
+    )
 
     assert template_str[0] == rule
     assert template_str[1] == "h1/1 [transformation=identity]"

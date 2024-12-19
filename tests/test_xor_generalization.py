@@ -4,7 +4,6 @@ import itertools
 import pytest
 
 from neuralogic import manual_seed
-from neuralogic.nn import get_evaluator
 from neuralogic.core import Settings, R, V, Template, Transformation
 from neuralogic.dataset import Dataset, Sample
 from neuralogic.optim import SGD
@@ -41,8 +40,8 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
 
     settings = Settings(epochs=5000)
 
-    evaluator = get_evaluator(template, settings)
-    evaluator.train(dataset, generator=False)
+    template.build(settings)
+    template.train(dataset, epochs=5000)
 
     # build the dataset for n inputs
     products = itertools.product([0, 1], repeat=n)
@@ -51,7 +50,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
     for example in products:
         n_dataset.add_sample(Sample(R.xor_at(n - 1)[0], [R.val_at(i)[int(val)] for i, val in enumerate(example)]))
 
-    for expected_value, predicted in zip(expected, evaluator.test(n_dataset)):
+    for expected_value, predicted in zip(expected, template.test(n_dataset)):
         assert expected_value == predicted
 
 
@@ -99,11 +98,11 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
         Sample(R.xor[0.0], [R.xy(0, 1), R.x(0)[1.0], R.x(1)[1.0], R.n(1)]),
     ])
 
-    settings = Settings(optimizer=SGD(), epochs=300)
-    neuralogic_evaluator = get_evaluator(template, settings)
+    settings = Settings(optimizer=SGD())
+    template.build(settings)
 
     # Train on the dataset with two var input
-    neuralogic_evaluator.train(dataset, generator=False)
+    template.train(dataset, epochs=300)
 
     # Get all products of lenght of n (all inputs of n vars)
     products = itertools.product([0.0, 1.0], repeat=n)
@@ -124,5 +123,5 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
         n_dataset.add(R.xor, fact_example)
 
     # Check that we predicted correct values for n inputs for model trained on 2 inputs
-    for expected_value, predicted in zip(expected, neuralogic_evaluator.test(n_dataset)):
+    for expected_value, predicted in zip(expected, template.test(n_dataset)):
         assert expected_value == round(predicted)

@@ -24,7 +24,7 @@ class _NeuraLogicFunction(Function):
         for fact in mapping:
             sample.set_fact_value(fact, value_factory.get_value(fact.weight)[1])
 
-        return torch.tensor(model(sample, train=False), dtype=dtype, requires_grad=True)
+        return torch.tensor(model.test(sample), dtype=dtype, requires_grad=True)
 
     @staticmethod
     def backward(ctx: Any, *grad_outputs: Any) -> Any:
@@ -33,7 +33,7 @@ class _NeuraLogicFunction(Function):
         number_format = ctx.number_format
         dtype = ctx.dtype
 
-        backproper, weight_updater = model.backprop(sample, -grad_outputs[0].detach().numpy())
+        backproper, weight_updater = model._backprop(sample, -grad_outputs[0].detach().numpy())
         state_index = backproper.stateIndex
 
         gradients = tuple(
@@ -46,9 +46,9 @@ class _NeuraLogicFunction(Function):
             for fact in ctx.mapping
         )
 
-        trainer = model.strategy.getTrainer()
-        trainer.updateWeights(model.strategy.getCurrentModel(), weight_updater)
-        trainer.invalidateSample(trainer.getInvalidation(), sample.java_sample)
+        trainer = model._trainer
+        trainer.updateWeights(model._strategy.getCurrentModel(), weight_updater)
+        trainer.invalidateSample(trainer.getInvalidation(), sample._java_sample)
 
         return (None, None, None, None, None, None, *gradients)
 
@@ -74,10 +74,10 @@ class NeuraLogic(nn.Module):
         self.to_logic = to_logic
 
         self.model = template.build(settings)
-        self.number_format = self.model.settings.settings_class.superDetailedNumberFormat
+        self.number_format = self.model._settings.settings_class.superDetailedNumberFormat
 
         dataset = Dataset(Sample(output_relation, input_facts))
-        self.sample = self.model.build_dataset(dataset, learnable_facts=True).samples[0]
+        self.sample = self.model.build_dataset(dataset, learnable_facts=True)[0]
         self.value_factory = ValueFactory()
 
         self.internal_weights = nn.Parameter(torch.empty((0,)))

@@ -77,7 +77,7 @@ def test_gen_module(input_size, hidden_size):
     bd = model.build_dataset(dataset)
 
     output = gen(x=data.x, edge_index=data.edge_index, edge_attr=data.edge_attr)
-    result = model(bd.samples, train=False)
+    result = model.test(bd)
 
     assert np.allclose([float(x) for x in output], [float(x) for x in result], atol=10e-5)
 
@@ -137,7 +137,7 @@ def test_gine_module(input_size):
     bd = model.build_dataset(dataset)
 
     output = gin(x=data.x, edge_index=data.edge_index, edge_attr=data.edge_attr)
-    result = model(bd.samples, train=False)
+    result = model.test(bd)
 
     assert np.allclose([[float(x) for x in xs] for xs in output], [[float(x) for x in xs] for xs in result], atol=10e-5)
 
@@ -195,6 +195,6 @@ def test_gcn_module(input_size, output_size):
     bd = model.build_dataset(dataset)
 
     output = gcn(x=data.x, edge_index=data.edge_index, edge_weight=data.edge_attr)
-    result = model(bd.samples, train=False)
+    result = model.test(bd)
 
     assert np.allclose([[float(x) for x in xs] for xs in output], [[float(x) for x in xs] for xs in result], atol=10e-5)
