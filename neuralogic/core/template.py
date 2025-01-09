@@ -36,6 +36,8 @@ class Template(NeuralModule):
         :param rules:
         :return:
         """
+        if self._parsed_template is not None:
+            raise ValueError("Cannot modify built template")
         self._template.extend(rules)
 
     def add_module(self, module: Module):
@@ -63,6 +65,9 @@ class Template(NeuralModule):
 
     def remove_duplicates(self):
         """Remove duplicates from the template"""
+        if self._parsed_template is not None:
+            raise ValueError("Cannot modify built template")
+
         entries = set()
         deduplicated_template: List[TemplateEntries] = []
 
@@ -114,6 +119,8 @@ class Template(NeuralModule):
         return self.__str__()
 
     def __iadd__(self, other) -> "Template":
+        if self._parsed_template is not None:
+            raise ValueError("Cannot modify built template")
         if isinstance(other, Iterable):
             self._template.extend(other)
         elif isinstance(other, Module):
@@ -126,9 +133,13 @@ class Template(NeuralModule):
         return self._template[item]
 
     def __delitem__(self, key):
+        if self._parsed_template is not None:
+            raise ValueError("Cannot modify built template")
         self._template.pop(key)
 
     def __setitem__(self, key, value):
+        if self._parsed_template is not None:
+            raise ValueError("Cannot modify built template")
         if isinstance(value, (Iterable, Module)):
             raise NotImplementedError
         self._template[key] = value
