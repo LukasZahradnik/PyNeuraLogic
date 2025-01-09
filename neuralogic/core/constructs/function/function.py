@@ -33,7 +33,7 @@ class Function:
         return False
 
     def process_head(self, head) -> "Function":
-        pass
+        raise NotImplementedError
 
     def get(self):
         name = "".join(s.capitalize() for s in self.name.split("_"))

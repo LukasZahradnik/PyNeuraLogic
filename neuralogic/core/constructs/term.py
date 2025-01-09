@@ -1,4 +1,4 @@
-from typing import Optional, Union, List
+from typing import Optional, List
 
 
 class Variable:
@@ -27,7 +27,9 @@ class Variable:
             return Variable(self.name, item)
         raise ValueError("Type can be only of type str")
 
-    def __eq__(self, other: Union["Variable", str]) -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, (Variable, str)):
+            raise NotImplementedError
         return str(other) == str(self)
 
     def __hash__(self):
@@ -54,7 +56,9 @@ class Constant:
             return Constant(self.name, item)
         raise ValueError("Type can be only of type str")
 
-    def __eq__(self, other: Union["Constant", str]) -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, (Constant, str)):
+            raise NotImplementedError
         return str(other) == str(self)
 
     def __hash__(self):
