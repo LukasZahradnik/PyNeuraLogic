@@ -20,22 +20,14 @@ from neuralogic.optim import Adam
 def gcn(activation: Transformation, output_size: int, num_features: int, dim: int = 10):
     template = Template()
 
-    template += (R.atom_embed(V.X)[dim, num_features] <= R.node_feature(V.X)) | [Transformation.IDENTITY]
-    template += R.atom_embed / 1 | [Transformation.IDENTITY]
+    template += R.atom_embed(V.X)[dim, num_features] <= R.node_feature(V.X)
 
-    template += (R.l1_embed(V.X)[dim, dim] <= (R.atom_embed(V.Y), R._edge(V.Y, V.X))) | [
-        Aggregation.SUM,
-        Transformation.IDENTITY,
-    ]
+    template += (R.l1_embed(V.X)[dim, dim] <= (R.atom_embed(V.Y), R._edge(V.Y, V.X))) | [Aggregation.SUM]
     template += R.l1_embed / 1 | [Transformation.RELU]
 
-    template += (R.l2_embed(V.X)[dim, dim] <= (R.l1_embed(V.Y), R._edge(V.Y, V.X))) | [
-        Aggregation.SUM,
-        Transformation.IDENTITY,
-    ]
-    template += R.l2_embed / 1 | [Transformation.IDENTITY]
+    template += (R.l2_embed(V.X)[dim, dim] <= (R.l1_embed(V.Y), R._edge(V.Y, V.X))) | [Aggregation.SUM]
 
-    template += (R.predict[output_size, dim] <= R.l2_embed(V.X)) | [Aggregation.AVG, Transformation.IDENTITY]
+    template += (R.predict[output_size, dim] <= R.l2_embed(V.X)) | [Aggregation.AVG]
     template += R.predict / 0 | [activation]
 
     return template
@@ -44,65 +36,47 @@ def gcn(activation: Transformation, output_size: int, num_features: int, dim: in
 def gin(activation: Transformation, output_size: int, num_features: int, dim: int = 10):
     template = Template()
 
-    template += (R.atom_embed(V.X)[dim, num_features] <= R.node_feature(V.X)) | [Transformation.IDENTITY]
-    template += R.atom_embed / 1 | [Transformation.IDENTITY]
+    template += R.atom_embed(V.X)[dim, num_features] <= R.node_feature(V.X)
 
     template += (R.l1_embed(V.X) <= (R.atom_embed(V.Y), R._edge(V.Y, V.X))) | [Aggregation.SUM, Transformation.IDENTITY]
-    template += (R.l1_embed(V.X) <= R.atom_embed(V.X)) | [Transformation.IDENTITY]
-    template += R.l1_embed / 1 | [Transformation.IDENTITY]
+    template += R.l1_embed(V.X) <= R.atom_embed(V.X)
 
     template += (R.l1_mlp_embed(V.X)[dim, dim] <= R.l1_embed(V.X)[dim, dim]) | [Transformation.RELU]
     template += R.l1_mlp_embed / 1 | [Transformation.RELU]
 
     # --
-    template += (R.l2_embed(V.X) <= (R.l1_mlp_embed(V.Y), R._edge(V.Y, V.X))) | [
-        Aggregation.SUM,
-        Transformation.IDENTITY,
-    ]
-    template += (R.l2_embed(V.X) <= R.l1_mlp_embed(V.X)) | [Transformation.IDENTITY]
-    template += R.l2_embed / 1 | [Transformation.IDENTITY]
+    template += (R.l2_embed(V.X) <= (R.l1_mlp_embed(V.Y), R._edge(V.Y, V.X))) | [Aggregation.SUM]
+    template += R.l2_embed(V.X) <= R.l1_mlp_embed(V.X)
 
     template += (R.l2_mlp_embed(V.X)[dim, dim] <= R.l2_embed(V.X)[dim, dim]) | [Transformation.RELU]
     template += R.l2_mlp_embed / 1 | [Transformation.RELU]
 
     # --
-    template += (R.l3_embed(V.X) <= (R.l2_mlp_embed(V.Y), R._edge(V.Y, V.X))) | [
-        Aggregation.SUM,
-        Transformation.IDENTITY,
-    ]
-    template += (R.l3_embed(V.X) <= R.l2_mlp_embed(V.X)) | [Transformation.IDENTITY]
-    template += R.l3_embed / 1 | [Transformation.IDENTITY]
+    template += (R.l3_embed(V.X) <= (R.l2_mlp_embed(V.Y), R._edge(V.Y, V.X))) | [Aggregation.SUM]
+    template += R.l3_embed(V.X) <= R.l2_mlp_embed(V.X)
 
     template += (R.l3_mlp_embed(V.X)[dim, dim] <= R.l3_embed(V.X)[dim, dim]) | [Transformation.RELU]
     template += R.l3_mlp_embed / 1 | [Transformation.RELU]
 
     # --
-    template += (R.l4_embed(V.X) <= (R.l3_mlp_embed(V.Y), R._edge(V.Y, V.X))) | [
-        Aggregation.SUM,
-        Transformation.IDENTITY,
-    ]
-    template += (R.l4_embed(V.X) <= R.l3_mlp_embed(V.X)) | [Transformation.IDENTITY]
-    template += R.l4_embed / 1 | [Transformation.IDENTITY]
+    template += (R.l4_embed(V.X) <= (R.l3_mlp_embed(V.Y), R._edge(V.Y, V.X))) | [Aggregation.SUM]
+    template += R.l4_embed(V.X) <= R.l3_mlp_embed(V.X)
 
     template += (R.l4_mlp_embed(V.X)[dim, dim] <= R.l4_embed(V.X)[dim, dim]) | [Transformation.RELU]
     template += R.l4_mlp_embed / 1 | [Transformation.RELU]
 
     # --
-    template += (R.l5_embed(V.X) <= (R.l4_mlp_embed(V.Y), R._edge(V.Y, V.X))) | [
-        Aggregation.SUM,
-        Transformation.IDENTITY,
-    ]
-    template += (R.l5_embed(V.X) <= R.l4_mlp_embed(V.X)) | [Transformation.IDENTITY]
-    template += R.l5_embed / 1 | [Transformation.IDENTITY]
+    template += (R.l5_embed(V.X) <= (R.l4_mlp_embed(V.Y), R._edge(V.Y, V.X))) | [Aggregation.SUM]
+    template += R.l5_embed(V.X) <= R.l4_mlp_embed(V.X)
 
     template += (R.l5_mlp_embed(V.X)[dim, dim] <= R.l5_embed(V.X)[dim, dim]) | [Transformation.RELU]
     template += R.l5_mlp_embed / 1 | [Transformation.RELU]
 
-    template += (R.predict[output_size, dim] <= R.l1_mlp_embed(V.X)) | [Aggregation.AVG, Transformation.IDENTITY]
-    template += (R.predict[output_size, dim] <= R.l2_mlp_embed(V.X)) | [Aggregation.AVG, Transformation.IDENTITY]
-    template += (R.predict[output_size, dim] <= R.l3_mlp_embed(V.X)) | [Aggregation.AVG, Transformation.IDENTITY]
-    template += (R.predict[output_size, dim] <= R.l4_mlp_embed(V.X)) | [Aggregation.AVG, Transformation.IDENTITY]
-    template += (R.predict[output_size, dim] <= R.l5_mlp_embed(V.X)) | [Aggregation.AVG, Transformation.IDENTITY]
+    template += (R.predict[output_size, dim] <= R.l1_mlp_embed(V.X)) | [Aggregation.AVG]
+    template += (R.predict[output_size, dim] <= R.l2_mlp_embed(V.X)) | [Aggregation.AVG]
+    template += (R.predict[output_size, dim] <= R.l3_mlp_embed(V.X)) | [Aggregation.AVG]
+    template += (R.predict[output_size, dim] <= R.l4_mlp_embed(V.X)) | [Aggregation.AVG]
+    template += (R.predict[output_size, dim] <= R.l5_mlp_embed(V.X)) | [Aggregation.AVG]
 
     template += R.predict / 0 | [activation]
 
@@ -112,24 +86,16 @@ def gin(activation: Transformation, output_size: int, num_features: int, dim: in
 def gsage(activation: Transformation, output_size: int, num_features: int, dim: int = 10):
     template = Template()
 
-    template += (R.atom_embed(V.X)[dim, num_features] <= R.node_feature(V.X)) | [Transformation.IDENTITY]
-    template += R.atom_embed / 1 | [Transformation.IDENTITY]
+    template += R.atom_embed(V.X)[dim, num_features] <= R.node_feature(V.X)
 
-    template += (R.l1_embed(V.X)[dim, dim] <= R.atom_embed(V.X)) | [Transformation.IDENTITY]
-    template += (R.l1_embed(V.X)[dim, dim] <= (R.atom_embed(V.Y), R._edge(V.Y, V.X))) | [
-        Aggregation.AVG,
-        Transformation.IDENTITY,
-    ]
+    template += R.l1_embed(V.X)[dim, dim] <= R.atom_embed(V.X)
+    template += R.l1_embed(V.X)[dim, dim] <= (R.atom_embed(V.Y), R._edge(V.Y, V.X)) | [Aggregation.AVG]
     template += R.l1_embed / 1 | [Transformation.RELU]
 
-    template += (R.l2_embed(V.X)[dim, dim] <= R.l1_embed(V.X)) | [Transformation.IDENTITY]
-    template += (R.l2_embed(V.X)[dim, dim] <= (R.l1_embed(V.Y), R._edge(V.Y, V.X))) | [
-        Aggregation.AVG,
-        Transformation.IDENTITY,
-    ]
-    template += R.l2_embed / 1 | [Transformation.IDENTITY]
+    template += R.l2_embed(V.X)[dim, dim] <= R.l1_embed(V.X)
+    template += (R.l2_embed(V.X)[dim, dim] <= (R.l1_embed(V.Y), R._edge(V.Y, V.X))) | [Aggregation.AVG]
 
-    template += (R.predict[output_size, dim] <= R.l2_embed(V.X)) | [Aggregation.AVG, Transformation.IDENTITY]
+    template += (R.predict[output_size, dim] <= R.l2_embed(V.X)) | [Aggregation.AVG]
     template += R.predict / 0 | [activation]
 
     return template

@@ -1,5 +1,6 @@
 from typing import Optional
 
+from neuralogic.core.constructs.function.function import AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation, Combination
 from neuralogic.core.constructs.factories import R, V
@@ -24,7 +25,7 @@ class GENConv(Module):
         Feature predicate name to get features from.
     edge_name : str
         Edge predicate name to use for neighborhood relations.
-    aggregation : Aggregation
+    aggregation : AggregationFunction
         The aggregation function.
         Default: ``Aggregation.SOFTMAX``
     num_layers : int
@@ -51,7 +52,7 @@ class GENConv(Module):
         output_name: str,
         feature_name: str,
         edge_name: str,
-        aggregation: Aggregation = Aggregation.SOFTMAX,
+        aggregation: AggregationFunction = Aggregation.SOFTMAX,
         num_layers: int = 2,
         expansion: int = 2,
         eps: float = 1e-7,
@@ -88,11 +89,7 @@ class GENConv(Module):
         e_proj = []
         if self.edge_dim is not None and self.out_channels != self.edge_dim:
             e = R.get(f"{self.output_name}__gen_edge_proj")
-            e_proj = [
-                (e(V.I, V.J)[self.out_channels, self.edge_dim] <= R.get(self.edge_name)(V.I, V.J))
-                | Metadata(transformation=Transformation.IDENTITY),
-                e / 2 | Metadata(transformation=Transformation.IDENTITY),
-            ]
+            e_proj = [e(V.I, V.J)[self.out_channels, self.edge_dim] <= R.get(self.edge_name)(V.I, V.J)]
 
         channels = [self.out_channels]
         for _ in range(self.num_layers - 1):
@@ -112,14 +109,8 @@ class GENConv(Module):
             *e_proj,
             (feat_sum(V.I, V.J) <= (j_feat, e(V.J, V.I)))
             | Metadata(transformation=Transformation.RELU, combination=Combination.SUM),
-            feat_sum / 2 | Metadata(transformation=Transformation.IDENTITY),
             (feat_agg(V.I) <= (feat_sum(V.I, V.J), eps))
-            | Metadata(
-                transformation=Transformation.IDENTITY, aggregation=self.aggregation, combination=Combination.SUM
-            ),
-            feat_agg / 1 | Metadata(transformation=Transformation.IDENTITY),
-            (out(V.I) <= (i_feat, feat_agg(V.I)))
-            | Metadata(transformation=Transformation.IDENTITY, combination=Combination.SUM),
-            out / 1 | Metadata(transformation=Transformation.IDENTITY),
+            | Metadata(aggregation=self.aggregation, combination=Combination.SUM),
+            (out(V.I) <= (i_feat, feat_agg(V.I))) | Metadata(combination=Combination.SUM),
             *mlp(),
         ]

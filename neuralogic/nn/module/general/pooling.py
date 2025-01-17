@@ -1,5 +1,6 @@
+from neuralogic.core.constructs.function.function import AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.constructs.function import Transformation, Aggregation
+from neuralogic.core.constructs.function import Aggregation
 from neuralogic.core.constructs.factories import R
 from neuralogic.nn.module.module import Module
 
@@ -48,7 +49,7 @@ class Pooling(Module):
         Output (head) predicate name of the module.
     input_name : str
         Input name.
-    aggregation : Aggregation
+    aggregation : AggregationFunction
         Aggregation function.
     input_arity : int
         Arity of the input predicate ``input_name``. Default: ``1``
@@ -58,7 +59,7 @@ class Pooling(Module):
         self,
         output_name: str,
         input_name: str,
-        aggregation: Aggregation,
+        aggregation: AggregationFunction,
         input_arity: int = 1,
     ):
         self.output_name = output_name
@@ -68,11 +69,10 @@ class Pooling(Module):
         self.aggregation = aggregation
 
     def __call__(self):
-        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(aggregation=self.aggregation)
 
         return [
             (R.get(self.output_name) <= R.get(self.input_name)(f"X{i}" for i in range(self.input_arity))) | metadata,
-            R.get(self.output_name) / 0 | [Transformation.IDENTITY],
         ]
 
 

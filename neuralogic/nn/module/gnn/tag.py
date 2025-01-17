@@ -1,3 +1,4 @@
+from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
@@ -64,10 +65,10 @@ class TAGConv(Module):
     k : int
         Number of hops.
         Default: ``2``
-    activation : Transformation
+    activation : TransformationFunction
         Activation function of the output.
         Default: ``Transformation.IDENTITY``
-    aggregation : Aggregation
+    aggregation : AggregationFunction
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.SUM``
 
@@ -81,8 +82,8 @@ class TAGConv(Module):
         feature_name: str,
         edge_name: str,
         k: int = 2,
-        activation: Transformation = Transformation.IDENTITY,
-        aggregation: Aggregation = Aggregation.SUM,
+        activation: TransformationFunction = Transformation.IDENTITY,
+        aggregation: AggregationFunction = Aggregation.SUM,
     ):
         self.output_name = output_name
         self.feature_name = feature_name
@@ -96,7 +97,7 @@ class TAGConv(Module):
         self.aggregation = aggregation
 
     def __call__(self):
-        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(aggregation=self.aggregation)
         head = R.get(self.output_name)
         feature = R.get(self.feature_name)
         edge = R.get(self.edge_name)

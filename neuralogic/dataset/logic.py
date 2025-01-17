@@ -1,8 +1,12 @@
 from typing import Optional, List, Union, Sequence
 
+import jpype
+
+from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.dataset.base import BaseDataset
+from neuralogic.core.constructs.factories import R
 
 DatasetEntries = Union[BaseRelation, Rule]
 
@@ -44,12 +48,12 @@ class Dataset(BaseDataset):
     __slots__ = ("samples", "_examples", "_queries")
 
     def __init__(self, samples: Optional[Union[List[Sample], Sample]] = None):
-        self.samples = samples
+        self.samples = []
 
-        if self.samples is None:
-            self.samples = []
-        elif not isinstance(self.samples, list):
-            self.samples = [self.samples]
+        if isinstance(samples, list):
+            self.samples = samples
+        elif not isinstance(samples, list):
+            self.samples = [samples]
 
         self._examples = []
         self._queries = []
@@ -99,3 +103,43 @@ class Dataset(BaseDataset):
 
     def set_queries(self, queries: List):
         self._queries = queries
+
+    def generate_features(self, feature_depth: int = 1, count_groundings: bool = True):
+        java_factory = JavaFactory()
+
+        clauses = []
+        vertex_lit = R.get("__vert")
+        vertex_lit.predicate.special = False
+        vertex_lit.predicate.hidden = False
+
+        for sample in self.samples:
+            vertex = set()
+
+            for e in sample.example:
+                if isinstance(e, Rule):
+                    vertex.update(self._get_constants(e.head))
+
+                    for rel in e.body:
+                        vertex.update(self._get_constants(rel))
+                if isinstance(e, BaseRelation):
+                    vertex.update(self._get_constants(e))
+
+            example = [vertex_lit(vert) for vert in vertex]
+            example.extend(sample.example)
+
+            clauses.append(java_factory.to_clause(example))
+
+        clause = jpype.java.util.ArrayList(clauses)
+
+        namespace = "cz.cvut.fel.ida.logic.features.generation"
+
+        jpype.JClass(f"{namespace}.FeatureGenerationSettings").COUNT_GROUNDINGS = count_groundings
+        features = jpype.JClass(f"{namespace}.FeatureGenerator").generateFeatures(clause, feature_depth)
+
+        table = [[int(i) for i in feats] for feats in features.table]
+        clauses = [str(clause) for clause in features.features]
+
+        return table, clauses
+
+    def _get_constants(self, relation: BaseRelation):
+        return [term for term in relation.terms if not str(relation)[0].isupper()]

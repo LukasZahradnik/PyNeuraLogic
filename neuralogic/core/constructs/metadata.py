@@ -1,6 +1,11 @@
 from typing import Union, Iterable, Callable, Optional
 
-from neuralogic.core.constructs.function import Transformation, Combination, Aggregation, Function
+from neuralogic.core.constructs.function.function import (
+    Function,
+    AggregationFunction,
+    TransformationFunction,
+    CombinationFunction,
+)
 
 
 class Metadata:
@@ -8,11 +13,11 @@ class Metadata:
 
     def __init__(
         self,
-        learnable: bool = None,
-        transformation: Union[str, Transformation, Combination] = None,
-        combination: Union[str, Combination] = None,
-        aggregation: Union[str, Aggregation] = None,
-        duplicate_grounding: Optional[bool] = None,
+        learnable: bool | None = None,
+        transformation: Union[str, TransformationFunction, CombinationFunction] | None = None,
+        combination: Union[str, CombinationFunction] | None = None,
+        aggregation: Union[str, AggregationFunction] | None = None,
+        duplicate_grounding: Optional[bool] | None = None,
     ):
         self.learnable = learnable
         self.combination = combination
@@ -27,11 +32,11 @@ class Metadata:
         for entry in iterable:
             if isinstance(entry, Callable) and not isinstance(entry, Function):
                 entry = entry()
-            if isinstance(entry, Aggregation):
+            if isinstance(entry, AggregationFunction):
                 metadata.aggregation = entry
-            elif isinstance(entry, Transformation):
+            elif isinstance(entry, TransformationFunction):
                 metadata.transformation = entry
-            elif isinstance(entry, Combination):
+            elif isinstance(entry, CombinationFunction):
                 metadata.combination = entry
             else:
                 raise ValueError(f"Invalid entry for metadata: {entry}")
@@ -60,9 +65,9 @@ class Metadata:
             transformation=other.transformation if other.transformation is not None else self.transformation,
             combination=other.combination if other.combination is not None else self.combination,
             aggregation=other.aggregation if other.aggregation is not None else self.aggregation,
-            duplicit_grounding=other.duplicit_grounding
-            if other.duplicit_grounding is not None
-            else self.duplicit_grounding,
+            duplicate_grounding=other.duplicate_grounding
+            if other.duplicate_grounding is not None
+            else self.duplicate_grounding,
         )
 
     def __add__(self, other: "Metadata") -> "Metadata":

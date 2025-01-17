@@ -68,23 +68,13 @@ class GINEConv(Module):
         e_proj = []
         if self.edge_dim is not None:
             e = R.get(f"{self.nn_name}__gine_edge_proj")
-            e_proj = [
-                (e(V.I, V.J)[self.in_channels, self.edge_dim] <= R.get(self.edge_name)(V.I, V.J))
-                | Metadata(transformation=Transformation.IDENTITY),
-                e / 2 | Metadata(transformation=Transformation.IDENTITY),
-            ]
+            e_proj = [e(V.I, V.J)[self.in_channels, self.edge_dim] <= R.get(self.edge_name)(V.I, V.J)]
 
         return [
             *e_proj,
             (feat_sum(V.I, V.J) <= (x(V.J), e(V.J, V.I)))
             | Metadata(transformation=Transformation.RELU, combination=Combination.SUM),
-            feat_sum / 2 | Metadata(transformation=Transformation.IDENTITY),
-            (feat_agg(V.I) <= feat_sum(V.I, V.J))
-            | Metadata(transformation=Transformation.IDENTITY, aggregation=Aggregation.SUM),
-            feat_agg / 1 | Metadata(transformation=Transformation.IDENTITY),
-            (out(V.I) <= (x_eps, feat_agg(V.I)))
-            | Metadata(transformation=Transformation.IDENTITY, combination=Combination.SUM),
-            out / 1 | Metadata(transformation=Transformation.IDENTITY),
-            (R.get(self.nn_name)(V.I) <= out(V.I)) | Metadata(transformation=Transformation.IDENTITY),
-            R.get(self.nn_name) / 1 | Metadata(transformation=Transformation.IDENTITY),
+            (feat_agg(V.I) <= feat_sum(V.I, V.J)) | Metadata(aggregation=Aggregation.SUM),
+            (out(V.I) <= (x_eps, feat_agg(V.I))) | Metadata(combination=Combination.SUM),
+            R.get(self.nn_name)(V.I) <= out(V.I),
         ]

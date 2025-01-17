@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from neuralogic.core.constructs.function import Transformation, Combination
+from neuralogic.core.constructs.function import Combination
 from neuralogic.core.constructs.factories import R
 from neuralogic.nn.module.module import Module
 
@@ -48,9 +48,6 @@ class PositionalEncoding(Module):
         else:
             rules = [pe_rel(*terms, i)[row].fixed() for i, row in enumerate(pe)]
 
-        rules.append(
-            (out_rel(all_terms) <= (pe_rel(all_terms), in_rel(all_terms))) | [Transformation.IDENTITY, Combination.SUM]
-        )
+        rules.append((out_rel(all_terms) <= (pe_rel(all_terms), in_rel(all_terms))) | [Combination.SUM])
 
-        rules.append(out_rel / self.arity | [Transformation.IDENTITY])
         return rules

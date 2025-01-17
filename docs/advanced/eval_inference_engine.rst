@@ -51,7 +51,7 @@ to get to the goal station. The second rule aggregates all possible instances an
 
 .. code-block:: Python
 
-    metadata = Metadata(aggregation=Aggregation.MIN, transformation=Transformation.IDENTITY)
+    metadata = Metadata(aggregation=Aggregation.MIN)
 
     template += (R.shortest(V.X, V.Y) <= R.connected(V.X, V.Y, V.L)) | metadata
     template += (R.shortest(V.X, V.Y) <= (R.connected(V.X, V.Z, V.L), R.shortest_path(V.Z, V.Y))) | metadata
@@ -59,15 +59,12 @@ to get to the goal station. The second rule aggregates all possible instances an
 
 .. attention::
 
-    Notice we are appending metadata with aggregation (Min) and transformation (Identity) functions.
+    Notice we are appending metadata with an aggregation (Min) functions.
 
-
-It is also necessary to set additional transformation functions to identity.
 
 .. code-block:: Python
 
-    template += R.shortest_path / 2 | Metadata(combination=Combination.MIN, transformation=Transformation.IDENTITY)
-    template += R.connected / 3 | Metadata(transformation=Transformation.IDENTITY)
+    template += R.shortest_path / 2 | Metadata(combination=Combination.MIN)
 
 
 Evaluating Queries

@@ -1,3 +1,4 @@
+from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
@@ -73,10 +74,10 @@ class APPNPConv(Module):
         Number of iterations
     alpha : float
         Teleport probability
-    activation : Transformation
+    activation : TransformationFunction
         Activation function of the output.
         Default: ``Transformation.IDENTITY``
-    aggregation : Aggregation
+    aggregation : AggregationFunction
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.SUM``
 
@@ -89,8 +90,8 @@ class APPNPConv(Module):
         edge_name: str,
         k: int,
         alpha: float,
-        activation: Transformation = Transformation.IDENTITY,
-        aggregation: Aggregation = Aggregation.SUM,
+        activation: TransformationFunction = Transformation.IDENTITY,
+        aggregation: AggregationFunction = Aggregation.SUM,
     ):
         self.output_name = output_name
         self.feature_name = feature_name
@@ -104,7 +105,7 @@ class APPNPConv(Module):
 
     def __call__(self):
         head = R.get(self.output_name)(V.I)
-        metadata = Metadata(transformation=Transformation.IDENTITY, aggregation=self.aggregation)
+        metadata = Metadata(aggregation=self.aggregation)
         edge = R.get(self.edge_name)
         feature = R.get(self.feature_name)
 
@@ -120,8 +121,6 @@ class APPNPConv(Module):
                     (k_head <= (R.get(f"{self.output_name}__{k - 1}")(V.J)[1 - self.alpha].fixed(), edge(V.J, V.I)))
                     | metadata
                 )
-            rules.append(R.get(f"{self.output_name}__{k}") / 1 | Metadata(transformation=Transformation.IDENTITY))
-
         if self.k == 1:
             output_rule = head <= (feature(V.J)[1 - self.alpha].fixed(), edge(V.J, V.I))
         else:

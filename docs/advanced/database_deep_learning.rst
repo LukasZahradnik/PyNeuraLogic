@@ -1,3 +1,4 @@
+
 Deep Learning on Databases
 ==========================
 
@@ -111,12 +112,12 @@ With just those few lines of code, we have managed to create a relational datase
 Training on data from database
 ******************************
 
-The dataset is ready; let's now take a look at defining the *template*, which roughly corresponds to creating a neural model architecture. 
+The dataset is ready; let's now take a look at defining the *template*, which roughly corresponds to creating a neural model architecture.
 A template can be seen as a high-level blueprint for constructing a computation graph, which will be automatically tailored for each example and its target query.
 
 The template we will define here calculates embeddings for each type of chemical bond (bond type is an integer in the range 1-7). Then we will
 define four stacked *Message Passing Neural Networks* (*MPNNs*) where edges are bonds and nodes are chemical atoms. Our proposed
-layers are similar to the *GraphSAGE* architecture except for the extra edge (*bond*) embeddings. Finally, the template 
+layers are similar to the *GraphSAGE* architecture except for the extra edge (*bond*) embeddings. Finally, the template
 defines a readout layer (*mutagenic*) that pools embeddings of all nodes from all layers and aggregates them into one
 value passed into a sigmoid function for the target molecule classification.
 
@@ -140,9 +141,9 @@ value passed into a sigmoid function for the target molecule classification.
     template += R.layer4(V.A)[1,] <= (R.layer3(V.N)[1,], R.bond_embed(V.B)[1,], R._bond(V.N, V.A, V.B))
     template += R.layer4(V.A)[1,] <= R.layer3(V.A)[1,]
 
-    template += (R.mutagenic(V.M)[1,] <= (
+    template += R.mutagenic(V.M)[1,] <= (
         R.layer1(V.A)[1,], R.layer2(V.A)[1,], R.layer3(V.A)[1,], R.layer4(V.A)[1,], R.atom(V.A, V.M)[1,]
-    )) | [Transformation.IDENTITY]
+    )
 
     template += R.mutagenic / 1 | [Transformation.SIGMOID]
 
