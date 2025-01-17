@@ -2,6 +2,11 @@ import jpype
 
 import neuralogic
 from neuralogic.core.constructs.function import Transformation, Combination, Aggregation
+from neuralogic.core.constructs.function.function import (
+    TransformationFunction,
+    CombinationFunction,
+    AggregationFunction,
+)
 from neuralogic.core.enums import Grounder
 from neuralogic.nn.init import Initializer
 from neuralogic.nn.loss import MSE, SoftEntropy, CrossEntropy, ErrorFunction
@@ -203,40 +208,40 @@ class SettingsProxy:
             self.__setattr__(key, value)
 
     @property
-    def relation_transformation(self) -> Transformation:
-        return Transformation(str(self.settings.atomNeuronTransformation))
+    def relation_transformation(self) -> TransformationFunction:
+        return TransformationFunction(str(self.settings.atomNeuronTransformation))
 
     @relation_transformation.setter
     def relation_transformation(self, value: Transformation):
         self.settings.atomNeuronTransformation = self.get_transformation_function(value)
 
     @property
-    def relation_combination(self) -> Combination:
-        return Combination(str(self.settings.atomNeuronCombination))
+    def relation_combination(self) -> CombinationFunction:
+        return CombinationFunction(str(self.settings.atomNeuronCombination))
 
     @relation_combination.setter
     def relation_combination(self, value: Combination):
         self.settings.atomNeuronCombination = self.get_combination_function(value)
 
     @property
-    def rule_transformation(self) -> Transformation:
-        return Transformation(str(self.settings.ruleNeuronTransformation))
+    def rule_transformation(self) -> TransformationFunction:
+        return TransformationFunction(str(self.settings.ruleNeuronTransformation))
 
     @rule_transformation.setter
     def rule_transformation(self, value: Transformation):
         self.settings.ruleNeuronTransformation = self.get_transformation_function(value)
 
     @property
-    def rule_combination(self) -> Combination:
-        return Combination(str(self.settings.ruleNeuronCombination))
+    def rule_combination(self) -> CombinationFunction:
+        return CombinationFunction(str(self.settings.ruleNeuronCombination))
 
     @rule_combination.setter
     def rule_combination(self, value: Combination):
         self.settings.ruleNeuronCombination = self.get_combination_function(value)
 
     @property
-    def rule_aggregation(self) -> Aggregation:
-        return Aggregation(str(self.settings.aggNeuronAggregation))
+    def rule_aggregation(self) -> AggregationFunction:
+        return AggregationFunction(str(self.settings.aggNeuronAggregation))
 
     @rule_aggregation.setter
     def rule_aggregation(self, value: Aggregation):

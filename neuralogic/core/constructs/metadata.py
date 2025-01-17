@@ -13,11 +13,11 @@ class Metadata:
 
     def __init__(
         self,
-        learnable: bool = None,
-        transformation: Union[str, TransformationFunction, CombinationFunction] = None,
-        combination: Union[str, CombinationFunction] = None,
-        aggregation: Union[str, AggregationFunction] = None,
-        duplicit_grounding: Optional[bool] = None,
+        learnable: bool | None = None,
+        transformation: Union[str, TransformationFunction, CombinationFunction] | None = None,
+        combination: Union[str, CombinationFunction] | None = None,
+        aggregation: Union[str, AggregationFunction] | None = None,
+        duplicit_grounding: Optional[bool] | None = None,
     ):
         self.learnable = learnable
         self.combination = combination

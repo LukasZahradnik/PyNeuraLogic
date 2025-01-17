@@ -18,7 +18,7 @@ class SoftmaxAggregation(AggregationFunction):
         self.term_indices = agg_terms
         self.agg_terms = agg_terms
 
-    def __call__(self, *, agg_terms: Sequence[int] = None):
+    def __call__(self, *, agg_terms: Sequence[int] | None = None):
         softmax = SoftmaxAggregation(self.name, agg_terms=agg_terms)
         return AggregationFunction.__call__(softmax)
 

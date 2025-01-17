@@ -74,7 +74,7 @@ class CSVFile:
             new_columns.append(CSVFile._find_index_in_header(header, col_value))
         return new_columns
 
-    def _to_logic(self, fp: TextIO) -> Sequence[DatasetEntries]:
+    def _to_logic(self, fp: TextIO) -> list[DatasetEntries]:
         example = []
 
         use_columns = self.term_columns
@@ -131,7 +131,7 @@ class CSVFile:
                 break
         return example
 
-    def to_logic_form(self) -> Sequence[DatasetEntries]:
+    def to_logic_form(self) -> list[DatasetEntries]:
         if isinstance(self.csv_source, (str, Path)):
             with open(self.csv_source, "r") as fp:
                 return self._to_logic(fp)
@@ -156,7 +156,7 @@ class CSVDataset(ConvertibleDataset):
         self.csv_queries = file
 
     def to_dataset(self) -> Dataset:
-        queries = self.csv_queries.to_logic_form() if self.csv_queries else []
+        queries: List[BaseRelation | Rule] = self.csv_queries.to_logic_form() if self.csv_queries else []
 
         if self.mode == Mode.ONE_EXAMPLE:
             example: List[DatasetEntries] = []

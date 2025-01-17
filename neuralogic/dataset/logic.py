@@ -48,12 +48,12 @@ class Dataset(BaseDataset):
     __slots__ = ("samples", "_examples", "_queries")
 
     def __init__(self, samples: Optional[Union[List[Sample], Sample]] = None):
-        self.samples = samples
+        self.samples = []
 
-        if self.samples is None:
-            self.samples = []
-        elif not isinstance(self.samples, list):
-            self.samples = [self.samples]
+        if isinstance(samples, list):
+            self.samples = samples
+        elif not isinstance(samples, list):
+            self.samples = [samples]
 
         self._examples = []
         self._queries = []
