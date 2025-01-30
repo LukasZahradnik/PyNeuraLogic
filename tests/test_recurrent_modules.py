@@ -417,7 +417,7 @@ def test_lstm_module_simple(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model(bd.samples)
+        result, _ = model.train(bd, 1)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
 
 
@@ -496,5 +496,5 @@ def test_gru_module_simple(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model(bd.samples)
+        result, _ = model.train(bd, 1)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)

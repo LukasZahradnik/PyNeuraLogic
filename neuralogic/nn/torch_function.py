@@ -37,9 +37,9 @@ class _NeuraLogicFunction(Function):
             for fact in ctx.mapping
         )
 
-        trainer = model.strategy.getTrainer()
-        trainer.updateWeights(model.strategy.getCurrentModel(), weight_updater)
-        trainer.invalidateSample(trainer.getInvalidation(), sample.java_sample)
+        trainer = model._strategy.getTrainer()
+        trainer.updateWeights(model._strategy.getCurrentModel(), weight_updater)
+        trainer.invalidateSample(trainer.getInvalidation(), sample._java_sample)
 
         return (None, None, None, None, None, *gradients)
 

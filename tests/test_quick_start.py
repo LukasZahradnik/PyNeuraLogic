@@ -21,6 +21,12 @@ def test_quick_start_from_tensor():
 
     logic_dataset = dataset.to_dataset()
 
+    print("--")
+    print(logic_dataset)
+    for x in logic_dataset.samples:
+        print([str(e) for e in x.example])
+        print(x.query)
+
     assert len(logic_dataset) == 3
     assert len(logic_dataset[0]) == 9
 

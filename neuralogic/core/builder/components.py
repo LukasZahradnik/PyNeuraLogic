@@ -32,11 +32,11 @@ class Node:
 
 
 class NeuralSample:
-    __slots__ = "java_sample", "grounding", "_nodes"
+    __slots__ = "_java_sample", "grounding", "_nodes"
 
     def __init__(self, sample, grounding):
-        self.java_sample = sample
         self.grounding = grounding
+        self._java_sample = sample
         self._nodes = None
 
     @property
@@ -47,7 +47,7 @@ class NeuralSample:
 
     @property
     def target(self):
-        return ValueFactory.from_java(self.java_sample.target, SettingsProxy.number_format())
+        return ValueFactory.from_java(self._java_sample.target, SettingsProxy.number_format())
 
     def get_nodes(self, literal, node_type=None):
         literal_name = literal.predicate.name
@@ -88,7 +88,7 @@ class NeuralSample:
     def _get_nodes(self):
         nodes = {}
 
-        for node in self.java_sample.query.evidence.allNeuronsTopologic:
+        for node in self._java_sample.query.evidence.allNeuronsTopologic:
             node_type = str(node.getClass().getSimpleName())
             name = str(node.name).strip()
 
@@ -154,7 +154,7 @@ class NeuralSample:
         return draw_sample(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
 
     def __str__(self):
-        return str(self.java_sample)
+        return str(self._java_sample)
 
 
 class Neuron:

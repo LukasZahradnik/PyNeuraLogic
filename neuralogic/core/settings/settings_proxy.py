@@ -66,10 +66,10 @@ class SettingsProxy:
         return SettingsProxy._number_format
 
     def _setup_random_generator(self):
-        if neuralogic._rnd_generator is None:
-            neuralogic._rnd_generator = self.settings.random
-            self.settings.random.setSeed(neuralogic._seed)
-        self.settings.random = neuralogic._rnd_generator
+        if neuralogic.setup._rnd_generator is None:
+            neuralogic.setup._rnd_generator = self.settings.random
+            self.settings.random.setSeed(neuralogic.setup._seed)
+        self.settings.random = neuralogic.setup._rnd_generator
 
     @property
     def iso_value_compression(self) -> bool:

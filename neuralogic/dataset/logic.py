@@ -52,7 +52,7 @@ class Dataset(BaseDataset):
 
         if isinstance(samples, list):
             self.samples = samples
-        elif not isinstance(samples, list):
+        elif not isinstance(samples, list) and samples is not None:
             self.samples = [samples]
 
         self._examples = []
