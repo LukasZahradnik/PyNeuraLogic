@@ -4,7 +4,7 @@ import json
 import jpype
 import torch
 
-from neuralogic import is_initialized, initialize
+from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.builder import DatasetBuilder

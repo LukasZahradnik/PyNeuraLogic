@@ -4,7 +4,7 @@ from typing import Optional, Iterable, Sequence
 import numpy as np
 import jpype
 
-from neuralogic import is_initialized, initialize
+from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.constructs.factories import R
 from neuralogic.core.constructs.function.enum import Combination
 from neuralogic.core.constructs.function.function import CombinationFunction

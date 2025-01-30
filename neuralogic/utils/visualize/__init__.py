@@ -5,7 +5,7 @@ from typing import Optional
 
 import jpype
 
-from neuralogic import get_default_graphviz_path
+from neuralogic.setup import get_default_graphviz_path
 from neuralogic.core.settings import Settings, SettingsProxy
 
 

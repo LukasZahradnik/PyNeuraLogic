@@ -1,7 +1,7 @@
 import jpype
 
 import neuralogic
-from neuralogic import is_initialized, initialize
+from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.constructs.function import Transformation, Combination, Aggregation
 from neuralogic.core.constructs.function.function import (
     TransformationFunction,

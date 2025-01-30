@@ -3,7 +3,7 @@ from typing import Union, Set, Dict, List
 import jpype
 
 import neuralogic.dataset as datasets
-from neuralogic import is_initialized, initialize
+from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.builder.builder import Builder
 from neuralogic.core.builder.components import BuiltDataset, GroundedDataset
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation

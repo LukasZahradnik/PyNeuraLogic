@@ -2,7 +2,7 @@ from typing import Union, List, Optional, Iterable
 
 import jpype
 
-from neuralogic import is_initialized, initialize
+from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.builder import Builder, DatasetBuilder
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule

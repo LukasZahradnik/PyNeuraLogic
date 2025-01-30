@@ -3,7 +3,7 @@ from typing import List, Optional
 import jpype
 from tqdm.autonotebook import tqdm
 
-from neuralogic import is_initialized, initialize
+from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.builder.components import NeuralSample
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources

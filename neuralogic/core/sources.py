@@ -2,7 +2,7 @@ from typing import List
 
 import jpype
 
-from neuralogic import is_initialized, initialize
+from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.settings import SettingsProxy
 
 

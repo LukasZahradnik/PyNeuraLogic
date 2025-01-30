@@ -2,7 +2,7 @@ from typing import List, Union, Optional, Tuple, Dict
 
 import jpype
 
-from neuralogic import is_initialized, initialize
+from neuralogic.setup import is_initialized, initialize
 from neuralogic.core import Template, Settings, R
 from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.builder import DatasetBuilder
