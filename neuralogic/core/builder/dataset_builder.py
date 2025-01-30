@@ -207,12 +207,12 @@ class DatasetBuilder:
         :param progress:
         :return:
         """
-        grounded_dataset = dataset
-
         if not isinstance(dataset, GroundedDataset):
             grounded_dataset = self.ground_dataset(
                 dataset, settings, batch_size=batch_size, learnable_facts=learnable_facts
             )
+        else:
+            grounded_dataset = dataset
         return BuiltDataset(grounded_dataset.neuralize(progress=progress), batch_size)
 
     @staticmethod

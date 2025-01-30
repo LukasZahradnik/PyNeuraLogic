@@ -67,6 +67,9 @@ class NeuralModule:
         batch_size: int = 1,
         learnable_facts: bool = False,
     ) -> GroundedDataset:
+        if self._dataset_builder is None or self._settings is None:
+            raise ValueError("template is not built")
+
         return self._dataset_builder.ground_dataset(
             dataset,
             self._settings,
@@ -82,6 +85,9 @@ class NeuralModule:
         learnable_facts: bool = False,
         progress: bool = False,
     ) -> BuiltDataset:
+        if self._dataset_builder is None or self._settings is None:
+            raise ValueError("template is not built")
+
         return self._dataset_builder.build_dataset(
             dataset,
             self._settings,
@@ -121,29 +127,28 @@ class NeuralModule:
         return self(dataset)
 
     def train(self, dataset, epochs: int = 1) -> Tuple[Value, int]:
-        res = self._train_test(dataset, True, epochs)
-        self._update_tensor_parameters()
-
-        return res
-
-    def test(self, dataset, epochs: int = 1) -> Value:
-        return self._train_test(dataset, False, epochs)
-
-    def _train_test(self, dataset, train: bool, epochs: int = 1) -> Union[Tuple[Value, int], Value]:
         self._set_hooks()
         samples, batch_size = self._dataset_to_samples(dataset)
 
         if not isinstance(samples, Collection):
-            if train:
-                result = self._strategy.learnSample(samples._java_sample)
-                return json.loads(str(result)), 1
+            result = self._strategy.learnSample(samples._java_sample)
+            res = json.loads(str(result)), 1
+        else:
+            sample_array = jpype.java.util.ArrayList([sample._java_sample for sample in samples])
+            results = self._strategy.learnSamples(sample_array, epochs, batch_size)
+            res = json.loads(str(results)), len(samples)
+
+        self._update_tensor_parameters()
+        return res
+
+    def test(self, dataset) -> Value:
+        self._set_hooks()
+        samples, batch_size = self._dataset_to_samples(dataset)
+
+        if not isinstance(samples, Collection):
             return json.loads(str(self._strategy.evaluateSample(samples._java_sample)))
 
         sample_array = jpype.java.util.ArrayList([sample._java_sample for sample in samples])
-
-        if train:
-            results = self._strategy.learnSamples(sample_array, epochs, batch_size)
-            return json.loads(str(results)), len(samples)
 
         results = self._strategy.evaluateSamples(sample_array, batch_size)
         return json.loads(str(results))
