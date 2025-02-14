@@ -1,5 +1,4 @@
 import math
-from typing import Optional
 
 from neuralogic.core.constructs.function import Transformation, Combination, Aggregation
 from neuralogic.core.constructs.factories import R
@@ -36,7 +35,7 @@ class Attention(Module):
         query_name: str,
         key_name: str,
         value_name: str,
-        mask_name: Optional[str] = None,
+        mask_name: str | None = None,
         arity: int = 1,
     ):
         self.embed_dim = embed_dim
@@ -95,9 +94,9 @@ class MultiheadAttention(Module):
         The name of the keys predicate.
     value_name : str
         The name of the values predicate.
-    vdim : int
+    vdim : Optional[int]
         Total number of features for values.
-    kdim : int
+    kdim : Optional[int]
         Total number of features for keys.
     mask_name : str, optional
         The name of the input mask predicate. Default: ``None``
@@ -113,9 +112,9 @@ class MultiheadAttention(Module):
         query_name: str,
         key_name: str,
         value_name: str,
-        vdim: int = None,
-        kdim: int = None,
-        mask_name: Optional[str] = None,
+        vdim: int | None = None,
+        kdim: int | None = None,
+        mask_name: str | None = None,
         arity: int = 1,
     ):
         self.embed_dim = embed_dim
@@ -124,8 +123,8 @@ class MultiheadAttention(Module):
         self.queries = query_name
         self.keys = key_name
         self.values = value_name
-        self.vdim = vdim if vdim is not None else embed_dim
-        self.kdim = kdim if kdim is not None else embed_dim
+        self.vdim: int = vdim if vdim is not None else embed_dim
+        self.kdim: int = kdim if kdim is not None else embed_dim
         self.mask_name = mask_name
         self.arity = arity
 

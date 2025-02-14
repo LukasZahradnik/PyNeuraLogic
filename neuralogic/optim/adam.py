@@ -1,4 +1,4 @@
-from typing import Tuple, Optional
+from typing import Tuple
 
 import jpype
 
@@ -12,7 +12,7 @@ class Adam(Optimizer):
         lr: float = 0.001,
         betas: Tuple[float, float] = (0.9, 0.999),
         eps: float = 1e-08,
-        lr_decay: Optional[LRDecay] = None,
+        lr_decay: LRDecay | None = None,
     ):
         super().__init__(lr, lr_decay)
         self._betas = betas

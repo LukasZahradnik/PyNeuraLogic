@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
@@ -80,7 +80,7 @@ class RGCNConv(Module):
         Output (head) predicate name of the module.
     feature_name : str
         Feature predicate name to get features from.
-    edge_name : Optional[str]
+    edge_name : str | None
         Edge predicate name to use for neighborhood relations. When :code:`None`, elements from :code:`relations`
         are used instead.
     relations : List[str]
@@ -100,7 +100,7 @@ class RGCNConv(Module):
         out_channels: int,
         output_name: str,
         feature_name: str,
-        edge_name: Optional[str],
+        edge_name: str | None,
         relations: List[str],
         activation: TransformationFunction = Transformation.IDENTITY,
         aggregation: AggregationFunction = Aggregation.AVG,

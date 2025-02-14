@@ -1,4 +1,4 @@
-from typing import Iterable, Optional
+from typing import Iterable
 
 from neuralogic.core.constructs.function import FContainer
 from neuralogic.core.constructs.metadata import Metadata
@@ -40,7 +40,7 @@ class Rule:
 
     def __init__(self, head, body):
         self.head = head
-        self.metadata: Optional[Metadata] = None
+        self.metadata: Metadata | None = None
 
         if head.function is not None:
             raise NotImplementedError(f"Rule head {head} cannot have a function attached")

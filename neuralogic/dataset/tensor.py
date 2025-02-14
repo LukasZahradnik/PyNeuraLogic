@@ -1,4 +1,4 @@
-from typing import Optional, List, Union, Tuple, Sequence, Iterable
+from typing import List, Union, Tuple, Sequence, Iterable
 
 import numpy as np
 
@@ -37,9 +37,9 @@ class Data:
         Edges represented via a graph connectivity format - matrix ``[[...src], [...dst]]``.
     y : Union[Sequence, float, int]
         Sequence of labels of all nodes or one graph label.
-    edge_attr : Optional[Sequence]
+    edge_attr : Sequence | None
         Optional sequence of edge features. Default: ``None``
-    y_mask : Optional[Sequence]
+    y_mask : Sequence | None
         Optional sequence of node ids to generate queries for. Default: ``None`` (all nodes)
 
     """
@@ -49,8 +49,8 @@ class Data:
         x: Sequence,
         edge_index: Sequence,
         y: Union[Sequence, float, int] = 0.0,
-        edge_attr: Optional[Sequence] = None,
-        y_mask: Optional[Sequence] = None,
+        edge_attr: Sequence | None = None,
+        y_mask: Sequence | None = None,
     ):
         self.x = x
         self.edge_index = edge_index
@@ -60,7 +60,7 @@ class Data:
 
     @staticmethod
     def get_query(
-        y, output_name: str = "predict", one_hot_encode_labels: bool = False, max_classes=1, index: Optional[int] = None
+        y, output_name: str = "predict", one_hot_encode_labels: bool = False, max_classes=1, index: int | None = None
     ):
         relation = Relation.get(output_name)
 

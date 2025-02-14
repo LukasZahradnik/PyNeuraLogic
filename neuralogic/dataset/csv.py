@@ -1,6 +1,6 @@
 import enum
 from pathlib import Path
-from typing import Optional, List, Union, TextIO, Callable, Sequence
+from typing import List, Union, TextIO, Callable, Sequence
 
 from neuralogic.core.constructs.factories import R
 from neuralogic.core.constructs.relation import BaseRelation
@@ -37,13 +37,13 @@ class CSVFile:
         relation_name: str,
         csv_source: Union[TextIO, Path],
         sep=",",
-        value_column: Optional[Union[str, int]] = None,
-        default_value: Optional[Union[float, int]] = None,
-        value_mapper: Optional[Callable] = None,
-        term_columns: Optional[Sequence[Union[str, int]]] = None,
+        value_column: Union[str, int] | None = None,
+        default_value: Union[float, int] | None = None,
+        value_mapper: Callable | None = None,
+        term_columns: Sequence[Union[str, int]] | None = None,
         header: bool = False,
         skip_rows: int = 0,
-        n_rows: Optional[int] = None,
+        n_rows: int | None = None,
         replace_empty_column: Union[str, float, int] = 0,
     ):
         self.relation_name = relation_name
@@ -65,7 +65,7 @@ class CSVFile:
                 return index
         raise ValueError(f"Value {value} not found in the header {header}")
 
-    def _get_column_indices(self, header) -> Optional[List[int]]:
+    def _get_column_indices(self, header) -> List[int] | None:
         if self.term_columns is None:
             return None
         new_columns = []
@@ -142,7 +142,7 @@ class CSVDataset(ConvertibleDataset):
     def __init__(
         self,
         csv_files: Union[List[CSVFile], CSVFile],
-        csv_queries: Optional[CSVFile] = None,
+        csv_queries: CSVFile | None = None,
         mode: Mode = Mode.ONE_EXAMPLE,
     ):
         self.csv_queries = csv_queries

@@ -1,4 +1,4 @@
-from typing import Union, Tuple, Optional
+from typing import Union, Tuple
 
 import jpype
 
@@ -28,7 +28,7 @@ class Slice(TransformationFunction):
 
     def __call__(
         self,
-        relation: Optional = None,
+        relation=None,
         *,
         rows: Union[type(Ellipsis), Tuple[int, int]] = ...,
         cols: Union[type(Ellipsis), Tuple[int, int]] = ...,

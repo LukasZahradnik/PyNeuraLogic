@@ -1,4 +1,4 @@
-from typing import List, Union, Optional, Tuple, Dict
+from typing import List, Union, Tuple, Dict
 
 import jpype
 
@@ -35,7 +35,7 @@ class InferenceEngine:
     def set_knowledge(self, examples: List[Union[BaseRelation, Rule]]) -> None:
         self.examples = examples
 
-    def get_queries(self, examples: Optional[List[Union[BaseRelation, Rule]]] = None):
+    def get_queries(self, examples: List[Union[BaseRelation, Rule]] | None = None):
         if examples is None:
             examples = self.examples
 
@@ -59,10 +59,10 @@ class InferenceEngine:
 
                 yield R.get(str(ground_head.predicateName()))([str(term.name()) for term in ground_head.arguments()])
 
-    def q(self, query: BaseRelation, examples: Optional[List[Union[BaseRelation, Rule]]] = None):
+    def q(self, query: BaseRelation, examples: List[Union[BaseRelation, Rule]] | None = None):
         return self.query(query, examples)
 
-    def query(self, query: BaseRelation, examples: Optional[List[Union[BaseRelation, Rule]]] = None):
+    def query(self, query: BaseRelation, examples: List[Union[BaseRelation, Rule]] | None = None):
         if examples is None:
             examples = self.examples
 

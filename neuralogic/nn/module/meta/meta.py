@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
@@ -32,7 +32,7 @@ class MetaConv(Module):
         Output (head) predicate name of the module.
     feature_name : str
         Feature predicate name to get features from.
-    role_name : Optional[str]
+    role_name : str | None
         Role predicate name to use for role relations. When :code:`None`, elements from :code:`roles` are used instead.
     roles : List[str]
         List of relations' names
@@ -51,7 +51,7 @@ class MetaConv(Module):
         out_channels: int,
         output_name: str,
         feature_name: str,
-        role_name: Optional[str],
+        role_name: str | None,
         roles: List[str],
         activation: TransformationFunction = Transformation.SIGMOID,
         aggregation: AggregationFunction = Aggregation.AVG,

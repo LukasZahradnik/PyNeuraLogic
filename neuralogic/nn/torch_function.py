@@ -51,7 +51,7 @@ class NeuraLogic(nn.Module):
         input_facts: List[Union[BaseRelation, Rule]],
         output_relation: BaseRelation,
         to_logic: Callable,
-        settings: Settings = None,
+        settings: Settings | None = None,
         dtype=torch.float32,
     ):
         super(NeuraLogic, self).__init__()

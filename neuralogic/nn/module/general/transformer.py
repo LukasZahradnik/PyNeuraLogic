@@ -1,5 +1,3 @@
-from typing import Optional
-
 from neuralogic.core.constructs.function import Transformation
 from neuralogic.core.constructs.factories import R
 from neuralogic.nn.module.module import Module
@@ -44,9 +42,9 @@ class Transformer(Module):
         output_name: str,
         src_name: str,
         tgt_name: str,
-        src_mask_name: Optional[str] = None,
-        tgt_mask_name: Optional[str] = None,
-        memory_mask_name: Optional[str] = None,
+        src_mask_name: str | None = None,
+        tgt_mask_name: str | None = None,
+        memory_mask_name: str | None = None,
         arity: int = 1,
     ):
         self.input_dim = input_dim
@@ -99,7 +97,7 @@ class EncoderBlock(Module):
         query_name: str,
         key_name: str,
         value_name: str,
-        mask_name: Optional[str] = None,
+        mask_name: str | None = None,
         arity: int = 1,
         mlp: bool = True,
     ):
@@ -183,7 +181,7 @@ class TransformerEncoder(EncoderBlock):
         dim_feedforward: int,
         output_name: str,
         input_name: str,
-        mask_name: Optional[str] = None,
+        mask_name: str | None = None,
         arity: int = 1,
     ):
         super().__init__(
@@ -235,8 +233,8 @@ class TransformerDecoder(Module):
         output_name: str,
         input_name: str,
         encoder_name: str,
-        mask_name: Optional[str] = None,
-        memory_mask_name: Optional[str] = None,
+        mask_name: str | None = None,
+        memory_mask_name: str | None = None,
         arity: int = 1,
     ):
         self.input_dim = input_dim

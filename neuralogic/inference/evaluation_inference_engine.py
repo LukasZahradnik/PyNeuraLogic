@@ -1,4 +1,4 @@
-from typing import List, Union, Optional
+from typing import List, Union
 
 from neuralogic.core import Template, Settings
 from neuralogic.core.constructs.relation import BaseRelation
@@ -8,18 +8,18 @@ from neuralogic.dataset import Dataset, Sample
 
 
 class EvaluationInferenceEngine:
-    def __init__(self, template: Template, settings: Settings = None):
-        self.settings = Settings() if settings is None else settings
+    def __init__(self, template: Template, settings: Settings | None = None):
+        self.settings: Settings = Settings() if settings is None else settings
         self.model = template.build(self.settings)
         self.dataset = Dataset(Sample(None, None))
 
     def set_knowledge(self, examples: List[Union[BaseRelation, Rule]]) -> None:
         self.dataset[0].example = examples
 
-    def q(self, query: BaseRelation, examples: Optional[List[Union[BaseRelation, Rule]]] = None):
+    def q(self, query: BaseRelation, examples: List[Union[BaseRelation, Rule]] | None = None):
         return self.query(query, examples)
 
-    def query(self, query: BaseRelation, examples: Optional[List[Union[BaseRelation, Rule]]] = None):
+    def query(self, query: BaseRelation, examples: List[Union[BaseRelation, Rule]] | None = None):
         global_examples = self.dataset[0].example
 
         if examples is not None:

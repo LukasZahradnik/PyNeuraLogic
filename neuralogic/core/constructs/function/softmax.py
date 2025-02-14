@@ -12,7 +12,7 @@ class SoftmaxAggregation(AggregationFunction):
         self,
         name: str,
         *,
-        agg_terms: Sequence[str] = None,
+        agg_terms: Sequence[str] | None = None,
     ):
         super().__init__(name)
         self.term_indices = agg_terms

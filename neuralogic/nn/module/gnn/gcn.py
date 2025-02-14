@@ -1,5 +1,3 @@
-from typing import Optional
-
 from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation, Combination
@@ -31,7 +29,7 @@ class GCNConv(Module):
     aggregation : AggregationFunction
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.SUM``
-    add_self_loops : Optional[bool]
+    add_self_loops : bool | None
         Add self loops if either set to `True` or `None` (if `normalize` is `True`).
         Default: ``None``
     normalize : bool
@@ -48,7 +46,7 @@ class GCNConv(Module):
         edge_name: str,
         activation: TransformationFunction = Transformation.IDENTITY,
         aggregation: AggregationFunction = Aggregation.SUM,
-        add_self_loops: Optional[bool] = None,
+        add_self_loops: bool | None = None,
         normalize: bool = True,
     ):
         self.output_name = output_name

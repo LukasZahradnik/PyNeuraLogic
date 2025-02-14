@@ -1,5 +1,4 @@
 import os
-from typing import Optional
 from shutil import copyfileobj
 
 from neuralogic.dataset.base import BaseDataset
@@ -13,17 +12,17 @@ class FileDataset(BaseDataset):
     Parameters
     ----------
 
-    examples_file : Optional[str]
+    examples_file : str | None
         Path to the examples file. Default: ``None``
-    queries_file : Optional[str]
+    queries_file : str | None
         Path to the queries file. Default: ``None``
 
     """
 
     def __init__(
         self,
-        examples_file: Optional[str] = None,
-        queries_file: Optional[str] = None,
+        examples_file: str = None,
+        queries_file: str = None,
     ):
         self.examples_file = examples_file
         self.queries_file = queries_file

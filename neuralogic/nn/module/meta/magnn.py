@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List
 
 from neuralogic.core.constructs.function.function import AggregationFunction, TransformationFunction
 from neuralogic.core.constructs.metadata import Metadata
@@ -50,7 +50,7 @@ class MAGNNMean(Module):
         output_name: str,
         feature_name: str,
         relation_name: str,
-        type_name: Optional[str],
+        type_name: str | None,
         meta_paths: List[str],
         activation: TransformationFunction = Transformation.SIGMOID,
         aggregation: AggregationFunction = Aggregation.SUM,
@@ -138,7 +138,7 @@ class MAGNNLinear(MAGNNMean):
         output_name: str,
         feature_name: str,
         relation_name: str,
-        type_name: Optional[str],
+        type_name: str | None,
         meta_paths: List[str],
         activation: TransformationFunction = Transformation.SIGMOID,
         aggregation: AggregationFunction = Aggregation.SUM,

@@ -1,5 +1,3 @@
-from typing import Optional
-
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation, Combination
 from neuralogic.core.constructs.factories import R, V
@@ -29,7 +27,7 @@ class GINEConv(Module):
     train_eps : bool
         Is ``eps`` trainable parameter.
         Default: ``false``
-    edge_dim : Optional[int]
+    edge_dim : int | None
         Dimension of edge features (``None`` is projection to ``in_channels`` is not needed).
         Default: ``None``
     """
@@ -42,7 +40,7 @@ class GINEConv(Module):
         nn_name: str,
         eps: float = 0.0,
         train_eps: bool = False,
-        edge_dim: Optional[int] = None,
+        edge_dim: int | None = None,
     ):
         self.feature_name = feature_name
         self.edge_name = edge_name
@@ -52,7 +50,7 @@ class GINEConv(Module):
         self.train_eps = train_eps
 
         self.in_channels = in_channels
-        self.edge_dim: Optional[int] = edge_dim
+        self.edge_dim: int | None = edge_dim
 
     def __call__(self):
         feat_sum = R.get(f"{self.nn_name}__gine_feat_sum")

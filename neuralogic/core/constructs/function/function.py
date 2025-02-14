@@ -21,7 +21,7 @@ class Function:
     def pretty_str(self) -> str:
         return str(self).capitalize()
 
-    def __call__(self, *args):
+    def __call__(self, *args, **kwargs):
         if len(args) == 0:
             return self
         raise NotImplementedError
@@ -53,7 +53,7 @@ class TransformationFunction(Function):
     ):
         super().__init__(name, namespace=namespace, operator=operator, can_flatten=can_flatten)
 
-    def __call__(self, relation: Optional = None, **kwargs):
+    def __call__(self, relation=None, **kwargs):
         from neuralogic.core.constructs import relation as rel
         from neuralogic.core.constructs.function.function_container import FContainer
 

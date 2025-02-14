@@ -16,7 +16,7 @@ class BaseRelation:
         self,
         predicate: Predicate,
         terms=None,
-        function: Union[TransformationFunction, CombinationFunction] = None,
+        function: Union[TransformationFunction, CombinationFunction, None] = None,
         negated: bool = False,
     ):
         self.predicate = predicate
@@ -147,7 +147,7 @@ class WeightedRelation(BaseRelation):
         predicate: Predicate,
         fixed=False,
         terms=None,
-        function: Union[TransformationFunction, CombinationFunction] = None,
+        function: Union[TransformationFunction, CombinationFunction, None] = None,
     ):
         super().__init__(predicate, terms, function, False)
 

@@ -1,4 +1,4 @@
-from typing import Optional, List, Union, Sequence
+from typing import List, Union, Sequence
 
 import jpype
 
@@ -17,9 +17,7 @@ class Sample:
         "example",
     )
 
-    def __init__(
-        self, query: Optional[BaseRelation], example: Optional[Union[Sequence[DatasetEntries], DatasetEntries]]
-    ):
+    def __init__(self, query: BaseRelation | None, example: Union[Sequence[DatasetEntries], DatasetEntries] | None):
         self.query = query
 
         if example is None:
@@ -47,7 +45,7 @@ class Dataset(BaseDataset):
 
     __slots__ = ("samples", "_examples", "_queries")
 
-    def __init__(self, samples: Optional[Union[List[Sample], Sample]] = None):
+    def __init__(self, samples: Union[List[Sample], Sample] | None = None):
         self.samples = []
 
         if isinstance(samples, list):
@@ -67,7 +65,7 @@ class Dataset(BaseDataset):
     def add_sample(self, sample: Sample):
         self.samples.append(sample)
 
-    def add(self, query: BaseRelation, example: Optional[List[DatasetEntries]]):
+    def add(self, query: BaseRelation, example: List[DatasetEntries] | None):
         self.samples.append(Sample(query, example))
 
     def __getitem__(self, item: int) -> Sample:

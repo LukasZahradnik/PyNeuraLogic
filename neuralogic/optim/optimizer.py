@@ -1,10 +1,8 @@
-from typing import Optional
-
 from neuralogic.optim.lr_scheduler import LRDecay
 
 
 class Optimizer:
-    def __init__(self, lr: float, lr_decay: Optional[LRDecay] = None):
+    def __init__(self, lr: float, lr_decay: LRDecay | None = None):
         if lr_decay is not None:
             lr_decay._optimizer = self
 

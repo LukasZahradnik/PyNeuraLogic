@@ -143,11 +143,11 @@ class NeuralSample:
 
     def draw(
         self,
-        filename: Optional[str] = None,
+        filename: str | None = None,
         show=True,
         img_type="png",
         value_detail: int = 0,
-        graphviz_path: Optional[str] = None,
+        graphviz_path: str | None = None,
         *args,
         **kwargs,
     ):

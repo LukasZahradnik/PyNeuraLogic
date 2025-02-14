@@ -1,6 +1,6 @@
 import csv
 import io
-from typing import Optional, List, Union, Callable
+from typing import List, Union, Callable
 
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
@@ -30,11 +30,11 @@ class DBSource:
         relation_name: str,
         table_name: str,
         term_columns: List[str],
-        value_column: Optional[str] = None,
+        value_column: str | None = None,
         default_value: Union[float, int] = 1.0,
-        value_mapper: Optional[Callable] = None,
+        value_mapper: Callable | None = None,
         skip_rows: int = 0,
-        n_rows: Optional[int] = None,
+        n_rows: int | None = None,
         replace_empty_column: Union[str, float, int] = 0,
         sep=",",
     ):
@@ -94,7 +94,7 @@ class DBDataset(ConvertibleDataset):
         self,
         connection,
         db_sources: Union[List[DBSource], DBSource],
-        queries_db_source: Optional[DBSource] = None,
+        queries_db_source: DBSource | None = None,
         mode: Mode = Mode.ONE_EXAMPLE,
     ):
         self.connection = connection

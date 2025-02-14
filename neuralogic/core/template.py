@@ -1,4 +1,4 @@
-from typing import Union, List, Optional, Iterable
+from typing import Union, List, Iterable
 
 import jpype
 
@@ -17,7 +17,7 @@ TemplateEntries = Union[BaseRelation, WeightedRelation, Rule]
 
 
 class Template(NeuralModule):
-    def __init__(self, *, template_file: Optional[str] = None):
+    def __init__(self, *, template_file: str | None = None):
         super().__init__()
         self._template: List[TemplateEntries] = []
         self._template_file = template_file

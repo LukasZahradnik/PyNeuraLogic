@@ -1,5 +1,3 @@
-from typing import Optional
-
 import jpype
 
 from neuralogic.optim.lr_scheduler import LRDecay
@@ -7,7 +5,7 @@ from neuralogic.optim.optimizer import Optimizer
 
 
 class SGD(Optimizer):
-    def __init__(self, lr: float = 0.1, lr_decay: Optional[LRDecay] = None):
+    def __init__(self, lr: float = 0.1, lr_decay: LRDecay | None = None):
         super().__init__(lr, lr_decay)
 
     def initialize(self):

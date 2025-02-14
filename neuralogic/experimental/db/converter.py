@@ -1,6 +1,6 @@
 import dataclasses
 from collections import defaultdict
-from typing import List, Dict, Tuple, Set, Optional
+from typing import List, Dict, Tuple, Set
 
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 
@@ -14,7 +14,7 @@ class TableMapping:
     relation_name: str
     table_name: str
     term_columns: List[str]
-    value_column: Optional[str] = None
+    value_column: str | None = None
 
 
 class Converter:
@@ -40,7 +40,7 @@ class Converter:
 
         for entry in template:
             if isinstance(entry, Rule):
-                weight_indices: List[Optional[int]] = []
+                weight_indices: List[int | None] = []
                 if isinstance(entry.head, WeightedRelation) and entry.head.weight is not None:
                     weight_indices.append(weight_index)
                     weight_index += 1
