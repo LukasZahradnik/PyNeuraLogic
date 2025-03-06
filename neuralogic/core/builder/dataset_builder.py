@@ -176,6 +176,9 @@ class DatasetBuilder:
 
             self.java_factory.weight_factory = weight_factory
         elif isinstance(dataset, datasets.FileDataset):
+            if dataset.queries_file is None and dataset.examples_file is None:
+                raise ValueError("To build FileDataset provide either queries or examples")
+
             args = ["-t", dataset.examples_file or dataset.queries_file]
             if dataset.queries_file is not None:
                 args.extend(["-q", dataset.queries_file])

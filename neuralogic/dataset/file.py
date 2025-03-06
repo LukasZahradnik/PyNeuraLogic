@@ -21,8 +21,8 @@ class FileDataset(BaseDataset):
 
     def __init__(
         self,
-        examples_file: str = None,
-        queries_file: str = None,
+        examples_file: str | None = None,
+        queries_file: str | None = None,
     ):
         self.examples_file = examples_file
         self.queries_file = queries_file
