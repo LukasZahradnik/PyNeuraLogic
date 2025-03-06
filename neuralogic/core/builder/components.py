@@ -34,7 +34,7 @@ class NeuralSample:
     __slots__ = "_java_sample", "grounding", "_nodes"
 
     def __init__(self, sample, grounding):
-        self.grounding = grounding
+        self.grounding = Grounding(grounding)
         self._java_sample = sample
         self._nodes = None
 
@@ -217,10 +217,11 @@ class Weight:
 
 
 class Grounding:
-    __slots__ = ("grounding",)
+    __slots__ = ("_grounding", "_nodes")
 
     def __init__(self, grounding):
-        self.grounding = grounding
+        self._grounding = grounding
+        self._nodes = None
 
     def draw(
         self,
@@ -232,7 +233,74 @@ class Grounding:
         *args,
         **kwargs,
     ):
-        return draw_grounding(self.grounding, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
+        return draw_grounding(self._grounding, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
+
+    def __hash__(self):
+        return hash(self._grounding)
+
+    def __eq__(self, other):
+        if not isinstance(other, Grounding):
+            return False
+        return other._grounding == self._grounding
 
     def __str__(self):
-        return str(self.grounding)
+        return str(self._grounding)
+
+    @property
+    def nodes(self):
+        if self._nodes is None:
+            self._nodes = self._get_nodes()
+        return self._nodes
+
+    def get_nodes(self, literal):
+        literal_name = literal.predicate.name
+        literal_arity = literal.predicate.arity
+
+        if literal_name not in self.nodes:
+            return []
+
+        nodes = []
+        for subs, value in self.nodes[literal_name].items():
+            if len(subs) != literal_arity:
+                continue
+
+            literal_subs = {}
+            for term, sub in zip(literal.terms, subs):
+                term_str = str(term)
+
+                if term_str[0] == term_str[0].upper() and term_str[0] != term_str[0].lower():
+                    if term_str in literal_subs and sub != literal_subs[term_str]:
+                        break
+                    literal_subs[str(term)] = sub
+                    continue
+
+                if str(term) != sub:
+                    break
+            else:
+                nodes.append(Node(value, literal_subs))
+        return nodes
+
+    def _get_nodes(self):
+        nodes = {}
+
+        for node in self._grounding.groundingWrap.getGroundTemplate().groundFacts:
+            name = str(node).strip()
+
+            bracket = name.rfind("(")
+            space = name.rfind(" ", 0, bracket if bracket != -1 else None)
+
+            substitutions = tuple()
+            if bracket != -1:
+                subs = name[bracket + 1 :]
+                name = name[space + 1 : bracket]
+
+                r_bracket = subs.find(")")
+                substitutions = tuple(subs[:r_bracket].split(", "))
+            elif space != -1:
+                name = name[space + 1 :]
+
+            if name not in nodes:
+                nodes[name] = {}
+
+            nodes[name][substitutions] = node
+        return nodes

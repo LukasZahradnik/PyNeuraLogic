@@ -53,8 +53,8 @@ class Dataset(BaseDataset):
         elif not isinstance(samples, list) and samples is not None:
             self.samples = [samples]
 
-        self._examples = []
-        self._queries = []
+        self._examples: list[list[DatasetEntries]] = []
+        self._queries: list[BaseRelation] = []
 
     def set_samples(self, samples: List[Sample]):
         self.samples = samples
