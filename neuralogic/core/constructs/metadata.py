@@ -1,4 +1,4 @@
-from typing import Union, Iterable, Callable, Optional
+from typing import Iterable, Callable
 
 from neuralogic.core.constructs.function.function import (
     Function,
@@ -14,10 +14,10 @@ class Metadata:
     def __init__(
         self,
         learnable: bool | None = None,
-        transformation: Union[str, TransformationFunction, CombinationFunction] | None = None,
-        combination: Union[str, CombinationFunction] | None = None,
-        aggregation: Union[str, AggregationFunction] | None = None,
-        duplicate_grounding: Optional[bool] | None = None,
+        transformation: TransformationFunction | CombinationFunction | None = None,
+        combination: CombinationFunction | None = None,
+        aggregation: AggregationFunction | None = None,
+        duplicate_grounding: bool | None = None,
     ):
         self.learnable = learnable
         self.combination = combination

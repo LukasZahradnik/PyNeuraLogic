@@ -25,7 +25,7 @@ class Settings:
         self.params.pop("self")
         self._proxies: weakref.WeakSet[SettingsProxy] = weakref.WeakSet()
 
-        self.kw_params = {}
+        self.kw_params: dict[str, Any] = {}
 
     @property
     def iso_value_compression(self) -> bool:

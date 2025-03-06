@@ -75,7 +75,7 @@ class CSVFile:
         return new_columns
 
     def _to_logic(self, fp: TextIO) -> list[DatasetEntries]:
-        example = []
+        example: list[DatasetEntries] = []
 
         use_columns = self.term_columns
         value_column = self.value_column
