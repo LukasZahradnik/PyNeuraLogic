@@ -1,7 +1,6 @@
 import json
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional
 
-import jpype
 import numpy as np
 
 from neuralogic.core.settings.settings_proxy import SettingsProxy
@@ -217,25 +216,6 @@ class Weight:
         return weight
 
 
-class BuiltDataset:
-    """BuiltDataset represents an already built dataset - that is, a dataset that has been grounded and neuralized."""
-
-    __slots__ = "_samples", "_batch_size"
-
-    def __init__(self, samples: List[NeuralSample], batch_size: int):
-        self._samples = samples
-        self._batch_size = batch_size
-
-    def __len__(self):
-        return len(self._samples)
-
-    def __getitem__(self, item):
-        return self._samples[item]
-
-    def __iter__(self):
-        return iter(self._samples)
-
-
 class Grounding:
     __slots__ = ("grounding",)
 
@@ -256,36 +236,3 @@ class Grounding:
 
     def __str__(self):
         return str(self.grounding)
-
-
-class GroundedDataset:
-    """GroundedDataset represents grounded examples that are not neuralized yet."""
-
-    __slots__ = "_groundings", "_groundings_list", "_builder"
-
-    def __init__(self, groundings, builder):
-        self._groundings = groundings
-        self._groundings_list = None
-        self._builder = builder
-
-    def _to_list(self):
-        if self._groundings_list is None:
-            self._groundings = self._groundings.collect(jpype.JClass("java.util.stream.Collectors").toList())
-            self._groundings_list = [Grounding(g) for g in self._groundings]
-
-    def __getitem__(self, item) -> Grounding:
-        self._to_list()
-        return self._groundings_list[item]
-
-    def __len__(self) -> int:
-        self._to_list()
-        return len(self._groundings_list)
-
-    def neuralize(self, *, progress: bool = False):
-        self._to_list()
-
-        if self._groundings_list is not None:
-            return self._builder.neuralize(jpype.java.util.ArrayList(self._groundings).stream(), progress, len(self))
-        if progress:
-            return self._builder.neuralize(self._groundings, progress, len(self))
-        return self._builder.neuralize(self._groundings, progress, 0)

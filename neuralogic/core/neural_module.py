@@ -7,7 +7,7 @@ from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.builder import DatasetBuilder
-from neuralogic.core.builder.components import BuiltDataset, GroundedDataset
+from neuralogic.core.builder.dataset import BuiltDataset, GroundedDataset
 from neuralogic.core.settings.settings_proxy import SettingsProxy
 from neuralogic.dataset import Dataset
 from neuralogic.dataset.base import BaseDataset

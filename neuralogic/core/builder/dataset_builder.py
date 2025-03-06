@@ -5,7 +5,7 @@ import jpype
 import neuralogic.dataset as datasets
 from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.builder.builder import Builder
-from neuralogic.core.builder.components import BuiltDataset, GroundedDataset
+from neuralogic.core.builder.dataset import BuiltDataset, GroundedDataset
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.java_objects import JavaFactory

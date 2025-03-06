@@ -76,13 +76,13 @@ class Builder:
             return self._neuralize(groundings, self._callback(pbar))
 
     def _neuralize(self, groundings, callback) -> List[NeuralSample]:
-        neuralize_pipeline = self.example_builder.neuralize(groundings, callback)
+        neuralize_pipeline = self.example_builder.neuralize(groundings.stream(), callback)
         neuralize_pipeline.execute(None)
 
         samples = neuralize_pipeline.get()
         logic_samples = samples.collect(self.collectors.toList())
 
-        return [NeuralSample(sample, None) for sample in logic_samples]
+        return [NeuralSample(sample, grounding) for sample, grounding in zip(logic_samples, groundings)]
 
     def build_model(self, parsed_template, settings: SettingsProxy):
         neural_model = self.neural_model(parsed_template.getAllWeights(), settings.settings)
