@@ -17,7 +17,7 @@ class Sample:
         "example",
     )
 
-    def __init__(self, query: BaseRelation | None, example: Union[Sequence[DatasetEntries], DatasetEntries] | None):
+    def __init__(self, query: BaseRelation | None, example: Sequence[DatasetEntries] | DatasetEntries | None):
         self.query = query
 
         if example is None:
@@ -45,7 +45,7 @@ class Dataset(BaseDataset):
 
     __slots__ = ("samples", "_examples", "_queries")
 
-    def __init__(self, samples: Union[List[Sample], Sample] | None = None):
+    def __init__(self, samples: List[Sample] | Sample | None = None):
         self.samples = []
 
         if isinstance(samples, list):
@@ -59,14 +59,20 @@ class Dataset(BaseDataset):
     def set_samples(self, samples: List[Sample]):
         self.samples = samples
 
-    def add_samples(self, samples: List[Sample]):
+    def add_samples(self, samples: List[Sample]) -> "Dataset":
         self.samples.extend(samples)
 
-    def add_sample(self, sample: Sample):
+        return self
+
+    def add_sample(self, sample: Sample) -> "Dataset":
         self.samples.append(sample)
 
-    def add(self, query: BaseRelation, example: List[DatasetEntries] | None):
+        return self
+
+    def add(self, query: BaseRelation | None, example: List[DatasetEntries] | None) -> "Dataset":
         self.samples.append(Sample(query, example))
+
+        return self
 
     def __getitem__(self, item: int) -> Sample:
         return self.samples[item]
@@ -139,5 +145,6 @@ class Dataset(BaseDataset):
 
         return table, clauses
 
+    @staticmethod
     def _get_constants(self, relation: BaseRelation):
         return [term for term in relation.terms if not str(relation)[0].isupper()]

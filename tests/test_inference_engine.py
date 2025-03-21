@@ -1,7 +1,5 @@
 from neuralogic.core import Template, R, V, C
 
-from neuralogic.inference.inference_engine import InferenceEngine
-
 
 def test_inference_engine_london_reachable() -> None:
     """
@@ -28,15 +26,13 @@ def test_inference_engine_london_reachable() -> None:
         ]
     )
 
-    engine = InferenceEngine(template)
-
     # ask if tottenham_court_road can be reached from green_park
-    assert engine.query(R.reachable(C.green_park, C.tottenham_court_road))
+    assert template.query(R.reachable(C.green_park, C.tottenham_court_road))
 
     # green_park cannot be reached from charing_cross
     # random_place does not exist in the dataset (cannot be reached from anywhere)
-    assert not engine.query(R.reachable(C.charing_cross, C.green_park))
-    assert not engine.q(R.reachable(C.charing_cross, C.random_place))
+    assert not template.query(R.reachable(C.charing_cross, C.green_park))
+    assert not template.q(R.reachable(C.charing_cross, C.random_place))
 
 
 def test_inference_engine_london() -> None:
@@ -67,19 +63,18 @@ def test_inference_engine_london() -> None:
         ]
     )
 
-    engine = InferenceEngine(template)
-    engine.set_knowledge(knowledge)
+    engine = template.build()
 
     # Run query for nearby(X, oxford_circus)
     # Should yield two substitutions for x (green_park and bond_street)
-    substitutions = list(engine.q(R.nearby(V.X, C.oxford_circus)))
+    substitutions = list(engine.q(R.nearby(V.X, C.oxford_circus), knowledge))
 
     assert substitutions[0]["X"] == "bond_street"
     assert substitutions[1]["X"] == "green_park"
     assert len(substitutions) == 2 and len(substitutions[0]) == 1 and len(substitutions[1]) == 1
 
     # Run query for nearby(X, tottenham_court_road)
-    substitutions = sorted(engine.q(R.nearby(V.X, C.charing_cross)), key=lambda x: x["X"])
+    substitutions = sorted(engine.q(R.nearby(V.X, C.charing_cross), knowledge), key=lambda x: x["X"])
 
     assert substitutions[0]["X"] == "bond_street"
     assert substitutions[1]["X"] == "green_park"
@@ -92,7 +87,7 @@ def test_inference_engine_london() -> None:
     # Run query for connected(X, leicester_square, Z)
     # Should yield two substitutions:
     # {'X': 'piccadilly_circus', 'Z': 'piccadilly'}, {'X': 'tottenham_court_road', 'Z': 'northern'}
-    substitutions = list(engine.q(R.connected(V.X, C.leicester_square, V.Z)))
+    substitutions = list(engine.q(R.connected(V.X, C.leicester_square, V.Z), knowledge))
 
     assert substitutions[0]["X"] == "piccadilly_circus"
     assert substitutions[0]["Z"] == "piccadilly"
@@ -113,19 +108,35 @@ def test_listing_all_queries() -> None:
     template += R.edge(2, 3)
     template += R.edge(3, 1)
 
-    inference_engine = InferenceEngine(template)
+    queries = list(template.queries())
 
-    queries = list(inference_engine.get_queries())
-
-    expected_queries = sorted(["h(2).", "h(3).", "h(1).", "h1(1).", "h1(2).", "h1(3).", "q."])
+    expected_queries = sorted(
+        ["edge(1, 2).", "edge(2, 3).", "edge(3, 1).", "h(2).", "h(3).", "h(1).", "h1(1).", "h1(2).", "h1(3).", "q."]
+    )
     str_queries = sorted([str(query) for query in queries])
 
     for a, b in zip(expected_queries, str_queries):
         assert a == b
 
-    queries = list(inference_engine.get_queries([R.edge(1, 4)]))
+    queries = list(template.queries([R.edge(1, 4)]))
 
-    expected_queries = sorted(["h(2).", "h(3).", "h(1).", "h(4).", "h1(1).", "h1(2).", "h1(3).", "h1(4).", "q."])
+    expected_queries = sorted(
+        [
+            "edge(1, 2).",
+            "edge(2, 3).",
+            "edge(3, 1).",
+            "edge(1, 4).",
+            "h(2).",
+            "h(3).",
+            "h(1).",
+            "h(4).",
+            "h1(1).",
+            "h1(2).",
+            "h1(3).",
+            "h1(4).",
+            "q.",
+        ]
+    )
     str_queries = sorted([str(query) for query in queries])
 
     for a, b in zip(expected_queries, str_queries):

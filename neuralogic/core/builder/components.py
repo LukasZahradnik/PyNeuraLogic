@@ -1,19 +1,38 @@
-import json
+import enum
 from typing import Any, Dict, Optional
-
-import numpy as np
 
 from neuralogic.core.settings.settings_proxy import SettingsProxy
 from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.utils.visualize import draw_sample, draw_grounding
 
 
-class Node:
-    __slots__ = "substitutions", "_atom"
+class NeuronType(enum.StrEnum):
+    Aggregation = "AggregationNeuron"
+    Atom = "AtomNeuron"
+    Negation = "NegationNeuron"
+    Rule = "RuleNeuron"
+    SplittableAggregation = "SplittableAggregationNeuron"
+    WeightedAtom = "WeightedAtomNeuron"
+    WeightedRule = "WeightedRuleNeuron"
+
+
+class Atom:
+    __slots__ = "substitutions", "_atom", "_predicate", "_arity"
 
     def __init__(self, atom, substitutions: Dict):
         self.substitutions = substitutions
         self._atom = atom
+
+        self._predicate = atom.predicateName()
+        self._arity = atom.arity()
+
+    @property
+    def predicate(self):
+        return self._predicate
+
+    @property
+    def arityy(self):
+        return self._arity
 
     @property
     def value(self):
@@ -23,44 +42,48 @@ class Node:
     def gradient(self):
         return ValueFactory.from_java(self._atom.getRawState().getGradient(), SettingsProxy.number_format())
 
-    def node_type(self):
-        return self._atom.getClass().getSimpleName()
+    def node_type(self) -> NeuronType:
+        return NeuronType(self._atom.getClass().getSimpleName())
 
     def __str__(self):
         return str(self._atom)
 
 
+class Neuron(Atom):
+    pass
+
+
 class NeuralSample:
-    __slots__ = "_java_sample", "grounding", "_nodes"
+    __slots__ = "_java_sample", "grounding", "_neurons"
 
     def __init__(self, sample, grounding):
         self.grounding = Grounding(grounding)
         self._java_sample = sample
-        self._nodes = None
+        self._neurons = None
 
     @property
-    def nodes(self):
-        if self._nodes is None:
-            self._nodes = self._get_nodes()
-        return self._nodes
+    def neurons(self):
+        if self._neurons is None:
+            self._neurons = self._get_neurons()
+        return self._neurons
 
     @property
     def target(self):
         return ValueFactory.from_java(self._java_sample.target, SettingsProxy.number_format())
 
-    def get_nodes(self, literal, node_type=None):
+    def get_neurons(self, literal, neuron_type: NeuronType | None = NeuronType.Atom):
         literal_name = literal.predicate.name
         literal_arity = literal.predicate.arity
 
-        nodes = []
-        nodes_by_name_vals = []
+        neurons = []
+        neurons_by_name_vals = []
 
-        if node_type is None:
-            nodes_by_name_vals = self.nodes.values()
-        elif node_type in self.nodes:
-            nodes_by_name_vals = [self.nodes[node_type]]
+        if neuron_type is None:
+            neurons_by_name_vals = self.neurons.values()
+        elif neuron_type in self.neurons:
+            neurons_by_name_vals = [self.neurons[neuron_type]]
 
-        for nodes_by_name in nodes_by_name_vals:
+        for nodes_by_name in neurons_by_name_vals:
             if literal_name not in nodes_by_name:
                 continue
 
@@ -81,10 +104,10 @@ class NeuralSample:
                     if str(term) != sub:
                         break
                 else:
-                    nodes.append(Node(value, literal_subs))
-        return nodes
+                    neurons.append(Neuron(value, literal_subs))
+        return neurons
 
-    def _get_nodes(self):
+    def _get_neurons(self):
         nodes = {}
 
         for node in self._java_sample.query.evidence.allNeuronsTopologic:
@@ -120,7 +143,7 @@ class NeuralSample:
             if term_str[0] == term_str[0].upper() and term_str[0] != term_str[0].lower():
                 raise ValueError(f"{fact} is not a fact")
 
-        return self.get_nodes(fact, "FactNeuron")
+        return self.get_neurons(fact, "FactNeuron")
 
     def set_fact_value(self, fact, value) -> int:
         for term in fact.terms:
@@ -129,7 +152,7 @@ class NeuralSample:
             if term_str[0] == term_str[0].upper() and term_str[0] != term_str[0].lower():
                 raise ValueError(f"{fact} is not a fact")
 
-        node = self.get_nodes(fact, "FactNeuron")
+        node = self.get_neurons(fact, "FactNeuron")
 
         if len(node) == 0:
             return -1
@@ -156,72 +179,12 @@ class NeuralSample:
         return str(self._java_sample)
 
 
-class Neuron:
-    def __init__(self, neuron: Dict[str, Any], index):
-        self.index = index
-        self.name = neuron["name"]
-        self.weighted = neuron["weighted"]
-        self.activation = neuron.get("transformation", None)
-        self.inputs = neuron["inputs"]
-        self.weights = neuron.get("weights", None)
-        self.offset = neuron["offset"]
-        self.value = neuron.get("value", None)
-        self.pooling = neuron["pooling"]
-        self.hook_name = Neuron.parse_hook_name(self.name)
-
-        if self.value:
-            self.value = json.loads(self.value)
-
-        if self.weights is not None:
-            self.weights = list(self.weights)
-
-        if self.inputs is not None:
-            self.inputs = list(self.inputs)
-
-    @staticmethod
-    def parse_hook_name(name: str):
-        splitted_name = name.split(" ")
-
-        if len(splitted_name) == 3:
-            return splitted_name[2]
-        return None
-
-
-class Weight:
-    def __init__(self, weight):
-        self.index: int = weight.index
-        self.name = str(weight.name)
-        self.dimensions = tuple(weight.value.size())
-        self.value = json.loads(str(weight.value.toString()))
-        self.fixed = weight.isFixed
-
-        if not isinstance(self.value, list):
-            self.value = self.value
-
-        if not self.dimensions:
-            self.dimensions = (1,)
-
-        if self.fixed:
-            self.value = np.array(self.value).reshape(self.dimensions)
-
-    @staticmethod
-    def get_unit_weight() -> "Weight":
-        weight = Weight.__new__(Weight)
-        weight.index = 0
-        weight.name = "unit"
-        weight.dimensions = (1,)
-        weight.value = 1.0
-        weight.fixed = True
-
-        return weight
-
-
 class Grounding:
-    __slots__ = ("_grounding", "_nodes")
+    __slots__ = ("_grounding", "_atoms")
 
     def __init__(self, grounding):
         self._grounding = grounding
-        self._nodes = None
+        self._atoms = None
 
     def draw(
         self,
@@ -247,20 +210,20 @@ class Grounding:
         return str(self._grounding)
 
     @property
-    def nodes(self):
-        if self._nodes is None:
-            self._nodes = self._get_nodes()
-        return self._nodes
+    def atoms(self) -> dict[str, dict[tuple[str, ...], Any]]:
+        if self._atoms is None:
+            self._atoms = self._get_atoms()
+        return self._atoms
 
-    def get_nodes(self, literal):
+    def get_atoms(self, literal) -> list[Atom]:
         literal_name = literal.predicate.name
         literal_arity = literal.predicate.arity
 
-        if literal_name not in self.nodes:
+        if literal_name not in self.atoms:
             return []
 
         nodes = []
-        for subs, value in self.nodes[literal_name].items():
+        for subs, value in self.atoms[literal_name].items():
             if len(subs) != literal_arity:
                 continue
 
@@ -277,30 +240,37 @@ class Grounding:
                 if str(term) != sub:
                     break
             else:
-                nodes.append(Node(value, literal_subs))
+                nodes.append(Atom(value, literal_subs))
         return nodes
 
-    def _get_nodes(self):
-        nodes = {}
+    def _get_atoms(self):
+        atoms = {}
 
-        for node in self._grounding.groundingWrap.getGroundTemplate().groundFacts:
-            name = str(node).strip()
+        for literal in self._grounding.groundingWrap.getGroundTemplate().derivedGroundFacts:
+            self._process_literal(literal, atoms)
 
-            bracket = name.rfind("(")
-            space = name.rfind(" ", 0, bracket if bracket != -1 else None)
+        for literal in self._grounding.groundingWrap.getGroundTemplate().groundFacts:
+            self._process_literal(literal, atoms)
 
-            substitutions = tuple()
-            if bracket != -1:
-                subs = name[bracket + 1 :]
-                name = name[space + 1 : bracket]
+        return atoms
 
-                r_bracket = subs.find(")")
-                substitutions = tuple(subs[:r_bracket].split(", "))
-            elif space != -1:
-                name = name[space + 1 :]
+    def _process_literal(self, literal, atoms):
+        name = str(literal).strip()
 
-            if name not in nodes:
-                nodes[name] = {}
+        bracket = name.rfind("(")
+        space = name.rfind(" ", 0, bracket if bracket != -1 else None)
 
-            nodes[name][substitutions] = node
-        return nodes
+        substitutions = tuple()
+        if bracket != -1:
+            subs = name[bracket + 1 :]
+            name = name[space + 1 : bracket]
+
+            r_bracket = subs.find(")")
+            substitutions = tuple(subs[:r_bracket].split(", "))
+        elif space != -1:
+            name = name[space + 1 :]
+
+        if name not in atoms:
+            atoms[name] = {}
+
+        atoms[name][substitutions] = literal

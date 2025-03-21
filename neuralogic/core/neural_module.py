@@ -245,7 +245,6 @@ class NeuralModule:
         self._hooks[name].discard(callback)
 
     def _initialize_neural_module(self, dataset_builder: DatasetBuilder, settings: SettingsProxy, model):
-        self._parsed_template = dataset_builder.parsed_template
         self._dataset_builder = dataset_builder
         self._settings = settings
         self._neural_model = model

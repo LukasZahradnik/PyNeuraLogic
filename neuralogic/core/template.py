@@ -2,12 +2,14 @@ from typing import Union, List, Iterable
 
 import jpype
 
+from neuralogic.dataset import Dataset
 from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.builder import Builder, DatasetBuilder
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.constructs.predicate import PredicateMetadata
 from neuralogic.core.constructs.java_objects import JavaFactory
+from neuralogic.core.constructs.factories import R
 from neuralogic.core.neural_module import NeuralModule
 from neuralogic.core.settings import SettingsProxy, Settings
 from neuralogic.nn.module.module import Module
@@ -36,8 +38,9 @@ class Template(NeuralModule):
         :param rules:
         :return:
         """
-        if self._parsed_template is not None:
+        if self._neural_model is not None:
             raise ValueError("Cannot modify built template")
+        self._parsed_template = None
         self._template.extend(rules)
 
     def add_module(self, module: Module):
@@ -48,9 +51,9 @@ class Template(NeuralModule):
         """
         self.add_rules(module())
 
-    def build(self, settings: Settings) -> "Template":
+    def build(self, settings: Settings | None = None) -> "Template":
         java_factory = JavaFactory()
-        settings_proxy = settings.create_proxy()
+        settings_proxy = settings.create_proxy() if settings is not None else Settings().create_disconnected_proxy()
 
         parsed_template = self._get_parsed_template(settings_proxy, java_factory)
         neural_model = Builder(settings_proxy).build_model(parsed_template, settings_proxy)
@@ -65,8 +68,10 @@ class Template(NeuralModule):
 
     def remove_duplicates(self):
         """Remove duplicates from the template"""
-        if self._parsed_template is not None:
+        if self._neural_model is not None:
             raise ValueError("Cannot modify built template")
+
+        self._parsed_template = None
 
         entries = set()
         deduplicated_template: List[TemplateEntries] = []
@@ -84,8 +89,12 @@ class Template(NeuralModule):
         if not is_initialized():
             initialize()
 
+        if self._parsed_template is not None:
+            return self._parsed_template
+
         if self._template_file is not None:
-            return Builder(settings).build_template_from_file(settings, self._template_file)
+            self._parsed_template = Builder(settings).build_template_from_file(settings, self._template_file)
+            return self._parsed_template
 
         predicate_metadata = []
         weighted_rules = []
@@ -109,8 +118,53 @@ class Template(NeuralModule):
         metadata_processor = metadata_processor(settings.settings)
 
         metadata_processor.processMetadata(template)
+        self._parsed_template = template
 
-        return template
+        return self._parsed_template
+
+    def queries(self, examples: List[BaseRelation | Rule] | None = None):
+        settings = Settings(iso_value_compression=False, chain_pruning=False).create_disconnected_proxy()
+        java_factory = JavaFactory()
+
+        parsed_template = self._get_parsed_template(settings, java_factory)
+        dataset_builder = DatasetBuilder(parsed_template, java_factory)
+
+        try:
+            grounded_dataset = dataset_builder.ground_dataset(Dataset().add(None, examples), settings)
+        except Exception:
+            return {}
+
+        results = [
+            R.get(name)(sub)
+            for sample in grounded_dataset
+            for name, substitution in sample.atoms.items()
+            for sub in substitution.keys()
+        ]
+
+        if not results:
+            return {}
+        return results
+
+    def query(self, query: BaseRelation, examples: List[BaseRelation | Rule] | None = None):
+        settings = Settings(iso_value_compression=False, chain_pruning=False).create_disconnected_proxy()
+        java_factory = JavaFactory()
+
+        parsed_template = self._get_parsed_template(settings, java_factory)
+        dataset_builder = DatasetBuilder(parsed_template, java_factory)
+
+        try:
+            grounded_dataset = dataset_builder.ground_dataset(Dataset().add(query, examples), settings)
+        except Exception:
+            return {}
+
+        results = [node.substitutions for sample in grounded_dataset for node in sample.get_atoms(query)]
+
+        if not results:
+            return {}
+        return results
+
+    def q(self, query: BaseRelation, examples: List[Union[BaseRelation, Rule]] | None = None):
+        return self.query(query, examples)
 
     def __str__(self) -> str:
         return "\n".join(str(r) for r in self._template)
@@ -119,8 +173,9 @@ class Template(NeuralModule):
         return self.__str__()
 
     def __iadd__(self, other) -> "Template":
-        if self._parsed_template is not None:
+        if self._neural_model is not None:
             raise ValueError("Cannot modify built template")
+        self._parsed_template = None
         if isinstance(other, Iterable):
             self._template.extend(other)
         elif isinstance(other, Module):
@@ -133,15 +188,17 @@ class Template(NeuralModule):
         return self._template[item]
 
     def __delitem__(self, key):
-        if self._parsed_template is not None:
+        if self._neural_model is not None:
             raise ValueError("Cannot modify built template")
+        self._parsed_template = None
         self._template.pop(key)
 
     def __setitem__(self, key, value):
-        if self._parsed_template is not None:
+        if self._neural_model is not None:
             raise ValueError("Cannot modify built template")
         if isinstance(value, (Iterable, Module)):
             raise NotImplementedError
+        self._parsed_template = None
         self._template[key] = value
 
     def __len__(self) -> int:
