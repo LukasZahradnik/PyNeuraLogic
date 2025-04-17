@@ -9,7 +9,7 @@ from neuralogic.setup import get_default_graphviz_path
 from neuralogic.core.settings import Settings, SettingsProxy
 
 
-def get_graphviz_path(path: Optional[str] = None) -> str:
+def get_graphviz_path(path: Optional[str] = None) -> str | None:
     """
     Get the path to the Graphviz executable
     """
@@ -108,7 +108,7 @@ def draw(drawer, obj, filename: Optional[str] = None, show=True, img_type="png",
             if hasattr(fig.canvas, "set_window_title"):
                 fig.canvas.set_window_title(kwargs.get("title", ""))
 
-            ax = fig.add_axes([0, 0, 1, 1])
+            ax = fig.add_axes((0, 0, 1, 1))
             ax.axis("off")
             ax.imshow(img)
 

@@ -1,4 +1,4 @@
-from typing import Optional, Union, Callable, Dict, Any, Set, Collection, List, Tuple
+from typing import Union, Callable, Dict, Any, Set, Collection, List, Tuple
 import json
 
 import jpype
@@ -43,8 +43,8 @@ class NeuralModule:
         self._hook_handler = HookHandler(self)
 
         self._parsed_template = None
-        self._dataset_builder: Optional[DatasetBuilder] = None
-        self._settings: Optional[SettingsProxy] = None
+        self._dataset_builder: DatasetBuilder | None = None
+        self._settings: SettingsProxy | None = None
 
         self._neural_model = None
         self._strategy = None
@@ -196,11 +196,11 @@ class NeuralModule:
 
     def draw(
         self,
-        filename: Optional[str] = None,
+        filename: str | None = None,
         show=True,
         img_type="png",
         value_detail: int = 0,
-        graphviz_path: Optional[str] = None,
+        graphviz_path: str | None = None,
         *args,
         **kwargs,
     ):
@@ -283,7 +283,7 @@ class NeuralModule:
         if len(self._hooks) != 0:
             self._strategy.setHooks(set(self._hooks.keys()), self._hook_handler)
 
-    def _sync_template(self, state_dict: Optional[Dict] = None, weights=None):
+    def _sync_template(self, state_dict: dict | None = None, weights=None):
         state_dict = self.state_dict() if state_dict is None else state_dict
         weights = self._parsed_template.getAllWeights() if weights is None else weights
         weight_dict = state_dict["weights"]

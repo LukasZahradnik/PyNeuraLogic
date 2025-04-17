@@ -40,11 +40,20 @@ class GroundedDataset:
 
     def __getitem__(self, item) -> Grounding:
         self._to_list()
+        if self._groundings_list is None:
+            raise ValueError
+
         return self._groundings_list[item]
 
     def __len__(self) -> int:
         self._to_list()
+        if self._groundings_list is None:
+            return 0
         return len(self._groundings_list)
+
+    def __iter__(self):
+        self._to_list()
+        return iter(self._groundings_list)
 
     def neuralize(self, *, progress: bool = False) -> list[NeuralSample]:
         self._to_list()

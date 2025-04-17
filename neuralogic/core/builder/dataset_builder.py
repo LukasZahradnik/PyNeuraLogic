@@ -179,7 +179,7 @@ class DatasetBuilder:
             if dataset.queries_file is None and dataset.examples_file is None:
                 raise ValueError("To build FileDataset provide either queries or examples")
 
-            args = ["-t", dataset.examples_file or dataset.queries_file]
+            args = ["-t", dataset.examples_file or dataset.queries_file or ""]
             if dataset.queries_file is not None:
                 args.extend(["-q", dataset.queries_file])
             if dataset.examples_file is not None:

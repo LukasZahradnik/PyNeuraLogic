@@ -1,4 +1,5 @@
-from typing import Union, Tuple
+from typing import Tuple
+from types import EllipsisType
 
 import jpype
 
@@ -12,26 +13,20 @@ class Slice(TransformationFunction):
         self,
         name: str,
         *,
-        rows: Union[type(Ellipsis), Tuple[int, int]] = ...,
-        cols: Union[type(Ellipsis), Tuple[int, int]] = ...,
+        rows: EllipsisType | Tuple[int, int] = ...,
+        cols: EllipsisType | Tuple[int, int] = ...,
     ):
         super().__init__(name)
 
-        if cols is not Ellipsis:
-            cols = [int(x) for x in cols]
-
-        if rows is not Ellipsis:
-            rows = [int(x) for x in rows]
-
-        self.rows = rows
-        self.cols = cols
+        self.cols = [int(x) for x in cols] if cols is not Ellipsis else Ellipsis
+        self.rows = [int(x) for x in rows] if rows is not Ellipsis else Ellipsis
 
     def __call__(
         self,
         relation=None,
         *,
-        rows: Union[type(Ellipsis), Tuple[int, int]] = ...,
-        cols: Union[type(Ellipsis), Tuple[int, int]] = ...,
+        rows: EllipsisType | Tuple[int, int] = ...,
+        cols: EllipsisType | Tuple[int, int] = ...,
     ):
         slice = Slice(self.name, rows=rows, cols=cols)
         return TransformationFunction.__call__(slice, relation)

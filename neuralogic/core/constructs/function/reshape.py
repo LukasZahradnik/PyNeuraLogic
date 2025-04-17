@@ -12,13 +12,11 @@ class Reshape(TransformationFunction):
         self,
         name: str,
         *,
-        shape: Union[None, Tuple[int, int], int] = None,
+        shape: Tuple[int, int] | int | None = None,
     ):
         super().__init__(name)
 
-        if isinstance(shape, int):
-            shape = (shape,)
-        self.shape = shape
+        self.shape = (shape,) if isinstance(shape, int) else shape
 
     def __call__(
         self,

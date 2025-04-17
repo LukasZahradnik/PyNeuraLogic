@@ -190,7 +190,7 @@ class PostgresConverter(Converter):
 
             if not relation.predicate.hidden:
                 if relation_mapping is None:
-                    value = "value"
+                    value: str | None = "value"
                 else:
                     value_column = relation_mapping.value_column
                     value = None if value_column is None else f"{value_column}::NUMERIC"

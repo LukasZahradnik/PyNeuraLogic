@@ -119,11 +119,14 @@ class CSVFile:
             else:
                 value = terms[value_column].strip()
                 if not len(value):
-                    value = default_value if default_value is not None else replace_empty
-                if value_mapper is None:
-                    line_relation = line_relation[float(value)]
+                    line_value = default_value if default_value is not None else replace_empty
                 else:
-                    line_relation = line_relation[value_mapper(value)]
+                    line_value = value
+
+                if value_mapper is None:
+                    line_relation = line_relation[float(line_value)]
+                else:
+                    line_relation = line_relation[value_mapper(line_value)]
 
             example.append(line_relation)
             read_lines += 1

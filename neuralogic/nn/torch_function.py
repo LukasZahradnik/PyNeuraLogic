@@ -65,7 +65,7 @@ class NeuraLogic(nn.Module):
         self.to_logic = to_logic
 
         self.model = template.build(settings)
-        self.number_format = self.model._settings.settings_class.superDetailedNumberFormat
+        self.number_format = settings.create_disconnected_proxy().settings_class.superDetailedNumberFormat
 
         dataset = Dataset(Sample(output_relation, input_facts))
         self.sample = self.model.build_dataset(dataset, learnable_facts=True)[0]

@@ -146,5 +146,5 @@ class Dataset(BaseDataset):
         return table, clauses
 
     @staticmethod
-    def _get_constants(self, relation: BaseRelation):
+    def _get_constants(relation: BaseRelation):
         return [term for term in relation.terms if not str(relation)[0].isupper()]

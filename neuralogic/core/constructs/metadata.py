@@ -1,4 +1,4 @@
-from typing import Iterable, Callable
+from typing import Iterable
 
 from neuralogic.core.constructs.function.function import (
     Function,
@@ -30,7 +30,7 @@ class Metadata:
         metadata = Metadata()
 
         for entry in iterable:
-            if isinstance(entry, Callable) and not isinstance(entry, Function):
+            if callable(entry) and not isinstance(entry, Function):
                 entry = entry()
             if isinstance(entry, AggregationFunction):
                 metadata.aggregation = entry
