@@ -69,20 +69,20 @@ The :py:class:`~neuralogic.dataset.logic.Dataset` class contains a set of fact l
 
 .. code-block:: Python
 
-    from neuralogic.core import Relation
+    from neuralogic import Relation
     from neuralogic.dataset import Dataset
-
 
     dataset = Dataset()
 
-    dataset.add_example([
+    example = [
         Relation.edge(0, 1), Relation.edge(1, 2), Relation.edge(2, 0),
         Relation.edge(1, 0), Relation.edge(2, 1), Relation.edge(0, 2),
 
         Relation.node_feature(0)[0],
         Relation.node_feature(1)[1],
         Relation.node_feature(2)[-1],
-    ])
+    ]
+
 
 As you can see, this encoding can be pretty lengthy, but at the same time, it gives us multiple benefits over the tensor
 representation. For example, nothing stops you from adding edge features, such as :code:`Relation.edge(0, 1)[1.0]`,
@@ -99,11 +99,9 @@ In this example, we will label nodes, just like in the case of tensor format rep
 
 .. code-block:: Python
 
-    dataset.add_queries([
-        Relation.predict(0)[1],
-        Relation.predict(1)[0],
-        Relation.predict(2)[1],
-    ])
+    dataset.add(Relation.predict(0)[1], example)
+    dataset.add(Relation.predict(1)[0], example)
+    dataset.add(Relation.predict(2)[1], example)
 
 .. NOTE::
 
@@ -118,7 +116,7 @@ The template structure is encoded in the instance of the :py:class:`~neuralogic.
 
 .. code-block:: python
 
-    from neuralogic.core import Template, Settings
+    from neuralogic import Template, Settings
     from neuralogic.nn.module import GCNConv
 
 
@@ -141,11 +139,11 @@ We do that by calling the :code:`build` method.
 
 .. code-block:: Python
 
-    from neuralogic.core import Settings
+    from neuralogic import Settings
     from neuralogic.optim import SGD
 
     settings = Settings(optimizer=SGD(lr=0.01), epochs=100)
-    model = template.build(Settings())
+    model = template.build(settings)
 
 
 The input dataset that we are trying to evaluate/train has to be also built. When we have the built dataset and model,
@@ -157,23 +155,3 @@ performing the forward and backward propagation is straightforward.
 
     model.train()  # or model.test() to change the mode
     output = model(built_dataset)
-
-
-Evaluators
-**********
-
-For faster prototyping, we have prepared *evaluators* which encapsulate helpers, such as training loop and
-evaluation. Evaluators can then be customized via various settings wrapped in the :py:class:`~neuralogic.core.settings.Settings` class.
-
-.. code-block:: Python
-
-    from neuralogic.nn import get_evaluator
-    from neuralogic.core import Settings
-    from neuralogic.optim import SGD
-
-
-    settings = Settings(optimizer=SGD(lr=0.01), epochs=100)
-    evaluator = get_evaluator(template, settings)
-
-    built_dataset = evaluator.build_dataset(dataset)
-    evaluator.train(built_dataset, generator=False)

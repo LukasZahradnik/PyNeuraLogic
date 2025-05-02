@@ -1,5 +1,5 @@
 from neuralogic.logging import LogHandler, add_log_handler
-from neuralogic.core import R, V, C, F, Template, Settings
+from neuralogic.core import R, V, C, F, Template, Settings, Relation, Var, Const
 from neuralogic.setup import (
     seed,
     set_max_memory_size,
@@ -19,6 +19,9 @@ __all__ = [
     "V",
     "C",
     "F",
+    "Relation",
+    "Var",
+    "Const",
     "Template",
     "Settings",
     "LogHandler",

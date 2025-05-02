@@ -122,7 +122,7 @@ class Template(NeuralModule):
 
         return self._parsed_template
 
-    def queries(self, examples: List[BaseRelation | Rule] | None = None):
+    def derivable_queries(self, example: List[BaseRelation | Rule] | None = None):
         settings = Settings(iso_value_compression=False, chain_pruning=False).create_disconnected_proxy()
         java_factory = JavaFactory()
 
@@ -130,7 +130,7 @@ class Template(NeuralModule):
         dataset_builder = DatasetBuilder(parsed_template, java_factory)
 
         try:
-            grounded_dataset = dataset_builder.ground_dataset(Dataset().add(None, examples), settings)
+            grounded_dataset = dataset_builder.ground_dataset(Dataset().add(None, example), settings)
         except Exception:
             return {}
 

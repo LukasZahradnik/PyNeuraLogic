@@ -23,7 +23,6 @@ The template will essentially evaluate :math:`xor_n = xor(val_n, xor_{n-1})` wit
 
 .. code-block:: python
 
-    from neuralogic.nn import get_evaluator
     from neuralogic.core import Settings, R, V, Template, Transformation
     from neuralogic.dataset import Dataset
 
@@ -37,14 +36,14 @@ the recursion. Integers in PyNeuraLogic are independent entities with no extra m
     max_number_of_vars = 5
 
     template = Template()
-    template += (R._next(i, i + 1) for i in range(max_number_of_vars))
+    template += (R._next(i, i + 1) for i in range(max_number_of_vars)) | [Transformation.TANH]
 
 We then define the base case of the recursion, that is, to get the value of :math:`xor` of length :math:`1` (index :math:`0`)
 return the value of the first (index :math:`0`) element.
 
 .. code-block:: python
 
-    template += R.xor_at(0) <= R.val_at(0)
+    template += R.xor_at(0) <= R.val_at(0) | [Transformation.TANH]
 
 Now when we have the base case ready, we introduce the recursive "calls". The following rule can be interpreted as
 "To calculate the :math:`xor` of length :math:`N` (``V.Y``), calculate the xor of length :math:`N - 1` (``V.X``)
@@ -54,7 +53,7 @@ We also assigned three unique vector learnable parameters and named them. Naming
 
 .. code-block:: python
 
-    template += R.xor_at(V.Y)["a": 1, 8] <= (R.val_at(V.Y)["b": 8, 1], R.xor_at(V.X)["c": 8, 1], R._next(V.X, V.Y))
+    template += (R.xor_at(V.Y)["a": 1, 8] <= (R.val_at(V.Y)["b": 8, 1], R.xor_at(V.X)["c": 8, 1], R._next(V.X, V.Y))) | [Transformation.TANH]
 
 
 And that is everything you need to define a template for recursive generalization of XOR!
@@ -92,14 +91,13 @@ That is, we encode :math:`xor(0, 0) = 0`, :math:`xor(1, 0) = 1`, and so on as th
 .. code-block:: python
 
     settings = Settings(
-        epochs=5000,
         rule_transformation=Transformation.TANH,
         relation_transformation=Transformation.IDENTITY,
         iso_value_compression=False,
     )
 
-    evaluator = get_evaluator(template, settings)
-    built_dataset = evaluator.build_dataset(train_dataset)
+    model = template.build(settings)
+    built_dataset = model.build_dataset(train_dataset)
 
 
 .. note::
@@ -120,7 +118,7 @@ Once we build the training dataset, we can visualize each sample. For example, t
 
 .. code-block:: python
 
-    evaluator.train(built_dataset, generator=False)
+    model.train(built_dataset, epochs=5000)
 
 We train the model on the training dataset via the evaluator and then prepare a test dataset.
 We can put any input of maximum length of *N* (``max_number_of_vars``) into the dataset. For this example, we chose
@@ -128,17 +126,11 @@ We can put any input of maximum length of *N* (``max_number_of_vars``) into the 
 
 .. code-block:: python
 
-    test_examples = [
-        [R.val_at(0)[0], R.val_at(1)[0], R.val_at(2)[1]],
-        [R.val_at(0)[1], R.val_at(1)[0], R.val_at(2)[1], R.val_at(3)[0]],
-    ]
+    test_dataset = Dataset()
+    test_dataset.add(R.xor_at(2), [R.val_at(0)[0], R.val_at(1)[0], R.val_at(2)[1]])
+    test_dataset.add(R.xor_at(3), [R.val_at(0)[1], R.val_at(1)[0], R.val_at(2)[1], R.val_at(3)[0]])
 
-    test_queries = [
-        R.xor_at(2), R.xor_at(3)
-    ]
-
-    test_dataset = Dataset(test_examples, test_queries)
-    built_test_dataset = evaluator.build_dataset(test_dataset)
+    built_test_dataset = model.build_dataset(test_dataset)
 
 
 
@@ -169,5 +161,5 @@ Running inference on our test dataset yields correct results, that is :math:`xor
 
 .. code-block:: python
 
-    for _, result in evaluator.test(built_test_dataset):
+    for result in model.test(built_test_dataset):
         print(result)  # 1, 0

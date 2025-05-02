@@ -27,7 +27,7 @@ with the "arity" (number of terms) the relation forms its unique signature.
 
 |
 
-Relations are created via object :code:`Relation` that can be imported from :code:`neuralogic.core`.
+Relations are created via object :code:`Relation` that can be imported from :code:`neuralogic`.
 
 
 .. tip::
@@ -46,7 +46,7 @@ which can be useful for generating relations.
 
 .. code-block:: Python
 
-    from neuralogic.core import Relation
+    from neuralogic import Relation
 
     Relation.my_rel  # Relation with a predicate name "my_rel"
 
@@ -65,18 +65,18 @@ Terms
 
 Terms are an optional list of *constants* and/or logic *variables*.
 
-- **Constants** are either numeric values (floats, integers) or string values with a lower-cased first letter. We can also define a constant via :code:`neuralogic.core.Term`, which converts the provided value into a valid constant (string) for us.
+- **Constants** are either numeric values (floats, integers) or string values with a lower-cased first letter. We can also define a constant via :code:`neuralogic.Const`, which converts the provided value into a valid constant (string) for us.
 
 .. code-block:: Python
 
-    from neuralogic.core import Term, Relation
+    from neuralogic import Const, Relation
 
     Relation.my_rel  # A relation with NO terms, also called a "proposition" in logic
     Relation.my_rel(1.0)  # A relation with one constant term 1.0
-    Relation.my_rel(Term.my_term, "string_term")  # A relation with two constant terms "my_term" and "string_term"
-    Relation.my_rel(1.0, Term.My_Term)   # A relation with two constant terms 1.0 and "my_term"
+    Relation.my_rel(Const.my_term, "string_term")  # A relation with two constant terms "my_term" and "string_term"
+    Relation.my_rel(1.0, Const.My_Term)   # A relation with two constant terms 1.0 and "my_term"
 
-- **Variables** are *capitalized* string values. We can, similarly to constants, utilize helper :code:`neuralogic.core.Var`, which converts the provided value into a valid variable (string) for us.
+- **Variables** are *capitalized* string values. We can, similarly to constants, utilize helper :code:`neuralogic.Var`, which converts the provided value into a valid variable (string) for us.
 
 .. code-block:: Python
 
@@ -183,13 +183,16 @@ These properties can be modified, per rule, by attaching a :py:class:`~neuralogi
 
 .. code-block:: Python
 
-    from neuralogic.core import Metadata, Transformation, Aggregation
+    from neuralogic.core import Metadata, Transformation, Aggregation, F
 
 
     (Relation.h <= (Relation.b_one, Relation.b_n)) | Metadata(transformation=Transformation.RELU, aggregation=Aggregation.AVG)
 
     # or, for short, just
     (Relation.h <= (Relation.b_one, Relation.b_n)) | [Transformation.RELU, Aggregation.AVG]
+
+    # or even shorter
+    (Relation.h <= (Relation.b_one, Relation.b_n)) | [F.relu, F.avg]
 
 
 For example, with the construct above, we created a new rule with a specified transformation function (relu) and aggregation function (avg).

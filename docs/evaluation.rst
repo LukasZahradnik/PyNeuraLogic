@@ -10,10 +10,7 @@ The 'compilation' is done in two steps. Firstly, we retrieve a model instance fo
 
 .. code-block:: Python
 
-    from neuralogic.core import Settings
-
-    settings = Settings()
-    model = template.build(settings)
+    model = template.build()
 
 
 Then we can 'build' the examples and queries (dataset), yielding a multitude of computational graphs to be trained.
@@ -43,27 +40,6 @@ When we want to load a state into our model, we can then simply pass the state i
     Evaluators offer the same interface for saving/loading of the model.
 
 
-Utilizing Evaluators
-####################
-
-Writing custom training loops and handling different backends can be cumbersome and repetitive. The library offers ‘evaluators’ that encapsulate the training loop and testing evaluation. Evaluators also handle other responsibilities, such as building datasets.
-
-.. code-block:: Python
-
-    from neuralogic.nn import get_evaluator
-
-
-    evaluator = get_evaluator(template, settings)
-
-
-Once you have an evaluator, you can evaluate or train the model on a dataset. The dataset doesn't have to be pre-built, as in the case of classical evaluation - the evaluator handles that for you.
-
-
-.. note::
-
-    If it is used more than once, it is more efficient to pass a pre-built dataset into the evaluator (this will prevent redundant dataset building).
-
-
 Settings Instance
 *****************
 
@@ -74,7 +50,7 @@ and the model itself (e.g., initialization of the learnable parameters).
 
 .. code-block:: Python
 
-    from neuralogic.core import Settings, Initializer
+    from neuralogic import Settings
     from neuralogic.nn.init import Uniform
     from neuralogic.optim import SGD
 
@@ -99,12 +75,11 @@ The generator mode (default mode) yields a tuple of two elements (total loss and
 
 .. code-block:: Python
 
-    for total_loss, seen_instances in neuralogic_evaluator.train(dataset):
-        pass
+    model.train(dataset, epochs=100)
 
 
 The non-generator mode, on the other hand, returns only a tuple of metrics from the last epoch.
 
 .. code-block:: Python
 
-    results = neuralogic_evaluator.train(dataset, generator=False)
+    results = model.test(dataset)

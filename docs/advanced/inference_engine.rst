@@ -67,12 +67,7 @@ Now we can ask the inference engine to get all sorts of different information, s
 
 .. code-block:: Python
 
-    from neuralogic.inference.inference_engine import InferenceEngine
-
-
-    engine = InferenceEngine(template)
-
-    engine.q(R.nearby(C.tottenham_court_road, V.X))
+    template.q(R.nearby(C.tottenham_court_road, V.X))
 
 Running the :code:`query` (or :code:`q`) will return a generator of dictionaries with all possible substitutions for all variables in the query.
 In this case, we have only one variable in the query (:code:`V.X`). As you can see, the inference engine found all stations that are nearby the Tottenham Court Road station (Leicester Square and Charing Cross).
@@ -103,9 +98,7 @@ Now we can ask the inference engine what stations we can reach from a station or
 
 .. code-block:: Python
 
-    engine = InferenceEngine(template)
-
-    if engine.query(R.reachable(C.green_park, C.tottenham_court_road)):
+    if template.query(R.reachable(C.green_park, C.tottenham_court_road)):
         print("Yes, you can reach Tottenham Court Road from Green Park")
     else:
         print("Those two stations are reachable, so this should never be printed out")
@@ -116,15 +109,8 @@ Changing the Knowledge Base
 
 There might be cases where we want to reuse defined rules on the different knowledge bases (e.g., on different cities' underground systems) or extend the knowledge base for some queries (e.g., add additional routes).
 
-We can extend the current knowledge defined in the template using the :code:`set_knowledge` method.
+We can set a knowledge that will extend the knowledge base defined in the template. This knowledge base will be considered only for the context of the query.
 
 .. code-block:: Python
 
-    engine.set_knowledge(additional_knowledge)
-
-We can also set a knowledge that will extend the knowledge base defined in the template but will ignore the knowledge set by the :code:`set_knowledge` method.
-This knowledge base will be considered only for the context of the query.
-
-.. code-block:: Python
-
-    engine.query(R.some_query, additional_knowledge)
+    template.query(R.some_query, additional_knowledge)

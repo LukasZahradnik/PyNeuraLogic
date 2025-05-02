@@ -47,7 +47,7 @@ template representing a linear layer.
 
 .. code-block:: python
 
-    from neuralogic.core import R, Template
+    from neuralogic import R, Template
     import neuralogic.nn.functional as F
 
 

@@ -25,18 +25,14 @@ For instance, a complete graph with three nodes and some features can be encoded
 
 .. code-block:: Python
 
-    from neuralogic.core import Relation, Dataset
-
-    dataset = Dataset()
-
-    dataset.add_example([
+    example = [
         Relation.edge(1, 2), Relation.edge(2, 1), Relation.edge(1, 3),
         Relation.edge(3, 1), Relation.edge(2, 3), Relation.edge(3, 2),
 
         Relation.feature(1)[0],
         Relation.feature(2)[1],
         Relation.feature(3)[-1],
-    ])
+    ]
 
 
 Queries
@@ -49,20 +45,23 @@ We might, for example, want to learn the output values of the unary relation (pr
 
 .. code-block:: Python
 
-    dataset.add_queries([
-        Relation.h('anna')[0],
-        Relation.h('elsa')[1],
-    ])
 
-Note that, in constrast to classic machine learning labels, queries are not restricted to a single target "output" in the template, such as the "output layer" in classic neural models. We can thus ask different completely arbitray queries at the same time:
+    from neuralogic import Relation
+    from neuralogic.dataset import Dataset
+
+    dataset = Dataset()
+
+    dataset.add(Relation.h("anna")[0], example)
+    dataset.add(Relation.h("elsa")[1], example)
+
+
+Note that, in contrast to classic machine learning labels, queries are not restricted to a single target "output" in the template, such as the "output layer" in classic neural models. We can thus ask different completely arbitrary queries at the same time:
 
 .. code-block:: Python
 
-    dataset.add_queries([
-        Relation.h('anna')[0],
-        Relation.h('elsa')[1],
-        Relation.friend('anna','elsa')[1],
-    ])
+    dataset.add(Relation.h("anna")[0], example)
+    dataset.add(Relation.h("elsa")[1], example)
+    dataset.add(Relation.friend("anna", "elsa")[1], example)
 
 Also, the associated labels can be of arbitrary shapes. We can thus, for example, combine a query :code:`Relation.a[0]` with a scalar label with a query :code:`Relation.b[[1, 0, 1]]` with a vector label, each associated with a different part of the learning template.
 

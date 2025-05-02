@@ -41,11 +41,10 @@ All that is needed to visualize the model - the template with current weights' v
 .. code-block:: Python
 
     from neuralogic.utils.data import XOR_Vectorized
-    from neuralogic.core import Settings
 
 
     template, dataset = XOR_Vectorized()
-    model = template.build(Settings())
+    model = template.build()
 
     model.draw()
 
@@ -56,10 +55,6 @@ All that is needed to visualize the model - the template with current weights' v
     :align: center
 
 |
-
-.. tip::
-
-    If you are using evaluators, you can draw the model via the :code:`evaluator.draw` method.
 
 .. tip::
 
