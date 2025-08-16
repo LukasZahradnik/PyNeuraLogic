@@ -64,7 +64,7 @@ def _init_logging():
     _is_logging_initialized = True
 
     if _default_logging:
-        add_handler(sys.stdout, Level.SEVERE)
+        add_handler(sys.stdout, Level.INFO)
 
     for handler_settings in _loggers_buffer:
         add_handler(*handler_settings)
