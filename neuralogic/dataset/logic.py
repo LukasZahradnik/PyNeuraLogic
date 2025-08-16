@@ -28,6 +28,9 @@ class Sample:
         else:
             self.example = example
 
+    def draw(*args, **kwargs):
+        raise NotImplementedError("sample cannot be drawn unless it is grounded or neuralized")
+
     def __str__(self) -> str:
         return str(self.query)
 
