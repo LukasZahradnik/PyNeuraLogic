@@ -32,8 +32,6 @@ class DatasetBuilder:
         self.query_counter = 0
         self.examples_counter = 0
 
-        self.hooks: Dict[str, Set] = {}
-
     def build_queries(self, queries, query_builder):
         logic_samples = []
         one_query_per_example = True

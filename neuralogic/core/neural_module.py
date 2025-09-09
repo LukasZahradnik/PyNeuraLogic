@@ -26,22 +26,6 @@ class NeuralModule:
         self._need_sync = False
         self._value_factory = ValueFactory()
 
-        @jpype.JImplements(
-            jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.iteration.actions.PythonHookHandler")
-        )
-        class HookHandler:
-            def __init__(self, module: "NeuralModule"):
-                self.module = module
-
-            @jpype.JOverride
-            def handleHook(self, hook, value):
-                self.module._run_hook(hook, json.loads(value))
-
-        self._hooks: Dict[str, Set[Callable]] = {}
-        self._hooks_set = False
-
-        self._hook_handler = HookHandler(self)
-
         self._parsed_template = None
         self._dataset_builder: DatasetBuilder | None = None
         self._settings: SettingsProxy | None = None
@@ -98,7 +82,6 @@ class NeuralModule:
         )
 
     def __call__(self, dataset=None):
-        self._set_hooks()
         samples, _ = self._dataset_to_samples(dataset)
         sample_collection = samples
 
@@ -125,7 +108,6 @@ class NeuralModule:
         return self(dataset)
 
     def train(self, dataset, epochs: int = 1) -> Tuple[Value, int]:
-        self._set_hooks()
         samples, batch_size = self._dataset_to_samples(dataset)
 
         if not isinstance(samples, Collection):
@@ -140,7 +122,6 @@ class NeuralModule:
         return res
 
     def test(self, dataset) -> Value:
-        self._set_hooks()
         samples, batch_size = self._dataset_to_samples(dataset)
 
         if not isinstance(samples, Collection):
@@ -206,44 +187,6 @@ class NeuralModule:
     ):
         return draw_model(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
 
-    def set_hooks(self, hooks):
-        self._hooks_set = len(hooks) != 0
-        self._hooks = hooks
-
-    def add_hook(self, relation: Union[BaseRelation, str], callback: Callable[[Any], None]):
-        """Hooks the callable to be called with the relation's value as an argument when the value of
-        the relation is being calculated.
-
-        :param relation:
-        :param callback:
-        :return:
-        """
-        name = str(relation)
-
-        if isinstance(relation, BaseRelation):
-            name = name[:-1]
-
-        if name not in self._hooks:
-            self._hooks[name] = {callback}
-        else:
-            self._hooks[name].add(callback)
-
-    def remove_hook(self, relation: Union[BaseRelation, str], callback):
-        """Removes the callable from the relation's hooks
-
-        :param relation:
-        :param callback:
-        :return:
-        """
-        name = str(relation)
-
-        if isinstance(relation, BaseRelation):
-            name = name[:-1]
-
-        if name not in self._hooks:
-            return
-        self._hooks[name].discard(callback)
-
     def _initialize_neural_module(self, dataset_builder: DatasetBuilder, settings: SettingsProxy, model):
         self._dataset_builder = dataset_builder
         self._settings = settings
@@ -266,10 +209,6 @@ class NeuralModule:
 
         self.reset_parameters()
 
-    def _run_hook(self, hook: str, value):
-        for callback in self._hooks[hook]:
-            callback(value)
-
     def _dataset_to_samples(self, dataset):
         if isinstance(dataset, Dataset):
             dataset = self.build_dataset(dataset)
@@ -278,10 +217,6 @@ class NeuralModule:
         if isinstance(dataset, BuiltDataset):
             return dataset._samples, dataset._batch_size
         return dataset, 1
-
-    def _set_hooks(self):
-        if len(self._hooks) != 0:
-            self._strategy.setHooks(set(self._hooks.keys()), self._hook_handler)
 
     def _sync_template(self, state_dict: dict | None = None, weights=None):
         state_dict = self.state_dict() if state_dict is None else state_dict
