@@ -115,7 +115,8 @@ $ pip install neuralogic
 ```
 
 
-### Prerequisites
+<details>
+<summary>Prerequisites</summary>
 
 To use PyNeuraLogic, you need to install the following prerequisites:
 
@@ -127,6 +128,9 @@ Java >= 1.8
 > \[!TIP]
 >
 > In case you want to use visualization provided in the library, it is required to have [Graphviz](https://graphviz.org/download/) installed.
+
+</details>
+
 
 <br />
 
@@ -154,6 +158,12 @@ It contains, for example, predefined modules for:
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingKRegularGraphs.ipynb) [Distinguishing k-regular graphs](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingKRegularGraphs.ipynb)
 <br />
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingNonRegularGraphs.ipynb) [Distinguishing non-regular graphs](https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/DistinguishingNonRegularGraphs.ipynb)
+
+## 🤝 Community & Support
+
+- [GitHub Issues](https://github.com/LukasZahradnik/PyNeuraLogic/issues) for bug reports and feature requests
+- [Discussions](https://github.com/LukasZahradnik/PyNeuraLogic/discussions) for questions and ideas
+- [Contributing Guide](CONTRIBUTING.md) if you want to help improve PyNeuraLogic
 
 ## 📝 Papers
 
