@@ -1,4 +1,4 @@
-from typing import List, Union, Sequence
+from typing import Union, Sequence
 
 import jpype
 
@@ -17,7 +17,7 @@ class Sample:
         "example",
     )
 
-    def __init__(self, query: BaseRelation | None, example: Sequence[DatasetEntries] | DatasetEntries | None):
+    def __init__(self, query: BaseRelation | list[BaseRelation] | None, example: Sequence[DatasetEntries] | DatasetEntries | None):
         self.query = query
 
         if example is None:
@@ -32,6 +32,8 @@ class Sample:
         raise NotImplementedError("sample cannot be drawn unless it is grounded or neuralized")
 
     def __str__(self) -> str:
+        if isinstance(self.query, list):
+            return ", ".join(str(q) for q in self.query)
         return str(self.query)
 
     def __len__(self) -> int:
@@ -48,7 +50,7 @@ class Dataset(BaseDataset):
 
     __slots__ = ("samples", "_examples", "_queries")
 
-    def __init__(self, samples: List[Sample] | Sample | None = None):
+    def __init__(self, samples: list[Sample] | Sample | None = None):
         self.samples = []
 
         if isinstance(samples, list):
@@ -59,10 +61,10 @@ class Dataset(BaseDataset):
         self._examples: list[list[DatasetEntries]] = []
         self._queries: list[BaseRelation] = []
 
-    def set_samples(self, samples: List[Sample]):
+    def set_samples(self, samples: list[Sample]):
         self.samples = samples
 
-    def add_samples(self, samples: List[Sample]) -> "Dataset":
+    def add_samples(self, samples: list[Sample]) -> "Dataset":
         self.samples.extend(samples)
 
         return self
@@ -72,7 +74,7 @@ class Dataset(BaseDataset):
 
         return self
 
-    def add(self, query: BaseRelation | None, example: List[DatasetEntries] | None) -> "Dataset":
+    def add(self, query: BaseRelation | list[BaseRelation] | None, example: list[DatasetEntries] | None) -> "Dataset":
         self.samples.append(Sample(query, example))
 
         return self
@@ -84,7 +86,7 @@ class Dataset(BaseDataset):
         self.samples[key] = value
 
     def __delitem__(self, key: int):
-        del self.samples
+        del self.samples[key]
 
     def __str__(self):
         return ". ".join(str(s) for s in self.samples)
@@ -96,19 +98,19 @@ class Dataset(BaseDataset):
     def add_example(self, example):
         self.add_examples([example])
 
-    def add_examples(self, examples: List):
+    def add_examples(self, examples: list):
         self._examples.extend(examples)
 
     def add_query(self, query):
         self.add_queries([query])
 
-    def add_queries(self, queries: List):
+    def add_queries(self, queries: list):
         self._queries.extend(queries)
 
-    def set_examples(self, examples: List):
+    def set_examples(self, examples: list):
         self._examples = examples
 
-    def set_queries(self, queries: List):
+    def set_queries(self, queries: list):
         self._queries = queries
 
     def generate_features(self, feature_depth: int = 1, count_groundings: bool = True):

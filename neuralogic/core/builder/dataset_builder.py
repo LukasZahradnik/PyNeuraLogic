@@ -1,4 +1,4 @@
-from typing import Union, Set, Dict, List
+from typing import Union, List
 
 import jpype
 
@@ -280,8 +280,15 @@ class DatasetBuilder:
             idx = id(sample.example)
 
             if idx not in example_dict:
-                queries_dict[idx] = [sample.query]
+                if isinstance(sample.query, list):
+                    queries_dict[idx] = [*sample.query]
+                else:
+                    queries_dict[idx] = [sample.query]
                 example_dict[idx] = sample.example
+                continue
+
+            if isinstance(sample.query, list):
+                queries_dict[idx].extend(sample.query)
             else:
                 queries_dict[idx].append(sample.query)
         return example_dict.values(), queries_dict.values()
