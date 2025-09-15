@@ -48,7 +48,7 @@ class ValueFactory:
                 else:
                     value = self.matrix_value(weight[0], weight[1])
             else:
-                raise NotImplementedError
+                raise NotImplementedError(f"dimensions of size {len(weight)} are not supported. If you wanted to provide tensor as weight, wrap it into a list first")
             return False, value
 
         if isinstance(weight, (Sequence, np.ndarray, Iterable)):
