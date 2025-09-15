@@ -1,11 +1,10 @@
-from typing import Union, Callable, Dict, Any, Set, Collection, List, Tuple
+from typing import Collection
 import json
 
 import jpype
 
 from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.constructs.java_objects import ValueFactory
-from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core.builder.dataset import BuiltDataset, GroundedDataset
 from neuralogic.core.settings.settings_proxy import SettingsProxy
@@ -15,7 +14,7 @@ from neuralogic.dataset.base import BaseDataset
 from neuralogic.utils.visualize import draw_model
 
 
-Value = Union[List, float]
+Value = list | float
 
 
 class NeuralModule:
@@ -40,10 +39,7 @@ class NeuralModule:
 
         self._weight_updater = None
         self._tensor_parameters = None
-
-        from neuralogic.core.torch.neural_module import TorchNeuralModule
-
-        self._torch_module = TorchNeuralModule()
+        self._torch_module = None
 
     def ground(
         self,
@@ -51,6 +47,7 @@ class NeuralModule:
         *,
         batch_size: int = 1,
         learnable_facts: bool = False,
+        progress: bool = False,
     ) -> GroundedDataset:
         if self._dataset_builder is None or self._settings is None:
             raise ValueError("template is not built")
@@ -60,11 +57,12 @@ class NeuralModule:
             self._settings,
             batch_size=batch_size,
             learnable_facts=learnable_facts,
+            progress=progress,
         )
 
     def build_dataset(
         self,
-        dataset: Union[BaseDataset, GroundedDataset],
+        dataset: BaseDataset | GroundedDataset,
         *,
         batch_size: int = 1,
         learnable_facts: bool = False,
@@ -83,10 +81,7 @@ class NeuralModule:
 
     def __call__(self, dataset=None):
         samples, _ = self._dataset_to_samples(dataset)
-        sample_collection = samples
-
-        if not isinstance(samples, Collection):
-            sample_collection = [samples]
+        sample_collection = samples if isinstance(samples, Collection) else [samples]
 
         for sample in sample_collection:
             self._trainer.invalidateSample(self._invalidation, sample._java_sample)
@@ -107,16 +102,16 @@ class NeuralModule:
     def forward(self, dataset):
         return self(dataset)
 
-    def train(self, dataset, epochs: int = 1) -> Tuple[Value, int]:
+    def train(self, dataset, epochs: int = 1) -> Value:
         samples, batch_size = self._dataset_to_samples(dataset)
 
         if not isinstance(samples, Collection):
             result = self._strategy.learnSample(samples._java_sample)
-            res = json.loads(str(result)), 1
+            res = json.loads(str(result))
         else:
             sample_array = jpype.java.util.ArrayList([sample._java_sample for sample in samples])
             results = self._strategy.learnSamples(sample_array, epochs, batch_size)
-            res = json.loads(str(results)), len(samples)
+            res = json.loads(str(results))
 
         self._update_tensor_parameters()
         return res
@@ -135,10 +130,10 @@ class NeuralModule:
     def reset_parameters(self):
         self._strategy.resetParameters()
 
-    def parameters(self) -> Dict:
+    def parameters(self) -> dict:
         return self.state_dict()
 
-    def state_dict(self) -> Dict:
+    def state_dict(self) -> dict:
         weights = self._neural_model.getAllWeights()
         weights_dict = {}
         weight_names = {}
@@ -169,7 +164,7 @@ class NeuralModule:
         if self._torch_module is not None:
             self._torch_module.update_tensor_parameters(self._tensor_parameters)
 
-    def load_state_dict(self, state_dict: Dict):
+    def load_state_dict(self, state_dict: dict):
         self._sync_template(state_dict, self._neural_model.getAllWeights())
 
         if self._torch_module is not None:
@@ -187,10 +182,20 @@ class NeuralModule:
     ):
         return draw_model(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
 
-    def _initialize_neural_module(self, dataset_builder: DatasetBuilder, settings: SettingsProxy, model):
+    def _initialize_neural_module(self, dataset_builder: DatasetBuilder, settings: SettingsProxy, model, torch: bool):
         self._dataset_builder = dataset_builder
         self._settings = settings
         self._neural_model = model
+
+        if torch:
+            try:
+                import torch
+            except:
+                raise Exception("torch is not installed in the environment")
+
+            from neuralogic.core.torch.neural_module import TorchNeuralModule
+
+            self._torch_module = TorchNeuralModule()
 
         optimizer = self._settings.optimizer.initialize()
         lr_decay = self._settings.optimizer.get_lr_decay()

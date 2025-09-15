@@ -1,4 +1,4 @@
-from typing import Union, List, Iterable
+from typing import Iterable
 
 import jpype
 
@@ -15,13 +15,13 @@ from neuralogic.core.settings import SettingsProxy, Settings
 from neuralogic.nn.module.module import Module
 
 
-TemplateEntries = Union[BaseRelation, WeightedRelation, Rule]
+TemplateEntries = BaseRelation | WeightedRelation | Rule | PredicateMetadata
 
 
 class Template(NeuralModule):
     def __init__(self, *, template_file: str | None = None):
         super().__init__()
-        self._template: List[TemplateEntries] = []
+        self._template: list[TemplateEntries] = []
         self._template_file = template_file
 
     def add_rule(self, rule) -> None:
@@ -32,7 +32,7 @@ class Template(NeuralModule):
         """
         self.add_rules([rule])
 
-    def add_rules(self, rules: List):
+    def add_rules(self, rules: list[TemplateEntries]) -> None:
         """Adds multiple rules to the template
 
         :param rules:
@@ -51,7 +51,7 @@ class Template(NeuralModule):
         """
         self.add_rules(module())
 
-    def build(self, settings: Settings | None = None) -> "Template":
+    def build(self, settings: Settings | None = None, torch: bool = False) -> "Template":
         java_factory = JavaFactory()
         settings_proxy = settings.create_proxy() if settings is not None else Settings().create_disconnected_proxy()
 
@@ -62,6 +62,7 @@ class Template(NeuralModule):
             DatasetBuilder(parsed_template, java_factory),
             settings_proxy,
             neural_model,
+            torch,
         )
 
         return self
@@ -74,7 +75,7 @@ class Template(NeuralModule):
         self._parsed_template = None
 
         entries = set()
-        deduplicated_template: List[TemplateEntries] = []
+        deduplicated_template: list[TemplateEntries] = []
 
         for entry in self._template:
             entry_str = str(entry)
@@ -122,7 +123,7 @@ class Template(NeuralModule):
 
         return self._parsed_template
 
-    def derivable_queries(self, example: List[BaseRelation | Rule] | None = None):
+    def derivable_queries(self, example: list[BaseRelation | Rule] | None = None):
         settings = Settings(iso_value_compression=False, chain_pruning=False).create_disconnected_proxy()
         java_factory = JavaFactory()
 
@@ -145,7 +146,7 @@ class Template(NeuralModule):
             return {}
         return results
 
-    def query(self, query: BaseRelation, examples: List[BaseRelation | Rule] | None = None):
+    def query(self, query: BaseRelation, examples: list[BaseRelation | Rule] | None = None):
         settings = Settings(iso_value_compression=False, chain_pruning=False).create_disconnected_proxy()
         java_factory = JavaFactory()
 
@@ -163,7 +164,7 @@ class Template(NeuralModule):
             return {}
         return results
 
-    def q(self, query: BaseRelation, examples: List[Union[BaseRelation, Rule]] | None = None):
+    def q(self, query: BaseRelation, examples: list[BaseRelation | Rule] | None = None):
         return self.query(query, examples)
 
     def __str__(self) -> str:
