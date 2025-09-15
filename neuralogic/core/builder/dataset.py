@@ -29,32 +29,18 @@ class GroundedDataset:
     __slots__ = "_groundings", "_groundings_list", "_builder"
 
     def __init__(self, groundings, builder: Builder):
-        self._groundings = groundings
-        self._groundings_list = None
         self._builder = builder
-
-    def _to_list(self):
-        if self._groundings_list is None:
-            self._groundings = self._groundings.collect(jpype.JClass("java.util.stream.Collectors").toList())
-            self._groundings_list = [Grounding(g) for g in self._groundings]
+        self._groundings = groundings
+        self._groundings_list = [Grounding(g) for g in self._groundings]
 
     def __getitem__(self, item) -> Grounding:
-        self._to_list()
-        if self._groundings_list is None:
-            raise ValueError
-
         return self._groundings_list[item]
 
     def __len__(self) -> int:
-        self._to_list()
-        if self._groundings_list is None:
-            return 0
         return len(self._groundings_list)
 
     def __iter__(self):
-        self._to_list()
         return iter(self._groundings_list)
 
-    def neuralize(self, *, progress: bool = False) -> list[NeuralSample]:
-        self._to_list()
-        return self._builder.neuralize(self._groundings, progress, len(self))
+    def neuralize(self, *, batch_size: int = 1, progress: bool = False) -> BuiltDataset:
+        return BuiltDataset(self._builder.neuralize(self._groundings.stream(), progress, len(self)), batch_size)

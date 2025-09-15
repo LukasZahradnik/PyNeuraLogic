@@ -112,13 +112,17 @@ class DatasetBuilder:
         *,
         batch_size: int = 1,
         learnable_facts: bool = False,
-    ) -> GroundedDataset:
+        progress: bool = False,
+        raw_groundings: bool = False,
+    ):
         """Grounds the dataset
 
         :param dataset:
         :param settings:
         :param batch_size:
         :param learnable_facts:
+        :param progress:
+        :param raw_groundings:
         :return:
         """
         if isinstance(dataset, datasets.ConvertibleDataset):
@@ -127,6 +131,8 @@ class DatasetBuilder:
                 settings,
                 batch_size=batch_size,
                 learnable_facts=learnable_facts,
+                progress=progress,
+                raw_groundings=raw_groundings,
             )
 
         if batch_size > 1:
@@ -170,7 +176,7 @@ class DatasetBuilder:
                 queries, examples, one_query_per_example, example_queries
             )
 
-            groundings = builder.ground_from_logic_samples(self.parsed_template, logic_samples)
+            groundings = builder.ground_from_logic_samples(self.parsed_template, logic_samples, progress)
 
             self.java_factory.weight_factory = weight_factory
         elif isinstance(dataset, datasets.FileDataset):
@@ -184,11 +190,16 @@ class DatasetBuilder:
                 args.extend(["-e", dataset.examples_file])
             sources = Sources.from_args(args, settings)
 
-            groundings = builder.ground_from_sources(self.parsed_template, sources)
+            groundings = builder.ground_from_sources(self.parsed_template, sources, progress)
         else:
             raise NotImplementedError
 
-        return GroundedDataset(groundings, builder)
+        if raw_groundings:
+            return groundings
+        if progress:
+            return GroundedDataset(groundings, builder)
+
+        return GroundedDataset(groundings.collect(builder.collectors.toList()), builder)
 
     def build_dataset(
         self,
@@ -209,12 +220,13 @@ class DatasetBuilder:
         :return:
         """
         if not isinstance(dataset, GroundedDataset):
-            grounded_dataset = self.ground_dataset(
-                dataset, settings, batch_size=batch_size, learnable_facts=learnable_facts
+            groundings = self.ground_dataset(
+                dataset, settings, batch_size=batch_size, learnable_facts=learnable_facts, raw_groundings=True,
             )
-        else:
-            grounded_dataset = dataset
-        return BuiltDataset(grounded_dataset.neuralize(progress=progress), batch_size)
+
+            samples = Builder(settings).neuralize(groundings, progress, None)
+            return BuiltDataset(samples, batch_size)
+        return dataset.neuralize(batch_size=batch_size, progress=progress)
 
     @staticmethod
     def merge_queries_with_examples(queries, examples, one_query_per_example, example_queries=True):

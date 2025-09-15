@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 import jpype
 from tqdm.autonotebook import tqdm
 
@@ -9,7 +7,7 @@ from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
 
 
-def stream_to_list(stream) -> List:
+def stream_to_list(stream) -> list:
     return list(stream.collect(jpype.JClass("java.util.stream.Collectors").toList()))
 
 
@@ -52,37 +50,46 @@ class Builder:
 
         return template
 
-    def ground_from_sources(self, parsed_template, sources: Sources):
-        return self._ground(parsed_template, sources, None)
+    def ground_from_sources(self, parsed_template, sources: Sources, progress: bool):
+        if not progress:
+            return self._ground(parsed_template, sources, None, None)
+        with tqdm(total=None, desc="Grounding", unit=" samples", dynamic_ncols=True) as pbar:
+            return self._ground(parsed_template, sources, None, self._callback(pbar))
 
-    def ground_from_logic_samples(self, parsed_template, logic_samples):
-        return self._ground(parsed_template, None, logic_samples)
+    def ground_from_logic_samples(self, parsed_template, logic_samples, progress: bool):
+        if not progress:
+            return self._ground(parsed_template, None, logic_samples, None)
+        with tqdm(total=len(logic_samples), desc="Grounding", unit=" samples", dynamic_ncols=True) as pbar:
+            return self._ground(parsed_template, None, logic_samples, self._callback(pbar))
 
-    def _ground(self, parsed_template, sources: Optional[Sources], logic_samples) -> List[NeuralSample]:
+    def _ground(self, parsed_template, sources: Sources | None, logic_samples, callback):
         if sources is not None:
-            ground_pipeline = self.example_builder.buildGroundings(parsed_template, sources.sources)
+            ground_pipeline = self.example_builder.buildGroundings(parsed_template, sources.sources, callback)
         else:
             logic_samples = jpype.java.util.ArrayList(logic_samples).stream()
-            ground_pipeline = self.example_builder.buildGroundings(parsed_template, logic_samples)
+            ground_pipeline = self.example_builder.buildGroundings(parsed_template, logic_samples, callback)
 
         ground_pipeline.execute(None if sources is None else sources.sources)
+        groundings = ground_pipeline.get()
 
-        return ground_pipeline.get()
+        if callback is not None:
+            return groundings.collect(self.collectors.toList())
+        return groundings
 
-    def neuralize(self, groundings, progress: bool, length: Optional[int]) -> List[NeuralSample]:
+    def neuralize(self, groundings, progress: bool, length: int | None) -> list[NeuralSample]:
         if not progress:
             return self._neuralize(groundings, None)
         with tqdm(total=length, desc="Building", unit=" samples", dynamic_ncols=True) as pbar:
             return self._neuralize(groundings, self._callback(pbar))
 
-    def _neuralize(self, groundings, callback) -> List[NeuralSample]:
-        neuralize_pipeline = self.example_builder.neuralize(groundings.stream(), callback)
+    def _neuralize(self, groundings, callback) -> list[NeuralSample]:
+        neuralize_pipeline = self.example_builder.neuralize(groundings, callback)
         neuralize_pipeline.execute(None)
 
-        samples = neuralize_pipeline.get()
-        logic_samples = samples.collect(self.collectors.toList())
+        pair = neuralize_pipeline.get()
+        logic_samples = pair.r.collect(self.collectors.toList())
 
-        return [NeuralSample(sample, grounding) for sample, grounding in zip(logic_samples, groundings)]
+        return [NeuralSample(sample, grounding) for sample, grounding in zip(logic_samples, pair.s)]
 
     def build_model(self, parsed_template, settings: SettingsProxy):
         neural_model = self.neural_model(parsed_template.getAllWeights(), settings.settings)
