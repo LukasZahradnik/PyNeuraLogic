@@ -227,6 +227,10 @@ class NeuralModule:
             dataset = self.build_dataset(dataset)
             return dataset._samples, dataset._batch_size
 
+        if isinstance(dataset, GroundedDataset):
+            dataset = dataset.neuralize()
+            return dataset._samples, dataset._batch_size
+
         if isinstance(dataset, BuiltDataset):
             return dataset._samples, dataset._batch_size
         return dataset, 1
