@@ -26,7 +26,7 @@ class ValueFactory:
 
         if len(size) == 0 or size[0] == 0:
             return float(value.get(0))
-        return np.array(memoryview(value.getAsArray())).reshape(size).tolist()
+        return memoryview(value.getAsArray()).tolist()
 
     def get_value(self, weight):
         if isinstance(weight, (float, int)) or np.ndim(weight) == 0:
