@@ -1,7 +1,6 @@
 import enum
 from typing import Any, Dict, Optional
 
-from neuralogic.core.settings.settings_proxy import SettingsProxy
 from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.utils.visualize import draw_sample, draw_grounding
 
@@ -37,11 +36,11 @@ class Atom:
 
     @property
     def value(self):
-        return ValueFactory.from_java(self._atom.getRawState().getValue(), SettingsProxy.number_format())
+        return ValueFactory.from_java(self._atom.getRawState().getValue())
 
     @property
     def gradient(self):
-        return ValueFactory.from_java(self._atom.getRawState().getGradient(), SettingsProxy.number_format())
+        return ValueFactory.from_java(self._atom.getRawState().getGradient())
 
     def node_type(self) -> NeuronType:
         return NeuronType(self._atom.getClass().getSimpleName())
@@ -70,7 +69,7 @@ class NeuralSample:
 
     @property
     def target(self):
-        return ValueFactory.from_java(self._java_sample.target, SettingsProxy.number_format())
+        return ValueFactory.from_java(self._java_sample.target)
 
     def get_neurons(self, literal, neuron_type: NeuronType | None = NeuronType.Atom):
         literal_name = literal.predicate.name

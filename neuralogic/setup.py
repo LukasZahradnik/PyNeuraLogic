@@ -14,7 +14,7 @@ _max_memory_size = None
 _graphviz_path = None
 
 jvm_params = {
-    "classpath": os.path.join(os.path.abspath(os.path.dirname(__file__)), "jar", "NeuraLogic.jar"),
+    "classpath": os.path.join(os.path.abspath(os.path.dirname(__file__)), "jar", "PyNeuraLogic.jar"),
 }
 
 jvm_options = ["-Xms1g"]

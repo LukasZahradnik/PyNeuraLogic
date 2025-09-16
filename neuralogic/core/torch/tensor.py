@@ -5,7 +5,6 @@ class NeuralogicOptTensor(torch.Tensor):
     _neuralogic_weight_updater = None
     _neuralogic_weight = None
     _neuralogic_value_factory = None
-    _neuralogic_number_format = None
 
     def add_(self, other, *args, **kwargs):
         r = super().add_(other, *args, **kwargs)
@@ -50,13 +49,12 @@ class NeuralogicOptTensor(torch.Tensor):
         return p
 
     @staticmethod
-    def create(weight, data, weight_updater, value_factory, number_format):
+    def create(weight, data, weight_updater, value_factory):
         tensor = torch.tensor(data, requires_grad=True)
         tensor.__class__ = NeuralogicOptTensor
         tensor._neuralogic_weight = weight
         tensor._neuralogic_weight_updater = weight_updater
         tensor._neuralogic_value_factory = value_factory
-        tensor._neuralogic_number_format = number_format
 
         return tensor
 

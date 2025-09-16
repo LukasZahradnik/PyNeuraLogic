@@ -1,5 +1,4 @@
 from typing import Collection
-import json
 
 import jpype
 
@@ -89,7 +88,6 @@ class NeuralModule:
         results = [
             self._value_factory.from_java(
                 self._trainer.evaluateSample(self._evaluation, sample._java_sample).getOutput(),
-                SettingsProxy.number_format(),
             )
             for sample in sample_collection
         ]
@@ -107,11 +105,21 @@ class NeuralModule:
 
         if not isinstance(samples, Collection):
             result = self._strategy.learnSample(samples._java_sample)
-            res = json.loads(str(result))
+            res = (
+                ValueFactory.from_java(result.getTarget()),
+                ValueFactory.from_java(result.getOutput()),
+                ValueFactory.from_java(result.errorValue()),
+            )
         else:
             sample_array = jpype.java.util.ArrayList([sample._java_sample for sample in samples])
             results = self._strategy.learnSamples(sample_array, epochs, batch_size)
-            res = json.loads(str(results))
+            res = [
+                (
+                    ValueFactory.from_java(result.getTarget()),
+                    ValueFactory.from_java(result.getOutput()),
+                    ValueFactory.from_java(result.errorValue()),
+                ) for result in results
+            ]
 
         self._update_tensor_parameters()
         return res
@@ -120,12 +128,12 @@ class NeuralModule:
         samples, batch_size = self._dataset_to_samples(dataset)
 
         if not isinstance(samples, Collection):
-            return json.loads(str(self._strategy.evaluateSample(samples._java_sample)))
+            return ValueFactory.from_java(self._strategy.evaluateSample(samples._java_sample))
 
         sample_array = jpype.java.util.ArrayList([sample._java_sample for sample in samples])
-
         results = self._strategy.evaluateSamples(sample_array, batch_size)
-        return json.loads(str(results))
+
+        return [ValueFactory.from_java(result) for result in results]
 
     def reset_parameters(self):
         self._strategy.resetParameters()
@@ -140,7 +148,7 @@ class NeuralModule:
 
         for weight in weights:
             if weight.isLearnable:
-                weights_dict[weight.index] = ValueFactory.from_java(weight.value, SettingsProxy.number_format())
+                weights_dict[weight.index] = ValueFactory.from_java(weight.value)
                 weight_names[weight.index] = weight.name
         return {
             "weights": weights_dict,

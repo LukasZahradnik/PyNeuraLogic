@@ -2,7 +2,6 @@ from typing import List, Collection
 
 import torch
 
-from neuralogic.core import SettingsProxy
 from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.core.torch.network_output import PyNeuraLogicNetworkOutput
 from neuralogic.core.torch.tensor import NeuralogicOptTensor
@@ -16,10 +15,9 @@ class TorchNeuralModule:
             tensor_parameters = [
                 NeuralogicOptTensor.create(
                     weight,
-                    ValueFactory.from_java(weight.value, SettingsProxy.number_format()),
+                    ValueFactory.from_java(weight.value),
                     weight_updater,
                     value_factory,
-                    SettingsProxy.number_format(),
                 )
                 for weight in neural_model.getAllWeights()
                 if weight.isLearnable
@@ -32,9 +30,7 @@ class TorchNeuralModule:
             return
 
         for param in tensor_parameters:
-            param.data = torch.tensor(
-                ValueFactory.from_java(param._neuralogic_weight.value, SettingsProxy.number_format())
-            )
+            param.data = torch.tensor(ValueFactory.from_java(param._neuralogic_weight.value))
 
     def forward(self, model, samples, results) -> PyNeuraLogicNetworkOutput:
         if not isinstance(samples, Collection):
