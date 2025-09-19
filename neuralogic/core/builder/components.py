@@ -31,7 +31,7 @@ class Atom:
         return self._predicate
 
     @property
-    def arityy(self):
+    def arity(self):
         return self._arity
 
     @property
@@ -54,10 +54,9 @@ class Neuron(Atom):
 
 
 class NeuralSample:
-    __slots__ = "_java_sample", "grounding", "_neurons"
+    __slots__ = "_java_sample", "_neurons"
 
-    def __init__(self, sample, grounding):
-        self.grounding = Grounding(grounding)
+    def __init__(self, sample):
         self._java_sample = sample
         self._neurons = None
 
