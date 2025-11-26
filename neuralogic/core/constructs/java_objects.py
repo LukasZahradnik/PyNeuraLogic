@@ -371,7 +371,7 @@ class JavaFactory:
             body_relation.append(self.get_relation(relation, variable_factory))
 
         for index in all_diff_index:
-            terms = {term for term in body_relation[index].terms}
+            terms = {term for term in body_relation[index].terms if term is not Ellipsis}
             terms.update(term for term in all_variables)
 
             body_relation[index] = self.get_relation(R.special.alldiff(terms), variable_factory)
