@@ -79,7 +79,7 @@ def test_model_evaluation_from_tensor():
     output = template.train(built_dataset, epochs=100)
 
     assert len(output[0]) == 3
-    assert output[1] == 3
+    assert len(output[1]) == 3
 
 
 def test_model_evaluation_from_logic():
@@ -121,4 +121,4 @@ def test_model_evaluation_from_logic():
     output = template.train(built_dataset, epochs=100)
 
     assert len(output[0]) == 3
-    assert output[1] == 3
+    assert len(output[1]) == 3

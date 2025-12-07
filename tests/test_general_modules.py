@@ -3,6 +3,7 @@ import pytest
 import torch
 
 from neuralogic.core import Template, R, Settings, Transformation
+from neuralogic.core.constructs.function.function import TransformationFunction
 from neuralogic.nn.module import Linear
 from neuralogic.dataset import Dataset, Sample
 
@@ -16,7 +17,7 @@ from neuralogic.dataset import Dataset, Sample
         (3, 3, 1, Transformation.TANH),
     ),
 )
-def test_linear_module(feature_size: int, output_size: int, num_of_inputs: int, activation: Transformation):
+def test_linear_module(feature_size: int, output_size: int, num_of_inputs: int, activation: TransformationFunction):
     """Test that PyNeuraLogic linear layer computes the same as pytorch linear layer"""
     torch.manual_seed(1)
     linear_input = torch.rand((num_of_inputs, feature_size))

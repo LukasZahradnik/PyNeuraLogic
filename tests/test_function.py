@@ -31,8 +31,7 @@ def test_transformation_body_function(torch_fun, fun):
     dataset = Dataset([Sample(R.h, R.input[data.tolist()])])
 
     built_dataset = model.build_dataset(dataset)
-
-    results = np.array(model.test(built_dataset)[0]).round(3)
+    results = np.array(model.test(built_dataset)).round(3)
 
     assert np.allclose(torch_result, results, atol=0.0001)
 
@@ -61,7 +60,7 @@ def test_slice_function():
     dataset = Dataset([Sample(R.h, [R.input[data]])])
 
     built_dataset = model.build_dataset(dataset)
-    results = np.array(model.test(built_dataset)[0])
+    results = np.array(model.test(built_dataset))
 
     assert np.allclose(res, results)
 
@@ -72,7 +71,7 @@ def test_slice_function():
     dataset = Dataset(Sample(R.h, [R.input[data]]))
 
     built_dataset = model.build_dataset(dataset)
-    results = np.array(model.test(built_dataset)[0])
+    results = np.array(model.test(built_dataset))
 
     assert np.allclose(res, results)
 
@@ -84,6 +83,6 @@ def test_slice_function():
     dataset = Dataset(Sample(R.h, [R.input[data]]))
 
     built_dataset = model.build_dataset(dataset)
-    results = np.array(model.test(built_dataset)[0])
+    results = np.array(model.test(built_dataset))
 
     assert np.allclose(res, results)

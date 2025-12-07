@@ -108,7 +108,7 @@ def test_listing_all_queries() -> None:
     template += R.edge(2, 3)
     template += R.edge(3, 1)
 
-    queries = list(template.queries())
+    queries = list(template.derivable_queries())
 
     expected_queries = sorted(
         ["edge(1, 2).", "edge(2, 3).", "edge(3, 1).", "h(2).", "h(3).", "h(1).", "h1(1).", "h1(2).", "h1(3).", "q."]
@@ -118,7 +118,7 @@ def test_listing_all_queries() -> None:
     for a, b in zip(expected_queries, str_queries):
         assert a == b
 
-    queries = list(template.queries([R.edge(1, 4)]))
+    queries = list(template.derivable_queries([R.edge(1, 4)]))
 
     expected_queries = sorted(
         [

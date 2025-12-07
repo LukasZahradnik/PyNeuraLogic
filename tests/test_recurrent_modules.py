@@ -69,7 +69,7 @@ def test_gru_module(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model.train(bd)
+        result = model.train(bd)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
 
 
@@ -127,7 +127,7 @@ def test_rnn_module(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model.train(bd)
+        result = model.train(bd)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
 
 
@@ -194,7 +194,7 @@ def test_lstm_module(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model.train(bd)
+        result = model.train(bd)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
 
 
@@ -215,7 +215,7 @@ def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
     template = Template()
     template += RNN(input_size, hidden_size, "h", "f", "h0", arity=0)
 
-    model = template.build(Settings(chain_pruning=False, iso_value_compression=False, error_function=MSE()))
+    model = template.build(Settings(chain_pruning=False, iso_value_compression=False, error_function=MSE()), torch=True)
 
     parameters = model.parameters()
     pyneuralogic_tensor_parameters = model.tensor_parameters()
@@ -322,7 +322,7 @@ def test_rnn_custom(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model.train(bd, epochs=1)
+        result  = model.train(bd, epochs=1)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
 
 
@@ -417,7 +417,7 @@ def test_lstm_module_simple(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model.train(bd, 1)
+        result = model.train(bd, 1)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
 
 
@@ -496,5 +496,5 @@ def test_gru_module_simple(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result, _ = model.train(bd, 1)
+        result = model.train(bd, 1)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)

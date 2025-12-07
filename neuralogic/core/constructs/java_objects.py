@@ -23,10 +23,11 @@ class ValueFactory:
     @staticmethod
     def from_java(value):
         size = list(value.size())
-
         if len(size) == 0 or size[0] == 0:
             return float(value.get(0))
-        return np.array(memoryview(value.getAsArray())).reshape(size).tolist()
+        if len(size) == 2 and size[1] != 1:
+            return np.array(memoryview(value.getAsArray())).reshape(size).tolist()
+        return np.array(memoryview(value.getAsArray())).tolist()
 
     def get_value(self, weight):
         if isinstance(weight, (float, int)) or np.ndim(weight) == 0:

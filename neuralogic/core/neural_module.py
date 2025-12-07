@@ -188,6 +188,8 @@ class NeuralModule:
         *args,
         **kwargs,
     ):
+        if self._dataset_builder is None or self._settings is None:
+            raise ValueError("template is not built")
         return draw_model(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
 
     def _initialize_neural_module(self, dataset_builder: DatasetBuilder, settings: SettingsProxy, model, torch: bool):

@@ -34,14 +34,6 @@ class Atom:
     def arity(self):
         return self._arity
 
-    @property
-    def value(self):
-        return ValueFactory.from_java(self._atom.getRawState().getValue())
-
-    @property
-    def gradient(self):
-        return ValueFactory.from_java(self._atom.getRawState().getGradient())
-
     def node_type(self) -> NeuronType:
         return NeuronType(self._atom.getClass().getSimpleName())
 
@@ -50,7 +42,20 @@ class Atom:
 
 
 class Neuron(Atom):
-    pass
+    def __init__(self, neuron, substitutions: Dict):
+        self.substitutions = substitutions
+        self._atom = neuron
+
+        self._predicate = neuron.getName()
+        self._arity = len(substitutions)
+
+    @property
+    def value(self):
+        return ValueFactory.from_java(self._atom.getRawState().getValue())
+
+    @property
+    def gradient(self):
+        return ValueFactory.from_java(self._atom.getRawState().getGradient())
 
 
 class NeuralSample:

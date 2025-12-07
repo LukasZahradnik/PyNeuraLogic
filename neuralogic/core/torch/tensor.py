@@ -45,7 +45,7 @@ class NeuralogicOptTensor(torch.Tensor):
         if value is None:
             return None
 
-        p = -torch.tensor(self._neuralogic_value_factory.from_java(value, self._neuralogic_number_format))
+        p = -torch.tensor(self._neuralogic_value_factory.from_java(value))
         return p
 
     @staticmethod

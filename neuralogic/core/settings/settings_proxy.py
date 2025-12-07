@@ -140,7 +140,7 @@ class SettingsProxy:
 
     @error_function.setter
     def error_function(self, error_function: ErrorFunction):
-        self.settings.inferOutputFcns = True
+        self.settings.inferOutputFcns = False
 
         if isinstance(error_function, MSE):
             self.settings.squishLastLayer = False
@@ -157,7 +157,7 @@ class SettingsProxy:
                 self.settings.squishLastLayer = True
                 java_error_function = self.settings_class.ErrorFcn.SOFTENTROPY
             else:
-                self.settings.inferOutputFcns = False
+                self.settings.inferOutputFcns = True
                 self.settings.squishLastLayer = False
                 java_error_function = self.settings_class.ErrorFcn.CROSSENTROPY
         else:
