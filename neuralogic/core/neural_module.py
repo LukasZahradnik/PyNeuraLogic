@@ -149,7 +149,7 @@ class NeuralModule:
         for weight in weights:
             if weight.isLearnable:
                 weights_dict[weight.index] = ValueFactory.from_java(weight.value)
-                weight_names[weight.index] = weight.name
+                weight_names[weight.index] = str(weight.name)
         return {
             "weights": weights_dict,
             "weight_names": weight_names,
