@@ -171,6 +171,7 @@ class DatasetBuilder:
 
             self.java_factory.weight_factory = self.java_factory.get_new_weight_factory()
             queries, one_query_per_example = self.build_queries(queries, query_builder)
+            builder.settings.oneQueryPerExample = one_query_per_example
 
             logic_samples = DatasetBuilder.merge_queries_with_examples(
                 queries, examples, one_query_per_example, example_queries
