@@ -79,7 +79,7 @@ def draw(drawer, obj, filename: Optional[str] = None, show=True, img_type="png",
                 "your Path or specify the path via the `graphviz_path` parameter"
             ) from e
 
-        return
+        return None
 
     data = drawer.drawIntoBytes(obj)
 
