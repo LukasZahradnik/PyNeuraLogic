@@ -87,7 +87,7 @@ def test_inference_engine_london() -> None:
     # Run query for connected(X, leicester_square, Z)
     # Should yield two substitutions:
     # {'X': 'piccadilly_circus', 'Z': 'piccadilly'}, {'X': 'tottenham_court_road', 'Z': 'northern'}
-    substitutions = list(engine.q(R.connected(V.X, C.leicester_square, V.Z), knowledge))
+    substitutions = sorted(list(engine.q(R.connected(V.X, C.leicester_square, V.Z), knowledge)), key=lambda a: a["X"])
 
     assert substitutions[0]["X"] == "piccadilly_circus"
     assert substitutions[0]["Z"] == "piccadilly"
@@ -138,6 +138,9 @@ def test_listing_all_queries() -> None:
         ]
     )
     str_queries = sorted([str(query) for query in queries])
+
+    print(str_queries)
+    print(expected_queries)
 
     for a, b in zip(expected_queries, str_queries):
         assert a == b
