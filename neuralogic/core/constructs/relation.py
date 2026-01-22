@@ -64,7 +64,7 @@ class BaseRelation:
             raise NotImplementedError
 
         name, hidden, special = self.predicate.name, self.predicate.hidden, self.predicate.special
-        return factories.AtomFactory.Predicate.get_predicate(name, other, hidden, special)
+        return factories.AtomFactory.get_predicate(name, other, hidden, special)
 
     def __call__(self, *args) -> "BaseRelation":
         if self.terms:
@@ -77,7 +77,7 @@ class BaseRelation:
         arity = len(terms)
 
         name, hidden, special = self.predicate.name, self.predicate.hidden, self.predicate.special
-        predicate = factories.AtomFactory.Predicate.get_predicate(name, arity, hidden, special)
+        predicate = factories.AtomFactory.get_predicate(name, arity, hidden, special)
 
         return BaseRelation(predicate, terms, self.function, self.negated)
 
