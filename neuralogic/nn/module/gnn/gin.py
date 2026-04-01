@@ -1,3 +1,4 @@
+from typing import Any
 from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.function import Transformation, Aggregation
@@ -48,7 +49,7 @@ class GINConv(Module):
         self.aggregation = aggregation
         self.activation = activation
 
-    def __call__(self):
+    def __call__(self) -> list[Any]:
         """
         Generates the rules for GIN convolution.
 

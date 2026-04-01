@@ -1,4 +1,5 @@
 import jpype
+from typing import Any
 from tqdm.autonotebook import tqdm
 
 from neuralogic.setup import is_initialized, initialize
@@ -7,7 +8,7 @@ from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
 
 
-def stream_to_list(stream) -> list:
+def stream_to_list(stream: Any) -> list:
     """
     Converts a Java stream to a Python list.
 
@@ -60,7 +61,7 @@ class Builder:
 
         self._callback = Callback
 
-    def build_template_from_file(self, settings: SettingsProxy, filename: str):
+    def build_template_from_file(self, settings: SettingsProxy, filename: str) -> Any:
         """
         Builds a template from a file.
 
@@ -88,7 +89,7 @@ class Builder:
 
         return template
 
-    def ground_from_sources(self, parsed_template, sources: Sources, progress: bool):
+    def ground_from_sources(self, parsed_template: Any, sources: Sources, progress: bool) -> Any:
         """
         Grounds the template from the provided sources.
 
@@ -111,7 +112,7 @@ class Builder:
         with tqdm(total=None, desc="Grounding", unit=" samples", dynamic_ncols=True) as pbar:
             return self._ground(parsed_template, sources, None, self._callback(pbar))
 
-    def ground_from_logic_samples(self, parsed_template, logic_samples, progress: bool):
+    def ground_from_logic_samples(self, parsed_template: Any, logic_samples: list[Any], progress: bool) -> Any:
         """
         Grounds the template from the provided logic samples.
 
@@ -134,7 +135,7 @@ class Builder:
         with tqdm(total=len(logic_samples), desc="Grounding", unit=" samples", dynamic_ncols=True) as pbar:
             return self._ground(parsed_template, None, logic_samples, self._callback(pbar))
 
-    def _ground(self, parsed_template, sources: Sources | None, logic_samples, callback):
+    def _ground(self, parsed_template: Any, sources: Sources | None, logic_samples: list[Any] | None, callback: Any) -> Any:
         if sources is not None:
             ground_pipeline = self.example_builder.buildGroundings(parsed_template, sources.sources, callback)
         else:
@@ -171,14 +172,14 @@ class Builder:
         with tqdm(total=length, desc="Building", unit=" samples", dynamic_ncols=True) as pbar:
             return self._neuralize(groundings, self._callback(pbar))
 
-    def _neuralize(self, groundings, callback) -> list[NeuralSample]:
+    def _neuralize(self, groundings: Any, callback: Any) -> list[NeuralSample]:
         neuralize_pipeline = self.example_builder.neuralize(groundings, callback)
         neuralize_pipeline.execute(None)
         logic_samples = neuralize_pipeline.get().collect(self.collectors.toList())
 
         return [NeuralSample(sample) for sample in logic_samples]
 
-    def build_model(self, parsed_template, settings: SettingsProxy):
+    def build_model(self, parsed_template: Any, settings: SettingsProxy) -> Any:
         """
         Builds a neural model from the parsed template.
 
@@ -199,7 +200,7 @@ class Builder:
         return neural_model
 
     @staticmethod
-    def get_builders(settings: SettingsProxy):
+    def get_builders(settings: SettingsProxy) -> Any:
         builder = jpype.JClass("cz.cvut.fel.ida.pipelines.building.PythonBuilder")(settings.settings)
 
         return builder

@@ -1,4 +1,4 @@
-from typing import Iterable, Union
+from typing import Iterable, Any
 
 import numpy as np
 
@@ -19,8 +19,8 @@ class BaseRelation:
     def __init__(
         self,
         predicate: Predicate,
-        terms=None,
-        function: Union[TransformationFunction, CombinationFunction, None] = None,
+        terms: Any = None,
+        function: TransformationFunction | CombinationFunction | None = None,
         negated: bool = False,
     ):
         """
@@ -68,7 +68,7 @@ class BaseRelation:
     def T(self) -> "BaseRelation":
         return self.attach_activation_function(Transformation.TRANSP)
 
-    def attach_activation_function(self, function: Union[TransformationFunction, CombinationFunction]):
+    def attach_activation_function(self, function: TransformationFunction | CombinationFunction) -> "BaseRelation":
         """Attaches an activation or combination function to the relation.
 
         Parameters
@@ -87,14 +87,14 @@ class BaseRelation:
         relation.function = function
         return relation
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: int) -> Predicate:
         if not isinstance(other, int) or self.predicate.arity != 0 or other < 0:
             raise NotImplementedError
 
         name, hidden, special = self.predicate.name, self.predicate.hidden, self.predicate.special
         return factories.AtomFactory.get_predicate(name, other, hidden, special)
 
-    def __call__(self, *args) -> "BaseRelation":
+    def __call__(self, *args: Any) -> "BaseRelation":
         if self.terms:
             raise Exception
 
@@ -114,7 +114,7 @@ class BaseRelation:
             raise ValueError(f"Special/Hidden relation {self} cannot have learnable parameters.")
         return WeightedRelation(item, self.predicate, False, self.terms, self.function)
 
-    def __le__(self, other: Union[Iterable["BaseRelation"], "BaseRelation"]) -> rule.Rule:
+    def __le__(self, other: Iterable["BaseRelation"] | "BaseRelation") -> rule.Rule:
         return rule.Rule(self, other)
 
     def to_str(self, end=False) -> str:
@@ -163,18 +163,18 @@ class BaseRelation:
 
         return relation
 
-    def __and__(self, other) -> rule.RuleBody:
+    def __and__(self, other: "BaseRelation") -> rule.RuleBody:
         if isinstance(other, BaseRelation):
             return rule.RuleBody(self, other)
         raise NotImplementedError
 
-    def __add__(self, other):
+    def __add__(self, other: "BaseRelation") -> FContainer:
         return FContainer((self, other), Combination.SUM)
 
-    def __mul__(self, other):
+    def __mul__(self, other: "BaseRelation") -> FContainer:
         return FContainer((self, other), Combination.ELPRODUCT)
 
-    def __matmul__(self, other):
+    def __matmul__(self, other: "BaseRelation") -> FContainer:
         return FContainer((self, other), Combination.PRODUCT)
 
 
@@ -187,11 +187,11 @@ class WeightedRelation(BaseRelation):
 
     def __init__(
         self,
-        weight,
+        weight: Any,
         predicate: Predicate,
-        fixed=False,
-        terms=None,
-        function: Union[TransformationFunction, CombinationFunction, None] = None,
+        fixed: bool = False,
+        terms: Any = None,
+        function: TransformationFunction | CombinationFunction | None = None,
     ):
         """
         Parameters
@@ -253,13 +253,13 @@ class WeightedRelation(BaseRelation):
     def __repr__(self) -> str:
         return self.__str__()
 
-    def __call__(self, *args) -> BaseRelation:
+    def __call__(self, *args: Any) -> BaseRelation:
         raise NotImplementedError(f"Cannot assign terms to weighted relation {self.predicate}")
 
     def __getitem__(self, item) -> "WeightedRelation":
         raise NotImplementedError(f"Cannot assign weight to weighted relation {self.predicate}")
 
-    def attach_activation_function(self, function: Union[Transformation, Combination]):
+    def attach_activation_function(self, function: Transformation | Combination) -> "WeightedRelation":
         raise NotImplementedError(
             f"Cannot attach a function to weighted relation {self}. Attach the function before adding weights."
         )

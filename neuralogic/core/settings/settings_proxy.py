@@ -9,6 +9,7 @@ from neuralogic.core.constructs.function.function import (
     AggregationFunction,
 )
 from neuralogic.core.enums import Grounder
+from typing import Any
 from neuralogic.nn.init import Initializer
 from neuralogic.nn.loss import MSE, SoftEntropy, CrossEntropy, ErrorFunction
 from neuralogic.optim import Optimizer
@@ -87,7 +88,7 @@ class SettingsProxy:
 
         self._setup_random_generator()
 
-    def _setup_random_generator(self):
+    def _setup_random_generator(self) -> None:
         if neuralogic.setup._rnd_generator is None:
             neuralogic.setup._rnd_generator = self.settings.random
             self.settings.random.setSeed(neuralogic.setup._seed)
@@ -99,7 +100,7 @@ class SettingsProxy:
         return self.settings.isoValueCompression
 
     @iso_value_compression.setter
-    def iso_value_compression(self, iso_value_compression: bool):
+    def iso_value_compression(self, iso_value_compression: bool) -> None:
         self.settings.isoValueCompression = iso_value_compression
 
     @property
@@ -108,7 +109,7 @@ class SettingsProxy:
         return self.settings.chainPruning
 
     @chain_pruning.setter
-    def chain_pruning(self, chain_pruning: bool):
+    def chain_pruning(self, chain_pruning: bool) -> None:
         self.settings.chainPruning = chain_pruning
 
     @property
@@ -116,16 +117,16 @@ class SettingsProxy:
         return self.settings.pruneOnlyIdentities
 
     @prune_only_identities.setter
-    def prune_only_identities(self, prune_only_identities: bool):
+    def prune_only_identities(self, prune_only_identities: bool) -> None:
         self.settings.pruneOnlyIdentities = prune_only_identities
 
     @property
-    def grounder(self):
+    def grounder(self) -> Any:
         """The grounding algorithm to use."""
         return self.settings.grounding
 
     @grounder.setter
-    def grounder(self, grounder: Grounder):
+    def grounder(self, grounder: Grounder) -> None:
         if grounder == Grounder.BUP:
             self.settings.grounding = self.settings.GroundingAlgo.BUP
         elif grounder == Grounder.GRINGO:
@@ -139,7 +140,7 @@ class SettingsProxy:
         return self._optimizer
 
     @optimizer.setter
-    def optimizer(self, optimizer: Optimizer):
+    def optimizer(self, optimizer: Optimizer) -> None:
         if optimizer.name() == "SGD":
             java_optimizer = self.settings_class.OptimizerSet.SGD
         elif optimizer.name() == "Adam":
@@ -152,28 +153,28 @@ class SettingsProxy:
         self.settings.initLearningRate = optimizer.lr
 
     @property
-    def initializer_const(self):
+    def initializer_const(self) -> float:
         return self.settings.constantInitValue
 
     @initializer_const.setter
-    def initializer_const(self, value: float):
+    def initializer_const(self, value: float) -> None:
         self.settings.constantInitValue = value
 
     @property
-    def initializer_uniform_scale(self):
+    def initializer_uniform_scale(self) -> float:
         return self.settings.randomInitScale
 
     @initializer_uniform_scale.setter
-    def initializer_uniform_scale(self, value: float):
+    def initializer_uniform_scale(self, value: float) -> None:
         self.settings.randomInitScale = value
 
     @property
-    def error_function(self):
+    def error_function(self) -> Any:
         """The error function used for training."""
         return self.settings.errorFunction
 
     @error_function.setter
-    def error_function(self, error_function: ErrorFunction):
+    def error_function(self, error_function: ErrorFunction) -> None:
         self.settings.inferOutputFcns = False
 
         if isinstance(error_function, MSE):
@@ -205,11 +206,11 @@ class SettingsProxy:
         return self.settings.maxCumEpochCount
 
     @epochs.setter
-    def epochs(self, epochs: int):
+    def epochs(self, epochs: int) -> None:
         self.settings.maxCumEpochCount = epochs
 
     @property
-    def initializer(self):
+    def initializer(self) -> Any:
         """The weight initializer used for model parameters."""
         initializer = self.settings.initializer
 
@@ -218,7 +219,7 @@ class SettingsProxy:
         return self.settings.initDistribution
 
     @initializer.setter
-    def initializer(self, initializer: Initializer):
+    def initializer(self, initializer: Initializer) -> None:
         if not isinstance(initializer, Initializer):
             raise TypeError()
 
@@ -239,7 +240,7 @@ class SettingsProxy:
         return TransformationFunction(str(self.settings.atomNeuronTransformation))
 
     @relation_transformation.setter
-    def relation_transformation(self, value: Transformation):
+    def relation_transformation(self, value: Transformation) -> None:
         self.settings.atomNeuronTransformation = self.get_transformation_function(value)
 
     @property
@@ -247,7 +248,7 @@ class SettingsProxy:
         return CombinationFunction(str(self.settings.atomNeuronCombination))
 
     @relation_combination.setter
-    def relation_combination(self, value: Combination):
+    def relation_combination(self, value: Combination) -> None:
         self.settings.atomNeuronCombination = self.get_combination_function(value)
 
     @property
@@ -255,7 +256,7 @@ class SettingsProxy:
         return TransformationFunction(str(self.settings.ruleNeuronTransformation))
 
     @rule_transformation.setter
-    def rule_transformation(self, value: Transformation):
+    def rule_transformation(self, value: Transformation) -> None:
         self.settings.ruleNeuronTransformation = self.get_transformation_function(value)
 
     @property
@@ -263,7 +264,7 @@ class SettingsProxy:
         return CombinationFunction(str(self.settings.ruleNeuronCombination))
 
     @rule_combination.setter
-    def rule_combination(self, value: Combination):
+    def rule_combination(self, value: Combination) -> None:
         self.settings.ruleNeuronCombination = self.get_combination_function(value)
 
     @property
@@ -271,7 +272,7 @@ class SettingsProxy:
         return AggregationFunction(str(self.settings.aggNeuronAggregation))
 
     @rule_aggregation.setter
-    def rule_aggregation(self, value: Aggregation):
+    def rule_aggregation(self, value: Aggregation) -> None:
         self.settings.aggNeuronAggregation = self.get_aggregation_function(value)
 
     @property
@@ -279,7 +280,7 @@ class SettingsProxy:
         return self.settings.debugExporting
 
     @debug_exporting.setter
-    def debug_exporting(self, debug_export: bool):
+    def debug_exporting(self, debug_export: bool) -> None:
         self.settings.debugExporting = debug_export
 
     @property
@@ -287,10 +288,10 @@ class SettingsProxy:
         return self.settings.defaultFactValue
 
     @default_fact_value.setter
-    def default_fact_value(self, value: float):
+    def default_fact_value(self, value: float) -> None:
         self.settings.defaultFactValue = value
 
-    def get_combination_function(self, combination: Combination):
+    def get_combination_function(self, combination: Combination) -> Any:
         """Returns the Java combination function for the given Python enum value.
 
         Parameters
@@ -306,18 +307,18 @@ class SettingsProxy:
         combination_name = str(combination)
         return self.settings_class.parseCombination(combination_name)
 
-    def get_aggregation_function(self, aggregation: Aggregation):
+    def get_aggregation_function(self, aggregation: Aggregation) -> Any:
         aggregation_name = str(aggregation)
         return self.settings_class.parseCombination(aggregation_name)
 
-    def get_transformation_function(self, transformation: Transformation):
+    def get_transformation_function(self, transformation: Transformation) -> Any:
         transformation_name = str(transformation)
         return self.settings_class.parseTransformation(transformation_name)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:
         setattr(self.settings, key, value)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str) -> Any:
         return getattr(self.settings, item)
 
     def to_json(self) -> str:

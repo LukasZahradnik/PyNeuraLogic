@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Any
 from neuralogic.core.constructs.predicate import Predicate
 from neuralogic.core.constructs import relation
 from neuralogic.core.constructs.term import Constant, Variable
@@ -19,37 +19,37 @@ class SpecialPredicateFactory:
         self.is_hidden = hidden
 
     @property
-    def hidden(self):
+    def hidden(self) -> "SpecialPredicateFactory":
         return SpecialPredicateFactory(True)
 
-    def alldiff(self, *args) -> relation.BaseRelation:
+    def alldiff(self, *args: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("alldiff", len(args), self.is_hidden, True), args)
 
-    def neq(self, a, b) -> relation.BaseRelation:
+    def neq(self, a: Any, b: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("neq", 2, self.is_hidden, True), [a, b])
 
-    def eq(self, a, b) -> relation.BaseRelation:
+    def eq(self, a: Any, b: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("eq", 2, self.is_hidden, True), [a, b])
 
-    def leq(self, a, b) -> relation.BaseRelation:
+    def leq(self, a: Any, b: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("leq", 2, self.is_hidden, True), [a, b])
 
-    def lt(self, a, b) -> relation.BaseRelation:
+    def lt(self, a: Any, b: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("lt", 2, self.is_hidden, True), [a, b])
 
-    def geq(self, a, b) -> relation.BaseRelation:
+    def geq(self, a: Any, b: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("geq", 2, self.is_hidden, True), [a, b])
 
-    def gt(self, a, b) -> relation.BaseRelation:
+    def gt(self, a: Any, b: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("gt", 2, self.is_hidden, True), [a, b])
 
-    def next(self, a, b) -> relation.BaseRelation:
+    def next(self, a: Any, b: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("next", 2, self.is_hidden, True), [a, b])
 
-    def maxcard(self, *args) -> relation.BaseRelation:
+    def maxcard(self, *args: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("maxcard", len(args), self.is_hidden, True), args)
 
-    def _in(self, *args) -> relation.BaseRelation:
+    def _in(self, *args: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("in", len(args), self.is_hidden, True), args)
 
     def anypred(self) -> relation.BaseRelation:
@@ -58,34 +58,34 @@ class SpecialPredicateFactory:
     def truepred(self) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("truepred", 0, self.is_hidden, True), None)
 
-    def add(self, a, b, c) -> relation.BaseRelation:
+    def add(self, a: Any, b: Any, c: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("add", 3, self.is_hidden, True), [a, b, c])
 
-    def sub(self, a, b, c) -> relation.BaseRelation:
+    def sub(self, a: Any, b: Any, c: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("sub", 3, self.is_hidden, True), [a, b, c])
 
-    def mod(self, a, b, c) -> relation.BaseRelation:
+    def mod(self, a: Any, b: Any, c: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("mod", 3, self.is_hidden, True), [a, b, c])
 
-    def add_eval(self, a, b) -> relation.BaseRelation:
+    def add_eval(self, a: Any, b: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("add_eval", 2, self.is_hidden, True), [a, b])
 
-    def sub_eval(self, a, b) -> relation.BaseRelation:
+    def sub_eval(self, a: Any, b: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("sub_eval", 2, self.is_hidden, True), [a, b])
 
-    def mod_eval(self, a, b) -> relation.BaseRelation:
+    def mod_eval(self, a: Any, b: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("mod_eval", 2, self.is_hidden, True), [a, b])
 
-    def mul_eval(self, a, b) -> relation.BaseRelation:
+    def mul_eval(self, a: Any, b: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("mul_eval", 2, self.is_hidden, True), [a, b])
 
-    def div_eval(self, a, b) -> relation.BaseRelation:
+    def div_eval(self, a: Any, b: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("div_eval", 2, self.is_hidden, True), [a, b])
 
-    def max_eval(self, a, b) -> relation.BaseRelation:
+    def max_eval(self, a: Any, b: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("max_eval", 2, self.is_hidden, True), [a, b])
 
-    def min_eval(self, a, b) -> relation.BaseRelation:
+    def min_eval(self, a: Any, b: Any) -> relation.BaseRelation:
         return relation.BaseRelation(Predicate("min_eval", 2, self.is_hidden, True), [a, b])
 
     def __call__(self, *args, **kwargs):
@@ -155,7 +155,7 @@ class AtomFactory:
     """
     def __init__(self):
         """Initializes the AtomFactory."""
-        self.instances: Dict[str, Dict[int, relation.BaseRelation]] = {}
+        self.instances: dict[str, dict[int, relation.BaseRelation]] = {}
 
         self.special = SpecialPredicateFactory()
         self.hidden = HiddenPredicateFactory()
@@ -180,7 +180,7 @@ class AtomFactory:
         return relation.BaseRelation(Predicate(item, 0, False, False))
 
     @staticmethod
-    def get_predicate(name, arity, hidden, special) -> Predicate:
+    def get_predicate(name: str, arity: int, hidden: bool, special: bool) -> Predicate:
         return Predicate(name, arity, hidden, special)
 
 
@@ -192,7 +192,7 @@ class VariableFactory:
     def __getattr__(self, item: str) -> Variable:
         return self.get(item)
 
-    def get(self, item: str, var_type: Optional[str] = None) -> Variable:
+    def get(self, item: str, var_type: str | None = None) -> Variable:
         """
         Creates a variable with the given name and optional type.
 
@@ -219,7 +219,7 @@ class ConstantFactory:
     def __getattr__(self, item: str) -> Constant:
         return self.get(item)
 
-    def get(self, item: str, const_type: Optional[str] = None) -> Constant:
+    def get(self, item: str, const_type: str | None = None) -> Constant:
         """
         Creates a constant with the given name and optional type.
 

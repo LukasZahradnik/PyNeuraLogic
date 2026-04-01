@@ -1,4 +1,5 @@
-from typing import List, Collection
+from collections.abc import Collection
+from typing import Any
 
 import torch
 
@@ -13,8 +14,12 @@ class TorchNeuralModule:
     It handles the conversion of Java weights to PyTorch tensors and the management of learnable parameters.
     """
     def tensor_parameters(
-        self, tensor_parameters, weight_updater, value_factory, neural_model
-    ) -> List[NeuralogicOptTensor]:
+        self,
+        tensor_parameters: list[NeuralogicOptTensor] | None,
+        weight_updater: Any,
+        value_factory: Any,
+        neural_model: Any,
+    ) -> list[NeuralogicOptTensor]:
         """
         Creates or retrieves PyTorch-compatible tensor parameters from the Java neural model.
 
@@ -48,7 +53,7 @@ class TorchNeuralModule:
 
         return tensor_parameters
 
-    def update_tensor_parameters(self, tensor_parameters):
+    def update_tensor_parameters(self, tensor_parameters: list[NeuralogicOptTensor] | None) -> None:
         """
         Updates the data of the provided tensor parameters from their underlying Java weights.
 
@@ -63,7 +68,7 @@ class TorchNeuralModule:
         for param in tensor_parameters:
             param.data = torch.tensor(ValueFactory.from_java(param._neuralogic_weight.value))
 
-    def forward(self, model, samples, results) -> PyNeuraLogicNetworkOutput:
+    def forward(self, model: Any, samples: Any, results: Any) -> PyNeuraLogicNetworkOutput:
         """
         Performs the forward pass by wrapping the results in PyNeuraLogicNetworkOutput.
 

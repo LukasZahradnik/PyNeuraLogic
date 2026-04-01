@@ -1,5 +1,5 @@
-import json
-from typing import Optional, Iterable, Sequence
+from collections.abc import Iterable, Sequence
+from typing import Any
 
 import numpy as np
 import jpype
@@ -26,7 +26,7 @@ class ValueFactory:
         self.matrix_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.MatrixValue")
 
     @staticmethod
-    def from_java(value):
+    def from_java(value: Any) -> float | list | np.ndarray:
         """
         Converts a Java Value object to a Python representation (float, list, or numpy array).
 
@@ -37,7 +37,7 @@ class ValueFactory:
 
         Returns
         -------
-        Union[float, list, np.ndarray]
+        float | list | np.ndarray
             The Python representation of the value.
         """
         size = list(value.size())
@@ -47,7 +47,7 @@ class ValueFactory:
             return np.array(memoryview(value.getAsArray())).reshape(size).tolist()
         return np.array(memoryview(value.getAsArray())).tolist()
 
-    def get_value(self, weight):
+    def get_value(self, weight: Any) -> tuple[bool, Any]:
         """
         Converts a Python weight to a Java Value object.
 
@@ -58,7 +58,7 @@ class ValueFactory:
 
         Returns
         -------
-        Tuple[bool, Any]
+        tuple[bool, Any]
             A tuple containing a boolean (True if initialized, False if just dimensions) and the Java Value object.
         """
         if isinstance(weight, (float, int)) or np.ndim(weight) == 0:
@@ -104,7 +104,7 @@ class ValueFactory:
         raise ValueError(f"Cannot create weight from type {type(weight)}, value {weight}")
 
 
-def _is_body_flat(body: FContainer):
+def _is_body_flat(body: FContainer) -> bool:
     if not isinstance(body.function, CombinationFunction):
         return False
 
@@ -114,7 +114,7 @@ def _is_body_flat(body: FContainer):
     return True
 
 
-def _flatten_rule_body(body, metadata: Metadata):
+def _flatten_rule_body(body: Iterable[Any], metadata: Metadata | None) -> Any:
     combination = Combination.SUM if metadata is None or metadata.combination is None else metadata.combination
     return combination(*body)
 
@@ -124,7 +124,7 @@ class JavaFactory:
     Factory for converting high-level Python logic constructs (Atoms, Rules, etc.) into their corresponding Java objects.
     It maintains internal factories for predicates, constants, and weights.
     """
-    def __init__(self, settings: Optional[SettingsProxy] = None):
+    def __init__(self, settings: SettingsProxy | None = None):
         """
         Parameters
         ----------
@@ -185,10 +185,10 @@ class JavaFactory:
         self.unit_weight = jpype.JClass("cz.cvut.fel.ida.algebra.weights.Weight").unitWeight
         self.variable_factory = self.get_variable_factory()
 
-    def get_variable_factory(self):
+    def get_variable_factory(self) -> Any:
         return self.var_factory_class()
 
-    def get_term(self, term, variable_factory):
+    def get_term(self, term: Any, variable_factory: Any) -> Any:
         """
         Converts a Python term (Variable, Constant, str, int, float) to a Java term.
 
@@ -224,7 +224,7 @@ class JavaFactory:
             return self.constant_factory.construct(str(term))
         raise ValueError(f"Invalid term {term}")
 
-    def atom_to_clause(self, atom):
+    def atom_to_clause(self, atom: Any) -> Any:
         """
         Converts a single atom to a Java Clause.
 
@@ -247,7 +247,7 @@ class JavaFactory:
 
         return self.clause(literal_array)
 
-    def to_clause(self, atoms):
+    def to_clause(self, atoms: Iterable[Any]) -> Any:
         literal_array = self.literal[len(atoms)]
 
         for i, atom in enumerate(atoms):
@@ -257,7 +257,7 @@ class JavaFactory:
             literal_array[i] = self.literal(predicate_name, atom.negated, terms)
         return self.clause(literal_array)
 
-    def get_generic_relation(self, relation_class, relation, variable_factory, default_weight=None, is_example=False):
+    def get_generic_relation(self, relation_class: Any, relation: Any, variable_factory: Any, default_weight: Any = None, is_example: bool = False) -> Any:
         """
         Generic method to convert a Python relation to a Java relation object.
 
@@ -309,13 +309,13 @@ class JavaFactory:
 
         return java_relation
 
-    def add_metadata_function(self, metadata, map, function: str):
+    def add_metadata_function(self, metadata: Metadata, map: Any, function: str) -> None:
         value = getattr(metadata, function)
 
         if value is not None and not value.is_parametrized():
             map.put(function, self.string_value(str(value).lower()))
 
-    def add_parametrized_function(self, metadata, metadata_obj, function: str):
+    def add_parametrized_function(self, metadata: Metadata, metadata_obj: Any, function: str) -> None:
         value = getattr(metadata, function)
 
         if value is not None and value.is_parametrized():
@@ -324,7 +324,7 @@ class JavaFactory:
             parameter_val.value = value.get()
             metadata_obj.put(parameter, parameter_val)
 
-    def get_metadata(self, metadata, metadata_class):
+    def get_metadata(self, metadata: Metadata | None, metadata_class: Any) -> Any:
         if metadata is None:
             return None
 
@@ -353,7 +353,7 @@ class JavaFactory:
 
         return metadata_obj
 
-    def get_query(self, query):
+    def get_query(self, query: Any) -> tuple[Any, list[Any] | None]:
         """
         Converts a Python query to a Java representation.
 
@@ -364,7 +364,7 @@ class JavaFactory:
 
         Returns
         -------
-        Tuple[Any, List[Any]]
+        tuple[Any, list[Any] | None]
             A tuple containing the Java head relation and a list of Java body relations.
         """
         variable_factory = self.get_variable_factory()
@@ -383,7 +383,7 @@ class JavaFactory:
             self.get_valued_fact(relation, variable_factory, True) for relation in query.body
         ]
 
-    def get_lifted_example(self, example, learnable_facts=False):
+    def get_lifted_example(self, example: Any, learnable_facts: bool = False) -> tuple[Any, Any]:
         """
         Converts a Python example to a Java LiftedExample.
 
@@ -396,7 +396,7 @@ class JavaFactory:
 
         Returns
         -------
-        Tuple[Any, Any]
+        tuple[Any, Any]
             A tuple containing the Java label conjunction and the Java LiftedExample.
         """
         conjunctions = []
@@ -416,19 +416,19 @@ class JavaFactory:
         lifted_example = self.lifted_example(jpype.java.util.ArrayList(conjunctions), jpype.java.util.ArrayList(rules))
         return label_conjunction, lifted_example
 
-    def get_conjunction(self, relations, variable_factory, default_weight=None, is_example=False):
+    def get_conjunction(self, relations: Iterable[Any], variable_factory: Any, default_weight: Any = None, is_example: bool = False) -> Any:
         valued_facts = [
             self.get_valued_fact(relation, variable_factory, default_weight, is_example) for relation in relations
         ]
         return self.conjunction(jpype.java.util.ArrayList(valued_facts))
 
-    def get_predicate_metadata_pair(self, predicate_metadata):
+    def get_predicate_metadata_pair(self, predicate_metadata: Any) -> Any:
         return self.pair(
             self.get_predicate(predicate_metadata.predicate),
             self.get_metadata(predicate_metadata.metadata, self.predicate_metadata),
         )
 
-    def get_valued_fact(self, relation, variable_factory, default_weight=None, is_example=False):
+    def get_valued_fact(self, relation: Any, variable_factory: Any, default_weight: Any = None, is_example: bool = False) -> Any:
         return self.get_generic_relation(
             self.valued_fact,
             relation,
@@ -437,10 +437,10 @@ class JavaFactory:
             is_example,
         )
 
-    def get_relation(self, relation, variable_factory, is_example=False):
+    def get_relation(self, relation: Any, variable_factory: Any, is_example: bool = False) -> Any:
         return self.get_generic_relation(self.body_atom, relation, variable_factory, is_example=is_example)
 
-    def get_rule(self, rule):
+    def get_rule(self, rule: Any) -> Any:
         """
         Converts a Python Rule to a Java WeightedRule.
 
@@ -534,15 +534,15 @@ class JavaFactory:
 
         return java_rule
 
-    def get_predicate(self, predicate):
+    def get_predicate(self, predicate: Any) -> Any:
         return self.predicate_factory.construct(predicate.name, predicate.arity, predicate.special, predicate.hidden)
 
-    def get_weight(self, weight, name, fixed):
+    def get_weight(self, weight: Any, name: str | None, fixed: bool) -> Any:
         initialized, value = self.value_factory.get_value(weight)
 
         if name is None:
             return self.weight_factory.construct(value, fixed, initialized)
         return self.weight_factory.construct(name, value, fixed, initialized)
 
-    def get_new_weight_factory(self):
+    def get_new_weight_factory(self) -> Any:
         return self.examples_builder(self.settings.settings).weightFactory

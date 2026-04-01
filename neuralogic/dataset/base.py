@@ -1,13 +1,16 @@
+from typing import Any
+
+
 class BaseDataset:
     """
     Base class for logic datasets.
     """
     def dump(
         self,
-        queries_fp,
-        examples_fp,
+        queries_fp: Any,
+        examples_fp: Any,
         sep: str = "\n",
-    ):
+    ) -> None:
         """
         Dumps the dataset queries and examples into the provided file-like objects.
 
@@ -27,7 +30,7 @@ class ConvertibleDataset(BaseDataset):
     """
     Base class for datasets that can be converted into a standard dataset format.
     """
-    def to_dataset(self):
+    def to_dataset(self) -> Any:
         """
         Converts the dataset to a standard dataset format.
 

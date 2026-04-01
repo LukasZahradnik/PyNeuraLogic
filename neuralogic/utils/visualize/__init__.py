@@ -1,7 +1,7 @@
 import io
 import os
 import tempfile
-from typing import Optional
+from typing import Any
 
 import jpype
 
@@ -9,7 +9,7 @@ from neuralogic.setup import get_default_graphviz_path
 from neuralogic.core.settings import Settings, SettingsProxy
 
 
-def get_graphviz_path(path: Optional[str] = None) -> str | None:
+def get_graphviz_path(path: str | None = None) -> str | None:
     """
     Get the path to the Graphviz executable
     """
@@ -19,7 +19,7 @@ def get_graphviz_path(path: Optional[str] = None) -> str | None:
 
 
 def get_drawing_settings(
-    img_type: str = "png", value_detail: int = 0, graphviz_path: Optional[str] = None
+    img_type: str = "png", value_detail: int = 0, graphviz_path: str | None = None
 ) -> SettingsProxy:
     """Returns the default settings instance for drawing with a specified image type.
 
@@ -63,7 +63,7 @@ def get_drawing_settings(
     return settings
 
 
-def get_template_drawer(settings: SettingsProxy):
+def get_template_drawer(settings: SettingsProxy) -> Any:
     """Returns the template drawer.
 
     Parameters
@@ -79,7 +79,7 @@ def get_template_drawer(settings: SettingsProxy):
     return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.TemplateDrawer")(settings.settings)
 
 
-def get_sample_drawer(settings: SettingsProxy):
+def get_sample_drawer(settings: SettingsProxy) -> Any:
     """Returns the sample drawer.
 
     Parameters
@@ -95,7 +95,7 @@ def get_sample_drawer(settings: SettingsProxy):
     return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.NeuralNetDrawer")(settings.settings)
 
 
-def get_grounding_drawer(settings: SettingsProxy):
+def get_grounding_drawer(settings: SettingsProxy) -> Any:
     """Returns the grounding drawer.
 
     Parameters
@@ -114,7 +114,7 @@ def get_grounding_drawer(settings: SettingsProxy):
 # todo gusta: + groundingDrawer, pipelineDrawer...
 
 
-def draw(drawer, obj, filename: Optional[str] = None, show=True, img_type="png", *args, **kwargs):
+def draw(drawer: Any, obj: Any, filename: str | None = None, show: bool = True, img_type: str = "png", *args: Any, **kwargs: Any) -> Any:
     """Draws the object using the provided drawer.
 
     Parameters
@@ -186,20 +186,20 @@ def draw(drawer, obj, filename: Optional[str] = None, show=True, img_type="png",
     return data
 
 
-def to_dot_source(drawer, obj) -> str:
-    return str(drawer.getGraphSource(obj))
+def to_dot_source(drawer: Any, obj: Any) -> str:
+        return str(drawer.getGraphSource(obj))
 
 
 def draw_model(
-    model,
-    filename: Optional[str] = None,
-    show=True,
-    img_type="png",
+    model: Any,
+    filename: str | None = None,
+    show: bool = True,
+    img_type: str = "png",
     value_detail: int = 0,
-    graphviz_path: Optional[str] = None,
-    *args,
-    **kwargs,
-):
+    graphviz_path: str | None = None,
+    *args: Any,
+    **kwargs: Any,
+) -> Any:
     """Draws model either as an image of type img_type either into:
         * a file - if filename is specified),
         * an IPython Image or Image popup - if show is True
@@ -239,15 +239,15 @@ def draw_model(
 
 
 def draw_grounding(
-    grounding,
-    filename: Optional[str] = None,
-    show=True,
-    img_type="png",
+    grounding: Any,
+    filename: str | None = None,
+    show: bool = True,
+    img_type: str = "png",
     value_detail: int = 0,
-    graphviz_path: Optional[str] = None,
-    *args,
-    **kwargs,
-):
+    graphviz_path: str | None = None,
+    *args: Any,
+    **kwargs: Any,
+) -> Any:
     """Draws sample's grounding either as an image of type img_type either into:
         * a file - if filename is specified),
         * an IPython Image or Image popup - if show is True
@@ -283,15 +283,15 @@ def draw_grounding(
 
 
 def draw_sample(
-    sample,
-    filename: Optional[str] = None,
-    show=True,
-    img_type="png",
+    sample: Any,
+    filename: str | None = None,
+    show: bool = True,
+    img_type: str = "png",
     value_detail: int = 0,
-    graphviz_path: Optional[str] = None,
-    *args,
-    **kwargs,
-):
+    graphviz_path: str | None = None,
+    *args: Any,
+    **kwargs: Any,
+) -> Any:
     """Draws sample either as an image of type img_type either into:
         * a file - if filename is specified),
         * an IPython Image or Image popup - if show is True
@@ -328,7 +328,7 @@ def draw_sample(
     return draw(sample_drawer, draw_object, filename, show, img_type, *args, **kwargs)
 
 
-def model_to_dot_source(model) -> str:
+def model_to_dot_source(model: Any) -> str:
     """Renders the model into its dot source representation.
 
     Parameters
@@ -350,7 +350,7 @@ def model_to_dot_source(model) -> str:
     return to_dot_source(template_drawer, template)
 
 
-def sample_to_dot_source(sample, value_detail: int = 0) -> str:
+def sample_to_dot_source(sample: Any, value_detail: int = 0) -> str:
     """Renders the sample into its dot source representation.
 
     Parameters

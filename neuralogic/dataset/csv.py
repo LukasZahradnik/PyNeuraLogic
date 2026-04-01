@@ -1,6 +1,7 @@
 import enum
 from pathlib import Path
-from typing import List, Union, TextIO, Callable, Sequence
+from collections.abc import Sequence, Callable
+from typing import Any, TextIO
 
 from neuralogic.core.constructs.factories import R
 from neuralogic.core.constructs.relation import BaseRelation
@@ -8,7 +9,7 @@ from neuralogic.core.constructs.rule import Rule
 from neuralogic.dataset import Dataset, Sample
 from neuralogic.dataset.base import ConvertibleDataset
 
-DatasetEntries = Union[BaseRelation, Rule]
+DatasetEntries = BaseRelation | Rule
 
 
 class Mode(enum.Enum):
@@ -41,16 +42,16 @@ class CSVFile:
     def __init__(
         self,
         relation_name: str,
-        csv_source: Union[TextIO, Path],
-        sep=",",
-        value_column: Union[str, int] | None = None,
-        default_value: Union[float, int] | None = None,
+        csv_source: TextIO | Path,
+        sep: str = ",",
+        value_column: str | int | None = None,
+        default_value: float | int | None = None,
         value_mapper: Callable | None = None,
-        term_columns: Sequence[Union[str, int]] | None = None,
+        term_columns: Sequence[str | int] | None = None,
         header: bool = False,
         skip_rows: int = 0,
         n_rows: int | None = None,
-        replace_empty_column: Union[str, float, int] = 0,
+        replace_empty_column: str | float | int = 0,
     ):
         """
         Parameters
@@ -91,13 +92,13 @@ class CSVFile:
         self.replace_empty_column = replace_empty_column
 
     @staticmethod
-    def _find_index_in_header(header, value) -> int:
+    def _find_index_in_header(header: list[str], value: str | int) -> int:
         for index, header_value in enumerate(header):
             if value == header_value:
                 return index
         raise ValueError(f"Value {value} not found in the header {header}")
 
-    def _get_column_indices(self, header) -> List[int] | None:
+    def _get_column_indices(self, header: list[str]) -> list[int] | None:
         if self.term_columns is None:
             return None
         new_columns = []
@@ -187,7 +188,7 @@ class CSVDataset(ConvertibleDataset):
     """
     def __init__(
         self,
-        csv_files: Union[List[CSVFile], CSVFile],
+        csv_files: list[CSVFile] | CSVFile,
         csv_queries: CSVFile | None = None,
         mode: Mode = Mode.ONE_EXAMPLE,
     ):
@@ -205,10 +206,10 @@ class CSVDataset(ConvertibleDataset):
         self.csv_files = [csv_files] if isinstance(csv_files, CSVFile) else csv_files
         self.mode = mode
 
-    def add_csv_file(self, file: CSVFile):
+    def add_csv_file(self, file: CSVFile) -> None:
         self.csv_files.append(file)
 
-    def set_query_csv_file(self, file: CSVFile):
+    def set_query_csv_file(self, file: CSVFile) -> None:
         self.csv_queries = file
 
     def to_dataset(self) -> Dataset:
@@ -220,10 +221,10 @@ class CSVDataset(ConvertibleDataset):
         Dataset
             The created Dataset object.
         """
-        queries: List[BaseRelation | Rule] = self.csv_queries.to_logic_form() if self.csv_queries else []
+        queries: list[BaseRelation | Rule] = self.csv_queries.to_logic_form() if self.csv_queries else []
 
         if self.mode == Mode.ONE_EXAMPLE:
-            example: List[DatasetEntries] = []
+            example: list[DatasetEntries] = []
 
             for source in self.csv_files:
                 example.extend(source.to_logic_form())

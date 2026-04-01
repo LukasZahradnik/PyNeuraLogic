@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Any
 
 import jpype
 
@@ -14,7 +14,7 @@ class Adam(Optimizer):
     def __init__(
         self,
         lr: float = 0.001,
-        betas: Tuple[float, float] = (0.9, 0.999),
+        betas: tuple[float, float] = (0.9, 0.999),
         eps: float = 1e-08,
         lr_decay: LRDecay | None = None,
     ):
@@ -35,14 +35,14 @@ class Adam(Optimizer):
         self._eps = eps
 
     @property
-    def betas(self) -> Tuple[float, float]:
+    def betas(self) -> tuple[float, float]:
         return self._betas
 
     @property
     def eps(self) -> float:
         return self._eps
 
-    def initialize(self):
+    def initialize(self) -> Any:
         """
         Initializes the Java representation of the Adam optimizer.
 

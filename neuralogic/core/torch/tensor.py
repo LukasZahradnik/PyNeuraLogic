@@ -1,4 +1,5 @@
 import torch
+from typing import Any
 
 
 class NeuralogicOptTensor(torch.Tensor):
@@ -11,7 +12,7 @@ class NeuralogicOptTensor(torch.Tensor):
     _neuralogic_weight = None
     _neuralogic_value_factory = None
 
-    def add_(self, other, *args, **kwargs):
+    def add_(self, other: Any, *args: Any, **kwargs: Any) -> Any:
         r = super().add_(other, *args, **kwargs)
         if self._neuralogic_weight is None:
             return r
@@ -20,7 +21,7 @@ class NeuralogicOptTensor(torch.Tensor):
 
         return r
 
-    def addcdiv_(self, tensor1, tensor2, *args, **kwargs):
+    def addcdiv_(self, tensor1: Any, tensor2: Any, *args: Any, **kwargs: Any) -> Any:
         r = super().addcdiv_(tensor1, tensor2, *args, **kwargs)
         if self._neuralogic_weight is None:
             return r
@@ -29,7 +30,7 @@ class NeuralogicOptTensor(torch.Tensor):
 
         return r
 
-    def addcmul_(self, tensor1, tensor2, *args, **kwargs):
+    def addcmul_(self, tensor1: Any, tensor2: Any, *args: Any, **kwargs: Any) -> Any:
         r = super().addcmul_(tensor1, tensor2, *args, **kwargs)
         if self._neuralogic_weight is None:
             return r
@@ -39,7 +40,7 @@ class NeuralogicOptTensor(torch.Tensor):
         return r
 
     @property
-    def grad(self):
+    def grad(self) -> torch.Tensor | None:
         """
         Returns the gradient for this tensor, retrieved from the PyNeuraLogic weight updater.
 
@@ -62,7 +63,7 @@ class NeuralogicOptTensor(torch.Tensor):
         return p
 
     @staticmethod
-    def create(weight, data, weight_updater, value_factory):
+    def create(weight: Any, data: Any, weight_updater: Any, value_factory: Any) -> "NeuralogicOptTensor":
         """
         Creates a new NeuralogicOptTensor wrapping specific PyNeuraLogic weight.
 
@@ -90,7 +91,7 @@ class NeuralogicOptTensor(torch.Tensor):
 
         return tensor
 
-    def __sync_neuralogic__(self):
+    def __sync_neuralogic__(self) -> None:
         """
         Synchronizes the current tensor data back to the underlying Java weight.
         """

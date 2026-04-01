@@ -1,4 +1,4 @@
-from typing import Union, Tuple, Optional
+from typing import Any
 
 import jpype
 
@@ -15,7 +15,7 @@ class Reshape(TransformationFunction):
         self,
         name: str,
         *,
-        shape: Tuple[int, int] | int | None = None,
+        shape: tuple[int, int] | int | None = None,
     ):
         """
         Parameters
@@ -31,10 +31,10 @@ class Reshape(TransformationFunction):
 
     def __call__(
         self,
-        relation: Optional = None,
+        relation: Any | None = None,
         *,
-        shape: Union[None, Tuple[int, int], int] = None,
-    ):
+        shape: tuple[int, int] | int | None = None,
+    ) -> Any:
         """
         Creates a new Reshape instance with the provided shape and applies it to the relation.
 
@@ -42,7 +42,7 @@ class Reshape(TransformationFunction):
         ----------
         relation : Any, optional
             The relation to apply the reshape to. Default: None.
-        shape : Union[Tuple[int, int], int], optional
+        shape : tuple[int, int] | int | None, optional
             The target shape. Default: None.
 
         Returns
@@ -56,7 +56,7 @@ class Reshape(TransformationFunction):
     def is_parametrized(self) -> bool:
         return True
 
-    def get(self):
+    def get(self) -> Any:
         shape = None if self.shape is None else list(self.shape)
 
         return jpype.JClass("cz.cvut.fel.ida.algebra.functions.transformation.joint.Reshape")(shape)
@@ -64,5 +64,5 @@ class Reshape(TransformationFunction):
     def wrap(self, content: str) -> str:
         return f"reshape({content}, shape={self.shape})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"reshape(shape={self.shape})"

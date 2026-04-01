@@ -1,4 +1,5 @@
 import jpype
+from typing import Any
 
 from neuralogic.optim.lr_scheduler import LRDecay
 from neuralogic.optim.optimizer import Optimizer
@@ -19,7 +20,7 @@ class SGD(Optimizer):
         """
         super().__init__(lr, lr_decay)
 
-    def initialize(self):
+    def initialize(self) -> Any:
         """
         Initializes the Java representation of the SGD optimizer.
 

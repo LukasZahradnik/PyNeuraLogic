@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any
 
 import jpype
 
@@ -10,7 +10,7 @@ class Function:
     """
     __slots__ = "name", "operator", "can_flatten", "namespace"
 
-    def __init__(self, name: str, *, namespace: str = "", operator: Optional[str] = None, can_flatten: bool = False):
+    def __init__(self, name: str, *, namespace: str = "", operator: str | None = None, can_flatten: bool = False):
         """
         Parameters
         ----------
@@ -24,11 +24,11 @@ class Function:
             Whether the function can be flattened in the logic program. Default: False.
         """
         self.name: str = name.lower()
-        self.operator: Optional[str] = operator
+        self.operator: str | None = operator
         self.can_flatten = can_flatten
         self.namespace = namespace
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     def wrap(self, content: str) -> str:
@@ -37,7 +37,7 @@ class Function:
     def pretty_str(self) -> str:
         return str(self).capitalize()
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         if len(args) == 0:
             return self
         raise NotImplementedError
@@ -48,10 +48,10 @@ class Function:
     def rule_head_dependant(self) -> bool:
         return False
 
-    def process_head(self, head) -> "Function":
+    def process_head(self, head: Any) -> "Function":
         raise NotImplementedError
 
-    def get(self):
+    def get(self) -> Any:
         """
         Returns the Java representation of the function.
 
@@ -76,12 +76,12 @@ class TransformationFunction(Function):
         name: str,
         *,
         namespace: str = "transformation.elementwise.{name}",
-        operator: Optional[str] = None,
+        operator: str | None = None,
         can_flatten: bool = False,
     ):
         super().__init__(name, namespace=namespace, operator=operator, can_flatten=can_flatten)
 
-    def __call__(self, relation=None, **kwargs):
+    def __call__(self, relation: Any = None, **kwargs: Any) -> Any:
         from neuralogic.core.constructs import relation as rel
         from neuralogic.core.constructs.function.function_container import FContainer
 
@@ -104,12 +104,12 @@ class CombinationFunction(Function):
         name: str,
         *,
         namespace: str = "combination.{name}",
-        operator: Optional[str] = None,
+        operator: str | None = None,
         can_flatten: bool = False,
     ):
         super().__init__(name, namespace=namespace, operator=operator, can_flatten=can_flatten)
 
-    def __call__(self, *relations):
+    def __call__(self, *relations: Any) -> Any:
         from neuralogic.core.constructs.function.function_container import FContainer
 
         if len(relations) == 0:
@@ -121,5 +121,5 @@ class AggregationFunction(Function):
     """
     Represents an aggregation function used to aggregate multiple groundings of the same rule.
     """
-    def get(self):
+    def get(self) -> Any:
         raise NotImplementedError

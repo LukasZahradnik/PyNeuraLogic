@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Any
 
 from neuralogic.core.constructs.function import FContainer
 from neuralogic.core.constructs.metadata import Metadata
@@ -11,7 +11,7 @@ class RuleBody:
 
     __slots__ = "literals", "metadata"
 
-    def __init__(self, lit1, lit2):
+    def __init__(self, lit1: "BaseRelation", lit2: "BaseRelation"):
         """
         Parameters
         ----------
@@ -20,10 +20,10 @@ class RuleBody:
         lit2 : BaseRelation
             The second literal in the body.
         """
-        self.literals = [lit1, lit2]
-        self.metadata = None
+        self.literals: list["BaseRelation" | FContainer] = [lit1, lit2]
+        self.metadata: Metadata | None = None
 
-    def __and__(self, other):
+    def __and__(self, other: "BaseRelation" | FContainer) -> "RuleBody":
         from neuralogic.core.constructs.relation import BaseRelation
 
         if isinstance(other, (BaseRelation, FContainer)):
@@ -37,7 +37,7 @@ class RuleBody:
     def __repr__(self) -> str:
         return self.__str__()
 
-    def __or__(self, other) -> "RuleBody":
+    def __or__(self, other: Iterable | Metadata) -> "RuleBody":
         if isinstance(other, Iterable):
             other = Metadata.from_iterable(other)
         elif not isinstance(other, Metadata):
@@ -54,13 +54,13 @@ class Rule:
 
     __slots__ = "head", "body", "metadata"
 
-    def __init__(self, head, body):
+    def __init__(self, head: "BaseRelation", body: RuleBody | Iterable["BaseRelation" | FContainer] | "BaseRelation" | FContainer):
         """
         Parameters
         ----------
         head : BaseRelation
             The head of the rule.
-        body : Union[RuleBody, Iterable[BaseRelation], BaseRelation]
+        body : RuleBody | Iterable[BaseRelation] | BaseRelation
             The body of the rule.
         """
         self.head = head
@@ -77,7 +77,7 @@ class Rule:
         if not isinstance(body, Iterable):
             body = [body]
 
-        self.body = body
+        self.body: list["BaseRelation" | FContainer] | FContainer = body
 
         if not isinstance(self.body, FContainer):
             self.body = list(self.body)
@@ -100,14 +100,14 @@ class Rule:
     def __repr__(self) -> str:
         return self.to_str()
 
-    def __and__(self, other) -> "Rule":
+    def __and__(self, other: Iterable["BaseRelation" | FContainer] | "BaseRelation" | FContainer) -> "Rule":
         if isinstance(other, Iterable):
             self.body.extend(list(other))
         else:
             self.body.append(other)
         return self
 
-    def __or__(self, other) -> "Rule":
+    def __or__(self, other: Iterable | Metadata) -> "Rule":
         if isinstance(other, Iterable):
             other = Metadata.from_iterable(other)
         elif not isinstance(other, Metadata):

@@ -19,7 +19,7 @@ class MSE(ErrorFunction):
     def __init__(self):
         super().__init__()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return ErrorFunctionNames.MSE
 
 
@@ -38,7 +38,7 @@ class CrossEntropy(ErrorFunction):
         super().__init__()
         self.with_logits = with_logits
 
-    def __str__(self):
+    def __str__(self) -> str:
         return ErrorFunctionNames.SOFTENTROPY if self.with_logits else ErrorFunctionNames.CROSSENTROPY
 
 
@@ -50,7 +50,7 @@ class SoftEntropy(ErrorFunction):
     def __init__(self):
         super().__init__()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return ErrorFunctionNames.SOFTENTROPY
 
 

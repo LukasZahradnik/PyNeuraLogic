@@ -1,6 +1,7 @@
 import csv
 import io
-from typing import List, Union, Callable
+from collections.abc import Callable
+from typing import Any
 
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
@@ -8,7 +9,7 @@ from neuralogic.dataset.logic import Dataset
 from neuralogic.dataset.csv import CSVDataset, CSVFile, Mode
 from neuralogic.dataset.base import ConvertibleDataset
 
-DatasetEntries = Union[BaseRelation, WeightedRelation, Rule]
+DatasetEntries = BaseRelation | WeightedRelation | Rule
 
 
 class DBSource:
@@ -32,14 +33,14 @@ class DBSource:
         self,
         relation_name: str,
         table_name: str,
-        term_columns: List[str],
+        term_columns: list[str],
         value_column: str | None = None,
-        default_value: Union[float, int] = 1.0,
+        default_value: float | int = 1.0,
         value_mapper: Callable | None = None,
         skip_rows: int = 0,
         n_rows: int | None = None,
-        replace_empty_column: Union[str, float, int] = 0,
-        sep=",",
+        replace_empty_column: str | float | int = 0,
+        sep: str = ",",
     ):
         """
         Parameters
@@ -79,7 +80,7 @@ class DBSource:
         if len(term_columns) == 0:
             raise NotImplementedError("Cannot create DBSource with zero terms")
 
-    def to_csv(self, cursor) -> CSVFile:
+    def to_csv(self, cursor: Any) -> CSVFile:
         """
         Converts the database source to an intermediate CSV representation.
 
@@ -135,8 +136,8 @@ class DBDataset(ConvertibleDataset):
     """
     def __init__(
         self,
-        connection,
-        db_sources: Union[List[DBSource], DBSource],
+        connection: Any,
+        db_sources: list[DBSource] | DBSource,
         queries_db_source: DBSource | None = None,
         mode: Mode = Mode.ONE_EXAMPLE,
     ):
@@ -157,10 +158,10 @@ class DBDataset(ConvertibleDataset):
         self.queries_db_source = queries_db_source
         self.mode = mode
 
-    def add_db_source(self, db_source: DBSource):
+    def add_db_source(self, db_source: DBSource) -> None:
         self.db_sources.append(db_source)
 
-    def set_queries(self, db_source: DBSource):
+    def set_queries(self, db_source: DBSource) -> None:
         self.queries_db_source = db_source
 
     def to_dataset(self) -> Dataset:

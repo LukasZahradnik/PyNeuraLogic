@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Any
 
 
 class Variable:
@@ -8,7 +8,7 @@ class Variable:
 
     __slots__ = "name", "type"
 
-    def __init__(self, name: str, type: Optional[str] = None):
+    def __init__(self, name: str, type: str | None = None):
         """
         Parameters
         ----------
@@ -25,7 +25,7 @@ class Variable:
             return f"{self.type}:{self.name}"
         return f"{self.name}"
 
-    def __getitem__(self, item) -> List["Variable"]:
+    def __getitem__(self, item: slice) -> list["Variable"]:
         if not isinstance(item, slice):
             raise ValueError("Variable range can be only defined by a slice")
 
@@ -44,10 +44,10 @@ class Variable:
             raise NotImplementedError
         return str(other) == str(self)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return str(self).__hash__()
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         return str(self).__lt__(str(other))
 
 
@@ -58,7 +58,7 @@ class Constant:
 
     __slots__ = "name", "type"
 
-    def __init__(self, name: str, type: Optional[str] = None):
+    def __init__(self, name: str, type: str | None = None):
         """
         Parameters
         ----------
@@ -85,8 +85,8 @@ class Constant:
             raise NotImplementedError
         return str(other) == str(self)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return str(self).__hash__()
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         return str(self).__lt__(str(other))

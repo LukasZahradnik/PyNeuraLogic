@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Any
 from types import EllipsisType
 
 import jpype
@@ -16,17 +16,17 @@ class Slice(TransformationFunction):
         self,
         name: str,
         *,
-        rows: EllipsisType | Tuple[int, int] = ...,
-        cols: EllipsisType | Tuple[int, int] = ...,
+        rows: EllipsisType | tuple[int, int] = ...,
+        cols: EllipsisType | tuple[int, int] = ...,
     ):
         """
         Parameters
         ----------
         name : str
             The name of the function.
-        rows : Union[EllipsisType, Tuple[int, int]], optional
+        rows : EllipsisType | tuple[int, int], optional
             The row range to slice. Default: Ellipsis (all rows).
-        cols : Union[EllipsisType, Tuple[int, int]], optional
+        cols : EllipsisType | tuple[int, int], optional
             The column range to slice. Default: Ellipsis (all columns).
         """
         super().__init__(name)
@@ -36,11 +36,11 @@ class Slice(TransformationFunction):
 
     def __call__(
         self,
-        relation=None,
+        relation: Any | None = None,
         *,
-        rows: EllipsisType | Tuple[int, int] = ...,
-        cols: EllipsisType | Tuple[int, int] = ...,
-    ):
+        rows: EllipsisType | tuple[int, int] = ...,
+        cols: EllipsisType | tuple[int, int] = ...,
+    ) -> Any:
         """
         Creates a new Slice instance with the provided ranges and applies it to the relation.
 
@@ -48,9 +48,9 @@ class Slice(TransformationFunction):
         ----------
         relation : Any, optional
             The relation to apply the slice to. Default: None.
-        rows : Union[EllipsisType, Tuple[int, int]], optional
+        rows : EllipsisType | tuple[int, int], optional
             The row range to slice. Default: Ellipsis (all rows).
-        cols : Union[EllipsisType, Tuple[int, int]], optional
+        cols : EllipsisType | tuple[int, int], optional
             The column range to slice. Default: Ellipsis (all columns).
 
         Returns
@@ -64,7 +64,7 @@ class Slice(TransformationFunction):
     def is_parametrized(self) -> bool:
         return True
 
-    def get(self):
+    def get(self) -> Any:
         cols = None if self.cols is Ellipsis else self.cols
         rows = None if self.rows is Ellipsis else self.rows
 
@@ -76,7 +76,7 @@ class Slice(TransformationFunction):
 
         return f"slice({content}, rows={rows}, cols={cols})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         rows = "..." if self.rows is Ellipsis or self.rows is None else self.rows
         cols = "..." if self.cols is Ellipsis or self.cols is None else self.cols
 

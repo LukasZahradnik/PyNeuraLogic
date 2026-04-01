@@ -1,4 +1,5 @@
 import math
+from typing import Any
 
 import numpy as np
 
@@ -46,7 +47,7 @@ class PositionalEncoding(Module):
         self.arity = arity
         self.learnable = learnable
 
-    def __call__(self):
+    def __call__(self) -> list[Any]:
         """
         Generates the rules for positional encoding.
 

@@ -1,4 +1,4 @@
-from typing import Sequence
+from collections.abc import Sequence
 
 from neuralogic.core.constructs.metadata import Metadata
 
@@ -9,7 +9,7 @@ class Predicate:
     """
     __slots__ = "name", "arity", "hidden", "special"
 
-    def __init__(self, name, arity, hidden=False, special=False):
+    def __init__(self, name: str, arity: int, hidden: bool = False, special: bool = False):
         """
         Parameters
         ----------
@@ -31,11 +31,11 @@ class Predicate:
         self.hidden = hidden
         self.special = special
 
-    def set_arity(self, arity):
+    def set_arity(self, arity: int) -> "Predicate" | None:
         if self.arity == arity:
             return self
 
-    def to_str(self):
+    def to_str(self) -> str:
         """
         Returns a string representation of the predicate (without arity).
 
@@ -59,7 +59,7 @@ class Predicate:
     def __repr__(self) -> str:
         return self.__str__()
 
-    def __or__(self, other) -> "PredicateMetadata":
+    def __or__(self, other: Sequence | Metadata) -> "PredicateMetadata":
         if isinstance(other, Sequence):
             other = Metadata.from_iterable(other)
         elif not isinstance(other, Metadata):

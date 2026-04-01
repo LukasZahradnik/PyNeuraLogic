@@ -1,4 +1,5 @@
-from typing import Dict
+from collections.abc import Iterable
+from typing import Any
 
 import jpype
 
@@ -15,7 +16,7 @@ class FContainer:
     """
     __slots__ = "nodes", "function"
 
-    def __init__(self, nodes, function: Function):
+    def __init__(self, nodes: Iterable[Any], function: Function):
         """
         Parameters
         ----------
@@ -28,7 +29,7 @@ class FContainer:
         self.nodes = nodes if not self.function.can_flatten else self.get_flattened_nodes(nodes, function)
 
     @staticmethod
-    def get_flattened_nodes(nodes, function: Function):
+    def get_flattened_nodes(nodes: Iterable[Any], function: Function) -> tuple:
         """
         Flattens the nodes if they are FContainers with the same function.
 
@@ -56,16 +57,16 @@ class FContainer:
                 new_nodes.append(node)
         return tuple(new_nodes)
 
-    def __add__(self, other):
+    def __add__(self, other: Any) -> "FContainer":
         return FContainer((self, other), Combination.SUM)
 
-    def __mul__(self, other):
+    def __mul__(self, other: Any) -> "FContainer":
         return FContainer((self, other), Combination.ELPRODUCT)
 
-    def __matmul__(self, other):
+    def __matmul__(self, other: Any) -> "FContainer":
         return FContainer((self, other), Combination.PRODUCT)
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.function.operator is not None:
             return f" {self.function.operator} ".join(
                 node.to_str(True) if isinstance(node, FContainer) else node.to_str() for node in self.nodes
@@ -78,14 +79,14 @@ class FContainer:
         return f"{self.function}"
 
     @property
-    def name(self):
+    def name(self) -> str:
         args = ", ".join(str(node.function) for node in self.nodes if isinstance(node, FContainer))
 
         if args:
             return f"{self.function}({args})"
         return f"{self.function}"
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[Any]:
         for node in self.nodes:
             if isinstance(node, FContainer):
                 for a in node:
@@ -105,7 +106,7 @@ class FContainer:
         graph = self._get_function_node({}, 0)
         return FunctionGraph(name=self.name, function_graph=graph)
 
-    def _get_function_node(self, input_counter: Dict[int, int], start_index: int = 0):
+    def _get_function_node(self, input_counter: dict[int, int], start_index: int = 0) -> Any:
         from neuralogic.core.constructs.relation import BaseRelation
 
         next_indices = [-1] * len(self.nodes)
@@ -144,7 +145,7 @@ class FContainer:
 
         return jpype.JClass(class_name)(self.function.get(), filtered_next_node, filtered_next_indices)
 
-    def to_str(self, parentheses_wrap: bool = False):
+    def to_str(self, parentheses_wrap: bool = False) -> str:
         """
         Returns a string representation of the container.
 

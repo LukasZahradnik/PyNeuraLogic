@@ -1,4 +1,5 @@
-from typing import Iterable
+from collections.abc import Iterable
+from typing import Any
 
 import jpype
 
@@ -34,7 +35,7 @@ class Template(NeuralModule):
         self._template: list[TemplateEntries] = []
         self._template_file = template_file
 
-    def add_rule(self, rule) -> None:
+    def add_rule(self, rule: TemplateEntries) -> None:
         """Adds one rule to the template.
 
         Parameters
@@ -57,7 +58,7 @@ class Template(NeuralModule):
         self._parsed_template = None
         self._template.extend(rules)
 
-    def add_module(self, module: Module):
+    def add_module(self, module: Module) -> None:
         """Expands the module into rules and adds them into the template.
 
         Parameters
@@ -97,7 +98,7 @@ class Template(NeuralModule):
 
         return self
 
-    def remove_duplicates(self):
+    def remove_duplicates(self) -> None:
         """Removes duplicates from the template."""
         if self._neural_model is not None:
             raise ValueError("Cannot modify built template")
@@ -116,7 +117,7 @@ class Template(NeuralModule):
             deduplicated_template.append(entry)
         self._template = deduplicated_template
 
-    def _get_parsed_template(self, settings: SettingsProxy, java_factory: JavaFactory):
+    def _get_parsed_template(self, settings: SettingsProxy, java_factory: JavaFactory) -> Any:
         if not is_initialized():
             initialize()
 
@@ -153,7 +154,7 @@ class Template(NeuralModule):
 
         return self._parsed_template
 
-    def derivable_queries(self, example: list[BaseRelation | Rule] | None = None):
+    def derivable_queries(self, example: list[BaseRelation | Rule] | None = None) -> list[BaseRelation] | dict:
         """Returns all derivable queries for the provided example.
 
         Parameters
@@ -163,7 +164,7 @@ class Template(NeuralModule):
 
         Returns
         -------
-        list[BaseRelation]
+        list[BaseRelation] | dict
             The list of derivable queries.
         """
         settings = Settings(iso_value_compression=False, chain_pruning=False).create_disconnected_proxy()
@@ -188,7 +189,7 @@ class Template(NeuralModule):
             return {}
         return results
 
-    def query(self, query: BaseRelation, examples: list[BaseRelation | Rule] | None = None):
+    def query(self, query: BaseRelation, examples: list[BaseRelation | Rule] | None = None) -> list[dict] | dict:
         """Performs a query on the template with the provided examples.
 
         Parameters
@@ -200,7 +201,7 @@ class Template(NeuralModule):
 
         Returns
         -------
-        list[dict]
+        list[dict] | dict
             The list of query results (substitutions).
         """
         settings = Settings(iso_value_compression=False, chain_pruning=False).create_disconnected_proxy()
@@ -220,7 +221,7 @@ class Template(NeuralModule):
             return {}
         return results
 
-    def q(self, query: BaseRelation, examples: list[BaseRelation | Rule] | None = None):
+    def q(self, query: BaseRelation, examples: list[BaseRelation | Rule] | None = None) -> list[dict] | dict:
         return self.query(query, examples)
 
     def __str__(self) -> str:
@@ -229,7 +230,7 @@ class Template(NeuralModule):
     def __repr__(self) -> str:
         return self.__str__()
 
-    def __iadd__(self, other) -> "Template":
+    def __iadd__(self, other: TemplateEntries | Iterable[TemplateEntries] | Module) -> "Template":
         if self._neural_model is not None:
             raise ValueError("Cannot modify built template")
         self._parsed_template = None
@@ -241,16 +242,16 @@ class Template(NeuralModule):
             self._template.append(other)
         return self
 
-    def __getitem__(self, item) -> TemplateEntries:
+    def __getitem__(self, item: int) -> TemplateEntries:
         return self._template[item]
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: int) -> None:
         if self._neural_model is not None:
             raise ValueError("Cannot modify built template")
         self._parsed_template = None
         self._template.pop(key)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: int, value: TemplateEntries) -> None:
         if self._neural_model is not None:
             raise ValueError("Cannot modify built template")
         if isinstance(value, (Iterable, Module)):
@@ -261,7 +262,7 @@ class Template(NeuralModule):
     def __len__(self) -> int:
         return len(self._template)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[TemplateEntries]:
         return iter(self._template)
 
     def __copy__(self) -> "Template":

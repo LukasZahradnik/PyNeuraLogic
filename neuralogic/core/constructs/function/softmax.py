@@ -1,4 +1,5 @@
-from typing import Sequence
+from collections.abc import Sequence
+from typing import Any
 
 import jpype
 
@@ -30,7 +31,7 @@ class SoftmaxAggregation(AggregationFunction):
         self.term_indices = agg_terms
         self.agg_terms = agg_terms
 
-    def __call__(self, *, agg_terms: Sequence[int] | None = None):
+    def __call__(self, *, agg_terms: Sequence[int] | None = None) -> Any:
         """
         Creates a new SoftmaxAggregation instance with the provided aggregation terms.
 
@@ -50,10 +51,10 @@ class SoftmaxAggregation(AggregationFunction):
     def is_parametrized(self) -> bool:
         return self.agg_terms is not None
 
-    def get(self):
+    def get(self) -> Any:
         return jpype.JClass("cz.cvut.fel.ida.algebra.functions.combination.Softmax")(self.term_indices)
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.agg_terms is None:
             return "softmax"
         return f"softmax(agg_terms=[{', '.join(self.agg_terms)}])"

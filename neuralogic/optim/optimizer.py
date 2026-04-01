@@ -1,3 +1,4 @@
+from typing import Any
 from neuralogic.optim.lr_scheduler import LRDecay
 
 
@@ -39,7 +40,7 @@ class Optimizer:
         return self._lr_object.value
 
     @lr.setter
-    def lr(self, value: float):
+    def lr(self, value: float) -> None:
         """
         Sets the learning rate.
 
@@ -52,7 +53,7 @@ class Optimizer:
             self._lr_object.value = value
         self._lr = value
 
-    def initialize(self):
+    def initialize(self) -> Any:
         """
         Initializes the Java representation of the optimizer.
 
@@ -66,7 +67,7 @@ class Optimizer:
     def name(self) -> str:
         return self.__class__.__name__
 
-    def get_lr_decay(self):
+    def get_lr_decay(self) -> Any | None:
         """
         Initializes and returns the learning rate decay object.
 

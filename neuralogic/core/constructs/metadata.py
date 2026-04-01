@@ -1,4 +1,5 @@
-from typing import Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from neuralogic.core.constructs.function.function import (
     Function,
@@ -46,7 +47,7 @@ class Metadata:
         self.duplicate_grounding = duplicate_grounding
 
     @staticmethod
-    def from_iterable(iterable: Iterable) -> "Metadata":
+    def from_iterable(iterable: Iterable[Any]) -> "Metadata":
         """
         Creates a Metadata object from an iterable of functions or values.
 

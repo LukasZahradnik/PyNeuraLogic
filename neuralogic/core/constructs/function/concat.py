@@ -1,4 +1,5 @@
 import jpype
+from typing import Any
 
 from neuralogic.core.constructs.function.function import AggregationFunction, CombinationFunction
 
@@ -26,7 +27,7 @@ class ConcatCombination(CombinationFunction):
         super().__init__(name)
         self.axis = axis
 
-    def __call__(self, *relations, axis: int = -1):
+    def __call__(self, *relations: Any, axis: int = -1) -> Any:
         """
         Creates a new ConcatCombination instance with the provided axis and applies it to the relations.
 
@@ -48,10 +49,10 @@ class ConcatCombination(CombinationFunction):
     def is_parametrized(self) -> bool:
         return self.axis != -1
 
-    def get(self):
+    def get(self) -> Any:
         return jpype.JClass("cz.cvut.fel.ida.algebra.functions.combination.Concatenation")(self.axis)
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.axis == -1:
             return "concat"
         return f"concat(axis={self.axis})"
@@ -80,7 +81,7 @@ class ConcatAggregation(AggregationFunction):
         super().__init__(name)
         self.axis = axis
 
-    def __call__(self, *, axis: int = -1):
+    def __call__(self, *, axis: int = -1) -> Any:
         """
         Creates a new ConcatAggregation instance with the provided axis.
 
@@ -100,10 +101,10 @@ class ConcatAggregation(AggregationFunction):
     def is_parametrized(self) -> bool:
         return self.axis != -1
 
-    def get(self):
+    def get(self) -> Any:
         return jpype.JClass("cz.cvut.fel.ida.algebra.functions.combination.Concatenation")(self.axis)
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.axis == -1:
             return "concat"
         return f"concat(axis={self.axis})"

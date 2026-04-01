@@ -1,4 +1,5 @@
-from typing import Union, List
+from collections.abc import Iterable
+from typing import Any
 
 import jpype
 
@@ -12,7 +13,7 @@ from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
 
-TemplateEntries = Union[BaseRelation, WeightedRelation, Rule]
+TemplateEntries = BaseRelation | WeightedRelation | Rule
 
 
 class DatasetBuilder:
@@ -20,7 +21,7 @@ class DatasetBuilder:
     DatasetBuilder is responsible for grounding and neuralizing datasets.
     """
 
-    def __init__(self, parsed_template, java_factory: JavaFactory):
+    def __init__(self, parsed_template: Any, java_factory: JavaFactory):
         """
         Parameters
         ----------
@@ -44,7 +45,7 @@ class DatasetBuilder:
         self.query_counter = 0
         self.examples_counter = 0
 
-    def build_queries(self, queries, query_builder):
+    def build_queries(self, queries: Iterable[Any], query_builder: Any) -> tuple[list[Any], bool]:
         """
         Builds queries from the provided queries and query builder.
 
@@ -57,7 +58,7 @@ class DatasetBuilder:
 
         Returns
         -------
-        Tuple[List[Any], bool]
+        tuple[list[Any], bool]
             A tuple containing the list of built logic samples and a boolean indicating if there is one query per example.
         """
         logic_samples = []
@@ -93,7 +94,7 @@ class DatasetBuilder:
             self.query_counter += 1
         return logic_samples, one_query_per_example
 
-    def build_examples(self, examples, examples_builder, learnable_facts=False):
+    def build_examples(self, examples: Iterable[Any], examples_builder: Any, learnable_facts: bool = False) -> tuple[list[Any], bool]:
         """
         Builds examples from the provided examples and examples builder.
 
@@ -108,7 +109,7 @@ class DatasetBuilder:
 
         Returns
         -------
-        Tuple[List[Any], bool]
+        tuple[list[Any], bool]
             A tuple containing the list of built logic samples and a boolean indicating if there are examples with queries.
         """
         logic_samples = []
@@ -158,7 +159,7 @@ class DatasetBuilder:
         learnable_facts: bool = False,
         progress: bool = False,
         raw_groundings: bool = False,
-    ):
+    ) -> GroundedDataset | Any:
         """Grounds the dataset.
 
         Parameters
@@ -178,7 +179,7 @@ class DatasetBuilder:
 
         Returns
         -------
-        Union[GroundedDataset, Any]
+        GroundedDataset | Any
             The grounded dataset or raw groundings.
         """
         if isinstance(dataset, datasets.ConvertibleDataset):
@@ -260,7 +261,7 @@ class DatasetBuilder:
 
     def build_dataset(
         self,
-        dataset: Union[datasets.BaseDataset, GroundedDataset],
+        dataset: datasets.BaseDataset | GroundedDataset,
         settings: SettingsProxy,
         *,
         batch_size: int = 1,
@@ -271,7 +272,7 @@ class DatasetBuilder:
 
         Parameters
         ----------
-        dataset : Union[datasets.BaseDataset, GroundedDataset]
+        dataset : datasets.BaseDataset | GroundedDataset
             The dataset to build.
         settings : SettingsProxy
             The settings proxy.
@@ -297,15 +298,15 @@ class DatasetBuilder:
         return dataset.neuralize(batch_size=batch_size, progress=progress)
 
     @staticmethod
-    def merge_queries_with_examples(queries, examples, one_query_per_example, example_queries=True):
+    def merge_queries_with_examples(self, queries: list[Any], examples: list[Any], one_query_per_example: bool, example_queries: bool = True) -> list[Any]:
         """
         Merges queries with their corresponding examples.
 
         Parameters
         ----------
-        queries : List[Any]
+        queries : list[Any]
             The list of queries.
-        examples : List[Any]
+        examples : list[Any]
             The list of examples.
         one_query_per_example : bool
             Whether there is one query per example.
@@ -314,7 +315,7 @@ class DatasetBuilder:
 
         Returns
         -------
-        List[Any]
+        list[Any]
             The list of merged logic samples.
         """
         if len(examples) == 0:
@@ -370,19 +371,18 @@ class DatasetBuilder:
             logic_samples.append(query)
         return logic_samples
 
-    @staticmethod
-    def samples_to_examples_and_queries(samples: List):
+    def samples_to_examples_and_queries(samples: list[Any]) -> tuple[Iterable[Any], Iterable[Any]]:
         """
         Converts a list of samples to two lists: examples and queries.
 
         Parameters
         ----------
-        samples : List[Any]
+        samples : list[Any]
             The list of samples.
 
         Returns
         -------
-        Tuple[Iterable[Any], Iterable[Any]]
+        tuple[Iterable[Any], Iterable[Any]]
             A tuple containing the iterable of examples and the iterable of queries.
         """
         example_dict = {}

@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any
 
 import jpype
 
@@ -32,7 +32,7 @@ class Sources:
         return Sources(sources)
 
     @staticmethod
-    def from_args(args: List[str], settings: SettingsProxy) -> "Sources":
+    def from_args(args: list[str], settings: SettingsProxy) -> "Sources":
         """
         Creates Sources from command line arguments and settings.
 
@@ -57,7 +57,7 @@ class Sources:
 
         return Sources(sources)
 
-    def __init__(self, sources):
+    def __init__(self, sources: Any):
         self.sources = sources
 
     def to_json(self) -> str:

@@ -2,21 +2,21 @@ import dataclasses
 import os
 import sys
 from enum import Enum
-from typing import List, Tuple, Any
+from typing import Any
 
 import jpype
 
 
 _is_logging_initialized = False
 _default_logging = True
-_loggers_buffer: List[Tuple] = []
+_loggers_buffer: list[tuple] = []
 
 
 class TextIOWrapper:
     """
     TextIOWrapper is a wrapper for text IO objects to ensure strings are written correctly.
     """
-    def __init__(self, wrapped_text_io):
+    def __init__(self, wrapped_text_io: Any):
         """
         Parameters
         ----------
@@ -25,7 +25,7 @@ class TextIOWrapper:
         """
         self.wrapped_text_io = wrapped_text_io
 
-    def write(self, string):
+    def write(self, string: Any) -> None:
         self.wrapped_text_io.write(str(string))
 
 
@@ -64,7 +64,7 @@ class LogHandler:
     formatter: Formatter = Formatter.COLOR
 
 
-def _init_logging():
+def _init_logging() -> None:
     global _is_logging_initialized
 
     jpype.java.lang.System.setOut(jpype.java.io.PrintStream(os.devnull))
@@ -87,7 +87,7 @@ def _init_logging():
     _loggers_buffer.clear()
 
 
-def add_log_handler(handler: LogHandler):
+def add_log_handler(handler: LogHandler) -> None:
     """
     Add logger handler for an insight into the java backend. Overrides the default logger to stdout.
 
@@ -99,7 +99,7 @@ def add_log_handler(handler: LogHandler):
     return add_handler(handler.output, handler.level, handler.formatter)
 
 
-def add_handler(output, level: Level = Level.FINER, formatter: Formatter = Formatter.COLOR):
+def add_handler(output: Any, level: Level = Level.FINER, formatter: Formatter = Formatter.COLOR) -> None:
     """
     Add logger handler for an insight into the java backend. Overrides the default logger to stdout.
 
@@ -142,7 +142,7 @@ def add_handler(output, level: Level = Level.FINER, formatter: Formatter = Forma
     root_logger.addHandler(stream_handler)
 
 
-def clear_handlers():
+def clear_handlers() -> None:
     """Removes all log handlers."""
     global _default_logging
     _default_logging = False

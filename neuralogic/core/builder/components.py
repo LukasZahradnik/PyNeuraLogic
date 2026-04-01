@@ -1,5 +1,6 @@
 import enum
-from typing import Any, Dict, Optional
+import numpy as np
+from typing import Any
 
 from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.utils.visualize import draw_sample, draw_grounding
@@ -25,7 +26,7 @@ class Atom:
     """
     __slots__ = "substitutions", "_atom", "_predicate", "_arity"
 
-    def __init__(self, atom, substitutions: Dict):
+    def __init__(self, atom: Any, substitutions: dict[str, Any]):
         """
         Parameters
         ----------
@@ -41,11 +42,11 @@ class Atom:
         self._arity = atom.arity()
 
     @property
-    def predicate(self):
+    def predicate(self) -> str:
         return self._predicate
 
     @property
-    def arity(self):
+    def arity(self) -> int:
         return self._arity
 
     def node_type(self) -> NeuronType:
@@ -59,7 +60,7 @@ class Atom:
         """
         return NeuronType(self._atom.getClass().getSimpleName())
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self._atom)
 
 
@@ -67,7 +68,7 @@ class Neuron(Atom):
     """
     Represents a neuron in the neural network, extending the Atom class with value and gradient properties.
     """
-    def __init__(self, neuron, substitutions: Dict):
+    def __init__(self, neuron: Any, substitutions: dict[str, Any]):
         self.substitutions = substitutions
         self._atom = neuron
 
@@ -75,11 +76,11 @@ class Neuron(Atom):
         self._arity = len(substitutions)
 
     @property
-    def value(self):
+    def value(self) -> float | list | np.ndarray:
         return ValueFactory.from_java(self._atom.getRawState().getValue())
 
     @property
-    def gradient(self):
+    def gradient(self) -> float | list | np.ndarray:
         return ValueFactory.from_java(self._atom.getRawState().getGradient())
 
 
@@ -89,21 +90,21 @@ class NeuralSample:
     """
     __slots__ = "_java_sample", "_neurons"
 
-    def __init__(self, sample):
+    def __init__(self, sample: Any):
         self._java_sample = sample
         self._neurons = None
 
     @property
-    def neurons(self):
+    def neurons(self) -> dict[str, dict[str, dict[tuple[str, ...], Any]]]:
         if self._neurons is None:
             self._neurons = self._get_neurons()
         return self._neurons
 
     @property
-    def target(self):
+    def target(self) -> float | list | np.ndarray:
         return ValueFactory.from_java(self._java_sample.target)
 
-    def get_neurons(self, literal, neuron_type: NeuronType | None = NeuronType.Atom):
+    def get_neurons(self, literal: Any, neuron_type: NeuronType | None = NeuronType.Atom) -> list[Neuron]:
         """
         Returns a list of neurons matching the provided literal and neuron type.
 
@@ -154,7 +155,7 @@ class NeuralSample:
                     neurons.append(Neuron(value, literal_subs))
         return neurons
 
-    def _get_neurons(self):
+    def _get_neurons(self) -> dict[str, dict[str, dict[tuple[str, ...], Any]]]:
         nodes = {}
 
         for node in self._java_sample.query.evidence.allNeuronsTopologic:
@@ -183,7 +184,7 @@ class NeuralSample:
             nodes[node_type][name][substitutions] = node
         return nodes
 
-    def get_fact(self, fact):
+    def get_fact(self, fact: Any) -> list[Neuron]:
         """
         Returns the neuron corresponding to the provided fact.
 
@@ -205,7 +206,7 @@ class NeuralSample:
 
         return self.get_neurons(fact, NeuronType.Fact)
 
-    def set_fact_value(self, fact, value) -> int:
+    def set_fact_value(self, fact: Any, value: float) -> int:
         """
         Sets the value of a specific fact in the sample.
 
@@ -241,13 +242,13 @@ class NeuralSample:
     def draw(
         self,
         filename: str | None = None,
-        show=True,
-        img_type="png",
+        show: bool = True,
+        img_type: str = "png",
         value_detail: int = 0,
         graphviz_path: str | None = None,
-        *args,
-        **kwargs,
-    ):
+        *args: Any,
+        **kwargs: Any,
+    ) -> Any:
         """
         Draws the neural sample.
 
@@ -271,7 +272,7 @@ class NeuralSample:
         """
         return draw_sample(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self._java_sample)
 
 
@@ -281,20 +282,20 @@ class Grounding:
     """
     __slots__ = ("_grounding", "_atoms")
 
-    def __init__(self, grounding):
+    def __init__(self, grounding: Any):
         self._grounding = grounding
         self._atoms = None
 
     def draw(
         self,
-        filename: Optional[str] = None,
-        show=True,
-        img_type="png",
+        filename: str | None = None,
+        show: bool = True,
+        img_type: str = "png",
         value_detail: int = 0,
-        graphviz_path: Optional[str] = None,
-        *args,
-        **kwargs,
-    ):
+        graphviz_path: str | None = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Any:
         """
         Draws the grounding.
 
@@ -321,12 +322,12 @@ class Grounding:
     def __hash__(self):
         return hash(self._grounding)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Grounding):
             return False
         return other._grounding == self._grounding
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self._grounding)
 
     @property
@@ -335,7 +336,7 @@ class Grounding:
             self._atoms = self._get_atoms()
         return self._atoms
 
-    def get_atoms(self, literal) -> list[Atom]:
+    def get_atoms(self, literal: Any) -> list[Atom]:
         """
         Returns a list of grounded atoms matching the provided literal.
 
@@ -376,7 +377,7 @@ class Grounding:
                 nodes.append(Atom(value, literal_subs))
         return nodes
 
-    def _get_atoms(self):
+    def _get_atoms(self) -> dict[str, dict[tuple[str, ...], Any]]:
         atoms = {}
 
         for literal in self._grounding.groundingWrap.getGroundTemplate().derivedGroundFacts:
@@ -387,7 +388,7 @@ class Grounding:
 
         return atoms
 
-    def _process_literal(self, literal, atoms):
+    def _process_literal(self, literal: Any, atoms: dict[str, dict[tuple[str, ...], Any]]) -> None:
         name = str(literal).strip()
 
         bracket = name.rfind("(")
