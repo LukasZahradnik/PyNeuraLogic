@@ -13,7 +13,7 @@ DESCRIPTION = "PyNeuraLogic lets you use Python to create Differentiable Logic P
 URL = "https://github.com/LukasZahradnik/PyNeuraLogic"
 EMAIL = "lukaszahradnik96@seznam.cz"
 AUTHOR = "Lukáš Zahradník"
-REQUIRES_PYTHON = ">=3.7.0"
+REQUIRES_PYTHON = ">=3.10.0"
 VERSION = None
 
 REQUIRED = [
@@ -66,8 +66,6 @@ setup(
         "Intended Audience :: Science/Research",
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
