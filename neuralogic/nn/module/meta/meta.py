@@ -8,9 +8,10 @@ from neuralogic.nn.module.module import Module
 
 
 class MetaConv(Module):
-    r"""
-    Metagraph Convolutional Unit layer from
-    `Meta-GNN: metagraph neural network for semi-supervised learning in attributed heterogeneous information networks <https://dl.acm.org/doi/10.1145/3341161.3342859>`_.
+    """
+    Metagraph Convolutional Unit layer.
+
+    From `Meta-GNN: metagraph neural network for semi-supervised learning in attributed heterogeneous information networks <https://dl.acm.org/doi/10.1145/3341161.3342859>`_.
     Which can be expressed as:
 
     .. math::
@@ -23,7 +24,6 @@ class MetaConv(Module):
 
     Parameters
     ----------
-
     in_channels : int
         Input feature size.
     out_channels : int
@@ -32,17 +32,14 @@ class MetaConv(Module):
         Output (head) predicate name of the module.
     feature_name : str
         Feature predicate name to get features from.
-    role_name : str | None
+    role_name : str, optional
         Role predicate name to use for role relations. When :code:`None`, elements from :code:`roles` are used instead.
     roles : List[str]
-        List of relations' names
-    activation : TransformationFunction
-        Activation function of the output.
-        Default: ``Transformation.SIGMOID``
-    aggregation : AggregationFunction
-        Aggregation function of nodes' neighbors.
-        Default: ``Aggregation.AVG``
-
+        List of relations' names.
+    activation : TransformationFunction, optional
+        Activation function of the output. Default: ``Transformation.SIGMOID``.
+    aggregation : AggregationFunction, optional
+        Aggregation function of nodes' neighbors. Default: ``Aggregation.AVG``.
     """
 
     def __init__(

@@ -9,6 +9,12 @@ from neuralogic.core.constructs.function.function import (
 
 
 class Metadata:
+    """
+    Represents metadata for a logic construct (e.g., rule, predicate).
+
+    Metadata can specify properties like learnability, transformation functions,
+    aggregation functions, and combination functions.
+    """
     __slots__ = "learnable", "transformation", "aggregation", "duplicate_grounding", "combination"
 
     def __init__(
@@ -19,6 +25,20 @@ class Metadata:
         aggregation: AggregationFunction | None = None,
         duplicate_grounding: bool | None = None,
     ):
+        """
+        Parameters
+        ----------
+        learnable : bool, optional
+            Whether the construct is learnable. Default: None.
+        transformation : Union[TransformationFunction, CombinationFunction], optional
+            The transformation function to apply. Default: None.
+        combination : CombinationFunction, optional
+            The combination function to use. Default: None.
+        aggregation : AggregationFunction, optional
+            The aggregation function to use. Default: None.
+        duplicate_grounding : bool, optional
+            Whether to allow duplicate groundings. Default: None.
+        """
         self.learnable = learnable
         self.combination = combination
         self.transformation = transformation
@@ -27,6 +47,19 @@ class Metadata:
 
     @staticmethod
     def from_iterable(iterable: Iterable) -> "Metadata":
+        """
+        Creates a Metadata object from an iterable of functions or values.
+
+        Parameters
+        ----------
+        iterable : Iterable
+            The iterable containing metadata entries.
+
+        Returns
+        -------
+        Metadata
+            The created Metadata object.
+        """
         metadata = Metadata()
 
         for entry in iterable:
@@ -60,6 +93,20 @@ class Metadata:
         return self.__str__()
 
     def combine(self, other: "Metadata") -> "Metadata":
+        """
+        Combines this metadata with another Metadata object.
+        Values from the other object take precedence.
+
+        Parameters
+        ----------
+        other : Metadata
+            The other Metadata object to combine with.
+
+        Returns
+        -------
+        Metadata
+            A new combined Metadata object.
+        """
         return Metadata(
             learnable=other.learnable if other.learnable is not None else self.learnable,
             transformation=other.transformation if other.transformation is not None else self.transformation,
@@ -74,6 +121,14 @@ class Metadata:
         return self.combine(other)
 
     def copy(self) -> "Metadata":
+        """
+        Returns a shallow copy of the metadata.
+
+        Returns
+        -------
+        Metadata
+            The copy of the metadata.
+        """
         return Metadata(
             learnable=self.learnable,
             transformation=self.transformation,

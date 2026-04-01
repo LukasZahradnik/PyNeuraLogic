@@ -8,11 +8,34 @@ from neuralogic.core.sources import Sources
 
 
 def stream_to_list(stream) -> list:
+    """
+    Converts a Java stream to a Python list.
+
+    Parameters
+    ----------
+    stream : Any
+        The Java stream to convert.
+
+    Returns
+    -------
+    list
+        The converted Python list.
+    """
     return list(stream.collect(jpype.JClass("java.util.stream.Collectors").toList()))
 
 
 class Builder:
+    """
+    Builder is responsible for grounding, neuralizing, and building models from templates and sources.
+    """
+
     def __init__(self, settings: SettingsProxy):
+        """
+        Parameters
+        ----------
+        settings : SettingsProxy
+            The settings proxy for the builder.
+        """
         if not is_initialized():
             initialize()
 
@@ -38,6 +61,21 @@ class Builder:
         self._callback = Callback
 
     def build_template_from_file(self, settings: SettingsProxy, filename: str):
+        """
+        Builds a template from a file.
+
+        Parameters
+        ----------
+        settings : SettingsProxy
+            The settings proxy.
+        filename : str
+            The path to the template file.
+
+        Returns
+        -------
+        Any
+            The built template.
+        """
         args = [
             "-t",
             filename,
@@ -51,12 +89,46 @@ class Builder:
         return template
 
     def ground_from_sources(self, parsed_template, sources: Sources, progress: bool):
+        """
+        Grounds the template from the provided sources.
+
+        Parameters
+        ----------
+        parsed_template : Any
+            The parsed template.
+        sources : Sources
+            The logic sources.
+        progress : bool
+            Whether to show progress.
+
+        Returns
+        -------
+        Any
+            The grounded logic samples.
+        """
         if not progress:
             return self._ground(parsed_template, sources, None, None)
         with tqdm(total=None, desc="Grounding", unit=" samples", dynamic_ncols=True) as pbar:
             return self._ground(parsed_template, sources, None, self._callback(pbar))
 
     def ground_from_logic_samples(self, parsed_template, logic_samples, progress: bool):
+        """
+        Grounds the template from the provided logic samples.
+
+        Parameters
+        ----------
+        parsed_template : Any
+            The parsed template.
+        logic_samples : list[Any]
+            The logic samples.
+        progress : bool
+            Whether to show progress.
+
+        Returns
+        -------
+        Any
+            The grounded logic samples.
+        """
         if not progress:
             return self._ground(parsed_template, None, logic_samples, None)
         with tqdm(total=len(logic_samples), desc="Grounding", unit=" samples", dynamic_ncols=True) as pbar:
@@ -77,6 +149,23 @@ class Builder:
         return groundings
 
     def neuralize(self, groundings, progress: bool, length: int | None) -> list[NeuralSample]:
+        """
+        Neuralizes the grounding samples.
+
+        Parameters
+        ----------
+        groundings : Any
+            The logic groundings to neuralize.
+        progress : bool
+            Whether to show progress.
+        length : int, optional
+            The total number of groundings. Default: None.
+
+        Returns
+        -------
+        list[NeuralSample]
+            The neuralized samples.
+        """
         if not progress:
             return self._neuralize(groundings, None)
         with tqdm(total=length, desc="Building", unit=" samples", dynamic_ncols=True) as pbar:
@@ -90,6 +179,21 @@ class Builder:
         return [NeuralSample(sample) for sample in logic_samples]
 
     def build_model(self, parsed_template, settings: SettingsProxy):
+        """
+        Builds a neural model from the parsed template.
+
+        Parameters
+        ----------
+        parsed_template : Any
+            The parsed template.
+        settings : SettingsProxy
+            The settings proxy.
+
+        Returns
+        -------
+        Any
+            The built neural model.
+        """
         neural_model = self.neural_model(parsed_template.getAllWeights(), settings.settings)
 
         return neural_model

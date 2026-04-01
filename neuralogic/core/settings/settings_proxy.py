@@ -15,6 +15,12 @@ from neuralogic.optim import Optimizer
 
 
 class SettingsProxy:
+    """
+    Proxy class for the Java Settings object.
+
+    It provides a Pythonic interface to configure various parameters of the NeuraLogic backend,
+    such as optimizers, initializers, error functions, and grounding algorithms.
+    """
 
     def __init__(
         self,
@@ -28,6 +34,26 @@ class SettingsProxy:
         prune_only_identities: bool,
         grounder: Grounder,
     ):
+        """
+        Parameters
+        ----------
+        optimizer : Optimizer
+            The optimizer to use for training.
+        epochs : int
+            The number of training epochs.
+        error_function : ErrorFunction
+            The error function to use.
+        initializer : Initializer
+            The weight initializer.
+        iso_value_compression : bool
+            Whether to use iso-value compression.
+        chain_pruning : bool
+            Whether to use chain pruning.
+        prune_only_identities : bool
+            Whether to prune only identity functions.
+        grounder : Grounder
+            The grounding algorithm to use.
+        """
         if not is_initialized():
             initialize()
 
@@ -56,6 +82,9 @@ class SettingsProxy:
         self.settings.supressLogFileOutput = True
         self.settings.loggingLevel = jpype.JClass("java.util.logging.Level").OFF
 
+        self.settings.possibleNeuronSharing = True
+        self.settings.logGC = False
+
         self._setup_random_generator()
 
     def _setup_random_generator(self):
@@ -66,6 +95,7 @@ class SettingsProxy:
 
     @property
     def iso_value_compression(self) -> bool:
+        """Whether to use iso-value compression."""
         return self.settings.isoValueCompression
 
     @iso_value_compression.setter
@@ -74,6 +104,7 @@ class SettingsProxy:
 
     @property
     def chain_pruning(self) -> bool:
+        """Whether to use chain pruning (reducing redundant chains of operations)."""
         return self.settings.chainPruning
 
     @chain_pruning.setter
@@ -90,6 +121,7 @@ class SettingsProxy:
 
     @property
     def grounder(self):
+        """The grounding algorithm to use."""
         return self.settings.grounding
 
     @grounder.setter
@@ -103,6 +135,7 @@ class SettingsProxy:
 
     @property
     def optimizer(self) -> Optimizer:
+        """The optimizer used for training."""
         return self._optimizer
 
     @optimizer.setter
@@ -136,6 +169,7 @@ class SettingsProxy:
 
     @property
     def error_function(self):
+        """The error function used for training."""
         return self.settings.errorFunction
 
     @error_function.setter
@@ -167,6 +201,7 @@ class SettingsProxy:
 
     @property
     def epochs(self) -> int:
+        """The maximum number of training epochs."""
         return self.settings.maxCumEpochCount
 
     @epochs.setter
@@ -175,6 +210,7 @@ class SettingsProxy:
 
     @property
     def initializer(self):
+        """The weight initializer used for model parameters."""
         initializer = self.settings.initializer
 
         if str(initializer) != "SIMPLE":
@@ -255,6 +291,18 @@ class SettingsProxy:
         self.settings.defaultFactValue = value
 
     def get_combination_function(self, combination: Combination):
+        """Returns the Java combination function for the given Python enum value.
+
+        Parameters
+        ----------
+        combination : Combination
+            The combination function enum value.
+
+        Returns
+        -------
+        Any
+            The Java combination function object.
+        """
         combination_name = str(combination)
         return self.settings_class.parseCombination(combination_name)
 
@@ -273,4 +321,11 @@ class SettingsProxy:
         return getattr(self.settings, item)
 
     def to_json(self) -> str:
+        """Exports the settings to a JSON string.
+
+        Returns
+        -------
+        str
+            The JSON representation of the settings.
+        """
         return self.settings.exportToJson()

@@ -10,6 +10,10 @@ from neuralogic.core.constructs.function.function import TransformationFunction,
 
 
 class BaseRelation:
+    """
+    Represents a relation with a predicate, terms, and an optional activation function.
+    """
+
     __slots__ = "predicate", "function", "terms", "negated"
 
     def __init__(
@@ -19,6 +23,18 @@ class BaseRelation:
         function: Union[TransformationFunction, CombinationFunction, None] = None,
         negated: bool = False,
     ):
+        """
+        Parameters
+        ----------
+        predicate : Predicate
+            The predicate of the relation.
+        terms : Any, optional
+            The terms of the relation. Default: None.
+        function : Union[TransformationFunction, CombinationFunction], optional
+            The activation/combination function. Default: None.
+        negated : bool
+            Whether the relation is negated. Default: False.
+        """
         self.predicate = predicate
         self.function = function
         self.negated = negated
@@ -53,6 +69,18 @@ class BaseRelation:
         return self.attach_activation_function(Transformation.TRANSP)
 
     def attach_activation_function(self, function: Union[TransformationFunction, CombinationFunction]):
+        """Attaches an activation or combination function to the relation.
+
+        Parameters
+        ----------
+        function : Union[TransformationFunction, CombinationFunction]
+            The function to attach.
+
+        Returns
+        -------
+        BaseRelation
+            A new relation with the attached function.
+        """
         if self.negated:
             raise ValueError(f"Cannot attach function to negated relation {self}")
         relation = self.__copy__()
@@ -90,6 +118,18 @@ class BaseRelation:
         return rule.Rule(self, other)
 
     def to_str(self, end=False) -> str:
+        """Returns a string representation of the relation.
+
+        Parameters
+        ----------
+        end : bool
+            Whether to append a dot at the end. Default: False.
+
+        Returns
+        -------
+        str
+            The string representation.
+        """
         end = "." if end else ""
 
         if self.terms:
@@ -139,6 +179,10 @@ class BaseRelation:
 
 
 class WeightedRelation(BaseRelation):
+    """
+    Represents a relation with an associated weight (learnable or fixed).
+    """
+
     __slots__ = "weight", "weight_name", "is_fixed"
 
     def __init__(
@@ -149,6 +193,20 @@ class WeightedRelation(BaseRelation):
         terms=None,
         function: Union[TransformationFunction, CombinationFunction, None] = None,
     ):
+        """
+        Parameters
+        ----------
+        weight : Any
+            The weight of the relation. Can be a value, a tuple, or a slice (for named weights).
+        predicate : Predicate
+            The predicate of the relation.
+        fixed : bool
+            Whether the weight is fixed. Default: False.
+        terms : Any, optional
+            The terms of the relation. Default: None.
+        function : Union[TransformationFunction, CombinationFunction], optional
+            The activation/combination function. Default: None.
+        """
         super().__init__(predicate, terms, function, False)
 
         self.weight = weight
@@ -166,6 +224,13 @@ class WeightedRelation(BaseRelation):
             self.weight = weight.tolist()
 
     def fixed(self) -> "WeightedRelation":
+        """Returns a copy of the relation with the weight fixed.
+
+        Returns
+        -------
+        WeightedRelation
+            The weighted relation with a fixed weight.
+        """
         if self.is_fixed:
             raise Exception(f"Weighted relation {self} is already fixed")
         return WeightedRelation(self.weight, self.predicate, True, self.terms, self.function)

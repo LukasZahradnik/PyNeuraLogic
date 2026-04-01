@@ -17,7 +17,13 @@ Value = list | float
 
 
 class NeuralModule:
+    """
+    NeuralModule is the base class for all neural templates and models.
+    It provides methods for grounding, building, training, and testing.
+    """
+
     def __init__(self):
+        """Initializes the neural module."""
         if not is_initialized():
             initialize()
 
@@ -48,6 +54,24 @@ class NeuralModule:
         learnable_facts: bool = False,
         progress: bool = False,
     ) -> GroundedDataset:
+        """Grounds the provided dataset using the template's settings.
+
+        Parameters
+        ----------
+        dataset : BaseDataset
+            The dataset to ground.
+        batch_size : int
+            The batch size for grounding. Default: 1.
+        learnable_facts : bool
+            Whether facts are learnable. Default: False.
+        progress : bool
+            Whether to show progress. Default: False.
+
+        Returns
+        -------
+        GroundedDataset
+            The grounded dataset.
+        """
         if self._dataset_builder is None or self._settings is None:
             raise ValueError("template is not built")
 
@@ -67,6 +91,24 @@ class NeuralModule:
         learnable_facts: bool = False,
         progress: bool = False,
     ) -> BuiltDataset:
+        """Builds (ground and neuralize) the provided dataset.
+
+        Parameters
+        ----------
+        dataset : Union[BaseDataset, GroundedDataset]
+            The dataset to build.
+        batch_size : int
+            The batch size. Default: 1.
+        learnable_facts : bool
+            Whether facts are learnable. Default: False.
+        progress : bool
+            Whether to show progress. Default: False.
+
+        Returns
+        -------
+        BuiltDataset
+            The built dataset.
+        """
         if self._dataset_builder is None or self._settings is None:
             raise ValueError("template is not built")
 
@@ -101,6 +143,20 @@ class NeuralModule:
         return self(dataset)
 
     def train(self, dataset, epochs: int = 1) -> Value:
+        """Trains the model on the provided dataset.
+
+        Parameters
+        ----------
+        dataset : Any
+            The dataset to train on. Can be a Dataset, GroundedDataset, BuiltDataset, or a list of samples.
+        epochs : int
+            The number of epochs to train. Default: 1.
+
+        Returns
+        -------
+        Union[Tuple[Value, Value, Value], List[Tuple[Value, Value, Value]]]
+            The training results (target, output, error).
+        """
         samples, batch_size = self._dataset_to_samples(dataset)
 
         if not isinstance(samples, Collection):
@@ -125,6 +181,18 @@ class NeuralModule:
         return res
 
     def test(self, dataset) -> Value:
+        """Tests the model on the provided dataset.
+
+        Parameters
+        ----------
+        dataset : Any
+            The dataset to test on.
+
+        Returns
+        -------
+        Union[Value, List[Value]]
+            The test results (outputs).
+        """
         samples, batch_size = self._dataset_to_samples(dataset)
 
         if not isinstance(samples, Collection):
@@ -139,9 +207,23 @@ class NeuralModule:
         self._strategy.resetParameters()
 
     def parameters(self) -> dict:
+        """Returns the model parameters.
+
+        Returns
+        -------
+        dict
+            The model parameters.
+        """
         return self.state_dict()
 
     def state_dict(self) -> dict:
+        """Returns the state dictionary of the model.
+
+        Returns
+        -------
+        dict
+            The state dictionary (weights and weight names).
+        """
         weights = self._neural_model.getAllWeights()
         weights_dict = {}
         weight_names = {}

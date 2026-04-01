@@ -4,9 +4,25 @@ import jpype
 
 
 class Function:
+    """
+    Base class for all logic functions (transformation, combination, aggregation).
+    Functions are used to transform, combine, or aggregate values in the logic program.
+    """
     __slots__ = "name", "operator", "can_flatten", "namespace"
 
     def __init__(self, name: str, *, namespace: str = "", operator: Optional[str] = None, can_flatten: bool = False):
+        """
+        Parameters
+        ----------
+        name : str
+            The name of the function.
+        namespace : str
+            The Java namespace of the function. Default: "".
+        operator : str, optional
+            The operator associated with the function (e.g., '+', '@'). Default: None.
+        can_flatten : bool
+            Whether the function can be flattened in the logic program. Default: False.
+        """
         self.name: str = name.lower()
         self.operator: Optional[str] = operator
         self.can_flatten = can_flatten
@@ -36,6 +52,14 @@ class Function:
         raise NotImplementedError
 
     def get(self):
+        """
+        Returns the Java representation of the function.
+
+        Returns
+        -------
+        Any
+            The Java function object.
+        """
         name = "".join(s.capitalize() for s in self.name.split("_"))
         formatted_namespace = self.namespace.format(name=name)
 
@@ -43,6 +67,10 @@ class Function:
 
 
 class TransformationFunction(Function):
+    """
+    Represents a transformation function applied to a relation or a container of relations.
+    Transformation functions can be applied element-wise or as join operations.
+    """
     def __init__(
         self,
         name: str,
@@ -68,6 +96,9 @@ class TransformationFunction(Function):
 
 
 class CombinationFunction(Function):
+    """
+    Represents a combination function used to combine multiple relations into a single output.
+    """
     def __init__(
         self,
         name: str,
@@ -87,5 +118,8 @@ class CombinationFunction(Function):
 
 
 class AggregationFunction(Function):
+    """
+    Represents an aggregation function used to aggregate multiple groundings of the same rule.
+    """
     def get(self):
         raise NotImplementedError

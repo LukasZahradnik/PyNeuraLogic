@@ -12,6 +12,9 @@ DatasetEntries = Union[BaseRelation, WeightedRelation, Rule]
 
 
 class DBSource:
+    """
+    Represents a database source (table) and its configuration for conversion to logic relations.
+    """
     __slots__ = (
         "relation_name",
         "table_name",
@@ -38,6 +41,30 @@ class DBSource:
         replace_empty_column: Union[str, float, int] = 0,
         sep=",",
     ):
+        """
+        Parameters
+        ----------
+        relation_name : str
+            The name of the relation to create from the database rows.
+        table_name : str
+            The name of the database table.
+        term_columns : List[str]
+            The columns to use as terms for the relation.
+        value_column : str, optional
+            The column containing the relation value (weight). Default: None.
+        default_value : Union[float, int], optional
+            The default value if not found in database. Default: 1.0.
+        value_mapper : Callable, optional
+            A function to map the database value to a different value. Default: None.
+        skip_rows : int, optional
+            The number of rows to skip at the beginning. Default: 0.
+        n_rows : int, optional
+            The maximum number of rows to read. Default: None (all).
+        replace_empty_column : Union[str, float, int], optional
+            The value to use for empty columns. Default: 0.
+        sep : str, optional
+            The separator to use for intermediate CSV representation. Default: ",".
+        """
         self.table_name = table_name
         self.relation_name = relation_name
         self.sep = sep
@@ -53,6 +80,19 @@ class DBSource:
             raise NotImplementedError("Cannot create DBSource with zero terms")
 
     def to_csv(self, cursor) -> CSVFile:
+        """
+        Converts the database source to an intermediate CSV representation.
+
+        Parameters
+        ----------
+        cursor : Any
+            The database cursor to use for execution.
+
+        Returns
+        -------
+        CSVFile
+            The intermediate CSVFile object.
+        """
         source = io.StringIO()
 
         columns = [term for term in self.term_columns]
@@ -90,6 +130,9 @@ class DBSource:
 
 
 class DBDataset(ConvertibleDataset):
+    """
+    Represents a dataset composed of one or more database sources.
+    """
     def __init__(
         self,
         connection,
@@ -97,6 +140,18 @@ class DBDataset(ConvertibleDataset):
         queries_db_source: DBSource | None = None,
         mode: Mode = Mode.ONE_EXAMPLE,
     ):
+        """
+        Parameters
+        ----------
+        connection : Any
+            The database connection object.
+        db_sources : Union[List[DBSource], DBSource]
+            The database source(s) containing the examples.
+        queries_db_source : DBSource, optional
+            The database source containing the queries. Default: None.
+        mode : Mode, optional
+            The mode of creating samples. Default: Mode.ONE_EXAMPLE.
+        """
         self.connection = connection
         self.db_sources = [db_sources] if isinstance(db_sources, DBSource) else db_sources
         self.queries_db_source = queries_db_source
@@ -109,6 +164,14 @@ class DBDataset(ConvertibleDataset):
         self.queries_db_source = db_source
 
     def to_dataset(self) -> Dataset:
+        """
+        Converts the database sources to a Dataset object.
+
+        Returns
+        -------
+        Dataset
+            The created Dataset object.
+        """
         with self.connection.cursor() as cur:
             csv_files = [db_source.to_csv(cur) for db_source in self.db_sources]
             csv_queries = None if self.queries_db_source is None else self.queries_db_source.to_csv(cur)

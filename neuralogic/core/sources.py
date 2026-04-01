@@ -7,8 +7,24 @@ from neuralogic.core.settings import SettingsProxy
 
 
 class Sources:
+    """
+    Represents the logic sources (templates, examples, queries) for the NeuraLogic backend.
+    """
     @staticmethod
     def from_settings(settings: SettingsProxy) -> "Sources":
+        """
+        Creates Sources from the provided settings.
+
+        Parameters
+        ----------
+        settings : SettingsProxy
+            The settings proxy.
+
+        Returns
+        -------
+        Sources
+            The created Sources object.
+        """
         if not is_initialized():
             initialize()
 
@@ -17,6 +33,21 @@ class Sources:
 
     @staticmethod
     def from_args(args: List[str], settings: SettingsProxy) -> "Sources":
+        """
+        Creates Sources from command line arguments and settings.
+
+        Parameters
+        ----------
+        args : List[str]
+            The command line arguments.
+        settings : SettingsProxy
+            The settings proxy.
+
+        Returns
+        -------
+        Sources
+            The created Sources object.
+        """
         if not is_initialized():
             initialize()
 
@@ -30,4 +61,12 @@ class Sources:
         self.sources = sources
 
     def to_json(self) -> str:
+        """
+        Exports the sources to a JSON string.
+
+        Returns
+        -------
+        str
+            The JSON representation of the sources.
+        """
         return self.sources.exportToJson()

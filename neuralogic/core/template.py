@@ -19,24 +19,38 @@ TemplateEntries = BaseRelation | WeightedRelation | Rule | PredicateMetadata
 
 
 class Template(NeuralModule):
+    """
+    Template is a collection of rules and relations that define the structure of the neural model.
+    """
+
     def __init__(self, *, template_file: str | None = None):
+        """
+        Parameters
+        ----------
+        template_file : str, optional
+            Path to a template file to load. Default: None.
+        """
         super().__init__()
         self._template: list[TemplateEntries] = []
         self._template_file = template_file
 
     def add_rule(self, rule) -> None:
-        """Adds one rule to the template
+        """Adds one rule to the template.
 
-        :param rule:
-        :return:
+        Parameters
+        ----------
+        rule : TemplateEntries
+            The rule to add.
         """
         self.add_rules([rule])
 
     def add_rules(self, rules: list[TemplateEntries]) -> None:
-        """Adds multiple rules to the template
+        """Adds multiple rules to the template.
 
-        :param rules:
-        :return:
+        Parameters
+        ----------
+        rules : list[TemplateEntries]
+            The rules to add.
         """
         if self._neural_model is not None:
             raise ValueError("Cannot modify built template")
@@ -44,14 +58,30 @@ class Template(NeuralModule):
         self._template.extend(rules)
 
     def add_module(self, module: Module):
-        """Expands the module into rules and adds them into the template
+        """Expands the module into rules and adds them into the template.
 
-        :param module:
-        :return:
+        Parameters
+        ----------
+        module : Module
+            The module to expand and add.
         """
         self.add_rules(module())
 
     def build(self, settings: Settings | None = None, torch: bool = False) -> "Template":
+        """Builds the template into a neural model.
+
+        Parameters
+        ----------
+        settings : Settings, optional
+            The settings for building. Default: None.
+        torch : bool
+            Whether to use PyTorch backend. Default: False.
+
+        Returns
+        -------
+        Template
+            The built template (self).
+        """
         java_factory = JavaFactory()
         settings_proxy = settings.create_proxy() if settings is not None else Settings().create_disconnected_proxy()
 
@@ -68,7 +98,7 @@ class Template(NeuralModule):
         return self
 
     def remove_duplicates(self):
-        """Remove duplicates from the template"""
+        """Removes duplicates from the template."""
         if self._neural_model is not None:
             raise ValueError("Cannot modify built template")
 
@@ -124,6 +154,18 @@ class Template(NeuralModule):
         return self._parsed_template
 
     def derivable_queries(self, example: list[BaseRelation | Rule] | None = None):
+        """Returns all derivable queries for the provided example.
+
+        Parameters
+        ----------
+        example : list[BaseRelation | Rule], optional
+            The example to derive queries from. Default: None.
+
+        Returns
+        -------
+        list[BaseRelation]
+            The list of derivable queries.
+        """
         settings = Settings(iso_value_compression=False, chain_pruning=False).create_disconnected_proxy()
         java_factory = JavaFactory()
 
@@ -147,6 +189,20 @@ class Template(NeuralModule):
         return results
 
     def query(self, query: BaseRelation, examples: list[BaseRelation | Rule] | None = None):
+        """Performs a query on the template with the provided examples.
+
+        Parameters
+        ----------
+        query : BaseRelation
+            The query to perform.
+        examples : list[BaseRelation | Rule], optional
+            The examples to use for the query. Default: None.
+
+        Returns
+        -------
+        list[dict]
+            The list of query results (substitutions).
+        """
         settings = Settings(iso_value_compression=False, chain_pruning=False).create_disconnected_proxy()
         java_factory = JavaFactory()
 

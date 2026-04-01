@@ -6,6 +6,9 @@ from neuralogic.core.constructs.function.function import TransformationFunction
 
 
 class Reshape(TransformationFunction):
+    """
+    Represents a reshape transformation function that changes the shape of a tensor.
+    """
     __slots__ = ("shape",)
 
     def __init__(
@@ -14,6 +17,14 @@ class Reshape(TransformationFunction):
         *,
         shape: Tuple[int, int] | int | None = None,
     ):
+        """
+        Parameters
+        ----------
+        name : str
+            The name of the function.
+        shape : Union[Tuple[int, int], int], optional
+            The target shape. Default: None.
+        """
         super().__init__(name)
 
         self.shape = (shape,) if isinstance(shape, int) else shape
@@ -24,6 +35,21 @@ class Reshape(TransformationFunction):
         *,
         shape: Union[None, Tuple[int, int], int] = None,
     ):
+        """
+        Creates a new Reshape instance with the provided shape and applies it to the relation.
+
+        Parameters
+        ----------
+        relation : Any, optional
+            The relation to apply the reshape to. Default: None.
+        shape : Union[Tuple[int, int], int], optional
+            The target shape. Default: None.
+
+        Returns
+        -------
+        TransformationFunction
+            The new Reshape instance (attached to the relation if provided).
+        """
         reshape = Reshape(self.name, shape=shape)
         return TransformationFunction.__call__(reshape, relation)
 

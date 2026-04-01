@@ -5,10 +5,29 @@ from neuralogic.optim.optimizer import Optimizer
 
 
 class SGD(Optimizer):
+    """
+    Stochastic Gradient Descent (SGD) optimizer.
+    """
     def __init__(self, lr: float = 0.1, lr_decay: LRDecay | None = None):
+        """
+        Parameters
+        ----------
+        lr : float, optional
+            The learning rate. Default: 0.1.
+        lr_decay : LRDecay, optional
+            Learning rate decay scheduler. Default: None.
+        """
         super().__init__(lr, lr_decay)
 
     def initialize(self):
+        """
+        Initializes the Java representation of the SGD optimizer.
+
+        Returns
+        -------
+        Any
+            The Java optimizer object.
+        """
         if self._optimizer:
             return self._optimizer
 

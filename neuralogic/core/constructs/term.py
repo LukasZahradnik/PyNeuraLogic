@@ -2,9 +2,21 @@ from typing import Optional, List
 
 
 class Variable:
+    """
+    Represents a variable in a logic expression.
+    """
+
     __slots__ = "name", "type"
 
     def __init__(self, name: str, type: Optional[str] = None):
+        """
+        Parameters
+        ----------
+        name : str
+            The name of the variable.
+        type : str, optional
+            The type of the variable. Default: None.
+        """
         self.name = name
         self.type = type
 
@@ -40,9 +52,21 @@ class Variable:
 
 
 class Constant:
+    """
+    Represents a constant in a logic expression.
+    """
+
     __slots__ = "name", "type"
 
     def __init__(self, name: str, type: Optional[str] = None):
+        """
+        Parameters
+        ----------
+        name : str
+            The name of the constant.
+        type : str, optional
+            The type of the constant. Default: None.
+        """
         self.name = name
         self.type = type
 

@@ -4,9 +4,24 @@ from neuralogic.core.constructs.metadata import Metadata
 
 
 class Predicate:
+    """
+    Represents a predicate in the logic program, defined by its name and arity.
+    """
     __slots__ = "name", "arity", "hidden", "special"
 
     def __init__(self, name, arity, hidden=False, special=False):
+        """
+        Parameters
+        ----------
+        name : str
+            The name of the predicate.
+        arity : int
+            The number of arguments the predicate takes.
+        hidden : bool
+            Whether the predicate is hidden. Default: False.
+        special : bool
+            Whether the predicate is a special backend predicate. Default: False.
+        """
         if name.startswith("_"):
             name = name[1:]
             hidden = True
@@ -21,6 +36,14 @@ class Predicate:
             return self
 
     def to_str(self):
+        """
+        Returns a string representation of the predicate (without arity).
+
+        Returns
+        -------
+        str
+            The string representation.
+        """
         if not self.special and not self.hidden:
             return self.name
 
@@ -45,9 +68,20 @@ class Predicate:
 
 
 class PredicateMetadata:
+    """
+    Associates metadata with a predicate.
+    """
     __slots__ = "predicate", "metadata"
 
     def __init__(self, predicate: Predicate, metadata: Metadata):
+        """
+        Parameters
+        ----------
+        predicate : Predicate
+            The predicate to associate metadata with.
+        metadata : Metadata
+            The metadata to associate.
+        """
         if metadata.aggregation is not None:
             raise ValueError(f"Cannot set 'aggregation' parameter on predicate ({predicate}) metadata")
 

@@ -6,6 +6,9 @@ from neuralogic.utils.visualize import draw_sample, draw_grounding
 
 
 class NeuronType(enum.StrEnum):
+    """
+    Enum representing different types of neurons in the neural network.
+    """
     Aggregation = "AggregationNeuron"
     Atom = "AtomNeuron"
     Negation = "NegationNeuron"
@@ -17,9 +20,20 @@ class NeuronType(enum.StrEnum):
 
 
 class Atom:
+    """
+    Represents an atom in the logic program, often corresponding to a node in the neural network.
+    """
     __slots__ = "substitutions", "_atom", "_predicate", "_arity"
 
     def __init__(self, atom, substitutions: Dict):
+        """
+        Parameters
+        ----------
+        atom : Any
+            The underlying Java atom object.
+        substitutions : Dict
+            Dictionary of variable substitutions.
+        """
         self.substitutions = substitutions
         self._atom = atom
 
@@ -35,6 +49,14 @@ class Atom:
         return self._arity
 
     def node_type(self) -> NeuronType:
+        """
+        Returns the type of the neuron.
+
+        Returns
+        -------
+        NeuronType
+            The type of the neuron.
+        """
         return NeuronType(self._atom.getClass().getSimpleName())
 
     def __str__(self):
@@ -42,6 +64,9 @@ class Atom:
 
 
 class Neuron(Atom):
+    """
+    Represents a neuron in the neural network, extending the Atom class with value and gradient properties.
+    """
     def __init__(self, neuron, substitutions: Dict):
         self.substitutions = substitutions
         self._atom = neuron
@@ -59,6 +84,9 @@ class Neuron(Atom):
 
 
 class NeuralSample:
+    """
+    Represents a single training or testing sample, containing the query and its associated neural network (evidence).
+    """
     __slots__ = "_java_sample", "_neurons"
 
     def __init__(self, sample):
@@ -76,6 +104,21 @@ class NeuralSample:
         return ValueFactory.from_java(self._java_sample.target)
 
     def get_neurons(self, literal, neuron_type: NeuronType | None = NeuronType.Atom):
+        """
+        Returns a list of neurons matching the provided literal and neuron type.
+
+        Parameters
+        ----------
+        literal : Any
+            The literal to match.
+        neuron_type : NeuronType, optional
+            The type of neurons to search for. Default: NeuronType.Atom.
+
+        Returns
+        -------
+        list[Neuron]
+            The list of matching neurons.
+        """
         literal_name = literal.predicate.name
         literal_arity = literal.predicate.arity
 
@@ -141,6 +184,19 @@ class NeuralSample:
         return nodes
 
     def get_fact(self, fact):
+        """
+        Returns the neuron corresponding to the provided fact.
+
+        Parameters
+        ----------
+        fact : Any
+            The fact to look for.
+
+        Returns
+        -------
+        list[Neuron]
+            The matching fact neuron(s).
+        """
         for term in fact.terms:
             term_str = str(term)
 
@@ -150,6 +206,21 @@ class NeuralSample:
         return self.get_neurons(fact, NeuronType.Fact)
 
     def set_fact_value(self, fact, value) -> int:
+        """
+        Sets the value of a specific fact in the sample.
+
+        Parameters
+        ----------
+        fact : Any
+            The fact to set the value for.
+        value : float
+            The value to set.
+
+        Returns
+        -------
+        int
+            The index of the fact neuron, or -1 if not found.
+        """
         for term in fact.terms:
             term_str = str(term)
 
@@ -177,6 +248,27 @@ class NeuralSample:
         *args,
         **kwargs,
     ):
+        """
+        Draws the neural sample.
+
+        Parameters
+        ----------
+        filename : str, optional
+            The filename to save the drawing to. Default: None.
+        show : bool
+            Whether to show the drawing. Default: True.
+        img_type : str
+            The image type. Default: "png".
+        value_detail : int
+            The level of detail for values. Default: 0.
+        graphviz_path : str, optional
+            The path to the Graphviz executable. Default: None.
+
+        Returns
+        -------
+        Any
+            The drawing data or image object.
+        """
         return draw_sample(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
 
     def __str__(self):
@@ -184,6 +276,9 @@ class NeuralSample:
 
 
 class Grounding:
+    """
+    Represents a grounded template, providing access to grounded atoms and facts.
+    """
     __slots__ = ("_grounding", "_atoms")
 
     def __init__(self, grounding):
@@ -200,6 +295,27 @@ class Grounding:
         *args,
         **kwargs,
     ):
+        """
+        Draws the grounding.
+
+        Parameters
+        ----------
+        filename : str, optional
+            The filename to save the drawing to. Default: None.
+        show : bool
+            Whether to show the drawing. Default: True.
+        img_type : str
+            The image type. Default: "png".
+        value_detail : int
+            The level of detail for values. Default: 0.
+        graphviz_path : str, optional
+            The path to the Graphviz executable. Default: None.
+
+        Returns
+        -------
+        Any
+            The drawing data or image object.
+        """
         return draw_grounding(self._grounding, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
 
     def __hash__(self):
@@ -220,6 +336,19 @@ class Grounding:
         return self._atoms
 
     def get_atoms(self, literal) -> list[Atom]:
+        """
+        Returns a list of grounded atoms matching the provided literal.
+
+        Parameters
+        ----------
+        literal : Any
+            The literal to match.
+
+        Returns
+        -------
+        list[Atom]
+            The list of matching grounded atoms.
+        """
         literal_name = literal.predicate.name
         literal_arity = literal.predicate.arity
 

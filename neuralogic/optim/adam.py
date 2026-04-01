@@ -7,6 +7,10 @@ from neuralogic.optim.optimizer import Optimizer
 
 
 class Adam(Optimizer):
+    """
+    Adam optimizer.
+    It implements the Adaptive Moment Estimation (Adam) algorithm.
+    """
     def __init__(
         self,
         lr: float = 0.001,
@@ -14,6 +18,18 @@ class Adam(Optimizer):
         eps: float = 1e-08,
         lr_decay: LRDecay | None = None,
     ):
+        """
+        Parameters
+        ----------
+        lr : float, optional
+            The learning rate. Default: 0.001.
+        betas : Tuple[float, float], optional
+            Coefficients used for computing running averages of gradient and its square. Default: (0.9, 0.999).
+        eps : float, optional
+            Term added to the denominator to improve numerical stability. Default: 1e-08.
+        lr_decay : LRDecay, optional
+            Learning rate decay scheduler. Default: None.
+        """
         super().__init__(lr, lr_decay)
         self._betas = betas
         self._eps = eps
@@ -27,6 +43,14 @@ class Adam(Optimizer):
         return self._eps
 
     def initialize(self):
+        """
+        Initializes the Java representation of the Adam optimizer.
+
+        Returns
+        -------
+        Any
+            The Java optimizer object.
+        """
         if self._optimizer:
             return self._optimizer
 

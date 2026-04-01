@@ -22,12 +22,12 @@ jvm_options = ["-Xms1g"]
 
 def set_max_memory_size(size: int):
     """
-    Set maximum memory size that can be utilized by the backend (in gigabytes)
+    Sets the maximum memory size that can be utilized by the backend (in gigabytes).
 
     Parameters
     ----------
     size : int
-        The maximum memory size (in gigabytes)
+        The maximum memory size (in gigabytes).
     """
     global _max_memory_size
     _max_memory_size = size
@@ -36,6 +36,11 @@ def set_max_memory_size(size: int):
 def initial_seed() -> int:
     """
     Returns the initial/current random seed for a random number generator used in the backend.
+
+    Returns
+    -------
+    int
+        The initial random seed.
     """
     return _initial_seed
 
@@ -43,6 +48,11 @@ def initial_seed() -> int:
 def seed() -> int:
     """
     Sets the seed for a random number generator used in the backend to a random seed and returns the seed.
+
+    Returns
+    -------
+    int
+        The newly generated random seed.
     """
     global _seed
 
@@ -102,7 +112,12 @@ def set_jvm_path(path: Optional[str]):
 
 def is_initialized() -> bool:
     """
-    Check whether the NeuraLogic backend has been initialized
+    Checks whether the NeuraLogic backend has been initialized.
+
+    Returns
+    -------
+    bool
+        True if the backend is initialized, False otherwise.
     """
     return _is_initialized
 
@@ -122,7 +137,12 @@ def set_graphviz_path(path: Optional[str]):
 
 def get_default_graphviz_path() -> Optional[str]:
     """
-    Get the default path to Graphviz
+    Gets the default path to Graphviz.
+
+    Returns
+    -------
+    Optional[str]
+        The Graphviz path or None if not set.
     """
     return _graphviz_path
 

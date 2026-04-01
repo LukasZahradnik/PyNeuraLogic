@@ -8,14 +8,42 @@ from neuralogic.core.constructs.function.function import Function
 
 
 class FContainer:
+    """
+    A container for multiple logic nodes (relations or other containers) and a function to apply to them.
+
+    It allows for nesting and building complex function graphs.
+    """
     __slots__ = "nodes", "function"
 
     def __init__(self, nodes, function: Function):
+        """
+        Parameters
+        ----------
+        nodes : Iterable[Any]
+            The nodes to be contained in the container.
+        function : Function
+            The function to apply to the nodes.
+        """
         self.function = function
         self.nodes = nodes if not self.function.can_flatten else self.get_flattened_nodes(nodes, function)
 
     @staticmethod
     def get_flattened_nodes(nodes, function: Function):
+        """
+        Flattens the nodes if they are FContainers with the same function.
+
+        Parameters
+        ----------
+        nodes : Iterable[Any]
+            The nodes to flatten.
+        function : Function
+            The function used for flattening criteria.
+
+        Returns
+        -------
+        tuple
+            The flattened nodes.
+        """
         new_nodes = []
         for node in nodes:
             if not isinstance(node, FContainer):
@@ -66,6 +94,14 @@ class FContainer:
                 yield node
 
     def to_function(self) -> Function:
+        """
+        Converts the container and its nested structure into a FunctionGraph.
+
+        Returns
+        -------
+        Function
+            The generated FunctionGraph.
+        """
         graph = self._get_function_node({}, 0)
         return FunctionGraph(name=self.name, function_graph=graph)
 
@@ -109,6 +145,19 @@ class FContainer:
         return jpype.JClass(class_name)(self.function.get(), filtered_next_node, filtered_next_indices)
 
     def to_str(self, parentheses_wrap: bool = False):
+        """
+        Returns a string representation of the container.
+
+        Parameters
+        ----------
+        parentheses_wrap : bool
+            Whether to wrap the output in parentheses. Default: False.
+
+        Returns
+        -------
+        str
+            The string representation.
+        """
         if parentheses_wrap and self.function.operator is not None:
             return f"({self})"
         return self.__str__()

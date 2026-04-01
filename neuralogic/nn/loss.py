@@ -5,10 +5,17 @@ class ErrorFunctionNames:
 
 
 class ErrorFunction:
+    """
+    Base class for error (loss) functions in the neural network.
+    """
     pass
 
 
 class MSE(ErrorFunction):
+    """
+    Mean Squared Error (SQUARED_DIFF) loss function.
+    Suitable for regression tasks.
+    """
     def __init__(self):
         super().__init__()
 
@@ -17,7 +24,17 @@ class MSE(ErrorFunction):
 
 
 class CrossEntropy(ErrorFunction):
+    """
+    Cross Entropy loss function.
+    Suitable for classification tasks.
+    """
     def __init__(self, with_logits: bool = True):
+        """
+        Parameters
+        ----------
+        with_logits : bool, optional
+            Whether the input to the loss function are logits (unprocessed by activation). Default: True.
+        """
         super().__init__()
         self.with_logits = with_logits
 
@@ -26,6 +43,10 @@ class CrossEntropy(ErrorFunction):
 
 
 class SoftEntropy(ErrorFunction):
+    """
+    Soft Entropy loss function.
+    Similar to Cross Entropy but usually applied with a soft layer at the end.
+    """
     def __init__(self):
         super().__init__()
 

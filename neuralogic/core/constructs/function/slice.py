@@ -7,6 +7,9 @@ from neuralogic.core.constructs.function.function import TransformationFunction
 
 
 class Slice(TransformationFunction):
+    """
+    Represents a slice transformation function that extracts a sub-tensor from a tensor.
+    """
     __slots__ = ("rows", "cols")
 
     def __init__(
@@ -16,6 +19,16 @@ class Slice(TransformationFunction):
         rows: EllipsisType | Tuple[int, int] = ...,
         cols: EllipsisType | Tuple[int, int] = ...,
     ):
+        """
+        Parameters
+        ----------
+        name : str
+            The name of the function.
+        rows : Union[EllipsisType, Tuple[int, int]], optional
+            The row range to slice. Default: Ellipsis (all rows).
+        cols : Union[EllipsisType, Tuple[int, int]], optional
+            The column range to slice. Default: Ellipsis (all columns).
+        """
         super().__init__(name)
 
         self.cols = [int(x) for x in cols] if cols is not Ellipsis else Ellipsis
@@ -28,6 +41,23 @@ class Slice(TransformationFunction):
         rows: EllipsisType | Tuple[int, int] = ...,
         cols: EllipsisType | Tuple[int, int] = ...,
     ):
+        """
+        Creates a new Slice instance with the provided ranges and applies it to the relation.
+
+        Parameters
+        ----------
+        relation : Any, optional
+            The relation to apply the slice to. Default: None.
+        rows : Union[EllipsisType, Tuple[int, int]], optional
+            The row range to slice. Default: Ellipsis (all rows).
+        cols : Union[EllipsisType, Tuple[int, int]], optional
+            The column range to slice. Default: Ellipsis (all columns).
+
+        Returns
+        -------
+        TransformationFunction
+            The new Slice instance (attached to the relation if provided).
+        """
         slice = Slice(self.name, rows=rows, cols=cols)
         return TransformationFunction.__call__(slice, relation)
 

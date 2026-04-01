@@ -5,9 +5,21 @@ from neuralogic.core.constructs.metadata import Metadata
 
 
 class RuleBody:
+    """
+    Represents the body of a rule, which is a collection of literals.
+    """
+
     __slots__ = "literals", "metadata"
 
     def __init__(self, lit1, lit2):
+        """
+        Parameters
+        ----------
+        lit1 : BaseRelation
+            The first literal in the body.
+        lit2 : BaseRelation
+            The second literal in the body.
+        """
         self.literals = [lit1, lit2]
         self.metadata = None
 
@@ -36,9 +48,21 @@ class RuleBody:
 
 
 class Rule:
+    """
+    Represents a rule in the template, consisting of a head and a body.
+    """
+
     __slots__ = "head", "body", "metadata"
 
     def __init__(self, head, body):
+        """
+        Parameters
+        ----------
+        head : BaseRelation
+            The head of the rule.
+        body : Union[RuleBody, Iterable[BaseRelation], BaseRelation]
+            The body of the rule.
+        """
         self.head = head
         self.metadata: Metadata | None = None
 

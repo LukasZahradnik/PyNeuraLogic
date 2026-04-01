@@ -16,7 +16,19 @@ TemplateEntries = Union[BaseRelation, WeightedRelation, Rule]
 
 
 class DatasetBuilder:
+    """
+    DatasetBuilder is responsible for grounding and neuralizing datasets.
+    """
+
     def __init__(self, parsed_template, java_factory: JavaFactory):
+        """
+        Parameters
+        ----------
+        parsed_template : Any
+            The parsed template.
+        java_factory : JavaFactory
+            The java factory.
+        """
         if not is_initialized():
             initialize()
 
@@ -33,6 +45,21 @@ class DatasetBuilder:
         self.examples_counter = 0
 
     def build_queries(self, queries, query_builder):
+        """
+        Builds queries from the provided queries and query builder.
+
+        Parameters
+        ----------
+        queries : Iterable
+            The queries to build.
+        query_builder : Any
+            The query builder.
+
+        Returns
+        -------
+        Tuple[List[Any], bool]
+            A tuple containing the list of built logic samples and a boolean indicating if there is one query per example.
+        """
         logic_samples = []
         one_query_per_example = True
 
@@ -67,6 +94,23 @@ class DatasetBuilder:
         return logic_samples, one_query_per_example
 
     def build_examples(self, examples, examples_builder, learnable_facts=False):
+        """
+        Builds examples from the provided examples and examples builder.
+
+        Parameters
+        ----------
+        examples : Iterable
+            The examples to build.
+        examples_builder : Any
+            The examples builder.
+        learnable_facts : bool
+            Whether facts are learnable. Default: False.
+
+        Returns
+        -------
+        Tuple[List[Any], bool]
+            A tuple containing the list of built logic samples and a boolean indicating if there are examples with queries.
+        """
         logic_samples = []
         one = jpype.JClass("cz.cvut.fel.ida.algebra.values.ScalarValue")(1.0)
         examples_queries = False
@@ -115,15 +159,27 @@ class DatasetBuilder:
         progress: bool = False,
         raw_groundings: bool = False,
     ):
-        """Grounds the dataset
+        """Grounds the dataset.
 
-        :param dataset:
-        :param settings:
-        :param batch_size:
-        :param learnable_facts:
-        :param progress:
-        :param raw_groundings:
-        :return:
+        Parameters
+        ----------
+        dataset : datasets.BaseDataset
+            The dataset to ground.
+        settings : SettingsProxy
+            The settings proxy.
+        batch_size : int
+            The batch size. Default: 1.
+        learnable_facts : bool
+            Whether facts are learnable. Default: False.
+        progress : bool
+            Whether to show progress. Default: False.
+        raw_groundings : bool
+            Whether to return raw groundings. Default: False.
+
+        Returns
+        -------
+        Union[GroundedDataset, Any]
+            The grounded dataset or raw groundings.
         """
         if isinstance(dataset, datasets.ConvertibleDataset):
             return self.ground_dataset(
@@ -211,14 +267,25 @@ class DatasetBuilder:
         learnable_facts: bool = False,
         progress: bool = False,
     ) -> BuiltDataset:
-        """Builds the dataset (does grounding and neuralization)
+        """Builds the dataset (does grounding and neuralization).
 
-        :param dataset:
-        :param settings:
-        :param batch_size:
-        :param learnable_facts:
-        :param progress:
-        :return:
+        Parameters
+        ----------
+        dataset : Union[datasets.BaseDataset, GroundedDataset]
+            The dataset to build.
+        settings : SettingsProxy
+            The settings proxy.
+        batch_size : int
+            The batch size. Default: 1.
+        learnable_facts : bool
+            Whether facts are learnable. Default: False.
+        progress : bool
+            Whether to show progress. Default: False.
+
+        Returns
+        -------
+        BuiltDataset
+            The built dataset.
         """
         if not isinstance(dataset, GroundedDataset):
             groundings = self.ground_dataset(
@@ -231,6 +298,25 @@ class DatasetBuilder:
 
     @staticmethod
     def merge_queries_with_examples(queries, examples, one_query_per_example, example_queries=True):
+        """
+        Merges queries with their corresponding examples.
+
+        Parameters
+        ----------
+        queries : List[Any]
+            The list of queries.
+        examples : List[Any]
+            The list of examples.
+        one_query_per_example : bool
+            Whether there is one query per example.
+        example_queries : bool
+            Whether examples contain queries. Default: True.
+
+        Returns
+        -------
+        List[Any]
+            The list of merged logic samples.
+        """
         if len(examples) == 0:
             return queries
 
@@ -286,6 +372,19 @@ class DatasetBuilder:
 
     @staticmethod
     def samples_to_examples_and_queries(samples: List):
+        """
+        Converts a list of samples to two lists: examples and queries.
+
+        Parameters
+        ----------
+        samples : List[Any]
+            The list of samples.
+
+        Returns
+        -------
+        Tuple[Iterable[Any], Iterable[Any]]
+            A tuple containing the iterable of examples and the iterable of queries.
+        """
         example_dict = {}
         queries_dict = {}
 

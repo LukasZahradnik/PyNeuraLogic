@@ -15,13 +15,31 @@ from neuralogic.core.settings import SettingsProxy, Settings
 
 
 class ValueFactory:
+    """
+    Factory for converting between Python values (scalars, lists, numpy arrays) and Java Value objects.
+    It handles ScalarValue, VectorValue, and MatrixValue.
+    """
     def __init__(self):
+        """Initializes the ValueFactory with references to Java value classes."""
         self.scalar_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.ScalarValue")
         self.vector_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.VectorValue")
         self.matrix_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.MatrixValue")
 
     @staticmethod
     def from_java(value):
+        """
+        Converts a Java Value object to a Python representation (float, list, or numpy array).
+
+        Parameters
+        ----------
+        value : Any
+            The Java Value object to convert.
+
+        Returns
+        -------
+        Union[float, list, np.ndarray]
+            The Python representation of the value.
+        """
         size = list(value.size())
         if len(size) == 0 or size[0] == 0:
             return float(value.get(0))
@@ -30,6 +48,19 @@ class ValueFactory:
         return np.array(memoryview(value.getAsArray())).tolist()
 
     def get_value(self, weight):
+        """
+        Converts a Python weight to a Java Value object.
+
+        Parameters
+        ----------
+        weight : Any
+            The weight to convert. Can be a scalar, tuple (for dimensions), list, or numpy array.
+
+        Returns
+        -------
+        Tuple[bool, Any]
+            A tuple containing a boolean (True if initialized, False if just dimensions) and the Java Value object.
+        """
         if isinstance(weight, (float, int)) or np.ndim(weight) == 0:
             return True, self.scalar_value(float(weight))
 
@@ -89,7 +120,17 @@ def _flatten_rule_body(body, metadata: Metadata):
 
 
 class JavaFactory:
+    """
+    Factory for converting high-level Python logic constructs (Atoms, Rules, etc.) into their corresponding Java objects.
+    It maintains internal factories for predicates, constants, and weights.
+    """
     def __init__(self, settings: Optional[SettingsProxy] = None):
+        """
+        Parameters
+        ----------
+        settings : SettingsProxy, optional
+            The settings proxy used for configuring the Java factories. If None, a default SettingsProxy is created.
+        """
         from neuralogic.core.constructs.rule import Rule
         from neuralogic.core.constructs.relation import WeightedRelation
 
@@ -148,6 +189,21 @@ class JavaFactory:
         return self.var_factory_class()
 
     def get_term(self, term, variable_factory):
+        """
+        Converts a Python term (Variable, Constant, str, int, float) to a Java term.
+
+        Parameters
+        ----------
+        term : Any
+            The term to convert.
+        variable_factory : Any
+            The Java variable factory to use for variables.
+
+        Returns
+        -------
+        Any
+            The Java term object.
+        """
         if isinstance(term, Variable):
             if term.type is None:
                 return variable_factory.construct(term.name)
@@ -169,6 +225,19 @@ class JavaFactory:
         raise ValueError(f"Invalid term {term}")
 
     def atom_to_clause(self, atom):
+        """
+        Converts a single atom to a Java Clause.
+
+        Parameters
+        ----------
+        atom : Any
+            The atom to convert.
+
+        Returns
+        -------
+        Any
+            The Java Clause object.
+        """
         terms = [self.get_term(term, self.variable_factory) for term in atom.terms]
 
         predicate_name = f"@{atom.predicate.name}" if atom.predicate.special else atom.predicate.name
@@ -189,6 +258,27 @@ class JavaFactory:
         return self.clause(literal_array)
 
     def get_generic_relation(self, relation_class, relation, variable_factory, default_weight=None, is_example=False):
+        """
+        Generic method to convert a Python relation to a Java relation object.
+
+        Parameters
+        ----------
+        relation_class : Any
+            The Java class of the relation (e.g., BodyAtom, ValuedFact).
+        relation : Any
+            The Python relation object.
+        variable_factory : Any
+            The Java variable factory.
+        default_weight : Any, optional
+            A default weight if the relation is unweighted. Default: None.
+        is_example : bool
+            Whether the relation is part of an example. Default: False.
+
+        Returns
+        -------
+        Any
+            The Java relation object.
+        """
         predicate = self.get_predicate(relation.predicate)
 
         weight = None
@@ -264,6 +354,19 @@ class JavaFactory:
         return metadata_obj
 
     def get_query(self, query):
+        """
+        Converts a Python query to a Java representation.
+
+        Parameters
+        ----------
+        query : Any
+            The query to convert. Can be a Rule, list of relations, or a single relation.
+
+        Returns
+        -------
+        Tuple[Any, List[Any]]
+            A tuple containing the Java head relation and a list of Java body relations.
+        """
         variable_factory = self.get_variable_factory()
 
         if query is None:
@@ -281,6 +384,21 @@ class JavaFactory:
         ]
 
     def get_lifted_example(self, example, learnable_facts=False):
+        """
+        Converts a Python example to a Java LiftedExample.
+
+        Parameters
+        ----------
+        example : Any
+            The example to convert.
+        learnable_facts : bool
+            Whether facts in the example should be learnable. Default: False.
+
+        Returns
+        -------
+        Tuple[Any, Any]
+            A tuple containing the Java label conjunction and the Java LiftedExample.
+        """
         conjunctions = []
         rules = []
         label_conjunction = None
@@ -323,6 +441,19 @@ class JavaFactory:
         return self.get_generic_relation(self.body_atom, relation, variable_factory, is_example=is_example)
 
     def get_rule(self, rule):
+        """
+        Converts a Python Rule to a Java WeightedRule.
+
+        Parameters
+        ----------
+        rule : Any
+            The Python rule to convert.
+
+        Returns
+        -------
+        Any
+            The Java WeightedRule object.
+        """
         java_rule = self.weighted_rule()
         java_rule.setOriginalString(str(rule))
 

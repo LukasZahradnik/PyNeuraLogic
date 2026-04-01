@@ -23,10 +23,19 @@ def get_drawing_settings(
 ) -> SettingsProxy:
     """Returns the default settings instance for drawing with a specified image type.
 
-    :param img_type:
-    :param value_detail:
-    :param graphviz_path:
-    :return:
+    Parameters
+    ----------
+    img_type : str
+        The image type. Default: "png".
+    value_detail : int
+        The level of detail for values. Default: 0.
+    graphviz_path : str, optional
+        The path to the Graphviz executable. Default: None.
+
+    Returns
+    -------
+    SettingsProxy
+        The settings proxy for drawing.
     """
     settings = Settings().create_proxy()
 
@@ -55,14 +64,50 @@ def get_drawing_settings(
 
 
 def get_template_drawer(settings: SettingsProxy):
+    """Returns the template drawer.
+
+    Parameters
+    ----------
+    settings : SettingsProxy
+        The settings proxy.
+
+    Returns
+    -------
+    Any
+        The template drawer.
+    """
     return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.TemplateDrawer")(settings.settings)
 
 
 def get_sample_drawer(settings: SettingsProxy):
+    """Returns the sample drawer.
+
+    Parameters
+    ----------
+    settings : SettingsProxy
+        The settings proxy.
+
+    Returns
+    -------
+    Any
+        The sample drawer.
+    """
     return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.NeuralNetDrawer")(settings.settings)
 
 
 def get_grounding_drawer(settings: SettingsProxy):
+    """Returns the grounding drawer.
+
+    Parameters
+    ----------
+    settings : SettingsProxy
+        The settings proxy.
+
+    Returns
+    -------
+    Any
+        The grounding drawer.
+    """
     return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.GroundingDrawer")(settings.settings)
 
 
@@ -70,6 +115,30 @@ def get_grounding_drawer(settings: SettingsProxy):
 
 
 def draw(drawer, obj, filename: Optional[str] = None, show=True, img_type="png", *args, **kwargs):
+    """Draws the object using the provided drawer.
+
+    Parameters
+    ----------
+    drawer : Any
+        The drawer to use.
+    obj : Any
+        The object to draw.
+    filename : str, optional
+        The filename to draw into. Default: None.
+    show : bool
+        Whether to show the image. Default: True.
+    img_type : str
+        The image type. Default: "png".
+    args : Any
+        Additional arguments for the drawer.
+    kwargs : Any
+        Additional keyword arguments for the drawer.
+
+    Returns
+    -------
+    Union[Any, bytes, None]
+        The drawing data, image object, or None if drawn into a file.
+    """
     if filename is not None:
         try:
             drawer.drawIntoFile(obj, os.path.abspath(filename))
@@ -136,15 +205,29 @@ def draw_model(
         * an IPython Image or Image popup - if show is True
         * or bytes otherwise
 
-    :param model:
-    :param filename:
-    :param show:
-    :param img_type:
-    :param value_detail:
-    :param graphviz_path:
-    :param args:
-    :param kwargs:
-    :return:
+    Parameters
+    ----------
+    model : NeuralModule
+        The model to draw.
+    filename : str, optional
+        The filename to draw into. Default: None.
+    show : bool
+        Whether to show the image. Default: True.
+    img_type : str
+        The image type. Default: "png".
+    value_detail : int
+        The level of detail for values. Default: 0.
+    graphviz_path : str, optional
+        The path to the Graphviz executable. Default: None.
+    args : Any
+        Additional arguments for the drawer.
+    kwargs : Any
+        Additional keyword arguments for the drawer.
+
+    Returns
+    -------
+    Union[Any, bytes, None]
+        The model drawing.
     """
     if model._need_sync:
         model._sync_template()
@@ -170,15 +253,29 @@ def draw_grounding(
         * an IPython Image or Image popup - if show is True
         * or bytes otherwise
 
-    :param sample:
-    :param filename:
-    :param show:
-    :param img_type:
-    :param value_detail:
-    :param graphviz_path:
-    :param args:
-    :param kwargs:
-    :return:
+    Parameters
+    ----------
+    grounding : Any
+        The grounding to draw.
+    filename : str, optional
+        The filename to draw into. Default: None.
+    show : bool
+        Whether to show the image. Default: True.
+    img_type : str
+        The image type. Default: "png".
+    value_detail : int
+        The level of detail for values. Default: 0.
+    graphviz_path : str, optional
+        The path to the Graphviz executable. Default: None.
+    args : Any
+        Additional arguments for the drawer.
+    kwargs : Any
+        Additional keyword arguments for the drawer.
+
+    Returns
+    -------
+    Union[Any, bytes, None]
+        The grounding drawing.
     """
     grounding_drawer = get_grounding_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
 
@@ -200,16 +297,29 @@ def draw_sample(
         * an IPython Image or Image popup - if show is True
         * or bytes otherwise
 
-    :param sample:
-    :param filename:
-    :param show:
-    :param img_type:
-    :param value_detail:
-    :param graphviz_path:
-    :param show:
-    :param args:
-    :param kwargs:
-    :return:
+    Parameters
+    ----------
+    sample : Any
+        The sample to draw.
+    filename : str, optional
+        The filename to draw into. Default: None.
+    show : bool
+        Whether to show the image. Default: True.
+    img_type : str
+        The image type. Default: "png".
+    value_detail : int
+        The level of detail for values. Default: 0.
+    graphviz_path : str, optional
+        The path to the Graphviz executable. Default: None.
+    args : Any
+        Additional arguments for the drawer.
+    kwargs : Any
+        Additional keyword arguments for the drawer.
+
+    Returns
+    -------
+    Union[Any, bytes, None]
+        The sample drawing.
     """
     draw_object = sample._java_sample
 
@@ -221,8 +331,15 @@ def draw_sample(
 def model_to_dot_source(model) -> str:
     """Renders the model into its dot source representation.
 
-    :param model:
-    :return:
+    Parameters
+    ----------
+    model : NeuralModule
+        The model to render.
+
+    Returns
+    -------
+    str
+        The dot source representation.
     """
     if model._need_sync:
         model._sync_template()
@@ -236,9 +353,17 @@ def model_to_dot_source(model) -> str:
 def sample_to_dot_source(sample, value_detail: int = 0) -> str:
     """Renders the sample into its dot source representation.
 
-    :param sample:
-    :param value_detail:
-    :return:
+    Parameters
+    ----------
+    sample : Any
+        The sample to render.
+    value_detail : int
+        The level of detail for values. Default: 0.
+
+    Returns
+    -------
+    str
+        The dot source representation.
     """
     sample_drawer = get_sample_drawer(get_drawing_settings(value_detail=value_detail))
 

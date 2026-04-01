@@ -12,12 +12,18 @@ DatasetEntries = Union[BaseRelation, Rule]
 
 
 class Mode(enum.Enum):
+    """
+    Enum representing different modes of creating samples from CSV files.
+    """
     ONE_EXAMPLE = "one"
     EXAMPLE_PER_SOURCE = "example_per_source"
     ZIP = "zip"
 
 
 class CSVFile:
+    """
+    Represents a single CSV file source and its configuration for conversion to logic relations.
+    """
     __slots__ = (
         "relation_name",
         "csv_source",
@@ -46,6 +52,32 @@ class CSVFile:
         n_rows: int | None = None,
         replace_empty_column: Union[str, float, int] = 0,
     ):
+        """
+        Parameters
+        ----------
+        relation_name : str
+            The name of the relation to create from the CSV rows.
+        csv_source : Union[TextIO, Path]
+            The source of the CSV data.
+        sep : str, optional
+            The separator used in the CSV. Default: ",".
+        value_column : Union[str, int], optional
+            The column containing the relation value (weight). Default: None.
+        default_value : Union[float, int], optional
+            The default value if not found in CSV. Default: None.
+        value_mapper : Callable, optional
+            A function to map the CSV value to a different value. Default: None.
+        term_columns : Sequence[Union[str, int]], optional
+            The columns to use as terms for the relation. Default: None (all columns).
+        header : bool, optional
+            Whether the CSV file has a header. Default: False.
+        skip_rows : int, optional
+            The number of rows to skip at the beginning. Default: 0.
+        n_rows : int, optional
+            The maximum number of rows to read. Default: None (all).
+        replace_empty_column : Union[str, float, int], optional
+            The value to use for empty columns. Default: 0.
+        """
         self.relation_name = relation_name
         self.csv_source = csv_source
         self.sep = sep
@@ -135,6 +167,14 @@ class CSVFile:
         return example
 
     def to_logic_form(self) -> list[DatasetEntries]:
+        """
+        Converts the CSV source to a list of logic relations.
+
+        Returns
+        -------
+        list[DatasetEntries]
+            The list of created logic relations.
+        """
         if isinstance(self.csv_source, (str, Path)):
             with open(self.csv_source, "r") as fp:
                 return self._to_logic(fp)
@@ -142,12 +182,25 @@ class CSVFile:
 
 
 class CSVDataset(ConvertibleDataset):
+    """
+    Represents a dataset composed of one or more CSV files.
+    """
     def __init__(
         self,
         csv_files: Union[List[CSVFile], CSVFile],
         csv_queries: CSVFile | None = None,
         mode: Mode = Mode.ONE_EXAMPLE,
     ):
+        """
+        Parameters
+        ----------
+        csv_files : Union[List[CSVFile], CSVFile]
+            The CSV file(s) containing the examples.
+        csv_queries : CSVFile, optional
+            The CSV file containing the queries. Default: None.
+        mode : Mode, optional
+            The mode of creating samples. Default: Mode.ONE_EXAMPLE.
+        """
         self.csv_queries = csv_queries
         self.csv_files = [csv_files] if isinstance(csv_files, CSVFile) else csv_files
         self.mode = mode
@@ -159,6 +212,14 @@ class CSVDataset(ConvertibleDataset):
         self.csv_queries = file
 
     def to_dataset(self) -> Dataset:
+        """
+        Converts the CSV files to a Dataset object.
+
+        Returns
+        -------
+        Dataset
+            The created Dataset object.
+        """
         queries: List[BaseRelation | Rule] = self.csv_queries.to_logic_form() if self.csv_queries else []
 
         if self.mode == Mode.ONE_EXAMPLE:

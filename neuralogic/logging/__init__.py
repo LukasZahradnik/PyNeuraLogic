@@ -13,7 +13,16 @@ _loggers_buffer: List[Tuple] = []
 
 
 class TextIOWrapper:
+    """
+    TextIOWrapper is a wrapper for text IO objects to ensure strings are written correctly.
+    """
     def __init__(self, wrapped_text_io):
+        """
+        Parameters
+        ----------
+        wrapped_text_io : Any
+            The text IO object to wrap.
+        """
         self.wrapped_text_io = wrapped_text_io
 
     def write(self, string):
@@ -21,7 +30,9 @@ class TextIOWrapper:
 
 
 class Level(Enum):
-    """Logging level"""
+    """
+    Logging level enum.
+    """
 
     OFF = 2147483647
     SEVERE = 1000
@@ -35,7 +46,9 @@ class Level(Enum):
 
 
 class Formatter(Enum):
-    """Logged information formatters"""
+    """
+    Logged information formatters enum.
+    """
 
     COLOR = "color"
     NORMAL = "normal"
@@ -43,6 +56,9 @@ class Formatter(Enum):
 
 @dataclasses.dataclass
 class LogHandler:
+    """
+    LogHandler stores settings for a log handler.
+    """
     output: Any
     level: Level = Level.FINER
     formatter: Formatter = Formatter.COLOR
@@ -75,7 +91,10 @@ def add_log_handler(handler: LogHandler):
     """
     Add logger handler for an insight into the java backend. Overrides the default logger to stdout.
 
-    :param handler: LogHandler
+    Parameters
+    ----------
+    handler : LogHandler
+        The log handler to add.
     """
     return add_handler(handler.output, handler.level, handler.formatter)
 
@@ -84,9 +103,14 @@ def add_handler(output, level: Level = Level.FINER, formatter: Formatter = Forma
     """
     Add logger handler for an insight into the java backend. Overrides the default logger to stdout.
 
-    :param output: File-like object (has ``write(text: str)`` method)
-    :param level: The logging level
-    :param formatter: The log formatter
+    Parameters
+    ----------
+    output : Any
+        File-like object (has ``write(text: str)`` method)
+    level : Level
+        The logging level. Default: Level.FINER.
+    formatter : Formatter
+        The log formatter. Default: Formatter.COLOR.
     """
     global _default_logging
     _default_logging = False
@@ -119,7 +143,7 @@ def add_handler(output, level: Level = Level.FINER, formatter: Formatter = Forma
 
 
 def clear_handlers():
-    """Clear all handlers"""
+    """Removes all log handlers."""
     global _default_logging
     _default_logging = False
 

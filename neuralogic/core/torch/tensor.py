@@ -2,6 +2,11 @@ import torch
 
 
 class NeuralogicOptTensor(torch.Tensor):
+    """
+    Experimental PyTorch tensor subclass that synchronizes its data with PyNeuraLogic Java weights.
+    It allows using PyTorch optimizers to directly update PyNeuraLogic weights by overriding
+    in-place operations and provide gradients from the Java engine.
+    """
     _neuralogic_weight_updater = None
     _neuralogic_weight = None
     _neuralogic_value_factory = None
@@ -35,6 +40,14 @@ class NeuralogicOptTensor(torch.Tensor):
 
     @property
     def grad(self):
+        """
+        Returns the gradient for this tensor, retrieved from the PyNeuraLogic weight updater.
+
+        Returns
+        -------
+        torch.Tensor
+            The gradient tensor, or None if no gradient is available.
+        """
         grad_list = self._neuralogic_weight_updater.weightUpdates
         index = self._neuralogic_weight.index
 
@@ -50,6 +63,25 @@ class NeuralogicOptTensor(torch.Tensor):
 
     @staticmethod
     def create(weight, data, weight_updater, value_factory):
+        """
+        Creates a new NeuralogicOptTensor wrapping specific PyNeuraLogic weight.
+
+        Parameters
+        ----------
+        weight : Any
+            Java weight object to wrap.
+        data : Any
+            Initial data for the tensor.
+        weight_updater : Any
+            Java weight updater providing gradients.
+        value_factory : Any
+            Value factory for Java to Python conversion.
+
+        Returns
+        -------
+        NeuralogicOptTensor
+            The created specialized tensor.
+        """
         tensor = torch.tensor(data, requires_grad=True)
         tensor.__class__ = NeuralogicOptTensor
         tensor._neuralogic_weight = weight
@@ -59,6 +91,9 @@ class NeuralogicOptTensor(torch.Tensor):
         return tensor
 
     def __sync_neuralogic__(self):
+        """
+        Synchronizes the current tensor data back to the underlying Java weight.
+        """
         size = self.size()
         weight_value = self._neuralogic_weight.value
 

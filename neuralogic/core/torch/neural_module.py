@@ -8,9 +8,32 @@ from neuralogic.core.torch.tensor import NeuralogicOptTensor
 
 
 class TorchNeuralModule:
+    """
+    Mixin class providing utility methods for integrating PyNeuraLogic with PyTorch.
+    It handles the conversion of Java weights to PyTorch tensors and the management of learnable parameters.
+    """
     def tensor_parameters(
         self, tensor_parameters, weight_updater, value_factory, neural_model
     ) -> List[NeuralogicOptTensor]:
+        """
+        Creates or retrieves PyTorch-compatible tensor parameters from the Java neural model.
+
+        Parameters
+        ----------
+        tensor_parameters : List[NeuralogicOptTensor], optional
+            Already existing tensor parameters. If None, they will be created.
+        weight_updater : Any
+            Weight updater object.
+        value_factory : Any
+            Value factory for Java to Python conversion.
+        neural_model : Any
+            Java neural model containing the weights.
+
+        Returns
+        -------
+        List[NeuralogicOptTensor]
+            List of learnable tensor parameters.
+        """
         if tensor_parameters is None:
             tensor_parameters = [
                 NeuralogicOptTensor.create(
@@ -26,6 +49,14 @@ class TorchNeuralModule:
         return tensor_parameters
 
     def update_tensor_parameters(self, tensor_parameters):
+        """
+        Updates the data of the provided tensor parameters from their underlying Java weights.
+
+        Parameters
+        ----------
+        tensor_parameters : List[NeuralogicOptTensor]
+            The list of tensor parameters to update.
+        """
         if tensor_parameters is None:
             return
 
@@ -33,6 +64,23 @@ class TorchNeuralModule:
             param.data = torch.tensor(ValueFactory.from_java(param._neuralogic_weight.value))
 
     def forward(self, model, samples, results) -> PyNeuraLogicNetworkOutput:
+        """
+        Performs the forward pass by wrapping the results in PyNeuraLogicNetworkOutput.
+
+        Parameters
+        ----------
+        model : Any
+            The neural model.
+        samples : Any
+            The samples used for the forward pass.
+        results : Any
+            The raw results from the Java engine.
+
+        Returns
+        -------
+        PyNeuraLogicNetworkOutput
+            The wrapped output compatible with PyTorch autograd.
+        """
         if not isinstance(samples, Collection):
             return PyNeuraLogicNetworkOutput.apply(
                 samples, model, torch.tensor(results[0], dtype=torch.float, requires_grad=True)

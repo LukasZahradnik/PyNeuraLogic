@@ -6,6 +6,10 @@ from neuralogic.nn.module.module import Module
 
 
 class GINConv(Module):
+    """
+    Implements the Graph Isomorphism Network (GIN) convolution layer.
+    GIN is a powerful GNN layer that can distinguish between different graph structures.
+    """
     def __init__(
         self,
         in_channels: int,
@@ -16,6 +20,24 @@ class GINConv(Module):
         activation: TransformationFunction = Transformation.IDENTITY,
         aggregation: AggregationFunction = Aggregation.SUM,
     ):
+        """
+        Parameters
+        ----------
+        in_channels : int
+            Number of input features.
+        out_channels : int
+            Number of output features.
+        output_name : str
+            Name of the output relation.
+        feature_name : str
+            Name of the input feature relation.
+        edge_name : str
+            Name of the edge relation.
+        activation : TransformationFunction, optional
+            Activation function to use. Default: Transformation.IDENTITY.
+        aggregation : AggregationFunction, optional
+            Aggregation function to use. Default: Aggregation.SUM.
+        """
         self.output_name = output_name
         self.feature_name = feature_name
         self.edge_name = edge_name
@@ -27,6 +49,14 @@ class GINConv(Module):
         self.activation = activation
 
     def __call__(self):
+        """
+        Generates the rules for GIN convolution.
+
+        Returns
+        -------
+        list
+            A list of rules defining the GIN convolution.
+        """
         head = R.get(self.output_name)(V.I)[self.out_channels, self.in_channels]
         embed = R.get(f"embed__{self.output_name}")
 
