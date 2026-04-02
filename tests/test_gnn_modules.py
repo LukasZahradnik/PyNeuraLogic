@@ -4,7 +4,7 @@ import torch
 from torch_geometric.data import Data
 from torch_geometric.nn import GENConv, GINEConv, GCNConv
 
-from neuralogic.core import Template, Settings, R, Aggregation
+from neuralogic.core import Model, Settings, R, Aggregation
 from neuralogic.dataset import Dataset, Sample
 from neuralogic.nn.loss import MSE
 
@@ -44,7 +44,7 @@ def test_gen_module(input_size, hidden_size):
     for m in gen.mlp._modules.values():
         m.bias = None
 
-    template = Template()
+    model = Model()
     template += neuralogic.nn.module.GENConv(
         input_size, hidden_size, "h", "f", "e", num_layers=1, aggregation=Aggregation.AVG, eps=0, edge_dim=input_size
     )
@@ -116,7 +116,7 @@ def test_gine_module(input_size):
 
     gin = GINEConv(Identity())
 
-    template = Template()
+    model = Model()
     template += neuralogic.nn.module.GINEConv(input_size, "f", "e", "h")
 
     model = template.build(
@@ -168,7 +168,7 @@ def test_gcn_module(input_size, output_size):
     data = Data(x=x, edge_index=edge_index.t().contiguous(), edge_attr=e)
     gcn = GCNConv(input_size, output_size, bias=False)
 
-    template = Template()
+    model = Model()
     template += neuralogic.nn.module.GCNConv(input_size, output_size, "h", "f", "e")
 
     model = template.build(

@@ -8,7 +8,7 @@ from neuralogic.core.settings import SettingsProxy
 
 class Sources:
     """
-    Represents the logic sources (templates, examples, queries) for the NeuraLogic backend.
+    Represents the logic sources (models, examples, queries) for the NeuraLogic backend.
     """
     @staticmethod
     def from_settings(settings: SettingsProxy) -> "Sources":

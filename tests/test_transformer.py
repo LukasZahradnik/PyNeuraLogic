@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import torch
 
-from neuralogic.core import Template, Settings, V, R
+from neuralogic.core import Model, Settings, V, R
 from neuralogic.dataset import Dataset, Sample
 from neuralogic.nn.module import MultiheadAttention
 
@@ -21,7 +21,7 @@ def test_multiheadattention(qdim: int, kdim: int, vdim: int, num_heads: int, seq
 
     mha = torch.nn.MultiheadAttention(qdim, num_heads, bias=False, kdim=kdim, vdim=vdim)
 
-    template = Template()
+    model = Model()
     template += MultiheadAttention(qdim, num_heads, "out", "q", "k", "v", vdim=vdim, kdim=kdim)
 
     model = template.build(Settings(iso_value_compression=False, chain_pruning=False))

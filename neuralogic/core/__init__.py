@@ -1,6 +1,6 @@
 from neuralogic.core.constructs.factories import Var, Const, Relation, V, C, R
 from neuralogic.core.constructs.rule import Rule, RuleBody
-from neuralogic.core.template import Template
+from neuralogic.core.model import Model
 from neuralogic.core.builder import BuiltDataset, GroundedDataset
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.settings import Settings, SettingsProxy
@@ -18,7 +18,7 @@ __all__ = [
     "F",
     "Rule",
     "RuleBody",
-    "Template",
+    "Model",
     "BuiltDataset",
     "GroundedDataset",
     "Transformation",

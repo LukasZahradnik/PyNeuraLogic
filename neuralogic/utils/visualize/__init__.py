@@ -63,8 +63,8 @@ def get_drawing_settings(
     return settings
 
 
-def get_template_drawer(settings: SettingsProxy) -> Any:
-    """Returns the template drawer.
+def get_model_drawer(settings: SettingsProxy) -> Any:
+    """Returns the model drawer.
 
     Parameters
     ----------
@@ -74,9 +74,9 @@ def get_template_drawer(settings: SettingsProxy) -> Any:
     Returns
     -------
     Any
-        The template drawer.
+        The model drawer.
     """
-    return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.TemplateDrawer")(settings.settings)
+    return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.ModelDrawer")(settings.settings)
 
 
 def get_sample_drawer(settings: SettingsProxy) -> Any:
@@ -230,10 +230,10 @@ def draw_model(
         The model drawing.
     """
     if model._need_sync:
-        model._sync_template()
+        model._sync_model()
 
-    template = model._parsed_template
-    template_drawer = get_template_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
+    model = model._parsed_model
+    template_drawer = get_model_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
 
     return draw(template_drawer, template, filename, show, img_type, *args, **kwargs)
 
@@ -342,12 +342,12 @@ def model_to_dot_source(model: Any) -> str:
         The dot source representation.
     """
     if model._need_sync:
-        model._sync_template()
+        model._sync_model()
 
-    template = model._template
-    template_drawer = get_template_drawer(get_drawing_settings())
+    model = model._model
+    template_drawer = get_model_drawer(get_drawing_settings())
 
-    return to_dot_source(template_drawer, template)
+    return to_dot_source(template_drawer, model)
 
 
 def sample_to_dot_source(sample: Any, value_detail: int = 0) -> str:

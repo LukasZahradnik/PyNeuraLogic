@@ -1,13 +1,13 @@
-from neuralogic.core import Relation, Template, Var, Const, Transformation
+from neuralogic.core import Relation, Model, Var, Const, Transformation
 from neuralogic.dataset import Dataset
 
 
 dataset = Dataset()
-template = Template()
+model = Model()
 
 # fmt: off
 
-template.add_rules(
+model.add_rules(
     [
         (Relation.foal(Var.X)[1, ] <= (Relation.parent(Var.X, Var.Y), Relation.horse(Var.Y))) | [Transformation.TANH],
         (Relation.foal(Var.X)[1, ] <= (Relation.sibling(Var.X, Var.Y), Relation.horse(Var.Y))) | [Transformation.TANH],

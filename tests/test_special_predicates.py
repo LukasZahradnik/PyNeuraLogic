@@ -1,11 +1,11 @@
 import pytest
 
-from neuralogic.core import Template, V, R
+from neuralogic.core import Model, V, R
 from neuralogic.dataset import Dataset, Sample
 
 
 def test_neq():
-    template = Template()
+    model = Model()
     template += R.head(V.X, V.Y) <= (R.special.neq(V.X, V.Y), R.val(V.X), R.val(V.Y))
 
     examples = [R.val(1), R.val(-1)]
@@ -23,7 +23,7 @@ def test_neq():
 
 
 def test_leq():
-    template = Template()
+    model = Model()
     template += R.head(V.X, V.Y) <= (R.special.leq(V.X, V.Y), R.val(V.X), R.val(V.Y))
 
     examples = [R.val(1), R.val(-1)]
@@ -44,7 +44,7 @@ def test_leq():
 
 
 def test_geq():
-    template = Template()
+    model = Model()
     template += R.head(V.X, V.Y) <= (R.special.geq(V.X, V.Y), R.val(V.X), R.val(V.Y))
 
     examples = [R.val(1), R.val(-1)]
@@ -65,7 +65,7 @@ def test_geq():
 
 
 def test_lt():
-    template = Template()
+    model = Model()
     template += R.head(V.X, V.Y) <= (R.special.lt(V.X, V.Y), R.val(V.X), R.val(V.Y))
 
     examples = [R.val(1), R.val(-1)]
@@ -80,7 +80,7 @@ def test_lt():
 
 
 def test_gt():
-    template = Template()
+    model = Model()
     template += R.head(V.X, V.Y) <= (R.special.gt(V.X, V.Y), R.val(V.X), R.val(V.Y))
 
     examples = [R.val(1), R.val(-1)]
@@ -95,7 +95,7 @@ def test_gt():
 
 
 def test_eq():
-    template = Template()
+    model = Model()
     template += R.head(V.X, V.Y) <= (R.special.eq(V.X, V.Y), R.val(V.X), R.val(V.Y))
 
     examples = [R.val(1), R.val(-1)]
@@ -113,7 +113,7 @@ def test_eq():
 
 
 def test_next():
-    template = Template()
+    model = Model()
     template += R.head(V.X, V.Y) <= (R.special.next(V.X, V.Y), R.val(V.X), R.val(V.Y))
 
     examples = [R.val(1), R.val(-1), R.val(0)]
@@ -131,7 +131,7 @@ def test_next():
 
 
 def test_next_skip():
-    template = Template()
+    model = Model()
     template += R.head(V.X, V.Y) <= (R.special.next(V.X, V.Z), R.special.next(V.Z, V.Y), R.val(V.X), R.val(V.Y))
 
     examples = [R.val(1), R.val(-1), R.val(0)]
@@ -146,7 +146,7 @@ def test_next_skip():
 
 
 def test_alldiff():
-    template = Template()
+    model = Model()
     template += R.head(V.X, V.Y, V.Z) <= (R.special.alldiff(V.X, V.Y, V.Z), R.val(V.X), R.val(V.Y), R.val(V.Z))
 
     examples = [R.val(1), R.val(-1), R.val(0)]
@@ -172,7 +172,7 @@ def test_alldiff():
 def test_eval_predicates(predicate, expected):
     var_value, const_value = 3, 2
 
-    template = Template()
+    model = Model()
     template += R.head(V.X) <= (predicate(V.X, const_value))
 
     m = template.build()

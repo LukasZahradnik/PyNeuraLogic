@@ -49,7 +49,7 @@ class RuleBody:
 
 class Rule:
     """
-    Represents a rule in the template, consisting of a head and a body.
+    Represents a rule in the model, consisting of a head and a body.
     """
 
     __slots__ = "head", "body", "metadata"

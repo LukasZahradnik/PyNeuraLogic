@@ -1,5 +1,5 @@
 from neuralogic.dataset import Data, TensorDataset, Dataset, Sample
-from neuralogic.core import Template, Settings, Relation
+from neuralogic.core import Model, Settings, Relation
 from neuralogic.nn.module import GCNConv
 from neuralogic.optim import SGD
 
@@ -63,7 +63,7 @@ def test_model_evaluation_from_tensor():
 
     dataset = TensorDataset(data=[data])
 
-    template = Template()
+    model = Model()
     template.add_module(
         GCNConv(in_channels=1, out_channels=5, output_name="h0", feature_name="node_feature", edge_name="edge")
     )
@@ -105,7 +105,7 @@ def test_model_evaluation_from_logic():
         ]
     )
 
-    template = Template()
+    model = Model()
     template.add_module(
         GCNConv(in_channels=1, out_channels=5, output_name="h0", feature_name="node_feature", edge_name="edge")
     )

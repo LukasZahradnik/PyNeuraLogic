@@ -1,14 +1,14 @@
-from neuralogic.core import Relation, Template, Transformation
+from neuralogic.core import Relation, Model, Transformation
 from neuralogic.dataset import Dataset, Sample
 
 
 dataset = Dataset()
 
 
-template = Template()
+model = Model()
 
-template.add_rule((Relation.xor[1, 8] <= Relation.xy[8, 2]) | [Transformation.TANH])  # Add template rule
-template.add_rule(Relation.xor / 0 | [Transformation.TANH])
+model.add_rule((Relation.xor[1, 8] <= Relation.xy[8, 2]) | [Transformation.TANH])  # Add template rule
+model.add_rule(Relation.xor / 0 | [Transformation.TANH])
 
 dataset.add_samples(
     [  # Add 4 examples

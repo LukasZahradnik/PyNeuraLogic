@@ -4,7 +4,7 @@ import torch
 from torch import nn
 from torch.autograd import Function
 
-from neuralogic.core import Template, Settings
+from neuralogic.core import Model, Settings
 from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.rule import Rule
@@ -47,7 +47,7 @@ class _NeuraLogicFunction(Function):
 class NeuraLogic(nn.Module):
     def __init__(
         self,
-        template: Template,
+        template: Model,
         input_facts: List[Union[BaseRelation, Rule]],
         output_relation: BaseRelation,
         to_logic: Callable,

@@ -278,7 +278,7 @@ class NeuralSample:
 
 class Grounding:
     """
-    Represents a grounded template, providing access to grounded atoms and facts.
+    Represents a grounded model, providing access to grounded atoms and facts.
     """
     __slots__ = ("_grounding", "_atoms")
 
@@ -380,10 +380,10 @@ class Grounding:
     def _get_atoms(self) -> dict[str, dict[tuple[str, ...], Any]]:
         atoms = {}
 
-        for literal in self._grounding.groundingWrap.getGroundTemplate().derivedGroundFacts:
+        for literal in self._grounding.groundingWrap.getGroundModel().derivedGroundFacts:
             self._process_literal(literal, atoms)
 
-        for literal in self._grounding.groundingWrap.getGroundTemplate().groundFacts:
+        for literal in self._grounding.groundingWrap.getGroundModel().groundFacts:
             self._process_literal(literal, atoms)
 
         return atoms

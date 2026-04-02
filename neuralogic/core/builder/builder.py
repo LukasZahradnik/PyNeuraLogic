@@ -27,7 +27,7 @@ def stream_to_list(stream: Any) -> list:
 
 class Builder:
     """
-    Builder is responsible for grounding, neuralizing, and building models from templates and sources.
+    Builder is responsible for grounding, neuralizing, and building models from models and sources.
     """
 
     def __init__(self, settings: SettingsProxy):
@@ -61,21 +61,21 @@ class Builder:
 
         self._callback = Callback
 
-    def build_template_from_file(self, settings: SettingsProxy, filename: str) -> Any:
+    def build_model_from_file(self, settings: SettingsProxy, filename: str) -> Any:
         """
-        Builds a template from a file.
+        Builds a model from a file.
 
         Parameters
         ----------
         settings : SettingsProxy
             The settings proxy.
         filename : str
-            The path to the template file.
+            The path to the model file.
 
         Returns
         -------
         Any
-            The built template.
+            The built model.
         """
         args = [
             "-t",
@@ -85,18 +85,18 @@ class Builder:
         ]
 
         sources = Sources.from_args(args, settings)
-        template = self.builder.buildTemplate(sources.sources)
+        model = self.builder.buildModel(sources.sources)
 
-        return template
+        return model
 
-    def ground_from_sources(self, parsed_template: Any, sources: Sources, progress: bool) -> Any:
+    def ground_from_sources(self, parsed_model: Any, sources: Sources, progress: bool) -> Any:
         """
-        Grounds the template from the provided sources.
+        Grounds the model from the provided sources.
 
         Parameters
         ----------
-        parsed_template : Any
-            The parsed template.
+        parsed_model : Any
+            The parsed model.
         sources : Sources
             The logic sources.
         progress : bool
@@ -108,18 +108,18 @@ class Builder:
             The grounded logic samples.
         """
         if not progress:
-            return self._ground(parsed_template, sources, None, None)
+            return self._ground(parsed_model, sources, None, None)
         with tqdm(total=None, desc="Grounding", unit=" samples", dynamic_ncols=True) as pbar:
-            return self._ground(parsed_template, sources, None, self._callback(pbar))
+            return self._ground(parsed_model, sources, None, self._callback(pbar))
 
-    def ground_from_logic_samples(self, parsed_template: Any, logic_samples: list[Any], progress: bool) -> Any:
+    def ground_from_logic_samples(self, parsed_model: Any, logic_samples: list[Any], progress: bool) -> Any:
         """
-        Grounds the template from the provided logic samples.
+        Grounds the model from the provided logic samples.
 
         Parameters
         ----------
-        parsed_template : Any
-            The parsed template.
+        parsed_model : Any
+            The parsed model.
         logic_samples : list[Any]
             The logic samples.
         progress : bool
@@ -131,16 +131,16 @@ class Builder:
             The grounded logic samples.
         """
         if not progress:
-            return self._ground(parsed_template, None, logic_samples, None)
+            return self._ground(parsed_model, None, logic_samples, None)
         with tqdm(total=len(logic_samples), desc="Grounding", unit=" samples", dynamic_ncols=True) as pbar:
-            return self._ground(parsed_template, None, logic_samples, self._callback(pbar))
+            return self._ground(parsed_model, None, logic_samples, self._callback(pbar))
 
-    def _ground(self, parsed_template: Any, sources: Sources | None, logic_samples: list[Any] | None, callback: Any) -> Any:
+    def _ground(self, parsed_model: Any, sources: Sources | None, logic_samples: list[Any] | None, callback: Any) -> Any:
         if sources is not None:
-            ground_pipeline = self.example_builder.buildGroundings(parsed_template, sources.sources, callback)
+            ground_pipeline = self.example_builder.buildGroundings(parsed_model, sources.sources, callback)
         else:
             logic_samples = jpype.java.util.ArrayList(logic_samples).stream()
-            ground_pipeline = self.example_builder.buildGroundings(parsed_template, logic_samples, callback)
+            ground_pipeline = self.example_builder.buildGroundings(parsed_model, logic_samples, callback)
 
         ground_pipeline.execute(None if sources is None else sources.sources)
         groundings = ground_pipeline.get()
@@ -179,14 +179,14 @@ class Builder:
 
         return [NeuralSample(sample) for sample in logic_samples]
 
-    def build_model(self, parsed_template: Any, settings: SettingsProxy) -> Any:
+    def build_model(self, parsed_model: Any, settings: SettingsProxy) -> Any:
         """
-        Builds a neural model from the parsed template.
+        Builds a neural model from the parsed model.
 
         Parameters
         ----------
-        parsed_template : Any
-            The parsed template.
+        parsed_model : Any
+            The parsed model.
         settings : SettingsProxy
             The settings proxy.
 
@@ -195,7 +195,7 @@ class Builder:
         Any
             The built neural model.
         """
-        neural_model = self.neural_model(parsed_template.getAllWeights(), settings.settings)
+        neural_model = self.neural_model(parsed_model.getAllWeights(), settings.settings)
 
         return neural_model
 

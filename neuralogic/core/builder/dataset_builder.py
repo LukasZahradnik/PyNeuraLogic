@@ -13,7 +13,7 @@ from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
 
-TemplateEntries = BaseRelation | WeightedRelation | Rule
+ModelEntries = BaseRelation | WeightedRelation | Rule
 
 
 class DatasetBuilder:
@@ -21,12 +21,12 @@ class DatasetBuilder:
     DatasetBuilder is responsible for grounding and neuralizing datasets.
     """
 
-    def __init__(self, parsed_template: Any, java_factory: JavaFactory):
+    def __init__(self, parsed_model: Any, java_factory: JavaFactory):
         """
         Parameters
         ----------
-        parsed_template : Any
-            The parsed template.
+        parsed_model : Any
+            The parsed model.
         java_factory : JavaFactory
             The java factory.
         """
@@ -34,7 +34,7 @@ class DatasetBuilder:
             initialize()
 
         self.java_factory = java_factory
-        self.parsed_template = parsed_template
+        self.parsed_model = parsed_model
 
         self.grounding_mode = jpype.JClass("cz.cvut.fel.ida.setup.Settings").GroundingMode
         self.logic_sample = jpype.JClass("cz.cvut.fel.ida.logic.constructs.example.LogicSample")
@@ -234,7 +234,7 @@ class DatasetBuilder:
                 queries, examples, one_query_per_example, example_queries
             )
 
-            groundings = builder.ground_from_logic_samples(self.parsed_template, logic_samples, progress)
+            groundings = builder.ground_from_logic_samples(self.parsed_model, logic_samples, progress)
 
             self.java_factory.weight_factory = weight_factory
         elif isinstance(dataset, datasets.FileDataset):
@@ -248,7 +248,7 @@ class DatasetBuilder:
                 args.extend(["-e", dataset.examples_file])
             sources = Sources.from_args(args, settings)
 
-            groundings = builder.ground_from_sources(self.parsed_template, sources, progress)
+            groundings = builder.ground_from_sources(self.parsed_model, sources, progress)
         else:
             raise NotImplementedError
 

@@ -1,5 +1,5 @@
 # Zebra Puzzle https://en.wikipedia.org/wiki/Zebra_Puzzle
-from neuralogic.core import R, V, Template
+from neuralogic.core import R, V, Model
 from neuralogic.inference import InferenceEngine
 
 color_vars = [V.Blue, V.Yellow, V.Ivory, V.Green, V.Red]
@@ -8,7 +8,7 @@ pet_vars = [V.Horse, V.Zebra, V.Fox, V.Dog, V.Snails]
 smoke_vars = [V.Kools, V.Chesterfield, V.LuckyStrike, V.OldGold, V.Parliament]
 person_vars = [V.Norwegian, V.Spaniard, V.Ukrainian, V.Japanese, V.Englishman]
 
-template = Template()
+model = Model()
 
 # 1. There are five houses.
 template += [R.house(i) for i in range(1, 6)]
@@ -58,7 +58,7 @@ template += R.solve(*person_vars, V.Zebra, V.Water) <= [
     R.special.alldiff(person_vars),
 ]
 
-inferene_engine = InferenceEngine(template)
+inferene_engine = InferenceEngine(model)
 
 for solution in inferene_engine.query(R.solve(*person_vars, V.Zebra, V.Water)):
     print("Solution:", solution)

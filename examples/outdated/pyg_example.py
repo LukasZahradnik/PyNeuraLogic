@@ -4,8 +4,8 @@ import torch
 import torch_geometric.transforms as T
 from torch_geometric.datasets import Planetoid
 
-from neuralogic.utils.templates import TemplateList, GCNConv
-from neuralogic.core import Template, Backend, Activation, Settings, Optimizer
+from neuralogic.utils.templates import ModelList, GCNConv
+from neuralogic.core import Model, Backend, Activation, Settings, Optimizer
 from neuralogic.utils.data import Data, Dataset
 from neuralogic.nn import get_evaluator
 
@@ -21,14 +21,14 @@ test_dataset = Dataset(data=[test_data])
 
 torch.manual_seed(123)
 
-template_list = TemplateList(
+template_list = ModelList(
     [
         GCNConv(in_channels=dataset.num_features, out_channels=16, activation=Activation.RELU),
         GCNConv(in_channels=16, out_channels=dataset.num_classes, activation=Activation.SIGMOID),
     ]
 )
 
-template = Template(module_list=template_list)
+model = Model(module_list=template_list)
 
 settings = Settings(epochs=1000, optimizer=Optimizer.ADAM, learning_rate=0.01)
 evaluator = get_evaluator(template, Backend.PYG, settings, native_backend_models=True)

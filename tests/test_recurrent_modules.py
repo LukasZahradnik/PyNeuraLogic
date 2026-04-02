@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import torch
 
-from neuralogic.core import Template, Settings, R, V, Transformation
+from neuralogic.core import Model, Settings, R, V, Transformation
 from neuralogic.dataset import Dataset, Sample
 from neuralogic.nn.loss import MSE
 
@@ -24,7 +24,7 @@ def test_gru_module(input_size, hidden_size, sequence_len, epochs):
 
     rnn = torch.nn.GRU(input_size, hidden_size, 1, bias=False)
 
-    template = Template()
+    model = Model()
     template += GRU(input_size, hidden_size, "h", "f", "h0", arity=0)
 
     model = template.build(
@@ -87,7 +87,7 @@ def test_rnn_module(input_size, hidden_size, sequence_len, epochs):
 
     rnn = torch.nn.RNN(input_size, hidden_size, 1, bias=False)
 
-    template = Template()
+    model = Model()
     template += RNN(input_size, hidden_size, "h", "f", "h0", arity=0)
 
     model = template.build(
@@ -146,7 +146,7 @@ def test_lstm_module(input_size, hidden_size, sequence_len, epochs):
 
     rnn = torch.nn.LSTM(input_size, hidden_size, 1, bias=False)
 
-    template = Template()
+    model = Model()
     template += LSTM(input_size, hidden_size, "h", "f", "h0", "c0", arity=0)
 
     model = template.build(
@@ -212,7 +212,7 @@ def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
 
     rnn = torch.nn.RNN(input_size, hidden_size, 1, bias=False)
 
-    template = Template()
+    model = Model()
     template += RNN(input_size, hidden_size, "h", "f", "h0", arity=0)
 
     model = template.build(Settings(chain_pruning=False, iso_value_compression=False, error_function=MSE()), torch=True)
@@ -281,7 +281,7 @@ def test_rnn_custom(input_size, hidden_size, sequence_len, epochs):
 
     rnn = torch.nn.RNN(input_size, hidden_size, 1, bias=False, nonlinearity="relu")
 
-    template = Template()
+    model = Model()
     template += RNN(input_size, hidden_size, "h", "f", "h0", arity=0, activation=Transformation.RELU)
 
     model = template.build(
@@ -343,7 +343,7 @@ def test_lstm_module_simple(input_size, hidden_size, sequence_len, epochs):
 
     rnn = torch.nn.LSTM(input_size, hidden_size, 1, bias=False)
 
-    template = Template()
+    model = Model()
 
     template += [
         R.h(0) <= R.h0,
@@ -435,7 +435,7 @@ def test_gru_module_simple(input_size, hidden_size, sequence_len, epochs):
 
     rnn = torch.nn.GRU(input_size, hidden_size, 1, bias=False)
 
-    template = Template()
+    model = Model()
 
     template += R.h(0) <= R.h0
     template += (

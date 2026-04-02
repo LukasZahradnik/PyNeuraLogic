@@ -1,13 +1,13 @@
 from typing import List
 from examples.datasets.data.train_example_data import train_example_data
 
-from neuralogic.core import Relation, Template, Var, Const, Transformation
+from neuralogic.core import Relation, Model, Var, Const, Transformation
 from neuralogic.dataset import Dataset
 
 
 dataset = Dataset()
 
-template = Template()
+model = Model()
 
 # One example per train, doesn't know order of vagons
 
@@ -22,7 +22,7 @@ Y = Var.Y  # todo gusta: tohle je dobry trik, ten bych pouzival na vic mistech, 
 
 meta = [Transformation.TANH]
 
-template.add_rules(
+model.add_rules(
     [
         *[(Relation.shape(Y) <= Relation.shape(Y, s)[1, ]) | meta for s in shapes],
         *[(Relation.length(Y) <= Relation.length(Y, s)[1, ]) | meta for s in [Const.short, Const.long]],

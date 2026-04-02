@@ -2,7 +2,7 @@ import torch
 from torch.nn import Sequential
 
 import neuralogic
-from neuralogic.core import Relation, Template, R, F
+from neuralogic.core import Relation, Model, R, F
 from neuralogic.nn.torch_function import NeuraLogic
 
 
@@ -10,7 +10,7 @@ def test_torch_function_with_parameters():
     torch.manual_seed(1)
     neuralogic.manual_seed(1)
 
-    template = Template()
+    model = Model()
     template += Relation.xor[1, 8] <= Relation.xy
 
     def to_logic(tensor_data):
@@ -58,7 +58,7 @@ def test_torch_function_without_parameters():
     torch.manual_seed(1)
     neuralogic.manual_seed(1)
 
-    template = Template()
+    model = Model()
     template += Relation.xor <= Relation.xy
 
     def to_logic(tensor_data):

@@ -2,7 +2,7 @@ import pytest
 
 import torch
 
-from neuralogic.core import Template, R, Settings, Transformation
+from neuralogic.core import Model, R, Settings, Transformation
 from neuralogic.core.constructs.function.function import TransformationFunction
 from neuralogic.nn.module import Linear
 from neuralogic.dataset import Dataset, Sample
@@ -27,7 +27,7 @@ def test_linear_module(feature_size: int, output_size: int, num_of_inputs: int, 
     if activation == Transformation.TANH:
         linear_output = torch.tanh_(linear_output)
 
-    template = Template()
+    model = Model()
     template += Linear(feature_size, output_size, "h", "f", activation=activation)
     model = template.build(Settings(iso_value_compression=False, chain_pruning=False))
 

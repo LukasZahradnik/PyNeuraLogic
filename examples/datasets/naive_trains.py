@@ -1,11 +1,11 @@
 from examples.datasets.data.train_example_data import train_example_data
 
-from neuralogic.core import Relation, Template, Var, Const, Transformation
+from neuralogic.core import Relation, Model, Var, Const, Transformation
 from neuralogic.dataset import Dataset
 
 
 dataset = Dataset()
-template = Template()
+model = Model()
 
 # Naive trains - one big example
 
@@ -21,7 +21,7 @@ Y = Var.Y
 
 meta = [Transformation.TANH]
 
-template.add_rules(
+model.add_rules(
     [
         *[(Relation.shape(X, Y) <= Relation.shape(X, Y, s)[1, ]) | meta for s in shapes],
         *[(Relation.length(X, Y) <= Relation.length(X, Y, s)[1, ]) | meta for s in [Const.short, Const.long]],

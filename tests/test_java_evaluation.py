@@ -1,7 +1,7 @@
 from typing import List
 
 from neuralogic import manual_seed
-from neuralogic.core import Settings, Template
+from neuralogic.core import Settings, Model
 from neuralogic.dataset.base import BaseDataset
 from neuralogic.optim import SGD
 from neuralogic.utils.data import XOR, XOR_Vectorized, Trains, Mutagenesis
@@ -244,7 +244,7 @@ import pytest
         ),
     ],
 )
-def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expected_results: List[float]) -> None:
+def test_evaluator_run_on_files(template: Model, dataset: BaseDataset, expected_results: List[float]) -> None:
     """Tests for running java evaluator on files"""
     manual_seed(0)
     settings = Settings(optimizer=SGD(0.1))
@@ -354,7 +354,7 @@ def test_evaluator_run_on_files(template: Template, dataset: BaseDataset, expect
     ],
 )
 def test_evaluator_run_on_rules(
-    template: Template, dataset: BaseDataset, expected_results: List[float], seed: int
+    template: Model, dataset: BaseDataset, expected_results: List[float], seed: int
 ) -> None:
     """Tests for running java evaluator on rules"""
     manual_seed(seed)
@@ -381,7 +381,7 @@ def test_evaluator_run_on_rules(
         (naive_xor.template, naive_xor.dataset),
     ],
 )
-def test_evaluator_state_loading(template: Template, dataset: BaseDataset) -> None:
+def test_evaluator_state_loading(template: Model, dataset: BaseDataset) -> None:
     """Tests for loading state"""
     settings = Settings(optimizer=SGD(0.1), epochs=20)
 
@@ -393,7 +393,7 @@ def test_evaluator_state_loading(template: Template, dataset: BaseDataset) -> No
     for predicted in template.test(built_dataset):
         results.append(round(predicted, 5))
 
-    second_template = template.clone()
+    second_model = template.clone()
     second_template.build(settings)
 
     built_dataset = second_template.build_dataset(dataset)

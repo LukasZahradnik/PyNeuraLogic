@@ -4,7 +4,7 @@ import itertools
 import pytest
 
 from neuralogic import manual_seed
-from neuralogic.core import Settings, R, V, Template, Transformation
+from neuralogic.core import Settings, R, V, Model, Transformation
 from neuralogic.dataset import Dataset, Sample
 from neuralogic.optim import SGD
 
@@ -22,7 +22,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
     manual_seed(0)
 
     dataset = Dataset()
-    template = Template()
+    model = Model()
 
     template += (R.xor_at(0) <= R.val_at(0)) | [Transformation.TANH]
     template += (
@@ -66,10 +66,10 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
     """Tests xor generalization"""
     # fmt: off
     manual_seed(0)
-    template = Template()
+    model = Model()
 
     # We have three weights in total named "a", "b" and "c"
-    template.add_rules([
+    model.add_rules([
 
         # This rule does xor for the last pair
         (R.xor(V.X, V.Y)["a":1, 8] <= (

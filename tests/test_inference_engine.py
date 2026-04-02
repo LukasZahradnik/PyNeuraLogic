@@ -1,4 +1,4 @@
-from neuralogic.core import Template, R, V, C
+from neuralogic.core import Model, R, V, C
 
 
 def test_inference_engine_london_reachable() -> None:
@@ -6,9 +6,9 @@ def test_inference_engine_london_reachable() -> None:
     Test of the inference engine
     based on https://book.simply-logical.space/part_i.html#a_brief_introduction_to_clausal_logic
     """
-    template = Template()
+    model = Model()
 
-    template.add_rules(
+    model.add_rules(
         [
             R.connected(C.bond_street, C.oxford_circus, C.central),
             R.connected(C.oxford_circus, C.tottenham_court_road, C.central),
@@ -40,7 +40,7 @@ def test_inference_engine_london() -> None:
     Test of the inference engine
     based on https://book.simply-logical.space/part_i.html#a_brief_introduction_to_clausal_logic
     """
-    template = Template()
+    model = Model()
 
     knowledge = [
         R.connected(C.bond_street, C.oxford_circus, C.central),
@@ -56,7 +56,7 @@ def test_inference_engine_london() -> None:
         R.connected(C.leicester_square, C.charing_cross, C.northern),
     ]
 
-    template.add_rules(
+    model.add_rules(
         [
             R.nearby(V.X, V.Y) <= R.connected(V.X, V.Y, V.L),
             R.nearby(V.X, V.Y) <= (R.connected(V.X, V.Z, V.L), R.connected(V.Z, V.Y, V.L)),
@@ -98,7 +98,7 @@ def test_inference_engine_london() -> None:
 
 
 def test_listing_all_queries() -> None:
-    template = Template()
+    model = Model()
 
     template += R.h(V.X) <= R.edge(V.Y, V.X)
     template += R.h1(V.X) <= (R.h(V.Y), R.edge(V.Y, V.X))

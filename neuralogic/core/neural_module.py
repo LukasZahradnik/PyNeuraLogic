@@ -18,7 +18,7 @@ Value = list | float
 
 class NeuralModule:
     """
-    NeuralModule is the base class for all neural templates and models.
+    NeuralModule is the base class for all neural models.
     It provides methods for grounding, building, training, and testing.
     """
 
@@ -30,7 +30,7 @@ class NeuralModule:
         self._need_sync = False
         self._value_factory = ValueFactory()
 
-        self._parsed_template = None
+        self._parsed_model = None
         self._dataset_builder: DatasetBuilder | None = None
         self._settings: SettingsProxy | None = None
 
@@ -54,7 +54,7 @@ class NeuralModule:
         learnable_facts: bool = False,
         progress: bool = False,
     ) -> GroundedDataset:
-        """Grounds the provided dataset using the template's settings.
+        """Grounds the provided dataset using the model's settings.
 
         Parameters
         ----------
@@ -73,7 +73,7 @@ class NeuralModule:
             The grounded dataset.
         """
         if self._dataset_builder is None or self._settings is None:
-            raise ValueError("template is not built")
+            raise ValueError("model is not built")
 
         return self._dataset_builder.ground_dataset(
             dataset,
@@ -110,7 +110,7 @@ class NeuralModule:
             The built dataset.
         """
         if self._dataset_builder is None or self._settings is None:
-            raise ValueError("template is not built")
+            raise ValueError("model is not built")
 
         return self._dataset_builder.build_dataset(
             dataset,
@@ -255,7 +255,7 @@ class NeuralModule:
             self._torch_module.update_tensor_parameters(self._tensor_parameters)
 
     def load_state_dict(self, state_dict: dict):
-        self._sync_template(state_dict, self._neural_model.getAllWeights())
+        self._sync_model(state_dict, self._neural_model.getAllWeights())
 
         if self._torch_module is not None:
             self._torch_module.update_tensor_parameters(self._tensor_parameters)
@@ -271,7 +271,7 @@ class NeuralModule:
         **kwargs,
     ):
         if self._dataset_builder is None or self._settings is None:
-            raise ValueError("template is not built")
+            raise ValueError("model is not built")
         return draw_model(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
 
     def _initialize_neural_module(self, dataset_builder: DatasetBuilder, settings: SettingsProxy, model, torch: bool):
@@ -319,9 +319,9 @@ class NeuralModule:
             return dataset._samples, dataset._batch_size
         return dataset, 1
 
-    def _sync_template(self, state_dict: dict | None = None, weights=None):
+    def _sync_model(self, state_dict: dict | None = None, weights=None):
         state_dict = self.state_dict() if state_dict is None else state_dict
-        weights = self._parsed_template.getAllWeights() if weights is None else weights
+        weights = self._parsed_model.getAllWeights() if weights is None else weights
         weight_dict = state_dict["weights"]
 
         for weight in weights:

@@ -32,7 +32,7 @@ class Converter:
         self.std_functions = None
 
     def _process_template_entries(self) -> Tuple[defaultdict, Dict[str, Metadata]]:
-        template = self.model.source_template
+        model = self.model.source_template
         weight_index = 0
 
         batched_relations: defaultdict[str, defaultdict[int, List]] = defaultdict(lambda: defaultdict(list))
@@ -63,7 +63,7 @@ class Converter:
             elif isinstance(entry, PredicateMetadata):
                 predicates_metadata[str(entry.predicate)] = entry.metadata
             else:
-                raise NotImplementedError("Template can contain only relations or predicate metadata!")
+                raise NotImplementedError("Model can contain only relations or predicate metadata!")
         return batched_relations, predicates_metadata
 
     def _convert(self):
