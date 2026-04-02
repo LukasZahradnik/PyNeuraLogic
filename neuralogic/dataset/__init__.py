@@ -4,6 +4,7 @@ from neuralogic.dataset.logic import Dataset, Sample
 from neuralogic.dataset.tensor import TensorDataset, Data
 from neuralogic.dataset.csv import Mode, CSVFile, CSVDataset
 from neuralogic.dataset.db import DBDataset, DBSource
+from neuralogic.dataset.pddl import PDDLDataset
 
 __all__ = [
     "BaseDataset",
@@ -18,4 +19,5 @@ __all__ = [
     "CSVDataset",
     "DBDataset",
     "DBSource",
+    "PDDLDataset",
 ]
