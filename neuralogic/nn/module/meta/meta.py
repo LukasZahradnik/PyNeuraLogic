@@ -1,14 +1,14 @@
 from typing import List
 
-from neuralogic.core.constructs.function.function import TransformationFunction, AggregationFunction
-from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.constructs.function import Transformation, Aggregation
 from neuralogic.core.constructs.factories import R, V
+from neuralogic.core.constructs.function import Aggregation, Transformation
+from neuralogic.core.constructs.function.function import AggregationFunction, TransformationFunction
+from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.nn.module.module import Module
 
 
 class MetaConv(Module):
-    """
+    r"""
     Metagraph Convolutional Unit layer.
 
     From `Meta-GNN: metagraph neural network for semi-supervised learning in attributed heterogeneous information networks <https://dl.acm.org/doi/10.1145/3341161.3342859>`_.

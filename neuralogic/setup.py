@@ -1,10 +1,9 @@
 import os
-from typing import Optional, List
+from typing import List, Optional
 
 import jpype
 
-from neuralogic.logging import _init_logging, LogHandler, add_log_handler
-
+from neuralogic.logging import LogHandler, _init_logging, add_log_handler
 
 _is_initialized = False
 _seed = int.from_bytes(os.urandom(4), byteorder="big")

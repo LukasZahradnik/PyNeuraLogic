@@ -1,12 +1,12 @@
-from typing import Union, Sequence
+from typing import Sequence, Union
 
 import jpype
 
+from neuralogic.core.constructs.factories import R
 from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.dataset.base import BaseDataset
-from neuralogic.core.constructs.factories import R
 
 DatasetEntries = Union[BaseRelation, Rule]
 
@@ -17,7 +17,9 @@ class Sample:
         "example",
     )
 
-    def __init__(self, query: BaseRelation | list[BaseRelation] | None, example: Sequence[DatasetEntries] | DatasetEntries | None):
+    def __init__(
+        self, query: BaseRelation | list[BaseRelation] | None, example: Sequence[DatasetEntries] | DatasetEntries | None
+    ):
         self.query = query
 
         if example is None:

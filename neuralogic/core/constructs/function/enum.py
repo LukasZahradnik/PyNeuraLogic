@@ -1,8 +1,8 @@
 from neuralogic.core.constructs.function.concat import ConcatAggregation, ConcatCombination
 from neuralogic.core.constructs.function.function import (
-    TransformationFunction,
-    CombinationFunction,
     AggregationFunction,
+    CombinationFunction,
+    TransformationFunction,
 )
 from neuralogic.core.constructs.function.reshape import Reshape
 from neuralogic.core.constructs.function.slice import Slice
@@ -14,6 +14,7 @@ class Transformation:
     Collection of transformation functions.
     Transformation functions are applied element-wise or as join operations (e.g., Softmax, Transpose).
     """
+
     # Element wise
     SIGMOID: TransformationFunction = TransformationFunction("SIGMOID")
     TANH: TransformationFunction = TransformationFunction("TANH")
@@ -47,6 +48,7 @@ class Combination:
     Combination functions are used to combine multiple inputs into a single output,
     often as part of a rule body or for combining multiple rules.
     """
+
     # Aggregation
     AVG: CombinationFunction = CombinationFunction("AVG", namespace="aggregation.Average")
     MAX: CombinationFunction = CombinationFunction("MAX", can_flatten=True, namespace="aggregation.Maximum")
@@ -73,6 +75,7 @@ class Aggregation:
     Collection of aggregation functions.
     Aggregation functions are used to aggregate multiple inputs, typically from different groundings of the same rule.
     """
+
     AVG: AggregationFunction = AggregationFunction("AVG")
     MAX: AggregationFunction = AggregationFunction("MAX")
     MIN: AggregationFunction = AggregationFunction("MIN")
@@ -87,6 +90,7 @@ class F:
     Utility class providing a flat namespace for common functions.
     It includes transformation, combination, and aggregation functions.
     """
+
     # Element wise
     sigmoid: TransformationFunction = Transformation.SIGMOID
     tanh: TransformationFunction = Transformation.TANH

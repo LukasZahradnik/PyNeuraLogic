@@ -1,7 +1,7 @@
 import math
 
-from neuralogic.core.constructs.function import Transformation, Combination, Aggregation
 from neuralogic.core.constructs.factories import R
+from neuralogic.core.constructs.function import Aggregation, Combination, Transformation
 from neuralogic.nn.module.module import Module
 
 

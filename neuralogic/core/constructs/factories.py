@@ -1,6 +1,7 @@
 from typing import Any
-from neuralogic.core.constructs.predicate import Predicate
+
 from neuralogic.core.constructs import relation
+from neuralogic.core.constructs.predicate import Predicate
 from neuralogic.core.constructs.term import Constant, Variable
 
 
@@ -9,6 +10,7 @@ class SpecialPredicateFactory:
     Factory for creating special predicates, such as 'alldiff', 'neq', 'eq', etc.
     Special predicates are handled differently by the backend engine.
     """
+
     def __init__(self, hidden: bool = False):
         """
         Parameters
@@ -125,6 +127,7 @@ class HiddenPredicateFactory:
     Factory for creating hidden predicates.
     Hidden predicates are not part of the output unless explicitly requested.
     """
+
     @property
     def special(self) -> SpecialPredicateFactory:
         return SpecialPredicateFactory(hidden=True)
@@ -153,6 +156,7 @@ class AtomFactory:
     Factory for creating atoms (relations) in the logic program.
     It supports dot notation for predicate names and provides access to special and hidden factories.
     """
+
     def __init__(self):
         """Initializes the AtomFactory."""
         self.instances: dict[str, dict[int, relation.BaseRelation]] = {}
@@ -189,6 +193,7 @@ class VariableFactory:
     Factory for creating variables.
     Variables are automatically capitalized unless specified otherwise.
     """
+
     def __getattr__(self, item: str) -> Variable:
         return self.get(item)
 
@@ -216,6 +221,7 @@ class ConstantFactory:
     Factory for creating constants.
     Constants are automatically converted to lowercase unless specified otherwise.
     """
+
     def __getattr__(self, item: str) -> Constant:
         return self.get(item)
 

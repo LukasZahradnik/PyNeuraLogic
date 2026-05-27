@@ -167,7 +167,7 @@ def test_alldiff():
         (R.special.mod_eval, 3 % 2),
         (R.special.max_eval, max(3, 2)),
         (R.special.min_eval, min(3, 2)),
-    )
+    ),
 )
 def test_eval_predicates(predicate, expected):
     var_value, const_value = 3, 2

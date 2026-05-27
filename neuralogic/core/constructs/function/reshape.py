@@ -9,6 +9,7 @@ class Reshape(TransformationFunction):
     """
     Represents a reshape transformation function that changes the shape of a tensor.
     """
+
     __slots__ = ("shape",)
 
     def __init__(

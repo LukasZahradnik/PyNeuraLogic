@@ -5,7 +5,6 @@ from neuralogic.core.constructs.rule import Rule
 from neuralogic.db.converter import Converter
 from neuralogic.db.pg.helpers import helpers
 
-
 FUNCTION_TEMPLATE = """
 CREATE OR REPLACE FUNCTION {name}({params}) RETURNS {return_type} AS $$
 {body}
@@ -69,7 +68,7 @@ class PostgresConverter(Converter):
         used_functions.add("mul")
         used_functions.add("sum")
 
-        function_sources = ["CREATE SCHEMA IF NOT EXISTS neuralogic_std;" "CREATE SCHEMA IF NOT EXISTS neuralogic;"]
+        function_sources = ["CREATE SCHEMA IF NOT EXISTS neuralogic_std;CREATE SCHEMA IF NOT EXISTS neuralogic;"]
 
         for fun in used_functions:
             helper_fun = helpers[fun]

@@ -295,7 +295,7 @@ def test_evaluator_run_on_files(model: Model, dataset: BaseDataset, expected_res
                 -0.734,
                 0.761,
             ],
-            0
+            0,
         ),
         (
             multiple_examples_trains.model,
@@ -353,9 +353,7 @@ def test_evaluator_run_on_files(model: Model, dataset: BaseDataset, expected_res
         ),
     ],
 )
-def test_evaluator_run_on_rules(
-    model: Model, dataset: BaseDataset, expected_results: List[float], seed: int
-) -> None:
+def test_evaluator_run_on_rules(model: Model, dataset: BaseDataset, expected_results: List[float], seed: int) -> None:
     """Tests for running java evaluator on rules"""
     manual_seed(seed)
     settings = Settings(optimizer=SGD(lr=0.1))

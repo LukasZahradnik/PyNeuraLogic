@@ -1,4 +1,4 @@
-from neuralogic.core.constructs.function.enum import Transformation, Combination, Aggregation, F
+from neuralogic.core.constructs.function.enum import Aggregation, Combination, F, Transformation
 from neuralogic.core.constructs.function.function import Function
 from neuralogic.core.constructs.function.function_container import FContainer
 

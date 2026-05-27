@@ -2,14 +2,15 @@ from typing import Any
 
 import jpype
 
-from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.settings import SettingsProxy
+from neuralogic.setup import initialize, is_initialized
 
 
 class Sources:
     """
     Represents the logic sources (models, examples, queries) for the NeuraLogic backend.
     """
+
     @staticmethod
     def from_settings(settings: SettingsProxy) -> "Sources":
         """

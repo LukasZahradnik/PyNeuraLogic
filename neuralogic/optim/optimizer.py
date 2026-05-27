@@ -1,4 +1,5 @@
 from typing import Any
+
 from neuralogic.optim.lr_scheduler import LRDecay
 
 
@@ -7,6 +8,7 @@ class Optimizer:
     Base class for all optimizers.
     Optimizers are used to update the weights of the neural network during training.
     """
+
     def __init__(self, lr: float, lr_decay: LRDecay | None = None):
         """
         Parameters

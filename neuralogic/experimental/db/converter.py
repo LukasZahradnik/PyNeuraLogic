@@ -1,11 +1,10 @@
 import dataclasses
 from collections import defaultdict
-from typing import List, Dict, Tuple, Set
+from typing import Dict, List, Set, Tuple
 
-from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
-
-from neuralogic.core import Aggregation, Settings, Metadata
+from neuralogic.core import Aggregation, Metadata, Settings
 from neuralogic.core.constructs.predicate import PredicateMetadata
+from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 
 
@@ -32,7 +31,7 @@ class Converter:
         self.std_functions = None
 
     def _process_template_entries(self) -> Tuple[defaultdict, Dict[str, Metadata]]:
-        model = self.model.source_template
+        template = self.model.source_template
         weight_index = 0
 
         batched_relations: defaultdict[str, defaultdict[int, List]] = defaultdict(lambda: defaultdict(list))

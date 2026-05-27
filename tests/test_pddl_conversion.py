@@ -23,17 +23,17 @@ def test_pddl_conversion() -> None:
     """
 
     pddl_dataset = PDDLDataset(domain_str, problem_str)
-    
+
     logic_dataset = pddl_dataset.to_dataset()
 
     assert len(logic_dataset) == 1
     sample = logic_dataset[0]
 
     example_strs = [str(e) for e in sample.example]
-    
+
     assert "clear(a)." in example_strs
     assert "holding(b)." in example_strs
-    
+
     assert "on(X, Y) :- clear(Y), holding(X)." in example_strs
     assert "clear(X) :- clear(Y), holding(X)." in example_strs
     assert "!*clear(Y) :- clear(Y), holding(X)." in example_strs

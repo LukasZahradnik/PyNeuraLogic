@@ -1,5 +1,5 @@
-from typing import Any
 from types import EllipsisType
+from typing import Any
 
 import jpype
 
@@ -10,6 +10,7 @@ class Slice(TransformationFunction):
     """
     Represents a slice transformation function that extracts a sub-tensor from a tensor.
     """
+
     __slots__ = ("rows", "cols")
 
     def __init__(

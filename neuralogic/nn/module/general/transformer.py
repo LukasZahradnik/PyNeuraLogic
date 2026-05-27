@@ -1,8 +1,8 @@
-from neuralogic.core.constructs.function import Transformation
 from neuralogic.core.constructs.factories import R
-from neuralogic.nn.module.module import Module
-from neuralogic.nn.module.general.mlp import MLP
+from neuralogic.core.constructs.function import Transformation
 from neuralogic.nn.module.general.attention import MultiheadAttention
+from neuralogic.nn.module.general.mlp import MLP
+from neuralogic.nn.module.module import Module
 
 
 class Transformer(Module):

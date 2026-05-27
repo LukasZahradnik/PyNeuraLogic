@@ -1,16 +1,11 @@
-numpy>=1.20.4
-pre-commit>=2.10.1
-pytest
-torch
-tqdm
-JPype1>=1.3.0
-matplotlib
-
-jupyter>=1.0.0
-
-sphinx
-sphinx-rtd-theme
-sphinx-tabs
-sphinx-copybutton
-
-torch_geometric
+# Dependencies are managed via pyproject.toml.
+# Run `uv sync` to install all dependencies, or:
+#
+#   uv sync                # runtime deps only
+#   uv sync --dev          # + dev tools (pytest, pre-commit, ruff)
+#   uv sync --all-extras   # all optional deps
+#
+# For pip-only installs:
+#   pip install -e .                    # runtime
+#   pip install -e ".[dev,doc,torch]"   # with extras
+#

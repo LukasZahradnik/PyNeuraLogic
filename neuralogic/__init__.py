@@ -1,18 +1,17 @@
+from neuralogic.core import C, Const, F, Model, R, Relation, Settings, V, Var
 from neuralogic.logging import LogHandler, add_log_handler
-from neuralogic.core import R, V, C, F, Model, Settings, Relation, Var, Const
 from neuralogic.setup import (
-    seed,
-    set_max_memory_size,
-    manual_seed,
+    get_default_graphviz_path,
     initial_seed,
     initialize,
     is_initialized,
+    manual_seed,
+    seed,
     set_graphviz_path,
-    set_jvm_path,
     set_jvm_options,
-    get_default_graphviz_path,
+    set_jvm_path,
+    set_max_memory_size,
 )
-
 
 __all__ = [
     "R",

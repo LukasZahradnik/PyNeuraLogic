@@ -1,15 +1,17 @@
 import enum
-import numpy as np
 from typing import Any
 
+import numpy as np
+
 from neuralogic.core.constructs.java_objects import ValueFactory
-from neuralogic.utils.visualize import draw_sample, draw_grounding
+from neuralogic.utils.visualize import draw_grounding, draw_sample
 
 
 class NeuronType(enum.StrEnum):
     """
     Enum representing different types of neurons in the neural network.
     """
+
     Aggregation = "AggregationNeuron"
     Atom = "AtomNeuron"
     Negation = "NegationNeuron"
@@ -24,6 +26,7 @@ class Atom:
     """
     Represents an atom in the logic program, often corresponding to a node in the neural network.
     """
+
     __slots__ = "substitutions", "_atom", "_predicate", "_arity"
 
     def __init__(self, atom: Any, substitutions: dict[str, Any]):
@@ -68,6 +71,7 @@ class Neuron(Atom):
     """
     Represents a neuron in the neural network, extending the Atom class with value and gradient properties.
     """
+
     def __init__(self, neuron: Any, substitutions: dict[str, Any]):
         self.substitutions = substitutions
         self._atom = neuron
@@ -88,6 +92,7 @@ class NeuralSample:
     """
     Represents a single training or testing sample, containing the query and its associated neural network (evidence).
     """
+
     __slots__ = "_java_sample", "_neurons"
 
     def __init__(self, sample: Any):
@@ -280,6 +285,7 @@ class Grounding:
     """
     Represents a grounded model, providing access to grounded atoms and facts.
     """
+
     __slots__ = ("_grounding", "_atoms")
 
     def __init__(self, grounding: Any):

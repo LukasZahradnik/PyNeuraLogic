@@ -1,5 +1,6 @@
-import jpype
 from typing import Any
+
+import jpype
 
 from neuralogic.core.constructs.function.function import AggregationFunction, CombinationFunction
 
@@ -8,6 +9,7 @@ class ConcatCombination(CombinationFunction):
     """
     Represents a concatenation combination function that joins multiple tensors along a specified axis.
     """
+
     __slots__ = ("axis",)
 
     def __init__(
@@ -62,6 +64,7 @@ class ConcatAggregation(AggregationFunction):
     """
     Represents a concatenation aggregation function that joins multiple groundings along a specified axis.
     """
+
     __slots__ = ("axis",)
 
     def __init__(

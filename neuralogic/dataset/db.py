@@ -5,9 +5,9 @@ from typing import Any
 
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
-from neuralogic.dataset.logic import Dataset
-from neuralogic.dataset.csv import CSVDataset, CSVFile, Mode
 from neuralogic.dataset.base import ConvertibleDataset
+from neuralogic.dataset.csv import CSVDataset, CSVFile, Mode
+from neuralogic.dataset.logic import Dataset
 
 DatasetEntries = BaseRelation | WeightedRelation | Rule
 
@@ -16,6 +16,7 @@ class DBSource:
     """
     Represents a database source (table) and its configuration for conversion to logic relations.
     """
+
     __slots__ = (
         "relation_name",
         "table_name",
@@ -134,6 +135,7 @@ class DBDataset(ConvertibleDataset):
     """
     Represents a dataset composed of one or more database sources.
     """
+
     def __init__(
         self,
         connection: Any,

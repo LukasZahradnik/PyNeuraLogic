@@ -11,6 +11,7 @@ class SoftmaxAggregation(AggregationFunction):
     Represents a Softmax aggregation function.
     It can be parametrized by specific terms (variables) to aggregate over.
     """
+
     __slots__ = ("agg_terms", "var_terms")
 
     def __init__(

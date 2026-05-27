@@ -1,11 +1,12 @@
-import jpype
 from typing import Any
+
+import jpype
 from tqdm.autonotebook import tqdm
 
-from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.builder.components import NeuralSample
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
+from neuralogic.setup import initialize, is_initialized
 
 
 def stream_to_list(stream: Any) -> list:
@@ -135,7 +136,9 @@ class Builder:
         with tqdm(total=len(logic_samples), desc="Grounding", unit=" samples", dynamic_ncols=True) as pbar:
             return self._ground(parsed_model, None, logic_samples, self._callback(pbar))
 
-    def _ground(self, parsed_model: Any, sources: Sources | None, logic_samples: list[Any] | None, callback: Any) -> Any:
+    def _ground(
+        self, parsed_model: Any, sources: Sources | None, logic_samples: list[Any] | None, callback: Any
+    ) -> Any:
         if sources is not None:
             ground_pipeline = self.example_builder.buildGroundings(parsed_model, sources.sources, callback)
         else:

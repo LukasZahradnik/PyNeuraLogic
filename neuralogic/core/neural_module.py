@@ -2,16 +2,14 @@ from typing import Collection
 
 import jpype
 
-from neuralogic.setup import is_initialized, initialize
-from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core.builder.dataset import BuiltDataset, GroundedDataset
+from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.core.settings.settings_proxy import SettingsProxy
 from neuralogic.dataset import Dataset
 from neuralogic.dataset.base import BaseDataset
-
+from neuralogic.setup import initialize, is_initialized
 from neuralogic.utils.visualize import draw_model
-
 
 Value = list | float
 
@@ -174,7 +172,8 @@ class NeuralModule:
                     ValueFactory.from_java(result.getTarget()),
                     ValueFactory.from_java(result.getOutput()),
                     ValueFactory.from_java(result.errorValue()),
-                ) for result in results
+                )
+                for result in results
             ]
 
         self._update_tensor_parameters()
@@ -282,7 +281,7 @@ class NeuralModule:
         if torch:
             try:
                 import torch
-            except:
+            except ImportError:
                 raise Exception("torch is not installed in the environment")
 
             from neuralogic.core.torch.neural_module import TorchNeuralModule

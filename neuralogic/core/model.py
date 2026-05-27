@@ -3,18 +3,17 @@ from typing import Any
 
 import jpype
 
-from neuralogic.dataset import Dataset
-from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.builder import Builder, DatasetBuilder
+from neuralogic.core.constructs.factories import R
+from neuralogic.core.constructs.java_objects import JavaFactory
+from neuralogic.core.constructs.predicate import PredicateMetadata
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
-from neuralogic.core.constructs.predicate import PredicateMetadata
-from neuralogic.core.constructs.java_objects import JavaFactory
-from neuralogic.core.constructs.factories import R
 from neuralogic.core.neural_module import NeuralModule
-from neuralogic.core.settings import SettingsProxy, Settings
+from neuralogic.core.settings import Settings, SettingsProxy
+from neuralogic.dataset import Dataset
 from neuralogic.nn.module.module import Module
-
+from neuralogic.setup import initialize, is_initialized
 
 ModelEntries = BaseRelation | WeightedRelation | Rule | PredicateMetadata
 

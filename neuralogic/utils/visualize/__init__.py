@@ -5,8 +5,8 @@ from typing import Any
 
 import jpype
 
-from neuralogic.setup import get_default_graphviz_path
 from neuralogic.core.settings import Settings, SettingsProxy
+from neuralogic.setup import get_default_graphviz_path
 
 
 def get_graphviz_path(path: str | None = None) -> str | None:
@@ -114,7 +114,15 @@ def get_grounding_drawer(settings: SettingsProxy) -> Any:
 # todo gusta: + groundingDrawer, pipelineDrawer...
 
 
-def draw(drawer: Any, obj: Any, filename: str | None = None, show: bool = True, img_type: str = "png", *args: Any, **kwargs: Any) -> Any:
+def draw(
+    drawer: Any,
+    obj: Any,
+    filename: str | None = None,
+    show: bool = True,
+    img_type: str = "png",
+    *args: Any,
+    **kwargs: Any,
+) -> Any:
     """Draws the object using the provided drawer.
 
     Parameters
@@ -162,14 +170,14 @@ def draw(drawer: Any, obj: Any, filename: str | None = None, show: bool = True, 
 
     if show:
         if is_jupyter():
-            from IPython.display import Image, SVG
+            from IPython.display import SVG, Image
 
             if img_type.lower() == "svg":
                 return SVG(data, *args, **kwargs)
             return Image(data, *args, **kwargs)
         else:
-            import matplotlib.pyplot as plt
             import matplotlib.image as mpimg
+            import matplotlib.pyplot as plt
 
             img = mpimg.imread(io.BytesIO(data), format=img_type)
             fig = plt.figure()
@@ -187,7 +195,7 @@ def draw(drawer: Any, obj: Any, filename: str | None = None, show: bool = True, 
 
 
 def to_dot_source(drawer: Any, obj: Any) -> str:
-        return str(drawer.getGraphSource(obj))
+    return str(drawer.getGraphSource(obj))
 
 
 def draw_model(

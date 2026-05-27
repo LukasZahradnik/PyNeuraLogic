@@ -1,7 +1,5 @@
-import jpype
-
 from neuralogic.core.builder import Builder
-from neuralogic.core.builder.components import NeuralSample, Grounding
+from neuralogic.core.builder.components import Grounding, NeuralSample
 
 
 class BuiltDataset:

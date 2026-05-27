@@ -4,8 +4,8 @@ from typing import Any
 import jpype
 
 from neuralogic.core.constructs.function.enum import Combination
-from neuralogic.core.constructs.function.function_graph import FunctionGraph
 from neuralogic.core.constructs.function.function import Function
+from neuralogic.core.constructs.function.function_graph import FunctionGraph
 
 
 class FContainer:
@@ -14,6 +14,7 @@ class FContainer:
 
     It allows for nesting and building complex function graphs.
     """
+
     __slots__ = "nodes", "function"
 
     def __init__(self, nodes: Iterable[Any], function: Function):

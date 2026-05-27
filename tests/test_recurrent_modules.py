@@ -322,7 +322,7 @@ def test_rnn_custom(input_size, hidden_size, sequence_len, epochs):
         loss.backward()
         optimizer.step()
 
-        result  = model.train(bd, epochs=1)
+        result = model.train(bd, epochs=1)
         assert np.allclose([float(x) for x in output[-1]], [float(x) for x in result[0][1]], atol=10e-5)
 
 

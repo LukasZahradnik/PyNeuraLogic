@@ -4,14 +4,14 @@ from typing import Any
 import jpype
 
 import neuralogic.dataset as datasets
-from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.builder.builder import Builder
 from neuralogic.core.builder.dataset import BuiltDataset, GroundedDataset
+from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
-from neuralogic.core.constructs.java_objects import JavaFactory
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
+from neuralogic.setup import initialize, is_initialized
 
 ModelEntries = BaseRelation | WeightedRelation | Rule
 
@@ -129,7 +129,9 @@ class DatasetBuilder:
             self.query_counter += 1
         return logic_samples, one_query_per_example
 
-    def build_examples(self, examples: Iterable[Any], examples_builder: Any, learnable_facts: bool = False) -> tuple[list[Any], bool]:
+    def build_examples(
+        self, examples: Iterable[Any], examples_builder: Any, learnable_facts: bool = False
+    ) -> tuple[list[Any], bool]:
         """
         Builds examples from the provided examples and examples builder.
 
@@ -325,7 +327,11 @@ class DatasetBuilder:
         """
         if not isinstance(dataset, GroundedDataset):
             groundings = self.ground_dataset(
-                dataset, settings, batch_size=batch_size, learnable_facts=learnable_facts, raw_groundings=True,
+                dataset,
+                settings,
+                batch_size=batch_size,
+                learnable_facts=learnable_facts,
+                raw_groundings=True,
             )
 
             samples = Builder(settings).neuralize(groundings, progress, None)
@@ -333,7 +339,9 @@ class DatasetBuilder:
         return dataset.neuralize(batch_size=batch_size, progress=progress)
 
     @staticmethod
-    def merge_queries_with_examples(queries: list[Any], examples: list[Any], one_query_per_example: bool, example_queries: bool = True) -> list[Any]:
+    def merge_queries_with_examples(
+        queries: list[Any], examples: list[Any], one_query_per_example: bool, example_queries: bool = True
+    ) -> list[Any]:
         """
         Merges queries with their corresponding examples.
 

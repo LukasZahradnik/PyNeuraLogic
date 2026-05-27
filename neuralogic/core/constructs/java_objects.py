@@ -1,17 +1,17 @@
 from collections.abc import Iterable, Sequence
 from typing import Any
 
-import numpy as np
 import jpype
+import numpy as np
 
-from neuralogic.setup import is_initialized, initialize
 from neuralogic.core.constructs.factories import R
+from neuralogic.core.constructs.function import FContainer
 from neuralogic.core.constructs.function.enum import Combination
 from neuralogic.core.constructs.function.function import CombinationFunction
 from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.constructs.function import FContainer
-from neuralogic.core.constructs.term import Variable, Constant
-from neuralogic.core.settings import SettingsProxy, Settings
+from neuralogic.core.constructs.term import Constant, Variable
+from neuralogic.core.settings import Settings, SettingsProxy
+from neuralogic.setup import initialize, is_initialized
 
 
 class ValueFactory:
@@ -19,6 +19,7 @@ class ValueFactory:
     Factory for converting between Python values (scalars, lists, numpy arrays) and Java Value objects.
     It handles ScalarValue, VectorValue, and MatrixValue.
     """
+
     def __init__(self):
         """Initializes the ValueFactory with references to Java value classes."""
         self.scalar_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.ScalarValue")
@@ -78,7 +79,9 @@ class ValueFactory:
                 else:
                     value = self.matrix_value(weight[0], weight[1])
             else:
-                raise NotImplementedError(f"dimensions of size {len(weight)} are not supported. If you wanted to provide tensor as weight, wrap it into a list first")
+                raise NotImplementedError(
+                    f"dimensions of size {len(weight)} are not supported. If you wanted to provide tensor as weight, wrap it into a list first"
+                )
             return False, value
 
         if isinstance(weight, (Sequence, np.ndarray, Iterable)):
@@ -124,6 +127,7 @@ class JavaFactory:
     Factory for converting high-level Python logic constructs (Atoms, Rules, etc.) into their corresponding Java objects.
     It maintains internal factories for predicates, constants, and weights.
     """
+
     def __init__(self, settings: SettingsProxy | None = None):
         """
         Parameters
@@ -131,8 +135,8 @@ class JavaFactory:
         settings : SettingsProxy, optional
             The settings proxy used for configuring the Java factories. If None, a default SettingsProxy is created.
         """
-        from neuralogic.core.constructs.rule import Rule
         from neuralogic.core.constructs.relation import WeightedRelation
+        from neuralogic.core.constructs.rule import Rule
 
         if not is_initialized():
             initialize()
@@ -257,7 +261,14 @@ class JavaFactory:
             literal_array[i] = self.literal(predicate_name, atom.negated, terms)
         return self.clause(literal_array)
 
-    def get_generic_relation(self, relation_class: Any, relation: Any, variable_factory: Any, default_weight: Any = None, is_example: bool = False) -> Any:
+    def get_generic_relation(
+        self,
+        relation_class: Any,
+        relation: Any,
+        variable_factory: Any,
+        default_weight: Any = None,
+        is_example: bool = False,
+    ) -> Any:
         """
         Generic method to convert a Python relation to a Java relation object.
 
@@ -416,7 +427,9 @@ class JavaFactory:
         lifted_example = self.lifted_example(jpype.java.util.ArrayList(conjunctions), jpype.java.util.ArrayList(rules))
         return label_conjunction, lifted_example
 
-    def get_conjunction(self, relations: Iterable[Any], variable_factory: Any, default_weight: Any = None, is_example: bool = False) -> Any:
+    def get_conjunction(
+        self, relations: Iterable[Any], variable_factory: Any, default_weight: Any = None, is_example: bool = False
+    ) -> Any:
         valued_facts = [
             self.get_valued_fact(relation, variable_factory, default_weight, is_example) for relation in relations
         ]
@@ -428,7 +441,9 @@ class JavaFactory:
             self.get_metadata(predicate_metadata.metadata, self.predicate_metadata),
         )
 
-    def get_valued_fact(self, relation: Any, variable_factory: Any, default_weight: Any = None, is_example: bool = False) -> Any:
+    def get_valued_fact(
+        self, relation: Any, variable_factory: Any, default_weight: Any = None, is_example: bool = False
+    ) -> Any:
         return self.get_generic_relation(
             self.valued_fact,
             relation,

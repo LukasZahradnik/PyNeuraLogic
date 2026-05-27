@@ -2,10 +2,10 @@ from collections.abc import Iterable
 from typing import Any
 
 from neuralogic.core.constructs.function.function import (
-    Function,
     AggregationFunction,
-    TransformationFunction,
     CombinationFunction,
+    Function,
+    TransformationFunction,
 )
 
 
@@ -16,6 +16,7 @@ class Metadata:
     Metadata can specify properties like learnability, transformation functions,
     aggregation functions, and combination functions.
     """
+
     __slots__ = "learnable", "transformation", "aggregation", "duplicate_grounding", "combination"
 
     def __init__(

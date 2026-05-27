@@ -6,7 +6,6 @@ from typing import Any
 
 import jpype
 
-
 _is_logging_initialized = False
 _default_logging = True
 _loggers_buffer: list[tuple] = []
@@ -16,6 +15,7 @@ class TextIOWrapper:
     """
     TextIOWrapper is a wrapper for text IO objects to ensure strings are written correctly.
     """
+
     def __init__(self, wrapped_text_io: Any):
         """
         Parameters
@@ -59,6 +59,7 @@ class LogHandler:
     """
     LogHandler stores settings for a log handler.
     """
+
     output: Any
     level: Level = Level.FINER
     formatter: Formatter = Formatter.COLOR

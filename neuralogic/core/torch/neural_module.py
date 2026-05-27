@@ -13,6 +13,7 @@ class TorchNeuralModule:
     Mixin class providing utility methods for integrating PyNeuraLogic with PyTorch.
     It handles the conversion of Java weights to PyTorch tensors and the management of learnable parameters.
     """
+
     def tensor_parameters(
         self,
         tensor_parameters: list[NeuralogicOptTensor] | None,

@@ -8,6 +8,7 @@ class Function:
     Base class for all logic functions (transformation, combination, aggregation).
     Functions are used to transform, combine, or aggregate values in the logic program.
     """
+
     __slots__ = "name", "operator", "can_flatten", "namespace"
 
     def __init__(self, name: str, *, namespace: str = "", operator: str | None = None, can_flatten: bool = False):
@@ -71,6 +72,7 @@ class TransformationFunction(Function):
     Represents a transformation function applied to a relation or a container of relations.
     Transformation functions can be applied element-wise or as join operations.
     """
+
     def __init__(
         self,
         name: str,
@@ -99,6 +101,7 @@ class CombinationFunction(Function):
     """
     Represents a combination function used to combine multiple relations into a single output.
     """
+
     def __init__(
         self,
         name: str,
@@ -121,5 +124,6 @@ class AggregationFunction(Function):
     """
     Represents an aggregation function used to aggregate multiple groundings of the same rule.
     """
+
     def get(self) -> Any:
         raise NotImplementedError

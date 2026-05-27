@@ -1,9 +1,9 @@
 import os
-from typing import Optional
-from neuralogic.dataset.logic import Dataset, Sample
+
 from neuralogic.dataset.base import ConvertibleDataset
-from neuralogic.utils.pddl.parser import PDDLReader
+from neuralogic.dataset.logic import Dataset, Sample
 from neuralogic.utils.pddl.domain import PDDLDomain
+from neuralogic.utils.pddl.parser import PDDLReader
 from neuralogic.utils.pddl.problem import PDDLProblem
 
 
@@ -12,12 +12,8 @@ class PDDLDataset(ConvertibleDataset):
     PDDLDataset converts PDDL domain and problem files into a logic dataset.
     It supports creating samples from the initial state and using the goal state as a query.
     """
-    def __init__(
-        self, 
-        domain: str, 
-        problems: str | list[str], 
-        include_actions: bool = True
-    ):
+
+    def __init__(self, domain: str, problems: str | list[str], include_actions: bool = True):
         """
         Parameters
         ----------
@@ -43,7 +39,7 @@ class PDDLDataset(ConvertibleDataset):
             else:
                 domain_sexpr = PDDLReader.parse_string(self.domain_input)
             self.domain = PDDLDomain(domain_sexpr)
-        
+
         if not self.problems:
             for problem_input in self.problem_inputs:
                 if os.path.isfile(problem_input):
@@ -70,11 +66,11 @@ class PDDLDataset(ConvertibleDataset):
         for problem in self.problems:
             # Example: Initial state + Domain rules
             example = problem.init + domain_rules
-            
+
             # Query: Goal state
             # If multiple goal literals, we currently take them as a list of queries
             query = problem.goal
-            
+
             samples.append(Sample(query, example))
 
         return Dataset(samples)

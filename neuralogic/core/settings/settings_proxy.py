@@ -1,18 +1,19 @@
+from typing import Any
+
 import jpype
 
 import neuralogic
-from neuralogic.setup import is_initialized, initialize
-from neuralogic.core.constructs.function import Transformation, Combination, Aggregation
+from neuralogic.core.constructs.function import Aggregation, Combination, Transformation
 from neuralogic.core.constructs.function.function import (
-    TransformationFunction,
-    CombinationFunction,
     AggregationFunction,
+    CombinationFunction,
+    TransformationFunction,
 )
 from neuralogic.core.enums import Grounder
-from typing import Any
 from neuralogic.nn.init import Initializer
-from neuralogic.nn.loss import MSE, SoftEntropy, CrossEntropy, ErrorFunction
+from neuralogic.nn.loss import MSE, CrossEntropy, ErrorFunction, SoftEntropy
 from neuralogic.optim import Optimizer
+from neuralogic.setup import initialize, is_initialized
 
 
 class SettingsProxy:

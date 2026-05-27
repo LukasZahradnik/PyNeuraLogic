@@ -1,11 +1,13 @@
 from typing import Any
-from neuralogic.core.constructs.factories import R, V, C
+
+from neuralogic.core.constructs.factories import C, R, V
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.rule import Rule
 
 
 class Action:
     """Represents a PDDL Action and its mapping to NeuraLogic Rules."""
+
     def __init__(self, name: str, parameters: list[tuple], precondition: Any, effect: Any):
         self.name = name
         self.parameters = parameters
@@ -57,6 +59,7 @@ class Action:
 
 class PDDLDomain:
     """Represents a PDDL Domain and its components."""
+
     def __init__(self, sexpr: Any):
         self.name = ""
         self.requirements = []
@@ -72,7 +75,7 @@ class PDDLDomain:
         for item in sexpr[1:]:
             if not isinstance(item, list):
                 continue
-            
+
             tag = item[0]
             if tag == "domain":
                 self.name = item[1]
@@ -95,17 +98,17 @@ class PDDLDomain:
         i = 2
         while i < len(item):
             if item[i] == ":parameters":
-                params = item[i+1] # e.g. (?x - type1 ?y - type2)
+                params = item[i + 1]  # e.g. (?x - type1 ?y - type2)
                 i += 2
             elif item[i] == ":precondition":
-                precondition = item[i+1]
+                precondition = item[i + 1]
                 i += 2
             elif item[i] == ":effect":
-                effect = item[i+1]
+                effect = item[i + 1]
                 i += 2
             else:
                 i += 1
-        
+
         self.actions.append(Action(name, params, precondition, effect))
 
     def to_rules(self) -> list[Rule]:

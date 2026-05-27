@@ -1,8 +1,12 @@
-from typing import Iterable, Any, Union, TypeAlias
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Iterable, TypeAlias, Union
 
 from neuralogic.core.constructs.function import FContainer
 from neuralogic.core.constructs.metadata import Metadata
 
+if TYPE_CHECKING:
+    from neuralogic.core.constructs.relation import BaseRelation
 
 BodyItem: TypeAlias = Union["BaseRelation", FContainer]
 

@@ -1,6 +1,6 @@
-from neuralogic.core.constructs.metadata import Metadata
-from neuralogic.core.constructs.function import Transformation, Aggregation, Combination
 from neuralogic.core.constructs.factories import R, V
+from neuralogic.core.constructs.function import Aggregation, Combination, Transformation
+from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.nn.module.module import Module
 
 

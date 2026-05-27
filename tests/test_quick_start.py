@@ -67,9 +67,7 @@ def test_model_evaluation_from_tensor():
     model.add_module(
         GCNConv(in_channels=1, out_channels=5, output_name="h0", feature_name="node_feature", edge_name="edge")
     )
-    model.add_module(
-        GCNConv(in_channels=5, out_channels=1, output_name="predict", feature_name="h0", edge_name="edge")
-    )
+    model.add_module(GCNConv(in_channels=5, out_channels=1, output_name="predict", feature_name="h0", edge_name="edge"))
 
     settings = Settings(optimizer=SGD(0.01))
     model.build(settings)
@@ -109,9 +107,7 @@ def test_model_evaluation_from_logic():
     model.add_module(
         GCNConv(in_channels=1, out_channels=5, output_name="h0", feature_name="node_feature", edge_name="edge")
     )
-    model.add_module(
-        GCNConv(in_channels=5, out_channels=1, output_name="predict", feature_name="h0", edge_name="edge")
-    )
+    model.add_module(GCNConv(in_channels=5, out_channels=1, output_name="predict", feature_name="h0", edge_name="edge"))
 
     settings = Settings(optimizer=SGD(0.01))
     model.build(settings)

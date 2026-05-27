@@ -11,6 +11,7 @@ class Adam(Optimizer):
     Adam optimizer.
     It implements the Adaptive Moment Estimation (Adam) algorithm.
     """
+
     def __init__(
         self,
         lr: float = 0.001,

@@ -1,12 +1,12 @@
-from typing import Iterable, Any
+from typing import Any, Iterable
 
 import numpy as np
 
-from neuralogic.core.constructs.function.enum import Combination, Transformation
+from neuralogic.core.constructs import factories, rule
 from neuralogic.core.constructs.function import FContainer
+from neuralogic.core.constructs.function.enum import Combination, Transformation
+from neuralogic.core.constructs.function.function import CombinationFunction, TransformationFunction
 from neuralogic.core.constructs.predicate import Predicate
-from neuralogic.core.constructs import rule, factories
-from neuralogic.core.constructs.function.function import TransformationFunction, CombinationFunction
 
 
 class BaseRelation:

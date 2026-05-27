@@ -3,8 +3,8 @@ from typing import Any
 
 import numpy as np
 
-from neuralogic.core.constructs.function import Combination
 from neuralogic.core.constructs.factories import R
+from neuralogic.core.constructs.function import Combination
 from neuralogic.nn.module.module import Module
 
 
@@ -13,6 +13,7 @@ class PositionalEncoding(Module):
     Implements positional encoding for logic sequences.
     It generates a set of rules that add fixed or learnable positional embeddings to the input features.
     """
+
     def __init__(
         self,
         embed_dim: int,

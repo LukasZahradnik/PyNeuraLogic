@@ -1,7 +1,7 @@
 import enum
+from collections.abc import Callable, Sequence
 from pathlib import Path
-from collections.abc import Sequence, Callable
-from typing import Any, TextIO
+from typing import TextIO
 
 from neuralogic.core.constructs.factories import R
 from neuralogic.core.constructs.relation import BaseRelation
@@ -16,6 +16,7 @@ class Mode(enum.Enum):
     """
     Enum representing different modes of creating samples from CSV files.
     """
+
     ONE_EXAMPLE = "one"
     EXAMPLE_PER_SOURCE = "example_per_source"
     ZIP = "zip"
@@ -25,6 +26,7 @@ class CSVFile:
     """
     Represents a single CSV file source and its configuration for conversion to logic relations.
     """
+
     __slots__ = (
         "relation_name",
         "csv_source",
@@ -186,6 +188,7 @@ class CSVDataset(ConvertibleDataset):
     """
     Represents a dataset composed of one or more CSV files.
     """
+
     def __init__(
         self,
         csv_files: list[CSVFile] | CSVFile,

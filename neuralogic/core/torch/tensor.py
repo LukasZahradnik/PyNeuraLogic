@@ -1,5 +1,6 @@
-import torch
 from typing import Any
+
+import torch
 
 
 class NeuralogicOptTensor(torch.Tensor):
@@ -8,6 +9,7 @@ class NeuralogicOptTensor(torch.Tensor):
     It allows using PyTorch optimizers to directly update PyNeuraLogic weights by overriding
     in-place operations and provide gradients from the Java engine.
     """
+
     _neuralogic_weight_updater = None
     _neuralogic_weight = None
     _neuralogic_value_factory = None

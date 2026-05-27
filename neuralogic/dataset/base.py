@@ -5,6 +5,7 @@ class BaseDataset:
     """
     Base class for logic datasets.
     """
+
     def dump(
         self,
         queries_fp: Any,
@@ -30,6 +31,7 @@ class ConvertibleDataset(BaseDataset):
     """
     Base class for datasets that can be converted into a standard dataset format.
     """
+
     def to_dataset(self) -> Any:
         """
         Converts the dataset to a standard dataset format.

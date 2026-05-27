@@ -8,6 +8,7 @@ class Predicate:
     """
     Represents a predicate in the logic program, defined by its name and arity.
     """
+
     __slots__ = "name", "arity", "hidden", "special"
 
     def __init__(self, name: str, arity: int, hidden: bool = False, special: bool = False):
@@ -72,6 +73,7 @@ class PredicateMetadata:
     """
     Associates metadata with a predicate.
     """
+
     __slots__ = "predicate", "metadata"
 
     def __init__(self, predicate: Predicate, metadata: Metadata):
