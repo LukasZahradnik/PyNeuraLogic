@@ -1,64 +1,137 @@
 # Contributing to PyNeuraLogic
 
-
 Thank you for considering contributing to the PyNeuraLogic project. Every contribution is welcome.
-You can contribute in multiple ways, e.g., with code, [reporting bugs](https://github.com/LukasZahradnik/PyNeuraLogic/issues/new?assignees=&labels=bug&template=bug_report.yaml&title=%5B%F0%9F%90%9B+Bug+Report%5D%3A+), 
-[proposing new features](https://github.com/LukasZahradnik/PyNeuraLogic/issues/new?assignees=&labels=enhancement&template=feature_request.yaml&title=%5B%E2%9C%A8+Feature+Request%5D%3A+),
-participating in [discussions](https://github.com/LukasZahradnik/PyNeuraLogic/discussions), etc.
 
+Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating — we expect everyone to follow it.
+
+You can contribute in many ways: with code, [reporting bugs](https://github.com/LukasZahradnik/PyNeuraLogic/issues/new?assignees=&labels=bug&template=bug_report.yaml&title=%5B%F0%9F%90%9B+Bug+Report%5D%3A+),
+[proposing new features](https://github.com/LukasZahradnik/PyNeuraLogic/issues/new?assignees=&labels=enhancement&template=feature_request.yaml&title=%5B%E2%9C%A8+Feature+Request%5D%3A+),
+participating in [discussions](https://github.com/LukasZahradnik/PyNeuraLogic/discussions), improving documentation, or writing tests.
+
+---
 
 ## How can I contribute
 
-### I came across a bug
+### 🐛 I came across a bug
 
-If you encounter a bug, please make sure you are using the latest version of PyNeuraLogic. If the problem is happening on the latest version, you can either:
-- [Report the bug](https://github.com/LukasZahradnik/PyNeuraLogic/issues/new?assignees=&labels=bug&template=bug_report.yaml&title=%5B%F0%9F%90%9B+Bug+Report%5D%3A+), and we will take a look at it.
-- Fix the bug. If you decide to fix the bug, please check the [issue list](https://github.com/LukasZahradnik/PyNeuraLogic/issues) if the bug isn't already reported and someone isn't working on a fix.
+If you encounter a bug, first make sure you are using the latest version of PyNeuraLogic. Check the [existing issues](https://github.com/LukasZahradnik/PyNeuraLogic/issues) to see if it's already known. Then you can either:
 
-### I am missing some features
+- [Report the bug](https://github.com/LukasZahradnik/PyNeuraLogic/issues/new?assignees=&labels=bug&template=bug_report.yaml&title=%5B%F0%9F%90%9B+Bug+Report%5D%3A+) — we'll take a look.
+- Fix it yourself — check the issue list first so nobody else is already working on it.
 
-If you would like a new feature to be added, open a new issue with a description of the feature. 
-Please make sure it is relevant to the scope of PyNeuraLogic - if you are not sure, you can still open an issue or, preferably, [discussion](https://github.com/LukasZahradnik/PyNeuraLogic/discussions).
+For security vulnerabilities, please **do not** open a public issue. See [SECURITY.md](SECURITY.md) for responsible disclosure.
 
-When the issue is created and the feature is relevant, someone can be assigned to the issue and implement it.
+### ✨ I am missing some features
 
-### I want to contribute to the documentation
+Open a new issue with a description of the feature you'd like. If you're unsure whether it fits the scope of PyNeuraLogic, start a [discussion](https://github.com/LukasZahradnik/PyNeuraLogic/discussions) instead.
 
-Documentation for methods/functions is always welcome, and creating an issue isn't required.
-Fixing typos in the documentation doesn't require creating an issue as well. 
+Once the issue is created and the feature is relevant, someone can be assigned to implement it — and you're welcome to contribute the implementation yourself.
 
-If you would like to make larger changes (e.g., add a new section in the documentation), please open an issue or [discussion](https://github.com/LukasZahradnik/PyNeuraLogic/discussions) first before implementing.
+### 📖 I want to contribute to the documentation
 
-### Something else
+Documentation improvements are always appreciated — you don't need to open an issue for small fixes or typos.
 
-If you have something that doesn't fit a description of something presented above or you are unsure, make a [blank issue](https://github.com/LukasZahradnik/PyNeuraLogic/issues/new) or ask us in [discussions](https://github.com/LukasZahradnik/PyNeuraLogic/discussions). 
+For larger changes (e.g., a new tutorial or section), please open an issue or start a [discussion](https://github.com/LukasZahradnik/PyNeuraLogic/discussions) first so we can coordinate.
 
+The documentation source lives in the `docs/` directory and uses Sphinx with reStructuredText. See [Building documentation](#building-documentation) below.
 
-## The development workflow and setup:
+### 🤔 Something else
 
-The following steps can help you to set up your development environment and contribute.
+If your contribution doesn't fit the categories above or you're unsure, open a [blank issue](https://github.com/LukasZahradnik/PyNeuraLogic/issues/new) or ask us in [discussions](https://github.com/LukasZahradnik/PyNeuraLogic/discussions).
 
-- Create a fork of the PyNeuraLogic repository
-- Clone your fork  (`git clone git@github.com:<Your_Username>/PyNeuraLogic.git`)
-- Install development dependencies (`pip install -r requirements.txt`)
-- Install pre-commit hooks with `pre-commit install` (it will automatically format your code before each commit with *black*)
-- Make changes, commit (`git commit`) and push (`git push`) them to your fork
-  - If your code isn't properly formatted, committing your code might fail. Running `git commit` again should resolve the issue.
-- Submit a pull request
+---
 
+## Development workflow
 
-Before submitting a pull request, please make sure that all tests are passing and the documentation can be built.
+### 1. Set up your environment
 
-#### Running tests:
+```bash
+# Fork & clone the repository
+git clone git@github.com:<Your_Username>/PyNeuraLogic.git
+cd PyNeuraLogic
+
+# Install dependencies (pick one)
+uv sync --dev                               # using uv (recommended)
+pip install -e ".[dev]"                     # using pip (alternative)
+
+# Install pre-commit hooks (runs ruff on every commit)
+pre-commit install
+```
+
+The `dev` extra installs `pytest`, `ruff`, `pyright`, and `pre-commit`.
+
+### 2. Make your changes
+
+Write your code, add or update tests, and commit:
+
+```bash
+git checkout -b my-feature-branch
+# ... make changes ...
+git add .
+git commit -m "A meaningful commit message"
+```
+
+Pre-commit hooks will automatically format your code with **ruff** on each commit. If formatting fails, the commit is blocked — just run `git commit` again to retry with fixes applied.
+
+### 3. Run linters and type checks
+
+Before pushing, run the same checks as CI:
+
+```bash
+ruff format --check neuralogic    # formatting
+ruff check neuralogic             # linting
+pyright neuralogic                # type checking
+```
+
+Fix any issues. You can auto-fix most lint and formatting issues with:
+
+```bash
+ruff format neuralogic
+ruff check --fix neuralogic
+```
+
+### 4. Run tests
 
 ```bash
 pytest
 ```
 
+If you added new functionality, please add corresponding tests in the `tests/` directory. Make sure the full suite passes.
 
-#### Building documentation:
+### 5. Update the changelog
+
+Add an entry under the `[Unreleased]` section in [CHANGELOG.md](CHANGELOG.md) describing your change. Follow the existing format (one line per change, grouped by **Added** / **Changed** / **Fixed** / **Removed**).
+
+### 6. Build the documentation (if applicable)
 
 ```bash
 cd docs
 make html
+```
+
+Open `docs/_build/html/index.html` in your browser to verify the output.
+
+### 7. Submit a pull request
+
+Push your branch and open a pull request. The [PR template](.github/PULL_REQUEST_TEMPLATE.md) will guide you through the description and checklist.
+
+GitHub Actions will run tests, linting, and type checks automatically on your PR. Ensure all checks pass before requesting a review.
+
+---
+
+## Project structure
+
+```
+PyNeuraLogic/
+├── neuralogic/          # Library source code
+│   ├── core/            # Core constructs, builder, settings
+│   ├── nn/              # Neural network modules & training
+│   ├── dataset/         # Dataset loaders (CSV, PDDL, logic, etc.)
+│   ├── optim/           # Optimizers & LR schedulers
+│   ├── logging/         # Logging utilities
+│   └── utils/           # Data utilities & visualization
+├── tests/               # Test suite (pytest)
+├── examples/            # Jupyter notebooks & scripts
+├── benchmarks/          # Performance benchmarks
+└── docs/                # Sphinx documentation
 ```
