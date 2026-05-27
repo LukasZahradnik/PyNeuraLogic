@@ -40,6 +40,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "ruff",
+    "pyright",
 ]
 doc = [
     "sphinx",
@@ -91,5 +92,7 @@ omit = [
 [tool.coverage.report]
 exclude_lines = ["raise", "except"]
 
-[tool.mypy]
-ignore_missing_imports = true
+[tool.pyright]
+typeCheckingMode = "basic"
+reportMissingImports = false
+reportMissingTypeStubs = false
