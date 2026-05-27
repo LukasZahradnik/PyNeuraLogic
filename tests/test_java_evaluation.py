@@ -20,7 +20,7 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    "template, dataset, expected_results",
+    "model, dataset, expected_results",
     [
         (*XOR(), [0, 0.625, 0.645, 0.663]),
         (*XOR_Vectorized(), [0, 0.7, 0.657, -0.056]),
@@ -244,18 +244,18 @@ import pytest
         ),
     ],
 )
-def test_evaluator_run_on_files(template: Model, dataset: BaseDataset, expected_results: List[float]) -> None:
+def test_evaluator_run_on_files(model: Model, dataset: BaseDataset, expected_results: List[float]) -> None:
     """Tests for running java evaluator on files"""
     manual_seed(0)
     settings = Settings(optimizer=SGD(0.1))
 
-    template.build(settings)
+    model.build(settings)
 
-    built_dataset = template.build_dataset(dataset)
-    template.train(built_dataset, epochs=50)
+    built_dataset = model.build_dataset(dataset)
+    model.train(built_dataset, epochs=50)
 
     results = []
-    for predicted in template.test(built_dataset):
+    for predicted in model.test(built_dataset):
         results.append(round(predicted, 3))
 
     assert len(results) == len(expected_results)
@@ -265,13 +265,13 @@ def test_evaluator_run_on_files(template: Model, dataset: BaseDataset, expected_
 
 
 @pytest.mark.parametrize(
-    "template, dataset, expected_results, seed",
+    "model, dataset, expected_results, seed",
     [
-        (naive_xor.template, naive_xor.dataset, [0, 0.936, 0.935, -0.002], 0),
-        (vectorized_xor.template, vectorized_xor.dataset, [0, 0.955, 0.954, -0.003], 0),
-        (horses.template, horses.dataset, [0.951, 0], 0),
+        (naive_xor.model, naive_xor.dataset, [0, 0.936, 0.935, -0.002], 0),
+        (vectorized_xor.model, vectorized_xor.dataset, [0, 0.955, 0.954, -0.003], 0),
+        (horses.model, horses.dataset, [0.951, 0], 0),
         (
-            naive_trains.template,
+            naive_trains.model,
             naive_trains.dataset,
             [
                 0.743,
@@ -298,7 +298,7 @@ def test_evaluator_run_on_files(template: Model, dataset: BaseDataset, expected_
             0
         ),
         (
-            multiple_examples_trains.template,
+            multiple_examples_trains.model,
             multiple_examples_trains.dataset,
             [
                 0.743,
@@ -325,7 +325,7 @@ def test_evaluator_run_on_files(template: Model, dataset: BaseDataset, expected_
             0,
         ),
         (
-            multiple_examples_no_order_trains.template,
+            multiple_examples_no_order_trains.model,
             multiple_examples_no_order_trains.dataset,
             [
                 0.685,
@@ -354,19 +354,19 @@ def test_evaluator_run_on_files(template: Model, dataset: BaseDataset, expected_
     ],
 )
 def test_evaluator_run_on_rules(
-    template: Model, dataset: BaseDataset, expected_results: List[float], seed: int
+    model: Model, dataset: BaseDataset, expected_results: List[float], seed: int
 ) -> None:
     """Tests for running java evaluator on rules"""
     manual_seed(seed)
     settings = Settings(optimizer=SGD(lr=0.1))
 
-    template.build(settings)
+    model.build(settings)
 
-    built_dataset = template.build_dataset(dataset)
-    template.train(built_dataset, epochs=300)
+    built_dataset = model.build_dataset(dataset)
+    model.train(built_dataset, epochs=300)
 
     results = []
-    for predicted in template.test(built_dataset):
+    for predicted in model.test(built_dataset):
         results.append(round(predicted, 3))
 
     assert len(results) == len(expected_results)
@@ -376,39 +376,39 @@ def test_evaluator_run_on_rules(
 
 
 @pytest.mark.parametrize(
-    "template, dataset",
+    "model, dataset",
     [
-        (naive_xor.template, naive_xor.dataset),
+        (naive_xor.model, naive_xor.dataset),
     ],
 )
-def test_evaluator_state_loading(template: Model, dataset: BaseDataset) -> None:
+def test_evaluator_state_loading(model: Model, dataset: BaseDataset) -> None:
     """Tests for loading state"""
     settings = Settings(optimizer=SGD(0.1), epochs=20)
 
-    template.build(settings)
-    built_dataset = template.build_dataset(dataset)
-    template.train(built_dataset)
+    model.build(settings)
+    built_dataset = model.build_dataset(dataset)
+    model.train(built_dataset)
 
     results = []
-    for predicted in template.test(built_dataset):
+    for predicted in model.test(built_dataset):
         results.append(round(predicted, 5))
 
-    second_model = template.clone()
-    second_template.build(settings)
+    second_model = model.clone()
+    second_model.build(settings)
 
-    built_dataset = second_template.build_dataset(dataset)
+    built_dataset = second_model.build_dataset(dataset)
 
     second_results = []
-    for predicted in second_template.test(built_dataset):
+    for predicted in second_model.test(built_dataset):
         second_results.append(round(predicted, 5))
 
     assert len(results) == len(second_results)
     assert any(result != second_result for result, second_result in zip(results, second_results))
 
-    second_template.load_state_dict(template.state_dict())
+    second_model.load_state_dict(model.state_dict())
 
     second_results = []
-    for predicted in second_template.test(built_dataset):
+    for predicted in second_model.test(built_dataset):
         second_results.append(round(predicted, 5))
 
     assert len(results) == len(second_results)

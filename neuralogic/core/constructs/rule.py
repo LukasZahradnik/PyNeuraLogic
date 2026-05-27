@@ -1,7 +1,10 @@
-from typing import Iterable, Any
+from typing import Iterable, Any, Union, TypeAlias
 
 from neuralogic.core.constructs.function import FContainer
 from neuralogic.core.constructs.metadata import Metadata
+
+
+BodyItem: TypeAlias = Union["BaseRelation", FContainer]
 
 
 class RuleBody:
@@ -20,10 +23,10 @@ class RuleBody:
         lit2 : BaseRelation
             The second literal in the body.
         """
-        self.literals: list["BaseRelation" | FContainer] = [lit1, lit2]
+        self.literals: list[Union["BaseRelation", FContainer]] = [lit1, lit2]
         self.metadata: Metadata | None = None
 
-    def __and__(self, other: "BaseRelation" | FContainer) -> "RuleBody":
+    def __and__(self, other: Union["BaseRelation", FContainer]) -> "RuleBody":
         from neuralogic.core.constructs.relation import BaseRelation
 
         if isinstance(other, (BaseRelation, FContainer)):
@@ -54,7 +57,7 @@ class Rule:
 
     __slots__ = "head", "body", "metadata"
 
-    def __init__(self, head: "BaseRelation", body: RuleBody | Iterable["BaseRelation" | FContainer] | "BaseRelation" | FContainer):
+    def __init__(self, head: "BaseRelation", body: RuleBody | Iterable[BodyItem] | BodyItem):
         """
         Parameters
         ----------
@@ -77,7 +80,7 @@ class Rule:
         if not isinstance(body, Iterable):
             body = [body]
 
-        self.body: list["BaseRelation" | FContainer] | FContainer = body
+        self.body: list[BodyItem] | FContainer = body
 
         if not isinstance(self.body, FContainer):
             self.body = list(self.body)
@@ -100,7 +103,7 @@ class Rule:
     def __repr__(self) -> str:
         return self.to_str()
 
-    def __and__(self, other: Iterable["BaseRelation" | FContainer] | "BaseRelation" | FContainer) -> "Rule":
+    def __and__(self, other: Iterable[BodyItem] | BodyItem) -> "Rule":
         if isinstance(other, Iterable):
             self.body.extend(list(other))
         else:

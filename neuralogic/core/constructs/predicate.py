@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from typing import Optional
 
 from neuralogic.core.constructs.metadata import Metadata
 
@@ -31,7 +32,7 @@ class Predicate:
         self.hidden = hidden
         self.special = special
 
-    def set_arity(self, arity: int) -> "Predicate" | None:
+    def set_arity(self, arity: int) -> Optional["Predicate"]:
         if self.arity == arity:
             return self
 

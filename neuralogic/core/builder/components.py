@@ -380,10 +380,13 @@ class Grounding:
     def _get_atoms(self) -> dict[str, dict[tuple[str, ...], Any]]:
         atoms = {}
 
-        for literal in self._grounding.groundingWrap.getGroundModel().derivedGroundFacts:
+        for literal in self._grounding.groundingWrap.getGroundTemplate().derivedGroundFacts:
             self._process_literal(literal, atoms)
 
-        for literal in self._grounding.groundingWrap.getGroundModel().groundFacts:
+        for literal in self._grounding.groundingWrap.getGroundTemplate().groundFacts:
+            self._process_literal(literal, atoms)
+
+        for literal in self._grounding.groundingWrap.getGroundTemplate().templateFacts:
             self._process_literal(literal, atoms)
 
         return atoms

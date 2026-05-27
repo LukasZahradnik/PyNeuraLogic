@@ -25,9 +25,9 @@ def test_transformation_body_function(torch_fun, fun):
     torch_result = torch_fun(data).detach().numpy().round(3)
 
     model = Model()
-    template += R.h <= fun(R.input)
+    model += R.h <= fun(R.input)
 
-    model = template.build(Settings(iso_value_compression=False, chain_pruning=False))
+    model = model.build(Settings(iso_value_compression=False, chain_pruning=False))
     dataset = Dataset([Sample(R.h, R.input[data.tolist()])])
 
     built_dataset = model.build_dataset(dataset)
@@ -54,9 +54,9 @@ def test_slice_function():
     )
 
     model = Model()
-    template += R.h <= F.slice(R.input, rows=(1, 3))
+    model += R.h <= F.slice(R.input, rows=(1, 3))
 
-    model = template.build(Settings(iso_value_compression=False, chain_pruning=False))
+    model = model.build(Settings(iso_value_compression=False, chain_pruning=False))
     dataset = Dataset([Sample(R.h, [R.input[data]])])
 
     built_dataset = model.build_dataset(dataset)
@@ -65,9 +65,9 @@ def test_slice_function():
     assert np.allclose(res, results)
 
     model = Model()
-    template += (R.h <= R.input) | [F.slice(rows=(1, 3))]
+    model += (R.h <= R.input) | [F.slice(rows=(1, 3))]
 
-    model = template.build(Settings(iso_value_compression=False, chain_pruning=False))
+    model = model.build(Settings(iso_value_compression=False, chain_pruning=False))
     dataset = Dataset(Sample(R.h, [R.input[data]]))
 
     built_dataset = model.build_dataset(dataset)
@@ -76,10 +76,10 @@ def test_slice_function():
     assert np.allclose(res, results)
 
     model = Model()
-    template += R.h <= R.input
-    template += R.h / 0 | [F.slice(rows=(1, 3))]
+    model += R.h <= R.input
+    model += R.h / 0 | [F.slice(rows=(1, 3))]
 
-    model = template.build(Settings(iso_value_compression=False, chain_pruning=False))
+    model = model.build(Settings(iso_value_compression=False, chain_pruning=False))
     dataset = Dataset(Sample(R.h, [R.input[data]]))
 
     built_dataset = model.build_dataset(dataset)

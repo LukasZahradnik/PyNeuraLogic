@@ -36,8 +36,8 @@ def test_pddl_conversion() -> None:
     
     assert "on(X, Y) :- clear(Y), holding(X)." in example_strs
     assert "clear(X) :- clear(Y), holding(X)." in example_strs
-    assert "!clear(Y) :- clear(Y), holding(X)." in example_strs
-    assert "!holding(X) :- clear(Y), holding(X)." in example_strs
+    assert "!*clear(Y) :- clear(Y), holding(X)." in example_strs
+    assert "!*holding(X) :- clear(Y), holding(X)." in example_strs
 
     assert len(sample.query) == 1
     assert str(sample.query[0]) == "on(b, a)."

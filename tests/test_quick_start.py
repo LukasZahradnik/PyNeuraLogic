@@ -64,19 +64,19 @@ def test_model_evaluation_from_tensor():
     dataset = TensorDataset(data=[data])
 
     model = Model()
-    template.add_module(
+    model.add_module(
         GCNConv(in_channels=1, out_channels=5, output_name="h0", feature_name="node_feature", edge_name="edge")
     )
-    template.add_module(
+    model.add_module(
         GCNConv(in_channels=5, out_channels=1, output_name="predict", feature_name="h0", edge_name="edge")
     )
 
     settings = Settings(optimizer=SGD(0.01))
-    template.build(settings)
-    built_dataset = template.build_dataset(dataset)
+    model.build(settings)
+    built_dataset = model.build_dataset(dataset)
 
-    # or template.test() to change the mode
-    output = template.train(built_dataset, epochs=100)
+    # or model.test() to change the mode
+    output = model.train(built_dataset, epochs=100)
 
     assert len(output[0]) == 3
     assert len(output[1]) == 3
@@ -106,19 +106,19 @@ def test_model_evaluation_from_logic():
     )
 
     model = Model()
-    template.add_module(
+    model.add_module(
         GCNConv(in_channels=1, out_channels=5, output_name="h0", feature_name="node_feature", edge_name="edge")
     )
-    template.add_module(
+    model.add_module(
         GCNConv(in_channels=5, out_channels=1, output_name="predict", feature_name="h0", edge_name="edge")
     )
 
     settings = Settings(optimizer=SGD(0.01))
-    template.build(settings)
-    built_dataset = template.build_dataset(dataset)
+    model.build(settings)
+    built_dataset = model.build_dataset(dataset)
 
-    # or template.test() to change the mode
-    output = template.train(built_dataset, epochs=100)
+    # or model.test() to change the mode
+    output = model.train(built_dataset, epochs=100)
 
     assert len(output[0]) == 3
     assert len(output[1]) == 3

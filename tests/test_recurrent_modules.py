@@ -25,9 +25,9 @@ def test_gru_module(input_size, hidden_size, sequence_len, epochs):
     rnn = torch.nn.GRU(input_size, hidden_size, 1, bias=False)
 
     model = Model()
-    template += GRU(input_size, hidden_size, "h", "f", "h0", arity=0)
+    model += GRU(input_size, hidden_size, "h", "f", "h0", arity=0)
 
-    model = template.build(
+    model = model.build(
         Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
     )
 
@@ -88,9 +88,9 @@ def test_rnn_module(input_size, hidden_size, sequence_len, epochs):
     rnn = torch.nn.RNN(input_size, hidden_size, 1, bias=False)
 
     model = Model()
-    template += RNN(input_size, hidden_size, "h", "f", "h0", arity=0)
+    model += RNN(input_size, hidden_size, "h", "f", "h0", arity=0)
 
-    model = template.build(
+    model = model.build(
         Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
     )
 
@@ -147,9 +147,9 @@ def test_lstm_module(input_size, hidden_size, sequence_len, epochs):
     rnn = torch.nn.LSTM(input_size, hidden_size, 1, bias=False)
 
     model = Model()
-    template += LSTM(input_size, hidden_size, "h", "f", "h0", "c0", arity=0)
+    model += LSTM(input_size, hidden_size, "h", "f", "h0", "c0", arity=0)
 
-    model = template.build(
+    model = model.build(
         Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
     )
 
@@ -213,9 +213,9 @@ def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
     rnn = torch.nn.RNN(input_size, hidden_size, 1, bias=False)
 
     model = Model()
-    template += RNN(input_size, hidden_size, "h", "f", "h0", arity=0)
+    model += RNN(input_size, hidden_size, "h", "f", "h0", arity=0)
 
-    model = template.build(Settings(chain_pruning=False, iso_value_compression=False, error_function=MSE()), torch=True)
+    model = model.build(Settings(chain_pruning=False, iso_value_compression=False, error_function=MSE()), torch=True)
 
     parameters = model.parameters()
     pyneuralogic_tensor_parameters = model.tensor_parameters()
@@ -282,9 +282,9 @@ def test_rnn_custom(input_size, hidden_size, sequence_len, epochs):
     rnn = torch.nn.RNN(input_size, hidden_size, 1, bias=False, nonlinearity="relu")
 
     model = Model()
-    template += RNN(input_size, hidden_size, "h", "f", "h0", arity=0, activation=Transformation.RELU)
+    model += RNN(input_size, hidden_size, "h", "f", "h0", arity=0, activation=Transformation.RELU)
 
-    model = template.build(
+    model = model.build(
         Settings(chain_pruning=False, iso_value_compression=False, optimizer=SGD(lr=0.001), error_function=MSE())
     )
 
@@ -345,7 +345,7 @@ def test_lstm_module_simple(input_size, hidden_size, sequence_len, epochs):
 
     model = Model()
 
-    template += [
+    model += [
         R.h(0) <= R.h0,
         R.h__c(0) <= R.c0,
         (
@@ -372,7 +372,7 @@ def test_lstm_module_simple(input_size, hidden_size, sequence_len, epochs):
         R.h(V.T) <= R.h__o(V.T) * Transformation.TANH(R.h__c(V.T)),
     ]
 
-    model = template.build(
+    model = model.build(
         Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
     )
 
@@ -437,24 +437,24 @@ def test_gru_module_simple(input_size, hidden_size, sequence_len, epochs):
 
     model = Model()
 
-    template += R.h(0) <= R.h0
-    template += (
+    model += R.h(0) <= R.h0
+    model += (
         R.h__r(V.T) <= R.f(V.T)[hidden_size, input_size] + R.h(V.Z)[hidden_size, hidden_size] + R.special.next(V.Z, V.T)
     ) | [Transformation.SIGMOID]
-    template += (
+    model += (
         R.h__z(V.T) <= R.f(V.T)[hidden_size, input_size] + R.h(V.Z)[hidden_size, hidden_size] + R.special.next(V.Z, V.T)
     ) | [Transformation.SIGMOID]
-    template += (
+    model += (
         R.h__n(V.T)
         <= (R.h__r(V.T) * R.h(V.Z)[hidden_size, hidden_size])
         + R.f(V.T)[hidden_size, input_size]
         + R.special.next(V.Z, V.T)
     ) | [Transformation.TANH]
-    template += R.h(V.T) <= (Transformation.REVERSE(R.h__z(V.T)) * R.h__n(V.T)) + (
+    model += R.h(V.T) <= (Transformation.REVERSE(R.h__z(V.T)) * R.h__n(V.T)) + (
         R.h__z(V.T) * R.h(V.Z)
     ) + R.special.next(V.Z, V.T)
 
-    model = template.build(
+    model = model.build(
         Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
     )
 

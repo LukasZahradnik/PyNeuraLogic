@@ -27,12 +27,12 @@ def test_inference_engine_london_reachable() -> None:
     )
 
     # ask if tottenham_court_road can be reached from green_park
-    assert template.query(R.reachable(C.green_park, C.tottenham_court_road))
+    assert model.query(R.reachable(C.green_park, C.tottenham_court_road))
 
     # green_park cannot be reached from charing_cross
     # random_place does not exist in the dataset (cannot be reached from anywhere)
-    assert not template.query(R.reachable(C.charing_cross, C.green_park))
-    assert not template.q(R.reachable(C.charing_cross, C.random_place))
+    assert not model.query(R.reachable(C.charing_cross, C.green_park))
+    assert not model.q(R.reachable(C.charing_cross, C.random_place))
 
 
 def test_inference_engine_london() -> None:
@@ -63,7 +63,7 @@ def test_inference_engine_london() -> None:
         ]
     )
 
-    engine = template.build()
+    engine = model.build()
 
     # Run query for nearby(X, oxford_circus)
     # Should yield two substitutions for x (green_park and bond_street)
@@ -100,15 +100,15 @@ def test_inference_engine_london() -> None:
 def test_listing_all_queries() -> None:
     model = Model()
 
-    template += R.h(V.X) <= R.edge(V.Y, V.X)
-    template += R.h1(V.X) <= (R.h(V.Y), R.edge(V.Y, V.X))
-    template += R.q <= R.h1(V.X)
+    model += R.h(V.X) <= R.edge(V.Y, V.X)
+    model += R.h1(V.X) <= (R.h(V.Y), R.edge(V.Y, V.X))
+    model += R.q <= R.h1(V.X)
 
-    template += R.edge(1, 2)
-    template += R.edge(2, 3)
-    template += R.edge(3, 1)
+    model += R.edge(1, 2)
+    model += R.edge(2, 3)
+    model += R.edge(3, 1)
 
-    queries = list(template.derivable_queries())
+    queries = list(model.derivable_queries())
 
     expected_queries = sorted(
         ["edge(1, 2).", "edge(2, 3).", "edge(3, 1).", "h(2).", "h(3).", "h(1).", "h1(1).", "h1(2).", "h1(3).", "q."]
@@ -118,7 +118,7 @@ def test_listing_all_queries() -> None:
     for a, b in zip(expected_queries, str_queries):
         assert a == b
 
-    queries = list(template.derivable_queries([R.edge(1, 4)]))
+    queries = list(model.derivable_queries([R.edge(1, 4)]))
 
     expected_queries = sorted(
         [

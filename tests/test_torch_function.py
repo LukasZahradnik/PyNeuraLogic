@@ -11,7 +11,7 @@ def test_torch_function_with_parameters():
     neuralogic.manual_seed(1)
 
     model = Model()
-    template += Relation.xor[1, 8] <= Relation.xy
+    model += Relation.xor[1, 8] <= Relation.xy
 
     def to_logic(tensor_data):
         return [Relation.xy[tensor_data]]
@@ -27,7 +27,7 @@ def test_torch_function_with_parameters():
         torch.nn.Linear(2, 8),
         torch.nn.Tanh(),
         NeuraLogic(
-            template,
+            model,
             [R.xy[8,]],
             R.xor,
             to_logic,
@@ -59,7 +59,7 @@ def test_torch_function_without_parameters():
     neuralogic.manual_seed(1)
 
     model = Model()
-    template += Relation.xor <= Relation.xy
+    model += Relation.xor <= Relation.xy
 
     def to_logic(tensor_data):
         return [Relation.xy[tensor_data]]
@@ -75,7 +75,7 @@ def test_torch_function_without_parameters():
         torch.nn.Linear(2, 8),
         torch.nn.Tanh(),
         NeuraLogic(
-            template,
+            model,
             [R.xy[8,]],
             R.xor,
             to_logic,

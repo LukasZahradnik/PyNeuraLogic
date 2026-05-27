@@ -140,7 +140,7 @@ class Model(NeuralModule):
             elif isinstance(rule, (WeightedRelation, BaseRelation)):
                 valued_facts.append(java_factory.get_valued_fact(rule, java_factory.get_variable_factory()))
 
-        parsed_model = jpype.JClass("cz.cvut.fel.ida.logic.constructs.template.types.ParsedModel")
+        parsed_template = jpype.JClass("cz.cvut.fel.ida.logic.constructs.template.types.ParsedTemplate")
         model = parsed_template(jpype.java.util.ArrayList(weighted_rules), jpype.java.util.ArrayList(valued_facts))
 
         model.weightsMetadata = (jpype.java.util.List) @ jpype.java.util.ArrayList([])

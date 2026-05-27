@@ -16,6 +16,41 @@ from neuralogic.core.sources import Sources
 ModelEntries = BaseRelation | WeightedRelation | Rule
 
 
+def samples_to_examples_and_queries(samples: list[Any]) -> tuple[Iterable[Any], Iterable[Any]]:
+    """
+    Converts a list of samples to two lists: examples and queries.
+
+    Parameters
+    ----------
+    samples : list[Any]
+        The list of samples.
+
+    Returns
+    -------
+    tuple[Iterable[Any], Iterable[Any]]
+        A tuple containing the iterable of examples and the iterable of queries.
+    """
+    example_dict = {}
+    queries_dict = {}
+
+    for sample in samples:
+        idx = id(sample.example)
+
+        if idx not in example_dict:
+            if isinstance(sample.query, list):
+                queries_dict[idx] = [*sample.query]
+            else:
+                queries_dict[idx] = [sample.query]
+            example_dict[idx] = sample.example
+            continue
+
+        if isinstance(sample.query, list):
+            queries_dict[idx].extend(sample.query)
+        else:
+            queries_dict[idx].append(sample.query)
+    return example_dict.values(), queries_dict.values()
+
+
 class DatasetBuilder:
     """
     DatasetBuilder is responsible for grounding and neuralizing datasets.
@@ -216,7 +251,7 @@ class DatasetBuilder:
             queries = dataset._queries
 
             if len(dataset.samples) != 0:
-                examples, queries = self.samples_to_examples_and_queries(dataset.samples)
+                examples, queries = samples_to_examples_and_queries(dataset.samples)
 
             if len(examples) == 1:
                 settings.settings.groundingMode = self.grounding_mode.GLOBAL
@@ -298,7 +333,7 @@ class DatasetBuilder:
         return dataset.neuralize(batch_size=batch_size, progress=progress)
 
     @staticmethod
-    def merge_queries_with_examples(self, queries: list[Any], examples: list[Any], one_query_per_example: bool, example_queries: bool = True) -> list[Any]:
+    def merge_queries_with_examples(queries: list[Any], examples: list[Any], one_query_per_example: bool, example_queries: bool = True) -> list[Any]:
         """
         Merges queries with their corresponding examples.
 
@@ -370,37 +405,3 @@ class DatasetBuilder:
             query_object.query.evidence = example_object.query.evidence
             logic_samples.append(query)
         return logic_samples
-
-    def samples_to_examples_and_queries(samples: list[Any]) -> tuple[Iterable[Any], Iterable[Any]]:
-        """
-        Converts a list of samples to two lists: examples and queries.
-
-        Parameters
-        ----------
-        samples : list[Any]
-            The list of samples.
-
-        Returns
-        -------
-        tuple[Iterable[Any], Iterable[Any]]
-            A tuple containing the iterable of examples and the iterable of queries.
-        """
-        example_dict = {}
-        queries_dict = {}
-
-        for sample in samples:
-            idx = id(sample.example)
-
-            if idx not in example_dict:
-                if isinstance(sample.query, list):
-                    queries_dict[idx] = [*sample.query]
-                else:
-                    queries_dict[idx] = [sample.query]
-                example_dict[idx] = sample.example
-                continue
-
-            if isinstance(sample.query, list):
-                queries_dict[idx].extend(sample.query)
-            else:
-                queries_dict[idx].append(sample.query)
-        return example_dict.values(), queries_dict.values()

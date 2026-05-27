@@ -150,7 +150,7 @@ class JavaFactory:
         self.predicate_metadata = jpype.JClass("cz.cvut.fel.ida.logic.constructs.template.metadata.PredicateMetadata")
         self.rule_metadata = jpype.JClass("cz.cvut.fel.ida.logic.constructs.template.metadata.RuleMetadata")
 
-        self.model_builder = jpype.JClass("cz.cvut.fel.ida.logic.constructs.building.ModelBuilder")
+        self.model_builder = jpype.JClass("cz.cvut.fel.ida.logic.constructs.building.TemplateBuilder")
         self.examples_builder = jpype.JClass("cz.cvut.fel.ida.logic.constructs.building.ExamplesBuilder")
 
         self.var_factory_class = jpype.JClass("cz.cvut.fel.ida.logic.constructs.building.factories.VariableFactory")

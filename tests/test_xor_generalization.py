@@ -24,8 +24,8 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
     dataset = Dataset()
     model = Model()
 
-    template += (R.xor_at(0) <= R.val_at(0)) | [Transformation.TANH]
-    template += (
+    model += (R.xor_at(0) <= R.val_at(0)) | [Transformation.TANH]
+    model += (
         R.xor_at(V.Y)["a":1, 8] <= (R.val_at(V.Y)["b":8, 1], R.xor_at(V.X)["c":8, 1], R.special.next(V.X, V.Y))
     ) | [Transformation.TANH]
 
@@ -40,8 +40,8 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
 
     settings = Settings(epochs=5000)
 
-    template.build(settings)
-    template.train(dataset, epochs=5000)
+    model.build(settings)
+    model.train(dataset, epochs=5000)
 
     # build the dataset for n inputs
     products = itertools.product([0, 1], repeat=n)
@@ -50,7 +50,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
     for example in products:
         n_dataset.add_sample(Sample(R.xor_at(n - 1)[0], [R.val_at(i)[int(val)] for i, val in enumerate(example)]))
 
-    for expected_value, predicted in zip(expected, template.test(n_dataset)):
+    for expected_value, predicted in zip(expected, model.test(n_dataset)):
         assert expected_value == predicted
 
 
@@ -99,10 +99,10 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
     ])
 
     settings = Settings(optimizer=SGD())
-    template.build(settings)
+    model.build(settings)
 
     # Train on the dataset with two var input
-    template.train(dataset, epochs=300)
+    model.train(dataset, epochs=300)
 
     # Get all products of lenght of n (all inputs of n vars)
     products = itertools.product([0.0, 1.0], repeat=n)
@@ -123,5 +123,5 @@ def test_xor_generalization(n: int, expected: List[int]) -> None:
         n_dataset.add(R.xor, fact_example)
 
     # Check that we predicted correct values for n inputs for model trained on 2 inputs
-    for expected_value, predicted in zip(expected, template.test(n_dataset)):
+    for expected_value, predicted in zip(expected, model.test(n_dataset)):
         assert expected_value == round(predicted)

@@ -85,7 +85,7 @@ class Builder:
         ]
 
         sources = Sources.from_args(args, settings)
-        model = self.builder.buildModel(sources.sources)
+        model = self.builder.buildTemplate(sources.sources)
 
         return model
 

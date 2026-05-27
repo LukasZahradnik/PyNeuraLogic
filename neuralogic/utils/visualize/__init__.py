@@ -76,7 +76,7 @@ def get_model_drawer(settings: SettingsProxy) -> Any:
     Any
         The model drawer.
     """
-    return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.ModelDrawer")(settings.settings)
+    return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.TemplateDrawer")(settings.settings)
 
 
 def get_sample_drawer(settings: SettingsProxy) -> Any:
@@ -235,7 +235,7 @@ def draw_model(
     model = model._parsed_model
     template_drawer = get_model_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
 
-    return draw(template_drawer, template, filename, show, img_type, *args, **kwargs)
+    return draw(template_drawer, model, filename, show, img_type, *args, **kwargs)
 
 
 def draw_grounding(

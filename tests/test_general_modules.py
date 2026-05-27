@@ -28,8 +28,8 @@ def test_linear_module(feature_size: int, output_size: int, num_of_inputs: int, 
         linear_output = torch.tanh_(linear_output)
 
     model = Model()
-    template += Linear(feature_size, output_size, "h", "f", activation=activation)
-    model = template.build(Settings(iso_value_compression=False, chain_pruning=False))
+    model += Linear(feature_size, output_size, "h", "f", activation=activation)
+    model = model.build(Settings(iso_value_compression=False, chain_pruning=False))
 
     state = model.state_dict()
     state["weights"][0] = list(linear.parameters())[0].detach().numpy()

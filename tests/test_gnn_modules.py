@@ -45,11 +45,11 @@ def test_gen_module(input_size, hidden_size):
         m.bias = None
 
     model = Model()
-    template += neuralogic.nn.module.GENConv(
+    model += neuralogic.nn.module.GENConv(
         input_size, hidden_size, "h", "f", "e", num_layers=1, aggregation=Aggregation.AVG, eps=0, edge_dim=input_size
     )
 
-    model = template.build(
+    model = model.build(
         Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
     )
 
@@ -117,9 +117,9 @@ def test_gine_module(input_size):
     gin = GINEConv(Identity())
 
     model = Model()
-    template += neuralogic.nn.module.GINEConv(input_size, "f", "e", "h")
+    model += neuralogic.nn.module.GINEConv(input_size, "f", "e", "h")
 
-    model = template.build(
+    model = model.build(
         Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
     )
 
@@ -169,9 +169,9 @@ def test_gcn_module(input_size, output_size):
     gcn = GCNConv(input_size, output_size, bias=False)
 
     model = Model()
-    template += neuralogic.nn.module.GCNConv(input_size, output_size, "h", "f", "e")
+    model += neuralogic.nn.module.GCNConv(input_size, output_size, "h", "f", "e")
 
-    model = template.build(
+    model = model.build(
         Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
     )
 
