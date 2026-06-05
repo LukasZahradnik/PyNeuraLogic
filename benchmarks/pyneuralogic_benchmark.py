@@ -14,7 +14,7 @@ from neuralogic.core import (
 from neuralogic.nn.init import Glorot
 from neuralogic.nn.loss import CrossEntropy
 from neuralogic.dataset import TensorDataset, Data
-from neuralogic.optim import Adam
+from neuralogic.nn.optim import Adam
 
 
 def gcn(activation: Transformation, output_size: int, num_features: int, dim: int = 10):

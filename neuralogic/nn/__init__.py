@@ -58,6 +58,16 @@ from neuralogic.nn.optim import (
     Optimizer,
     SGD,
 )
+from neuralogic.nn.trainer import (
+    CheckpointCallback,
+    EarlyStoppingCallback,
+    Metric,
+    ProgressCallback,
+    Trainer,
+    TrainerCallback,
+    TrainerHistory,
+    compute_metrics,
+)
 
 __all__ = [
     # modules
@@ -109,4 +119,13 @@ __all__ = [
     "Adam",
     "SGD",
     "Optimizer",
+    # trainer
+    "Trainer",
+    "TrainerHistory",
+    "TrainerCallback",
+    "EarlyStoppingCallback",
+    "CheckpointCallback",
+    "ProgressCallback",
+    "compute_metrics",
+    "Metric",
 ]
