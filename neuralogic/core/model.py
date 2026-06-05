@@ -1,4 +1,6 @@
+import pickle
 from collections.abc import Iterable
+from pathlib import Path
 from typing import Any
 
 import jpype
@@ -275,3 +277,39 @@ class Model(NeuralModule):
 
     def clone(self) -> "Model":
         return self.__copy__()
+
+    def save(self, path: str | Path) -> None:
+        """Save the model weights to a file.
+
+        The model must be built before calling :meth:`save`.
+        To restore, rebuild the same architecture and call :meth:`load`.
+
+        Parameters
+        ----------
+        path : str | Path
+            Path to the output file (``.pkl`` extension recommended).
+        """
+        if self._neural_model is None:
+            raise ModelError("Cannot save an unbuilt model. Call model.build() first.")
+        path = Path(path)
+        data = {"state_dict": self.state_dict()}
+        with open(path, "wb") as f:
+            pickle.dump(data, f)
+
+    def load(self, path: str | Path) -> None:
+        """Load model weights from a file saved by :meth:`save`.
+
+        The model must already be built with the **same architecture**
+        that produced the saved file.
+
+        Parameters
+        ----------
+        path : str | Path
+            Path to the saved file.
+        """
+        if self._neural_model is None:
+            raise ModelError("Cannot load weights into an unbuilt model. Call model.build() first.")
+        path = Path(path)
+        with open(path, "rb") as f:
+            data = pickle.load(f)
+        self.load_state_dict(data["state_dict"])
