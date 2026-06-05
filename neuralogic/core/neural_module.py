@@ -238,7 +238,10 @@ class NeuralModule:
 
     def tensor_parameters(self):
         if self._torch_module is None:
-            raise NotImplementedError
+            raise NotImplementedError(
+                "tensor_parameters() requires the PyTorch backend. "
+                "Call model.build(settings, torch=True) to enable it."
+            )
 
         self._tensor_parameters = self._torch_module.tensor_parameters(
             self._tensor_parameters,

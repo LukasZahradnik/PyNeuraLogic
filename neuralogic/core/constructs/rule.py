@@ -99,7 +99,7 @@ class Rule:
         return str(self)
 
     def __str__(self) -> str:
-        metadata = "" if self.metadata is None is None else f" {self.metadata}"
+        metadata = "" if self.metadata is None else f" {self.metadata}"
         if isinstance(self.body, FContainer):
             return f"{self.head.to_str()} :- {self.body.to_str()}.{metadata}"
         return f"{self.head.to_str()} :- {', '.join(atom.to_str() for atom in self.body)}.{metadata}"

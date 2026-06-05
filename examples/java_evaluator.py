@@ -2,7 +2,7 @@ from examples.datasets.vectorized_xor import template, dataset
 
 from neuralogic.nn import get_evaluator
 from neuralogic.core import Settings
-from neuralogic.optim import SGD
+from neuralogic.nn.optim import SGD
 
 
 settings = Settings(optimizer=SGD(), epochs=300)

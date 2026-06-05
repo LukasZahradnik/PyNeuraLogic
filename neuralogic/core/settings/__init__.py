@@ -5,7 +5,7 @@ from neuralogic.core.enums import Grounder
 from neuralogic.core.settings.settings_proxy import SettingsProxy
 from neuralogic.nn.init import Initializer, Uniform
 from neuralogic.nn.loss import MSE, ErrorFunction
-from neuralogic.optim import Adam, Optimizer
+from neuralogic.nn.optim import Adam, Optimizer
 
 
 class Settings:

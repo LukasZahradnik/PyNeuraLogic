@@ -12,7 +12,7 @@ from neuralogic.core.constructs.function.function import (
 from neuralogic.core.enums import Grounder
 from neuralogic.nn.init import Initializer
 from neuralogic.nn.loss import MSE, CrossEntropy, ErrorFunction, SoftEntropy
-from neuralogic.optim import Optimizer
+from neuralogic.nn.optim import Optimizer
 from neuralogic.setup import initialize, is_initialized
 
 

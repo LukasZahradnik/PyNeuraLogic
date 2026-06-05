@@ -1,0 +1,112 @@
+"""Neural network building blocks — modules, losses, initializers, and optimizers.
+
+All primary symbols are importable directly from ``neuralogic.nn``::
+
+    from neuralogic.nn import GCNConv, LSTM, MSE, Uniform, Adam
+"""
+
+from neuralogic.nn.init import (
+    Constant,
+    Glorot,
+    He,
+    Initializer,
+    Longtail,
+    Normal,
+    Uniform,
+)
+from neuralogic.nn.loss import (
+    CrossEntropy,
+    ErrorFunction,
+    MSE,
+    SoftEntropy,
+)
+from neuralogic.nn.module import (
+    APPNPConv,
+    Attention,
+    AvgPooling,
+    GATv2Conv,
+    GCNConv,
+    GENConv,
+    GINConv,
+    GINEConv,
+    GRU,
+    Linear,
+    LSTM,
+    MAGNNLinear,
+    MAGNNMean,
+    MaxPooling,
+    MetaConv,
+    MLP,
+    Module,
+    MultiheadAttention,
+    Pooling,
+    PositionalEncoding,
+    ResGatedGraphConv,
+    RGCNConv,
+    RNN,
+    RvNN,
+    SGConv,
+    SAGEConv,
+    SumPooling,
+    TAGConv,
+    Transformer,
+    TransformerDecoder,
+    TransformerEncoder,
+)
+from neuralogic.nn.optim import (
+    Adam,
+    Optimizer,
+    SGD,
+)
+
+__all__ = [
+    # modules
+    "APPNPConv",
+    "Attention",
+    "AvgPooling",
+    "GATv2Conv",
+    "GCNConv",
+    "GENConv",
+    "GINConv",
+    "GINEConv",
+    "GRU",
+    "Linear",
+    "LSTM",
+    "MAGNNLinear",
+    "MAGNNMean",
+    "MaxPooling",
+    "MetaConv",
+    "MLP",
+    "Module",
+    "MultiheadAttention",
+    "Pooling",
+    "PositionalEncoding",
+    "ResGatedGraphConv",
+    "RGCNConv",
+    "RNN",
+    "RvNN",
+    "SGConv",
+    "SAGEConv",
+    "SumPooling",
+    "TAGConv",
+    "Transformer",
+    "TransformerDecoder",
+    "TransformerEncoder",
+    # losses
+    "MSE",
+    "CrossEntropy",
+    "SoftEntropy",
+    "ErrorFunction",
+    # initializers
+    "Uniform",
+    "Normal",
+    "Constant",
+    "Glorot",
+    "He",
+    "Longtail",
+    "Initializer",
+    # optimizers
+    "Adam",
+    "SGD",
+    "Optimizer",
+]
