@@ -4,7 +4,7 @@ from neuralogic.core import Settings, Transformation
 from neuralogic.core.constructs.function import Function
 from neuralogic.nn.init import Initializer, Uniform
 from neuralogic.nn.loss import SoftEntropy, ErrorFunction
-from neuralogic.optim import SGD, Optimizer
+from neuralogic.nn.optim import SGD, Optimizer
 
 import pytest
 

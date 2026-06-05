@@ -1,7 +1,7 @@
 from neuralogic.dataset import Data, TensorDataset, Dataset, Sample
 from neuralogic.core import Model, Settings, Relation
 from neuralogic.nn.module import GCNConv
-from neuralogic.optim import SGD
+from neuralogic.nn.optim import SGD
 
 
 def test_quick_start_from_tensor():

@@ -2,8 +2,8 @@ from typing import Any
 
 import jpype
 
-from neuralogic.optim.lr_scheduler import LRDecay
-from neuralogic.optim.optimizer import Optimizer
+from neuralogic.nn.optim.lr_scheduler import LRDecay
+from neuralogic.nn.optim.optimizer import Optimizer
 
 
 class SGD(Optimizer):

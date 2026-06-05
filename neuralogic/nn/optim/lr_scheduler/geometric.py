@@ -1,6 +1,6 @@
 import jpype
 
-from neuralogic.optim.lr_scheduler.lr_decay import LRDecay
+from neuralogic.nn.optim.lr_scheduler.lr_decay import LRDecay
 
 
 class GeometricLR(LRDecay):

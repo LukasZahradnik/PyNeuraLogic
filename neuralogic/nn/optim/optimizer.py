@@ -1,6 +1,6 @@
 from typing import Any
 
-from neuralogic.optim.lr_scheduler import LRDecay
+from neuralogic.nn.optim.lr_scheduler import LRDecay
 
 
 class Optimizer:

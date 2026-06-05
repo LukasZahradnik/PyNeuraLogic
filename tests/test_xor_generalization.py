@@ -6,7 +6,7 @@ import pytest
 from neuralogic import manual_seed
 from neuralogic.core import Settings, R, V, Model, Transformation
 from neuralogic.dataset import Dataset, Sample
-from neuralogic.optim import SGD
+from neuralogic.nn.optim import SGD
 
 
 @pytest.mark.parametrize(

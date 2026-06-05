@@ -7,7 +7,7 @@ from neuralogic.dataset import Dataset, Sample
 from neuralogic.nn.loss import MSE
 
 from neuralogic.nn.module import GRU, RNN, LSTM
-from neuralogic.optim import Adam, SGD
+from neuralogic.nn.optim import Adam, SGD
 
 
 @pytest.mark.parametrize(

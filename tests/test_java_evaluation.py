@@ -3,7 +3,7 @@ from typing import List
 from neuralogic import manual_seed
 from neuralogic.core import Settings, Model
 from neuralogic.dataset.base import BaseDataset
-from neuralogic.optim import SGD
+from neuralogic.nn.optim import SGD
 from neuralogic.utils.data import XOR, XOR_Vectorized, Trains, Mutagenesis
 
 from examples.datasets import (

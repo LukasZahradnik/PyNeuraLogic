@@ -3,8 +3,8 @@ from typing import List
 import pytest
 
 from neuralogic import initialize, is_initialized
-from neuralogic.optim import Adam
-from neuralogic.optim.lr_scheduler import GeometricLR, ArithmeticLR
+from neuralogic.nn.optim import Adam
+from neuralogic.nn.optim.lr_scheduler import GeometricLR, ArithmeticLR
 
 
 @pytest.mark.parametrize(
