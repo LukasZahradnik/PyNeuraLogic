@@ -12,6 +12,7 @@ from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.neural_module import NeuralModule
 from neuralogic.core.settings import Settings, SettingsProxy
 from neuralogic.dataset import Dataset
+from neuralogic.exceptions import ModelError
 from neuralogic.nn.module.module import Module
 from neuralogic.setup import initialize, is_initialized
 
@@ -53,7 +54,7 @@ class Model(NeuralModule):
             The rules to add.
         """
         if self._neural_model is not None:
-            raise ValueError("Cannot modify built model")
+            raise ModelError("Cannot modify built model")
         self._parsed_model = None
         self._model.extend(rules)
 
@@ -100,7 +101,7 @@ class Model(NeuralModule):
     def remove_duplicates(self) -> None:
         """Removes duplicates from the model."""
         if self._neural_model is not None:
-            raise ValueError("Cannot modify built model")
+            raise ModelError("Cannot modify built model")
 
         self._parsed_model = None
 
@@ -231,7 +232,7 @@ class Model(NeuralModule):
 
     def __iadd__(self, other: ModelEntries | Iterable[ModelEntries] | Module) -> "Model":
         if self._neural_model is not None:
-            raise ValueError("Cannot modify built model")
+            raise ModelError("Cannot modify built model")
         self._parsed_model = None
         if isinstance(other, Iterable):
             self._model.extend(other)
@@ -246,13 +247,13 @@ class Model(NeuralModule):
 
     def __delitem__(self, key: int) -> None:
         if self._neural_model is not None:
-            raise ValueError("Cannot modify built model")
+            raise ModelError("Cannot modify built model")
         self._parsed_model = None
         self._model.pop(key)
 
     def __setitem__(self, key: int, value: ModelEntries) -> None:
         if self._neural_model is not None:
-            raise ValueError("Cannot modify built model")
+            raise ModelError("Cannot modify built model")
         if isinstance(value, (Iterable, Module)):
             raise NotImplementedError
         self._parsed_model = None

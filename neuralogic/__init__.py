@@ -1,4 +1,11 @@
 from neuralogic.core import C, Const, F, Model, R, Relation, Settings, V, Var
+from neuralogic.exceptions import (
+    BackendError,
+    ConfigurationError,
+    DatasetError,
+    ModelError,
+    NeuraLogicError,
+)
 from neuralogic.logging import LogHandler, add_log_handler
 from neuralogic.setup import (
     get_default_graphviz_path,
@@ -35,4 +42,9 @@ __all__ = [
     "set_jvm_path",
     "set_jvm_options",
     "get_default_graphviz_path",
+    "NeuraLogicError",
+    "ModelError",
+    "DatasetError",
+    "BackendError",
+    "ConfigurationError",
 ]

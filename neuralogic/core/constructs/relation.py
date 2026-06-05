@@ -96,7 +96,7 @@ class BaseRelation:
 
     def __call__(self, *args: Any) -> "BaseRelation":
         if self.terms:
-            raise Exception
+            raise ValueError("Cannot assign terms twice to a relation")
 
         if len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], str):
             terms = list(args[0])
@@ -232,7 +232,7 @@ class WeightedRelation(BaseRelation):
             The weighted relation with a fixed weight.
         """
         if self.is_fixed:
-            raise Exception(f"Weighted relation {self} is already fixed")
+            raise ValueError(f"Weighted relation {self} is already fixed")
         return WeightedRelation(self.weight, self.predicate, True, self.terms, self.function)
 
     def to_str(self, end=False):

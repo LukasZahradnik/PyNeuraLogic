@@ -282,7 +282,7 @@ class NeuralModule:
             try:
                 import torch
             except ImportError:
-                raise Exception("torch is not installed in the environment")
+                raise ImportError("torch is not installed in the environment")
 
             from neuralogic.core.torch.neural_module import TorchNeuralModule
 

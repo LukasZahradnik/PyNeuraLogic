@@ -3,6 +3,7 @@ from typing import List, Optional
 
 import jpype
 
+from neuralogic.exceptions import ConfigurationError
 from neuralogic.logging import LogHandler, _init_logging, add_log_handler
 
 _is_initialized = False
@@ -189,7 +190,7 @@ def initialize(
     global _is_initialized
 
     if _is_initialized and started_check:
-        raise Exception("NeuraLogic already initialized")
+        raise ConfigurationError("NeuraLogic already initialized")
     if _is_initialized:
         return
 

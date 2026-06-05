@@ -151,7 +151,7 @@ def draw(
         try:
             drawer.drawIntoFile(obj, os.path.abspath(filename))
         except jpype.java.lang.NullPointerException as e:
-            raise Exception(
+            raise RuntimeError(
                 "Drawing raised NullPointerException. Try to install GraphViz (https://graphviz.org/download/) on "
                 "your Path or specify the path via the `graphviz_path` parameter"
             ) from e
@@ -161,7 +161,7 @@ def draw(
     data = drawer.drawIntoBytes(obj)
 
     if data is None:
-        raise Exception(
+        raise RuntimeError(
             "Drawing failed. Try to install GraphViz (https://graphviz.org/download/) on your Path or specify the "
             "path via the `graphviz_path` parameter"
         )
@@ -382,5 +382,5 @@ def is_jupyter() -> bool:
     try:
         __IPYTHON__  # noqa: F821
         return True
-    except Exception:
+    except NameError:
         return False

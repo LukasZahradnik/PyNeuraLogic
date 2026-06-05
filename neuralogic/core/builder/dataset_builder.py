@@ -11,6 +11,7 @@ from neuralogic.core.constructs.relation import BaseRelation, WeightedRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.settings import SettingsProxy
 from neuralogic.core.sources import Sources
+from neuralogic.exceptions import DatasetError
 from neuralogic.setup import initialize, is_initialized
 
 ModelEntries = BaseRelation | WeightedRelation | Rule
@@ -180,7 +181,7 @@ class DatasetBuilder:
                 raise NotImplementedError
 
             if not example_query and examples_queries:
-                raise Exception("Inconsistent examples! Some examples have queries and some do not")
+                raise DatasetError("Inconsistent examples! Some examples have queries and some do not")
 
             examples_queries = example_query
             logic_samples.append(self.logic_sample(value, query_atom))
@@ -366,7 +367,7 @@ class DatasetBuilder:
 
         if len(queries) == 0:
             if not example_queries:
-                raise Exception("No queries provided! The query list is empty and examples do not contain queries")
+                raise DatasetError("No queries provided! The query list is empty and examples do not contain queries")
             return examples
 
         # One large example for one or more queries
@@ -385,7 +386,7 @@ class DatasetBuilder:
         # One example per query
         if one_query_per_example:
             if len(examples) != len(queries):
-                raise Exception(
+                raise DatasetError(
                     f"The size of examples {len(examples)} doesn't match the size of queries {len(queries)}"
                 )
 

@@ -91,13 +91,13 @@ class SpecialPredicateFactory:
         return relation.BaseRelation(Predicate("min_eval", 2, self.is_hidden, True), [a, b])
 
     def __call__(self, *args, **kwargs):
-        raise Exception(
+        raise TypeError(
             "Cannot add terms to not fully initialized relation - 'special' and 'hidden' are keywords, "
             "that cannot be used as a predicate name with dot notation (use `get` method instead)"
         )
 
     def __getitem__(self, item):
-        raise Exception(
+        raise TypeError(
             "Cannot add terms to not fully initialized relation - 'special' and 'hidden' are keywords, "
             "that cannot be used as a predicate name with dot notation (use `get` method instead)"
         )
@@ -139,13 +139,13 @@ class HiddenPredicateFactory:
         return relation.BaseRelation(Predicate(name, 0, True, False))
 
     def __call__(self, *args, **kwargs):
-        raise Exception(
+        raise TypeError(
             "Cannot add terms to not fully initialized relation - 'special' and 'hidden' are keywords, "
             "that cannot be used as a predicate name with dot notation (use `get` method instead)"
         )
 
     def __getitem__(self, item):
-        raise Exception(
+        raise TypeError(
             "Cannot add terms to not fully initialized relation - 'special' and 'hidden' are keywords, "
             "that cannot be used as a predicate name with dot notation (use `get` method instead)"
         )

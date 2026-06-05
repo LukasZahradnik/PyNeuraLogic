@@ -80,7 +80,7 @@ class Converter:
         for name, arities in batched_relations.items():
             for arity, relations_by_arity in arities.items():
                 if f"{name}/{arity}" in self.table_mappings:
-                    raise Exception
+                    raise NotImplementedError(f"Table mapping for {name}/{arity} already exists")
 
                 is_fact = False
 
