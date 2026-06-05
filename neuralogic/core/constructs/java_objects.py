@@ -22,6 +22,8 @@ class ValueFactory:
 
     def __init__(self):
         """Initializes the ValueFactory with references to Java value classes."""
+        if not is_initialized():
+            initialize()
         self.scalar_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.ScalarValue")
         self.vector_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.VectorValue")
         self.matrix_value = jpype.JClass("cz.cvut.fel.ida.algebra.values.MatrixValue")
