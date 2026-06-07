@@ -381,7 +381,7 @@ def test_evaluator_run_on_rules(model: Model, dataset: BaseDataset, expected_res
 )
 def test_evaluator_state_loading(model: Model, dataset: BaseDataset) -> None:
     """Tests for loading state"""
-    settings = Settings(optimizer=SGD(0.1), epochs=20)
+    settings = Settings(optimizer=SGD(0.1))
 
     model.build(settings)
     built_dataset = model.build_dataset(dataset)

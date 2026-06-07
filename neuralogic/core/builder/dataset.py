@@ -1,5 +1,11 @@
-from neuralogic.core.builder import Builder
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from neuralogic.core.builder.components import Grounding, NeuralSample
+
+if TYPE_CHECKING:
+    from neuralogic.core.builder import Builder
 
 
 class BuiltDataset:

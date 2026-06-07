@@ -14,7 +14,6 @@ import pytest
     [
         {
             "optimizer": SGD(0.5),
-            "epochs": 100,
             "error_function": SoftEntropy(),
             "initializer": Uniform(5.0),
             "initializer_uniform_scale": 5.0,

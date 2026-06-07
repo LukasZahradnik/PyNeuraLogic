@@ -38,7 +38,7 @@ def test_xor_generalization_accurate(n: int, expected: List[int]) -> None:
         ]
     )
 
-    settings = Settings(epochs=5000)
+    settings = Settings()
 
     model.build(settings)
     model.train(dataset, epochs=5000)

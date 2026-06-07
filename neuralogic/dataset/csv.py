@@ -6,7 +6,6 @@ from typing import TextIO
 from neuralogic.core.constructs.factories import R
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.rule import Rule
-from neuralogic.dataset import Dataset, Sample
 from neuralogic.dataset.base import ConvertibleDataset
 
 DatasetEntries = BaseRelation | Rule
@@ -215,7 +214,7 @@ class CSVDataset(ConvertibleDataset):
     def set_query_csv_file(self, file: CSVFile) -> None:
         self.csv_queries = file
 
-    def to_dataset(self) -> Dataset:
+    def to_dataset(self) -> "Dataset":
         """
         Converts the CSV files to a Dataset object.
 
@@ -224,6 +223,8 @@ class CSVDataset(ConvertibleDataset):
         Dataset
             The created Dataset object.
         """
+        from neuralogic.dataset import Dataset, Sample
+
         queries: list[BaseRelation | Rule] = self.csv_queries.to_logic_form() if self.csv_queries else []
 
         if self.mode == Mode.ONE_EXAMPLE:

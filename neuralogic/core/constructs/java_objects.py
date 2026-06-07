@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import Iterable, Sequence
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import jpype
 import numpy as np
@@ -10,8 +12,10 @@ from neuralogic.core.constructs.function.enum import Combination
 from neuralogic.core.constructs.function.function import CombinationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.core.constructs.term import Constant, Variable
-from neuralogic.core.settings import Settings, SettingsProxy
 from neuralogic.setup import initialize, is_initialized
+
+if TYPE_CHECKING:
+    from neuralogic.core.settings import Settings, SettingsProxy
 
 
 class ValueFactory:
@@ -144,6 +148,8 @@ class JavaFactory:
             initialize()
 
         if settings is None:
+            from neuralogic.core.settings import Settings
+
             settings = Settings().create_proxy()
 
         self.settings = settings

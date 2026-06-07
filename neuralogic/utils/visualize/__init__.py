@@ -1,12 +1,16 @@
+from __future__ import annotations
+
 import io
 import os
 import tempfile
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import jpype
 
-from neuralogic.core.settings import Settings, SettingsProxy
 from neuralogic.setup import get_default_graphviz_path
+
+if TYPE_CHECKING:
+    from neuralogic.core.settings import Settings, SettingsProxy
 
 
 def get_graphviz_path(path: str | None = None) -> str | None:
@@ -37,6 +41,8 @@ def get_drawing_settings(
     SettingsProxy
         The settings proxy for drawing.
     """
+    from neuralogic.core.settings import Settings
+
     settings = Settings().create_proxy()
 
     graphviz = get_graphviz_path(graphviz_path)

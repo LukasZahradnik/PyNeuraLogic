@@ -1,11 +1,15 @@
-from typing import Collection
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Collection
 
 import jpype
 
-from neuralogic.core.builder import DatasetBuilder
 from neuralogic.core.builder.dataset import BuiltDataset, GroundedDataset
+
+if TYPE_CHECKING:
+    from neuralogic.core.builder import DatasetBuilder
+    from neuralogic.core.settings.settings_proxy import SettingsProxy
 from neuralogic.core.constructs.java_objects import ValueFactory
-from neuralogic.core.settings.settings_proxy import SettingsProxy
 from neuralogic.dataset import Dataset
 from neuralogic.dataset.base import BaseDataset
 from neuralogic.setup import initialize, is_initialized

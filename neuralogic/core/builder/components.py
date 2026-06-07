@@ -3,8 +3,6 @@ from typing import Any
 
 import numpy as np
 
-from neuralogic.core.constructs.java_objects import ValueFactory
-from neuralogic.utils.visualize import draw_grounding, draw_sample
 
 
 class NeuronType(enum.StrEnum):
@@ -81,10 +79,14 @@ class Neuron(Atom):
 
     @property
     def value(self) -> float | list | np.ndarray:
+        from neuralogic.core.constructs.java_objects import ValueFactory
+
         return ValueFactory.from_java(self._atom.getRawState().getValue())
 
     @property
     def gradient(self) -> float | list | np.ndarray:
+        from neuralogic.core.constructs.java_objects import ValueFactory
+
         return ValueFactory.from_java(self._atom.getRawState().getGradient())
 
 
@@ -107,6 +109,8 @@ class NeuralSample:
 
     @property
     def target(self) -> float | list | np.ndarray:
+        from neuralogic.core.constructs.java_objects import ValueFactory
+
         return ValueFactory.from_java(self._java_sample.target)
 
     def get_neurons(self, literal: Any, neuron_type: NeuronType | None = NeuronType.Atom) -> list[Neuron]:
@@ -275,6 +279,8 @@ class NeuralSample:
         Any
             The drawing data or image object.
         """
+        from neuralogic.utils.visualize import draw_sample
+
         return draw_sample(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
 
     def __str__(self) -> str:
@@ -323,6 +329,8 @@ class Grounding:
         Any
             The drawing data or image object.
         """
+        from neuralogic.utils.visualize import draw_grounding
+
         return draw_grounding(self._grounding, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
 
     def __hash__(self):
