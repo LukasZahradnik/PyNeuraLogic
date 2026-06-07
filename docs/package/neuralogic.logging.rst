@@ -1,8 +1,10 @@
-neuralogic.logging
-==================
+neuralogic.logging package
+==========================
+
+Module contents
+---------------
 
 .. automodule:: neuralogic.logging
    :members:
-   :undoc-members:
    :show-inheritance:
-   :member-order: bysource
+   :undoc-members:

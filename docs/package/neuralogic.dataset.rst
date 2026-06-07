@@ -1,38 +1,69 @@
-neuralogic.dataset
-==================
+neuralogic.dataset package
+==========================
 
+Submodules
+----------
 
-Available dataset formats
+neuralogic.dataset.base module
+------------------------------
 
-- :class:`~neuralogic.dataset.logic.Dataset` (Logic format)
-- :class:`~neuralogic.dataset.file.FileDataset`
-- :class:`~neuralogic.dataset.tensor.TensorDataset`
-
-----
-
-.. autoclass:: neuralogic.dataset.logic.Dataset
+.. automodule:: neuralogic.dataset.base
    :members:
+   :show-inheritance:
+   :undoc-members:
 
-.. autoclass:: neuralogic.dataset.file.FileDataset
-   :members:
+neuralogic.dataset.csv module
+-----------------------------
 
-.. autoclass:: neuralogic.dataset.tensor.Data
+.. automodule:: neuralogic.dataset.csv
    :members:
+   :show-inheritance:
+   :undoc-members:
 
-.. autoclass:: neuralogic.dataset.tensor.TensorDataset
-   :members:
+neuralogic.dataset.db module
+----------------------------
 
-.. autoclass:: neuralogic.dataset.csv.CSVFile
+.. automodule:: neuralogic.dataset.db
    :members:
+   :show-inheritance:
+   :undoc-members:
 
-.. autoclass:: neuralogic.dataset.csv.CSVDataset
-   :members:
+neuralogic.dataset.file module
+------------------------------
 
-.. autoclass:: neuralogic.dataset.csv.Mode
+.. automodule:: neuralogic.dataset.file
    :members:
+   :show-inheritance:
+   :undoc-members:
 
-.. autoclass:: neuralogic.dataset.db.DBSource
-   :members:
+neuralogic.dataset.logic module
+-------------------------------
 
-.. autoclass:: neuralogic.dataset.db.DBDataset
+.. automodule:: neuralogic.dataset.logic
    :members:
+   :show-inheritance:
+   :undoc-members:
+
+neuralogic.dataset.pddl module
+------------------------------
+
+.. automodule:: neuralogic.dataset.pddl
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+neuralogic.dataset.tensor module
+--------------------------------
+
+.. automodule:: neuralogic.dataset.tensor
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: neuralogic.dataset
+   :members:
+   :show-inheritance:
+   :undoc-members:
