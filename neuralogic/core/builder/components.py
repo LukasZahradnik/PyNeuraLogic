@@ -4,7 +4,6 @@ from typing import Any
 import numpy as np
 
 
-
 class NeuronType(str, enum.Enum):
     """
     Enum representing different types of neurons in the neural network.

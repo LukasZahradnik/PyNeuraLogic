@@ -61,9 +61,7 @@ def _mean(values: list) -> float:
         return float(sum(float(v) for v in values) / len(values))
 
 
-def _build_logs(
-    train_loss: float, val_loss: float | None, lr: float | None = None
-) -> dict[str, Any]:
+def _build_logs(train_loss: float, val_loss: float | None, lr: float | None = None) -> dict[str, Any]:
     """Assemble the per-epoch log dictionary."""
     logs: dict[str, Any] = {"train_loss": train_loss}
     if val_loss is not None:

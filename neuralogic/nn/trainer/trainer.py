@@ -22,10 +22,7 @@ from .metrics import Metric, _validate_metrics, compute_metrics
 class Trainer:
     def __init__(self, module: NeuralModule) -> None:
         if module._neural_model is None:
-            raise ValueError(
-                "The model must be built before creating a Trainer. "
-                "Call model.build(settings) first."
-            )
+            raise ValueError("The model must be built before creating a Trainer. Call model.build(settings) first.")
         self.model = module
         self.stop_training: bool = False
 
@@ -87,11 +84,7 @@ class Trainer:
         _validate_metrics(metric_names)
 
         built_train = _ensure_built(self.model, train_dataset, batch_size)
-        built_val = (
-            _ensure_built(self.model, val_dataset, batch_size)
-            if val_dataset is not None
-            else None
-        )
+        built_val = _ensure_built(self.model, val_dataset, batch_size) if val_dataset is not None else None
 
         optimizer = self.model._settings.optimizer
         lr_decay = optimizer._lr_decay if hasattr(optimizer, "_lr_decay") else None

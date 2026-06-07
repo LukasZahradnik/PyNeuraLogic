@@ -266,17 +266,13 @@ class WeightedRelation(BaseRelation):
 
     @property
     def T(self) -> "WeightedRelation":
-        raise TypeError(
-            f"Cannot transpose weighted relation {self}. Apply the transposition before adding weights."
-        )
+        raise TypeError(f"Cannot transpose weighted relation {self}. Apply the transposition before adding weights.")
 
     def __invert__(self) -> "WeightedRelation":
         raise TypeError(f"Weighted relations ({self}) cannot be negated.")
 
     def __neg__(self) -> "WeightedRelation":
-        raise TypeError(
-            f"Cannot negate weighted relation {self}. Apply the reverse function before adding weights."
-        )
+        raise TypeError(f"Cannot negate weighted relation {self}. Apply the reverse function before adding weights.")
 
     def __copy__(self):
         relation = WeightedRelation.__new__(WeightedRelation)

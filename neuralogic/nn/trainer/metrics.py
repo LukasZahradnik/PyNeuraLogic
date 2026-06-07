@@ -205,9 +205,7 @@ def compute_metrics(
     for name in names:
         key = str(name)
         if key not in _METRIC_REGISTRY:
-            warnings.warn(
-                f"Unknown metric '{key}'. Available: {sorted(_METRIC_REGISTRY)}"
-            )
+            warnings.warn(f"Unknown metric '{key}'. Available: {sorted(_METRIC_REGISTRY)}")
             continue
         fn = _METRIC_REGISTRY[key]
         result[key] = fn(targets, outputs)
@@ -218,6 +216,4 @@ def _validate_metrics(metrics: list[str]) -> None:
     """Warn about unknown metric names."""
     unknown = [m for m in metrics if str(m) not in _METRIC_REGISTRY]
     if unknown:
-        warnings.warn(
-            f"Unknown metric(s): {unknown}. Available: {sorted(_METRIC_REGISTRY)}"
-        )
+        warnings.warn(f"Unknown metric(s): {unknown}. Available: {sorted(_METRIC_REGISTRY)}")
