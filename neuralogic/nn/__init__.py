@@ -15,12 +15,16 @@ from neuralogic.nn.init import (
     Uniform,
 )
 from neuralogic.nn.loss import (
+    MSE,
     CrossEntropy,
     ErrorFunction,
-    MSE,
     SoftEntropy,
 )
 from neuralogic.nn.module import (
+    GRU,
+    LSTM,
+    MLP,
+    RNN,
     APPNPConv,
     Attention,
     AvgPooling,
@@ -29,24 +33,20 @@ from neuralogic.nn.module import (
     GENConv,
     GINConv,
     GINEConv,
-    GRU,
     Linear,
-    LSTM,
     MAGNNLinear,
     MAGNNMean,
     MaxPooling,
     MetaConv,
-    MLP,
     Module,
     MultiheadAttention,
     Pooling,
     PositionalEncoding,
     ResGatedGraphConv,
     RGCNConv,
-    RNN,
     RvNN,
-    SGConv,
     SAGEConv,
+    SGConv,
     SumPooling,
     TAGConv,
     Transformer,
@@ -54,9 +54,9 @@ from neuralogic.nn.module import (
     TransformerEncoder,
 )
 from neuralogic.nn.optim import (
+    SGD,
     Adam,
     Optimizer,
-    SGD,
 )
 from neuralogic.nn.trainer import (
     CheckpointCallback,

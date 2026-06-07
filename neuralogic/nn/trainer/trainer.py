@@ -8,15 +8,15 @@ from neuralogic.core.builder.dataset import BuiltDataset, GroundedDataset
 from neuralogic.core.neural_module import NeuralModule
 from neuralogic.dataset import Dataset
 
-from .helpers import _build_logs, _ensure_built, _mean, _unpack_results
-from .callbacks import (
+from neuralogic.nn.trainer.callbacks import (
     CheckpointCallback,
     EarlyStoppingCallback,
     ProgressCallback,
     TrainerCallback,
 )
-from .history import TrainerHistory
-from .metrics import Metric, _validate_metrics, compute_metrics
+from neuralogic.nn.trainer.helpers import _build_logs, _ensure_built, _mean, _unpack_results
+from neuralogic.nn.trainer.history import TrainerHistory
+from neuralogic.nn.trainer.metrics import Metric, _validate_metrics, compute_metrics
 
 
 class Trainer:

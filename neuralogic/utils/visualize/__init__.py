@@ -10,7 +10,7 @@ import jpype
 from neuralogic.setup import get_default_graphviz_path
 
 if TYPE_CHECKING:
-    from neuralogic.core.settings import Settings, SettingsProxy
+    from neuralogic.core.settings import SettingsProxy
 
 
 def get_graphviz_path(path: str | None = None) -> str | None:

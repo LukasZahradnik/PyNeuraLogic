@@ -1,12 +1,15 @@
 import enum
 from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import TextIO
+from typing import TYPE_CHECKING, TextIO
 
 from neuralogic.core.constructs.factories import R
 from neuralogic.core.constructs.relation import BaseRelation
 from neuralogic.core.constructs.rule import Rule
 from neuralogic.dataset.base import ConvertibleDataset
+
+if TYPE_CHECKING:
+    from neuralogic.dataset.logic import Dataset
 
 DatasetEntries = BaseRelation | Rule
 

@@ -1,4 +1,3 @@
-from neuralogic.nn.trainer.trainer import Trainer
 from neuralogic.nn.trainer.callbacks import (
     CheckpointCallback,
     EarlyStoppingCallback,
@@ -7,6 +6,7 @@ from neuralogic.nn.trainer.callbacks import (
 )
 from neuralogic.nn.trainer.history import TrainerHistory
 from neuralogic.nn.trainer.metrics import Metric, compute_metrics
+from neuralogic.nn.trainer.trainer import Trainer
 
 __all__ = [
     "Trainer",

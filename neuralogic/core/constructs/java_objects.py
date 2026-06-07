@@ -15,7 +15,7 @@ from neuralogic.core.constructs.term import Constant, Variable
 from neuralogic.setup import initialize, is_initialized
 
 if TYPE_CHECKING:
-    from neuralogic.core.settings import Settings, SettingsProxy
+    from neuralogic.core.settings import SettingsProxy
 
 
 class ValueFactory:

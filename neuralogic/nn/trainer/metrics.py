@@ -4,8 +4,10 @@ import math
 import warnings
 from collections.abc import Sequence
 from enum import Enum
-from typing import Callable, Union
+from typing import TYPE_CHECKING, Callable, Union
 
+if TYPE_CHECKING:
+    import numpy as np
 
 _METRIC_REGISTRY: dict[str, Callable[[list, list], float]] = {}
 
@@ -52,7 +54,7 @@ def _to_arrays(targets: list, outputs: list):
     return t_arr, o_arr
 
 
-def _class_indices(arr) -> "np.ndarray":
+def _class_indices(arr) -> np.ndarray:
     """Convert array to integer class indices.
 
     Scalars → threshold 0.5.  Vectors → argmax.  2D → row-wise argmax.
@@ -67,7 +69,7 @@ def _class_indices(arr) -> "np.ndarray":
     return np.argmax(arr, axis=-1)
 
 
-def _macro_score(t_cls: "np.ndarray", o_cls: "np.ndarray", mode: str) -> float:
+def _macro_score(t_cls: np.ndarray, o_cls: np.ndarray, mode: str) -> float:
     """Compute macro-averaged precision, recall, or F1."""
     import numpy as np
 
@@ -147,7 +149,6 @@ def _accuracy(targets, outputs) -> float:
 @_register("precision_macro")
 def _precision_macro(targets, outputs) -> float:
     """Macro-averaged precision (unweighted mean of per-class precision)."""
-    import numpy as np
 
     t_arr, o_arr = _to_arrays(targets, outputs)
     t_cls = _class_indices(t_arr)
@@ -158,7 +159,6 @@ def _precision_macro(targets, outputs) -> float:
 @_register("recall_macro")
 def _recall_macro(targets, outputs) -> float:
     """Macro-averaged recall (unweighted mean of per-class recall)."""
-    import numpy as np
 
     t_arr, o_arr = _to_arrays(targets, outputs)
     t_cls = _class_indices(t_arr)
@@ -169,7 +169,6 @@ def _recall_macro(targets, outputs) -> float:
 @_register("f1_macro")
 def _f1_macro(targets, outputs) -> float:
     """Macro-averaged F1 score (unweighted mean of per-class F1)."""
-    import numpy as np
 
     t_arr, o_arr = _to_arrays(targets, outputs)
     t_cls = _class_indices(t_arr)
