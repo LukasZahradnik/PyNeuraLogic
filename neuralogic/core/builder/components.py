@@ -5,7 +5,7 @@ import numpy as np
 
 
 
-class NeuronType(enum.StrEnum):
+class NeuronType(str, enum.Enum):
     """
     Enum representing different types of neurons in the neural network.
     """

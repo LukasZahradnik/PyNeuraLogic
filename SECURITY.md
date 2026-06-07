@@ -13,7 +13,6 @@ Please include the following details in your report:
 - The version(s) affected
 - Any potential impact or exploit scenario
 
-We will acknowledge your report within **5 business days** and work with you to understand and address the issue promptly.
 
 ## Supported Versions
 
@@ -21,7 +20,7 @@ We recommend using the latest published version of `neuralogic` from PyPI. Secur
 
 | Version | Supported |
 |---------|-----------|
-| 0.8.x   | ✅ |
+| >= 0.8  | ✅ |
 | < 0.8   | ❌ |
 
 ## Disclosure Policy
