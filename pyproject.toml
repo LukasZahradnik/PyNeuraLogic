@@ -1,10 +1,10 @@
 [build-system]
 requires = ["setuptools>=64"]
-build-backend = "setuptools.backends._legacy:_Backend"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "neuralogic"
-version = "0.8.12.dev"
+version = "0.9.0"
 description = "PyNeuraLogic lets you use Python to create Differentiable Logic Programs."
 readme = "README.md"
 requires-python = ">=3.10"

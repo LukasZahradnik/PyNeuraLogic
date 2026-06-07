@@ -2293,7 +2293,7 @@ wheels = [
 
 [[package]]
 name = "neuralogic"
-version = "0.8.12.dev0"
+version = "0.9.0"
 source = { editable = "." }
 dependencies = [
     { name = "jpype1" },

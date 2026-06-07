@@ -9,3 +9,10 @@
 #   pip install -e .                    # runtime
 #   pip install -e ".[dev,doc,torch]"   # with extras
 #
+# Read the Docs installs from this file.
+# Keep in sync with [project.optional-dependencies] doc in pyproject.toml.
+sphinx
+sphinx-rtd-theme
+sphinx-tabs
+sphinx-copybutton
+#
