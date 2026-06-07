@@ -1,4 +1,4 @@
-neuralogic.nn.init
+neuralogic.nn.java
 ==================
 
 .. automodule:: neuralogic.nn.java

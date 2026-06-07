@@ -1,4 +1,4 @@
-neuralogic.optim
+neuralogic.nn.optim
 ================
 
 Subpackages
@@ -7,10 +7,10 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   neuralogic.optim.lr_scheduler
+   neuralogic.nn.optim.lr_scheduler
 
 
-.. automodule:: neuralogic.optim
+.. automodule:: neuralogic.nn.optim
    :members:
    :undoc-members:
    :show-inheritance:

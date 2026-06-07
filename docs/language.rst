@@ -94,7 +94,7 @@ Weights
 *******
 
 On top of classic relational logic programming, in PyNeuraLogic, the relations can be additionally associated with *weights*.
-A relation's weight is optional and servers as a learnable parameter. The weight itself can be defined in the following ways:
+A relation's weight is optional and serves as a learnable parameter. The weight itself can be defined in the following ways:
 
 - Scalar value defining a learnable scalar parameter initialized to a specific value.
 

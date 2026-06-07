@@ -47,11 +47,11 @@ template representing a linear layer.
 
 .. code-block:: python
 
-    from neuralogic import R, Template
-    import neuralogic.nn.functional as F
+    from neuralogic import R, Model
+    from neuralogic.core import F
 
 
-    template = Template()
+    template = Model()
 
     template += (R.xor[1, 8] <= R.xy) | [F.identity]
     template += R.xor / 0 | [F.identity]
@@ -81,7 +81,7 @@ the query (output predicate), and the mapping function.
 
 .. note::
 
-    We have onest atic computation graph and change input facts values here, in contrast to the usual NeuraLogic
+    We have one static computation graph and change input facts values here, in contrast to the usual NeuraLogic
     workflow, where we have a different computation graph for each example-query set.
 
 

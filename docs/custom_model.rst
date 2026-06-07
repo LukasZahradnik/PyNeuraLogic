@@ -80,4 +80,4 @@ A single learning example may then be associated with a single query, as common 
 Template
 ########
 
-The template (:py:class:`~neuralogic.core.template.Template`) is a set of *rules* that encode the lifted model architecture. Intuitively, this is somewhat similar to composing modules in the common deep learning frameworks, but more versatile. The versatility follows from the *declarative* nature of the rules, which can be highly abstract and expressive, just like the modules, yet directly reveal an interface to the underlying lower-level principles of the module's computation.
+The template (:py:class:`~neuralogic.core.model.Model`) is a set of *rules* that encode the lifted model architecture. Intuitively, this is somewhat similar to composing modules in the common deep learning frameworks, but more versatile. The versatility follows from the *declarative* nature of the rules, which can be highly abstract and expressive, just like the modules, yet directly reveal an interface to the underlying lower-level principles of the module's computation.

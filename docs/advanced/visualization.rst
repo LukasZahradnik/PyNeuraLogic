@@ -27,11 +27,11 @@ Visualization of the XOR Example
 ################################
 
 To showcase the usage of visualization tools, we will use the template and the dataset introduced
-in `XOR Example <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb>`_ |colab|
+in `XOR Example <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/SimpleXOR.ipynb>`_ |colab|
 
 .. |colab| image:: https://colab.research.google.com/assets/colab-badge.svg
                 :alt: Open in Colab
-                :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb
+                :target: https://colab.research.google.com/github/LukasZahradnik/PyNeuraLogic/blob/master/examples/SimpleXOR.ipynb
 
 Model Rendering
 ***************

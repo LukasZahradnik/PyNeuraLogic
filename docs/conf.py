@@ -20,7 +20,7 @@ python_use_unqualified_type_names = True
 # -- Project information -----------------------------------------------------
 
 project = "PyNeuraLogic"
-copyright = "2024, Lukáš Zahradník"
+copyright = "2026, Lukáš Zahradník"
 author = "Lukáš Zahradník"
 
 

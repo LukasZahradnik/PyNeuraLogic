@@ -4,11 +4,6 @@ neuralogic.nn
 Subpackages
 -----------
 
-.. toctree::
-    :maxdepth: 4
-
-    neuralogic.nn.evaluator
-
 
 Submodules
 ----------
@@ -16,8 +11,6 @@ Submodules
 .. toctree::
     :maxdepth: 4
 
-    neuralogic.nn.base
-    neuralogic.nn.functional
     neuralogic.nn.init
     neuralogic.nn.java
     neuralogic.nn.loss

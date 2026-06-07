@@ -31,10 +31,10 @@ neuralogic.core.sources
    :undoc-members:
    :show-inheritance:
 
-neuralogic.core.template
-------------------------
+neuralogic.core.model
+---------------------
 
-.. automodule:: neuralogic.core.template
+.. automodule:: neuralogic.core.model
    :members:
    :undoc-members:
    :show-inheritance:

@@ -26,11 +26,10 @@ The encoding is almost the same, except for added values to each connection, tha
 
 .. code-block:: Python
 
-    from neuralogic.core import Template, R, V, T, Metadata, Aggregation, Transformation, Combination
-    from neuralogic.inference.evaluation_inference_engine import EvaluationInferenceEngine
+    from neuralogic.core import Model, R, V, T, Metadata, Aggregation, Transformation, Combination
 
 
-    template = Template()
+    template = Model()
     template += [
         R.connected(T.bond_street, T.oxford_circus, T.central)[7],
         R.connected(T.oxford_circus, T.tottenham_court_road, T.central)[9],
@@ -70,46 +69,40 @@ to get to the goal station. The second rule aggregates all possible instances an
 Evaluating Queries
 ******************
 
-Now when the template and the knowledge base are ready, we can run queries the same way as for the previously introduced instance of :code:`InferenceEngine`.
-The only difference in the interface for :code:`EvaluationInferenceEngine` are returned values from the generator -
-instead of returning generator of dictionaries containing substitutions, :code:`EvaluationInferenceEngine` returns a generator of tuple containing the output of evaluation and the dictionary of substitutions.
+Now when the template and the knowledge base are ready, we can run queries the same way as for the previously introduced instance of the inference engine.
+Since the model instance also provides the :code:`query` method (or :code:`q` for short), we can directly ask it for substitutions.
 
-
-We can, for example, get the shortest path from the Bond Street station to the Charing Cross station.
+We can, for example, query the shortest path from the Bond Street station to the Charing Cross station.
 
 .. code-block:: Python
 
-    engine = EvaluationInferenceEngine(template)
+    result = template.q(R.shortest_path(T.bond_street, T.charing_cross))
 
-    result = engine.q(R.shortest_path(T.bond_street, T.charing_cross)
-
-    print(list(result))
+    print(result)
 
 .. code-block::
 
     [
-        (30.0, {})
+        {"X": "bond_street"}
     ]
 
 
-The query computed the distance to be :code:`30` units, which is the actual shortest distance for this input. But this query does not bring any additional value compared to evaluation via evaluators or directly on the model.
-
-To fully utilize the fuzzy relational inference engine, we would also want to get some substitutions. For example, we can get the shortest distances from the Green Park station to all reachable stations.
+To fully utilize the inference engine, we can also ask for substitutions from the Green Park station to all reachable stations.
 
 .. code-block:: Python
 
-    result = engine.q(R.shortest_path(T.green_park, V.X))
+    result = template.q(R.shortest_path(T.green_park, V.X))
 
-    print(list(result))
+    print(result)
 
 .. code-block::
 
     [
-        (19.0, {'X': 'charing_cross'}),
-        (14.0, {'X': 'leicester_square'}),
-        (8.0, {'X': 'piccadilly_circus'}),
-        (15.0, {'X': 'oxford_circus'}),
-        (24.0, {'X': 'tottenham_court_road'})
+        {"X": "charing_cross"},
+        {"X": "leicester_square"},
+        {"X": "piccadilly_circus"},
+        {"X": "oxford_circus"},
+        {"X": "tottenham_court_road"}
     ]
 
-This output then tells us that the shortest path to the Charing Cross station from the Green Park station is :code:`19` units long, to the Leicester Square station it is :code:`14` units long, and so on.
+This output then tells us the shortest path to the Charing Cross station from the Green Park station is reachable, to the Leicester Square station is reachable, and so on.

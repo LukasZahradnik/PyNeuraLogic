@@ -28,10 +28,10 @@ This graph can be encoded as :code:`connected(From, To, Line)` such as:
 
 .. code-block:: Python
 
-    from neuralogic.core import Template, R, V, C
+    from neuralogic.core import Model, R, V, C
 
 
-    template = Template()
+    template = Model()
     template += [
         R.connected(C.bond_street, C.oxford_circus, C.central),
         R.connected(C.oxford_circus, C.tottenham_court_road, C.central),

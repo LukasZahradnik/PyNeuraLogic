@@ -30,10 +30,10 @@ Saving and Loading Model
 ########################
 
 When our model is trained, or we want to persist the model's state (e.g., make a checkpoint),
-we can utilize the model instance method :py:meth:`~neuralogic.nn.base.AbstractNeuraLogic.state_dict` (or :py:meth:`~neuralogic.nn.base.AbstractNeuraLogic.parameters`).
+we can utilize the model instance method :py:meth:`~neuralogic.core.neural_module.NeuralModule.state_dict` (or :py:meth:`~neuralogic.core.neural_module.NeuralModule.parameters`).
 The method puts all parameters' values into a dictionary that can be later saved (e.g., in JSON or in binary) or somehow manipulated.
 
-When we want to load a state into our model, we can then simply pass the state into :py:meth:`~neuralogic.nn.base.AbstractNeuraLogic.load_state_dict` method.
+When we want to load a state into our model, we can then simply pass the state into :py:meth:`~neuralogic.core.neural_module.NeuralModule.load_state_dict` method.
 
 .. note::
 
@@ -52,7 +52,7 @@ and the model itself (e.g., initialization of the learnable parameters).
 
     from neuralogic import Settings
     from neuralogic.nn.init import Uniform
-    from neuralogic.optim import SGD
+    from neuralogic.nn.optim import SGD
 
 
     Settings(
@@ -69,17 +69,16 @@ which is set to Stochastic gradient descent (SGD) with a learning rate of :math:
 Evaluator Training/Testing Interface
 ************************************
 
-The evaluator's basic interface consists of two methods - :code:`train` and :code:`test` for training on a dataset and evaluating on a dataset, respectively. Both methods have the same interface and are implemented in two modes - generator and non-generator.
+The model's basic interface consists of two methods — :code:`train` and :code:`test` for training on a dataset and evaluating on a dataset, respectively.
 
-The generator mode (default mode) yields a tuple of two elements (total loss and number of instances/samples) per each epoch. This mode can be useful when we want to, for example, visualize, log or do some other manipulations in real-time during the training (or testing).
-
-.. code-block:: Python
-
-    model.train(dataset, epochs=100)
-
-
-The non-generator mode, on the other hand, returns only a tuple of metrics from the last epoch.
+The :code:`train` method accepts a dataset and a number of epochs, runs the training loop, and returns the training results — a list of :code:`(target, output, error)` tuples (or a single such tuple for a single sample).
 
 .. code-block:: Python
 
-    results = model.test(dataset)
+    results = model.train(dataset, epochs=100)
+
+The :code:`test` method accepts a dataset and returns the model outputs — a list of output values (or a single value for a single sample).
+
+.. code-block:: Python
+
+    outputs = model.test(dataset)

@@ -13,7 +13,7 @@ Recursive XOR Generalization
 
 
 
-In one of our `introductory examples <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/IntroductionIntoPyNeuraLogic.ipynb>`_
+In one of our `introductory examples <https://github.com/LukasZahradnik/PyNeuraLogic/blob/master/examples/SimpleXOR.ipynb>`_
 we have showcased how to learn the XOR operation for two inputs. In this example, we will generalize the learning of
 the XOR operation to *N* inputs while making the use of recursion.
 
@@ -23,7 +23,7 @@ The template will essentially evaluate :math:`xor_n = xor(val_n, xor_{n-1})` wit
 
 .. code-block:: python
 
-    from neuralogic.core import Settings, R, V, Template, Transformation
+    from neuralogic.core import Settings, R, V, Model, Transformation
     from neuralogic.dataset import Dataset
 
 Before we define rules for the actual learning, we introduce helper relations (facts) ``R._next``.
@@ -35,7 +35,7 @@ the recursion. Integers in PyNeuraLogic are independent entities with no extra m
 
     max_number_of_vars = 5
 
-    template = Template()
+    template = Model()
     template += (R._next(i, i + 1) for i in range(max_number_of_vars)) | [Transformation.TANH]
 
 We then define the base case of the recursion, that is, to get the value of :math:`xor` of length :math:`1` (index :math:`0`)

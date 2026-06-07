@@ -123,10 +123,10 @@ value passed into a sigmoid function for the target molecule classification.
 
 .. code-block:: python
 
-    from neuralogic.core import Template, R, V, Transformation
+    from neuralogic.core import Model, R, V, Transformation
 
 
-    template = Template()
+    template = Model()
     template += [R.bond_embed(bond_type)[1,] for bond_type in range(1, 8)]
 
     template += R.layer1(V.A)[1,] <= (R.atom(V.N, V.M)[1,], R.bond_embed(V.B)[1,], R._bond(V.N, V.A, V.B))
@@ -148,25 +148,23 @@ value passed into a sigmoid function for the target molecule classification.
     template += R.mutagenic / 1 | [Transformation.SIGMOID]
 
 
-Now we can build our model by passing the template into an *evaluator*, which we then use to train the model on our dataset.
+Now we can build our model and train it on our dataset.
 
 .. code-block:: python
 
-    from neuralogic.nn import get_evaluator
-    from neuralogic.core import Settings, Optimizer
+    from neuralogic.core import Settings
     from neuralogic.nn.init import Glorot
-    from neuralogic.nn.loss import CrossEntropy
-    from neuralogic.optim import Adam
+    from neuralogic.nn.optim import Adam
 
 
     settings = Settings(
-        optimizer=Adam(), epochs=2000, initializer=Glorot(), error_function=CrossEntropy(with_logits=False)
+        optimizer=Adam(), epochs=2000, initializer=Glorot()
     )
 
-    neuralogic_evaluator = get_evaluator(template, settings)
-    built_dataset = neuralogic_evaluator.build_dataset(logic_dataset)
+    template.build(settings)
+    built_dataset = template.build_dataset(logic_dataset)
 
-    for epoch, (total_loss, seen_instances) in enumerate(neuralogic_evaluator.train(built_dataset)):
+    for epoch, (total_loss, seen_instances) in enumerate(template.train(built_dataset)):
         print(f"Epoch {epoch}, total loss: {total_loss}, average loss {total_loss / seen_instances}")
 
 
@@ -184,11 +182,12 @@ column names in the table.
 
 .. code-block:: python
 
-    from neuralogic.db import PostgresConverter, TableMapping
+    from neuralogic.experimental.db import PostgresConverter
+    from neuralogic.experimental.db.converter import TableMapping
 
 
     convertor = PostgresConverter(
-        neuralogic_evaluator.model,
+        template,
         [
             TableMapping("_bond", "bond", ["atom1_id", "atom2_id", "type"]),
             TableMapping("atom", "atom", ["atom_id", "molecule_id"], value_column="charge")

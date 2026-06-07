@@ -112,15 +112,15 @@ Model Definition
 ################
 
 Models in PyNeuraLogic are not just particular computational graphs, as common in classic deep learning, but can be viewed more generally as *templates* for (differentiable) computation.
-The template structure is encoded in the instance of the :py:class:`~neuralogic.core.template.Template` class via relational *rules* or, for convenience, pre-defined modules (which are also expanded into said rules, check out the :doc:`zoo` for a list of modules).
+The template structure is encoded in the instance of the :py:class:`~neuralogic.core.model.Model` class via relational *rules* or, for convenience, pre-defined modules (which are also expanded into said rules, check out the :doc:`zoo` for a list of modules).
 
 .. code-block:: python
 
-    from neuralogic import Template, Settings
+    from neuralogic import Model, Settings
     from neuralogic.nn.module import GCNConv
 
 
-    template = Template()
+    template = Model()
     template.add_module(
         GCNConv(in_channels=1, out_channels=5, output_name="h0", feature_name="node_feature", edge_name="edge")
     )
@@ -140,7 +140,7 @@ We do that by calling the :code:`build` method.
 .. code-block:: Python
 
     from neuralogic import Settings
-    from neuralogic.optim import SGD
+    from neuralogic.nn.optim import SGD
 
     settings = Settings(optimizer=SGD(lr=0.01), epochs=100)
     model = template.build(settings)
@@ -153,5 +153,5 @@ performing the forward and backward propagation is straightforward.
 
     built_dataset = model.build_dataset(dataset)
 
-    model.train()  # or model.test() to change the mode
+    model.train(built_dataset)
     output = model(built_dataset)
