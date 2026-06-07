@@ -65,7 +65,7 @@ class Predicate:
         if isinstance(other, Sequence):
             other = Metadata.from_iterable(other)
         elif not isinstance(other, Metadata):
-            raise NotImplementedError
+            raise TypeError(f"Predicate metadata must be Metadata or Sequence, got {type(other).__name__}")
         return PredicateMetadata(self, other)
 
 

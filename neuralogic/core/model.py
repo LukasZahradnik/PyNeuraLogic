@@ -257,7 +257,7 @@ class Model(NeuralModule):
         if self._neural_model is not None:
             raise ModelError("Cannot modify built model")
         if isinstance(value, (Iterable, Module)):
-            raise NotImplementedError
+            raise TypeError(f"Cannot set model item to {type(value).__name__}; use add_rules() for multiple entries")
         self._parsed_model = None
         self._model[key] = value
 

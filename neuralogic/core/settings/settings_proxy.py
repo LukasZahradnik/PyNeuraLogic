@@ -28,7 +28,6 @@ class SettingsProxy:
         self,
         *,
         optimizer: Optimizer,
-        epochs: int,
         error_function: ErrorFunction,
         initializer: Initializer,
         iso_value_compression: bool,
@@ -41,8 +40,6 @@ class SettingsProxy:
         ----------
         optimizer : Optimizer
             The optimizer to use for training.
-        epochs : int
-            The number of training epochs.
         error_function : ErrorFunction
             The error function to use.
         initializer : Initializer
@@ -200,15 +197,6 @@ class SettingsProxy:
             raise NotImplementedError
 
         self.settings.errorFunction = java_error_function
-
-    @property
-    def epochs(self) -> int:
-        """The maximum number of training epochs."""
-        return self.settings.maxCumEpochCount
-
-    @epochs.setter
-    def epochs(self, epochs: int) -> None:
-        self.settings.maxCumEpochCount = epochs
 
     @property
     def initializer(self) -> Any:

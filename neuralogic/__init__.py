@@ -18,6 +18,7 @@ from neuralogic.setup import (
     set_jvm_options,
     set_jvm_path,
     set_max_memory_size,
+    shutdown,
 )
 
 __all__ = [
@@ -38,6 +39,7 @@ __all__ = [
     "seed",
     "initialize",
     "is_initialized",
+    "shutdown",
     "set_graphviz_path",
     "set_jvm_path",
     "set_jvm_options",

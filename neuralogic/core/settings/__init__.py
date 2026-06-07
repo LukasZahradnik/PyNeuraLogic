@@ -13,7 +13,6 @@ class Settings:
         self,
         *,
         optimizer: Optimizer = Adam(),
-        epochs: int = 3000,
         error_function: ErrorFunction = MSE(),
         initializer: Initializer = Uniform(),
         iso_value_compression: bool = True,
@@ -74,14 +73,6 @@ class Settings:
     @error_function.setter
     def error_function(self, error_function: ErrorFunction):
         self._update("error_function", error_function)
-
-    @property
-    def epochs(self) -> int:
-        return self.params["epochs"]
-
-    @epochs.setter
-    def epochs(self, epochs: int):
-        self._update("epochs", epochs)
 
     @property
     def initializer(self) -> Initializer:

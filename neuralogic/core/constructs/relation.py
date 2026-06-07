@@ -89,7 +89,7 @@ class BaseRelation:
 
     def __truediv__(self, other: int) -> Predicate:
         if not isinstance(other, int) or self.predicate.arity != 0 or other < 0:
-            raise NotImplementedError
+            raise TypeError(f"Invalid arity operand for {self}: {other!r}")
 
         name, hidden, special = self.predicate.name, self.predicate.hidden, self.predicate.special
         return factories.AtomFactory.get_predicate(name, other, hidden, special)
@@ -166,7 +166,7 @@ class BaseRelation:
     def __and__(self, other: "BaseRelation") -> rule.RuleBody:
         if isinstance(other, BaseRelation):
             return rule.RuleBody(self, other)
-        raise NotImplementedError
+        raise TypeError(f"Cannot combine {type(self).__name__} with {type(other).__name__}")
 
     def __add__(self, other: "BaseRelation") -> FContainer:
         return FContainer((self, other), Combination.SUM)
@@ -254,28 +254,28 @@ class WeightedRelation(BaseRelation):
         return self.__str__()
 
     def __call__(self, *args: Any) -> BaseRelation:
-        raise NotImplementedError(f"Cannot assign terms to weighted relation {self.predicate}")
+        raise TypeError(f"Cannot assign terms to weighted relation {self.predicate}")
 
     def __getitem__(self, item) -> "WeightedRelation":
-        raise NotImplementedError(f"Cannot assign weight to weighted relation {self.predicate}")
+        raise TypeError(f"Cannot assign weight to weighted relation {self.predicate}")
 
     def attach_activation_function(self, function: Transformation | Combination) -> "WeightedRelation":
-        raise NotImplementedError(
+        raise TypeError(
             f"Cannot attach a function to weighted relation {self}. Attach the function before adding weights."
         )
 
     @property
     def T(self) -> "WeightedRelation":
-        raise NotImplementedError(
-            f"Cannot transpose weighted relation {self} Apply the transposition before adding weights."
+        raise TypeError(
+            f"Cannot transpose weighted relation {self}. Apply the transposition before adding weights."
         )
 
     def __invert__(self) -> "WeightedRelation":
-        raise NotImplementedError(f"Weighted relations ({self}) cannot be negated.")
+        raise TypeError(f"Weighted relations ({self}) cannot be negated.")
 
     def __neg__(self) -> "WeightedRelation":
-        raise NotImplementedError(
-            f"Cannot negate weighted relation {self} Apply the reverse function before adding weights."
+        raise TypeError(
+            f"Cannot negate weighted relation {self}. Apply the reverse function before adding weights."
         )
 
     def __copy__(self):

@@ -81,7 +81,7 @@ class SoftmaxAggregation(AggregationFunction):
 
         for agg_term in set(self.agg_terms):
             if not agg_term[0].isupper():
-                raise NotImplementedError(f"Softmax aggregable terms can be only variables. Provided: {agg_term}")
+                raise TypeError(f"Softmax aggregable terms can be only variables. Provided: {agg_term}")
 
             for i, term in enumerate(head.terms):
                 if agg_term == term:

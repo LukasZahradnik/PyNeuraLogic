@@ -36,7 +36,7 @@ class RuleBody:
         if isinstance(other, (BaseRelation, FContainer)):
             self.literals.append(other)
             return self
-        raise NotImplementedError
+        raise TypeError(f"Cannot combine RuleBody with {type(other).__name__}")
 
     def __str__(self) -> str:
         return ", ".join(atom.to_str() for atom in self.literals)
@@ -48,7 +48,7 @@ class RuleBody:
         if isinstance(other, Iterable):
             other = Metadata.from_iterable(other)
         elif not isinstance(other, Metadata):
-            raise NotImplementedError
+            raise TypeError(f"RuleBody metadata must be Metadata or iterable, got {type(other).__name__}")
 
         self.metadata = other
         return self
@@ -74,7 +74,7 @@ class Rule:
         self.metadata: Metadata | None = None
 
         if head.function is not None:
-            raise NotImplementedError(f"Rule head {head} cannot have a function attached")
+            raise TypeError(f"Rule head {head} cannot have a function attached")
 
         if isinstance(body, RuleBody):
             if body.metadata is not None:
@@ -118,7 +118,7 @@ class Rule:
         if isinstance(other, Iterable):
             other = Metadata.from_iterable(other)
         elif not isinstance(other, Metadata):
-            raise NotImplementedError
+            raise TypeError(f"Rule metadata must be Metadata or iterable, got {type(other).__name__}")
 
         self._set_metadata(other)
         return self

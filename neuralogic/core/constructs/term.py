@@ -41,7 +41,7 @@ class Variable:
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, (Variable, str)):
-            raise NotImplementedError
+            return NotImplemented
         return str(other) == str(self)
 
     def __hash__(self) -> int:
@@ -82,7 +82,7 @@ class Constant:
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, (Constant, str)):
-            raise NotImplementedError
+            return NotImplemented
         return str(other) == str(self)
 
     def __hash__(self) -> int:

@@ -232,3 +232,29 @@ def initialize(
     else:
         jpype.startJVM(*options, **params)
     _init_logging()
+
+
+def shutdown():
+    """
+    Shut down the NeuraLogic JVM backend.
+
+    After calling this, you must call :func:`initialize` again before using
+    any NeuraLogic functionality.  If the backend was never started, this
+    is a no-op.
+
+    .. note::
+
+        JPype does not support restarting a JVM within the same process,
+        so re-initialization may fail.  For reliable restart, use a fresh
+        process.
+    """
+    global _is_initialized, _rnd_generator
+
+    if not _is_initialized:
+        return
+
+    if jpype.isJVMStarted():
+        jpype.shutdownJVM()
+
+    _is_initialized = False
+    _rnd_generator = None
