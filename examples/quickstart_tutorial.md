@@ -88,17 +88,38 @@ templates you can mix rule-level and predicate-level metadata freely.
 
 ## 3. Step 1 — Define the Model (Template)
 
-We'll build a 2-layer graph convolutional network (GCN) on a small 3-node graph. The template
-consists of two `GCNConv` modules, each expanding into logical rules under the hood.
+We'll build a model with two complementary paths that both feed into the `predict` predicate:
+
+1. **A hand-crafted logical rule** that detects **triangles** — three nodes where each pair
+   is connected by an edge. This is explicit domain knowledge: "if a node sits in a triangle,
+   that's a strong structural signal." The rule fires when the pattern matches.
+2. **Two `GCNConv` layers** that learn from node features and graph structure — these serve
+   as a **learned fallback** when no clear structural pattern (like a triangle) is present.
+
+Both paths contribute to `predict`, and their outputs are summed. The triangle rule provides
+a learned bias when the pattern fires; the GCN handles everything else.
 
 ```python
-from neuralogic.core import Model, Settings, Transformation
+from neuralogic.core import Model, Settings, Transformation, R, V
 from neuralogic.nn.module import GCNConv
 from neuralogic.nn.optim import Adam
 
 # Create an empty model (template)
 model = Model()
 
+# ── Hand-crafted logical rule: triangle detection ──
+# A node X participates in a triangle if there exist Y, Z such that
+# X→Y, Y→Z, and Z→X are all edges (a 3-cycle)
+model += (R.triangle(V.X) <= (
+    R.edge(V.X, V.Y), R.edge(V.Y, V.Z), R.edge(V.Z, V.X)
+))
+
+# Map the triangle signal into the 2-class prediction space.
+# The [2, 1] weight learns how much each output class is influenced
+# by the presence of a triangle
+model += (R.predict(V.X)[2, 1] <= R.triangle(V.X))
+
+# ── GCN layers: learned fallback for nodes without clear patterns ──
 # Layer 1: 1 input feature → 4 hidden dims
 model += GCNConv(
     in_channels=1,
@@ -125,13 +146,17 @@ print(model)
 **Output (simplified):**
 
 ```
+triangle(X) :- edge(X, Y), edge(Y, Z), edge(Z, X).
+{2, 1} predict(X) :- triangle(X).
 {4, 1} h1(X) :- {4, 1} node_feature(Y), {1} edge(Y, X).
 {4} h1 :- {4}... .
 {2, 4} predict(X) :- {2, 4} h1(Y), {1} edge(Y, X).
 {2} predict :- {2}... .
 ```
 
-Each `GCNConv` expands into two kinds of rules:
+The first two rules are our hand-crafted triangle logic — a pattern-matching rule and a
+learned weight mapping it into the prediction space. The remaining rules are the GCN
+expansion. Each `GCNConv` generates two kinds of rules:
 - **A parameterized rule** with learnable weight matrices (message passing)
 - **A metadata rule** defining activation and aggregation per predicate
 
@@ -242,8 +267,13 @@ The template must be built before it can be drawn:
 
 ```python
 # Build the model first (visualization requires a built model)
+# Optimization flags are turned OFF so the visualized graph matches your rules 1:1
 model.build(
-    Settings(optimizer=Adam(lr=0.01))
+    Settings(
+        optimizer=Adam(lr=0.01),
+        iso_value_compression=False,
+        chain_pruning=False,
+    )
 )
 
 # Draw the template — shows the rule structure with weight matrices
@@ -338,6 +368,9 @@ for q in queries:
 
 ```
 Derivable queries:
+  triangle(0)
+  triangle(1)
+  triangle(2)
   predict(0)
   predict(1)
   predict(2)
@@ -347,6 +380,7 @@ Derivable queries:
 ```
 
 This tells you:
+- The `triangle` predicate is derivable for all three nodes — our hand-crafted rule fires because the graph is fully connected (a triangle)
 - The `predict` predicate can be queried for nodes 0, 1, and 2 (good — those are the nodes we want to classify)
 - The hidden `h1` predicate is also derivable (it's the intermediate layer)
 
@@ -391,10 +425,13 @@ from neuralogic.core import Settings
 from neuralogic.nn.optim import Adam
 from neuralogic.nn.loss import MSE
 
-# Configure training
+# Configure training — optimization flags are OFF for clear visualization;
+# turn them on for production-scale training (see Section 9)
 settings = Settings(
     optimizer=Adam(lr=0.01),
     error_function=MSE(),
+    iso_value_compression=False,
+    chain_pruning=False,
 )
 
 # Build compiles the model through the Java backend
@@ -470,5 +507,45 @@ print(f"Number of learnable weights: {len(state['weights'])}")
 for idx, name in state['weight_names'].items():
     print(f"  Weight {idx} ('{name}'): shape={state['weights'][idx].shape}")
 ```
+
+---
+
+## 9. Appendix: Backend Optimizations
+
+`Settings` has two backend graph-optimization flags that affect both training
+performance and visualization fidelity:
+
+| Flag | Default | What it does |
+|---|---|---|
+| `iso_value_compression` | `True` | Merges nodes with identical values into shared representations, reducing the computation graph size. |
+| `chain_pruning` | `True` | Removes redundant linear chains in the computation graph, fusing operations where possible. |
+
+### Why this tutorial keeps them OFF
+
+These optimizations are **destructive for visualization** — they alter the graph
+structure, compressing multiple nodes into one and pruning intermediate operations.
+When you draw a template or sample, the resulting picture will show the *optimized*
+graph, which may not match your logical rules one-to-one.
+
+### When to turn them ON
+
+For **production training** on larger datasets, re-enable both flags for smaller
+computation graphs and faster training:
+
+```python
+settings = Settings(
+    optimizer=Adam(lr=0.001),
+    error_function=CrossEntropy(with_logits=True),
+    initializer=Glorot(),
+    iso_value_compression=True,   # merge identical nodes
+    chain_pruning=True,           # fuse linear chains
+)
+```
+
+There is also a related flag `prune_only_identities` (default `False`) that makes
+`chain_pruning` more conservative — it only prunes identity operations, leaving
+other linear chains intact. This gives a middle ground between full pruning and
+no pruning when you want some optimization but need to preserve most intermediate
+nodes for inspection.
 
 
