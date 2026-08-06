@@ -101,32 +101,40 @@ class DatasetBuilder:
         one_query_per_example = True
 
         for query in queries:
-            head, facts = self.java_factory.get_query(query)
+            rule_queries = query if isinstance(query, list) and all(isinstance(item, Rule) for item in query) else None
+            queries_to_build = rule_queries if rule_queries else [query]
 
-            if head is not None:
-                id = head.literal.toString()
-                if head.getValue() is None or not isinstance(query.head.weight, (float, int)):
+            if len(queries_to_build) > 1:
+                one_query_per_example = False
+
+            for current_query in queries_to_build:
+                head, facts = self.java_factory.get_query(current_query)
+
+                if head is not None:
+                    id = head.literal.toString()
+                    weight = head.getConjunctWeight()
+                    if weight is None or not isinstance(current_query.head.weight, (float, int)):
+                        logic_samples.extend(
+                            [self.logic_sample(f.getValue(), query_builder.createQueryAtom(id, f), True) for f in facts]
+                        )
+                    else:
+                        importance = weight.value.value
+                        logic_samples.extend(
+                            [
+                                self.logic_sample(f.getValue(), query_builder.createQueryAtom(id, importance, f), True)
+                                for f in facts
+                            ]
+                        )
+                elif facts is not None:
+                    id = str(self.query_counter)
+                    if len(facts) > 1:
+                        one_query_per_example = False
+
                     logic_samples.extend(
                         [self.logic_sample(f.getValue(), query_builder.createQueryAtom(id, f), True) for f in facts]
                     )
                 else:
-                    importance = head.getValue().value
-                    logic_samples.extend(
-                        [
-                            self.logic_sample(f.getValue(), query_builder.createQueryAtom(id, importance, f), True)
-                            for f in facts
-                        ]
-                    )
-            elif facts is not None:
-                id = str(self.query_counter)
-                if len(facts) > 1:
-                    one_query_per_example = False
-
-                logic_samples.extend(
-                    [self.logic_sample(f.getValue(), query_builder.createQueryAtom(id, f), True) for f in facts]
-                )
-            else:
-                logic_samples.append(None)
+                    logic_samples.append(None)
             self.query_counter += 1
         return logic_samples, one_query_per_example
 

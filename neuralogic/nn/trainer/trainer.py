@@ -7,7 +7,6 @@ from typing import Union
 from neuralogic.core.builder.dataset import BuiltDataset, GroundedDataset
 from neuralogic.core.neural_module import NeuralModule
 from neuralogic.dataset import Dataset
-
 from neuralogic.nn.trainer.callbacks import (
     CheckpointCallback,
     EarlyStoppingCallback,

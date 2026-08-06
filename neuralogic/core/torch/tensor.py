@@ -64,6 +64,14 @@ class NeuralogicOptTensor(torch.Tensor):
         p = -torch.tensor(self._neuralogic_value_factory.from_java(value))
         return p
 
+    @grad.setter
+    def grad(self, value: torch.Tensor | None) -> None:
+        """Clear gradients accumulated by the PyNeuraLogic backend."""
+        if value is not None:
+            raise ValueError("NeuralogicOptTensor gradients can only be reset to None")
+
+        self._neuralogic_weight_updater.clearUpdates()
+
     @staticmethod
     def create(weight: Any, data: Any, weight_updater: Any, value_factory: Any) -> "NeuralogicOptTensor":
         """
@@ -109,7 +117,7 @@ class NeuralogicOptTensor(torch.Tensor):
                 weight_value.set(i, float(val))
             return
 
-        cols = size[0]
+        cols = size[1]
 
         for i, values in enumerate(self):
             for j, val in enumerate(values):
