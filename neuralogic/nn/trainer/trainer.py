@@ -117,9 +117,11 @@ class Trainer:
 
             val_loss: float | None = None
             if built_val is not None:
-                state = self.model.state_dict()
-                val_results = self.model.train(built_val, epochs=1)
-                self.model.load_state_dict(state)
+                # Validation used to train on the validation set and restore the weights afterwards. The
+                # weights did come back, but the optimizer's own state did not - a state_dict carries weight
+                # values only - so Adam kept the moments it picked up from validation and every later epoch
+                # drifted. Evaluating touches neither.
+                val_results = self.model.validate(built_val)
                 val_targets, val_outputs, val_errors = _unpack_results(val_results)
                 val_loss = _mean(val_errors)
                 history.val_losses.append(val_loss)

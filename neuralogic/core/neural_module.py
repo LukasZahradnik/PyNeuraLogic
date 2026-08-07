@@ -206,6 +206,44 @@ class NeuralModule:
 
         return [ValueFactory.from_java(result) for result in results]
 
+    def validate(self, dataset) -> Value:
+        """Evaluates the model on the provided dataset and reports the error, without training on it.
+
+        Same shape of result as :meth:`train`, so a validation loss can be computed the same way, but nothing
+        is backpropagated and the optimizer is not stepped.
+
+        Parameters
+        ----------
+        dataset : Any
+            The dataset to validate on.
+
+        Returns
+        -------
+        Union[Tuple[Value, Value, Value], List[Tuple[Value, Value, Value]]]
+            The validation results (target, output, error).
+        """
+        samples, batch_size = self._dataset_to_samples(dataset)
+
+        if not isinstance(samples, Collection):
+            result = self._strategy.validateSample(samples._java_sample)
+            return (
+                ValueFactory.from_java(result.getTarget()),
+                ValueFactory.from_java(result.getOutput()),
+                ValueFactory.from_java(result.errorValue()),
+            )
+
+        sample_array = jpype.java.util.ArrayList([sample._java_sample for sample in samples])
+        results = self._strategy.validateSamples(sample_array, batch_size)
+
+        return [
+            (
+                ValueFactory.from_java(result.getTarget()),
+                ValueFactory.from_java(result.getOutput()),
+                ValueFactory.from_java(result.errorValue()),
+            )
+            for result in results
+        ]
+
     def reset_parameters(self):
         self._strategy.resetParameters()
 
