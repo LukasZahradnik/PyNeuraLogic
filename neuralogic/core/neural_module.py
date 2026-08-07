@@ -232,7 +232,7 @@ class NeuralModule:
         weight_names = {}
 
         for weight in weights:
-            if weight.isLearnable:
+            if weight.isLearnable():
                 weights_dict[weight.index] = ValueFactory.from_java(weight.value)
                 weight_names[weight.index] = str(weight.name)
         return {
@@ -330,7 +330,7 @@ class NeuralModule:
         weight_dict = state_dict["weights"]
 
         for weight in weights:
-            if not weight.isLearnable:
+            if not weight.isLearnable():
                 continue
             weight_value = weight.value
 
