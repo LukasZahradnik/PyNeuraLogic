@@ -278,6 +278,76 @@ class NeuralModule:
             "weight_names": weight_names,
         }
 
+    def fixed_state_dict(self) -> dict:
+        """Returns the weights training does not touch, in the same shape as :meth:`state_dict`.
+
+        A fixed weight is a modelling choice rather than a parameter - an initial hidden state, say - so it is
+        deliberately absent from :meth:`state_dict`, which describes what training changes. Reading one is
+        still a reasonable thing to want, and without this the only way was through the private Java model.
+
+        The library's own internal constants sit at negative indices, the logical `ONE` among them. Those are
+        not modelling choices and are left out.
+
+        Returns
+        -------
+        dict
+            The fixed weights and their names.
+        """
+        weights_dict = {}
+        weight_names = {}
+
+        for weight in self._neural_model.getAllWeights():
+            if not weight.isLearnable() and weight.index >= 0:
+                weights_dict[weight.index] = ValueFactory.from_java(weight.value)
+                weight_names[weight.index] = str(weight.name)
+        return {
+            "weights": weights_dict,
+            "weight_names": weight_names,
+        }
+
+    def load_fixed_state_dict(self, state_dict: dict):
+        """Sets the weights training does not touch, from a :meth:`fixed_state_dict` shaped dictionary.
+
+        Setting one is initialization, not learning, so this is separate from :meth:`load_state_dict` - which
+        skips fixed weights precisely because training must not move them.
+
+        Parameters
+        ----------
+        state_dict : dict
+            Fixed weights to set, keyed by weight index. Indices absent from the model are an error, and a
+            learnable index is refused rather than quietly written.
+        """
+        by_index = {weight.index: weight for weight in self._neural_model.getAllWeights()}
+        weight_dict = state_dict["weights"]
+
+        for index, value in weight_dict.items():
+            if index < 0:
+                raise ValueError(f"weight {index} is one of the library's internal constants and is not settable")
+            weight = by_index.get(index)
+            if weight is None:
+                raise ValueError(f"there is no weight with index {index} in this model")
+            if weight.isLearnable():
+                raise ValueError(f"weight {index} is learnable - use load_state_dict for those")
+            self._set_weight_value(weight.value, value)
+
+        if self._torch_module is not None:
+            self._torch_module.update_tensor_parameters(self._tensor_parameters)
+
+    @staticmethod
+    def _set_weight_value(weight_value, value):
+        if isinstance(value, (float, int)):
+            weight_value.set(0, float(value))
+            return
+        if isinstance(value[0], (float, int)):
+            for i, val in enumerate(value):
+                weight_value.set(i, float(val))
+            return
+
+        cols = len(value[0])
+        for i, values in enumerate(value):
+            for j, val in enumerate(values):
+                weight_value.set(i * cols + j, float(val))
+
     def tensor_parameters(self):
         if self._torch_module is None:
             raise NotImplementedError(
@@ -370,25 +440,7 @@ class NeuralModule:
         for weight in weights:
             if not weight.isLearnable():
                 continue
-            weight_value = weight.value
-
-            index = weight.index
-            value = weight_dict[index]
-
-            if isinstance(value, (float, int)):
-                weight_value.set(0, float(value))
-                continue
-
-            if isinstance(value[0], (float, int)):
-                for i, val in enumerate(value):
-                    weight_value.set(i, float(val))
-                continue
-
-            cols = len(value[0])
-
-            for i, values in enumerate(value):
-                for j, val in enumerate(values):
-                    weight_value.set(i * cols + j, float(val))
+            self._set_weight_value(weight.value, weight_dict[weight.index])
 
     def _backprop(self, sample, gradient):
         _, gradient_value = self._value_factory.get_value(gradient)
