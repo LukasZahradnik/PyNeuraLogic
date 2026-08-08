@@ -1,3 +1,4 @@
+from neuralogic.__version__ import __version__
 from neuralogic.core import C, Const, F, Model, R, Relation, Settings, V, Var
 from neuralogic.exceptions import (
     BackendError,
@@ -22,6 +23,7 @@ from neuralogic.setup import (
 )
 
 __all__ = [
+    "__version__",
     "R",
     "V",
     "C",

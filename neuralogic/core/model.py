@@ -14,7 +14,7 @@ from neuralogic.core.constructs.rule import Rule
 from neuralogic.core.neural_module import NeuralModule
 from neuralogic.core.settings import Settings, SettingsProxy
 from neuralogic.dataset import Dataset
-from neuralogic.exceptions import ModelError
+from neuralogic.exceptions import DatasetError, ModelError
 from neuralogic.nn.module.module import Module
 from neuralogic.setup import initialize, is_initialized
 
@@ -177,8 +177,9 @@ class Model(NeuralModule):
 
         try:
             grounded_dataset = dataset_builder.ground_dataset(Dataset().add(None, example), settings)
-        except Exception:
-            return {}
+        except Exception as e:
+            # Returning {} here made a crash indistinguishable from an example that derives nothing
+            raise DatasetError(f"could not ground the example while deriving queries: {e}") from e
 
         results = [
             R.get(name)(sub)
@@ -214,8 +215,9 @@ class Model(NeuralModule):
 
         try:
             grounded_dataset = dataset_builder.ground_dataset(Dataset().add(query, examples), settings)
-        except Exception:
-            return {}
+        except Exception as e:
+            # Returning {} here made a crash indistinguishable from a query that grounds to nothing
+            raise DatasetError(f"could not ground the query {query}: {e}") from e
 
         results = [node.substitutions for sample in grounded_dataset for node in sample.get_atoms(query)]
 
