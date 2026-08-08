@@ -97,3 +97,51 @@ def test_error_function_matches_torch(error, loss):
     _, expected = _torch_value_and_gradient(torch.sigmoid, loss)
 
     assert gradient == pytest.approx(expected, abs=1e-9)
+
+
+def test_the_error_sums_over_a_vector_output_rather_than_averaging():
+    """MSE here adds the squared differences up; torch.nn.MSELoss divides by how many there were.
+
+    A scalar output cannot tell the two apart, and neither can a comparison run on Adam - its step follows
+    the sign of the gradient far more than the size, so it agrees with either convention to about 1e-7.
+    Under plain SGD they are a factor of the output width apart, which is what this pins.
+    """
+    width = 3
+    inputs = [0.7, -0.4, 0.2]
+    weight = [[0.5, -0.2, 0.1], [0.3, 0.4, -0.6], [-0.1, 0.2, 0.8]]
+    target = [1.0, 0.0, -0.5]
+
+    model = Model()
+    model += R.source("a")[inputs].fixed()
+    model += (R.out(V.X) <= R.source(V.X)["w":width, width]) | [Combination.SUM, Transformation.IDENTITY]
+    built = model.build(
+        Settings(
+            optimizer=SGD(lr=LEARNING_RATE),
+            error_function=MSE(),
+            iso_value_compression=False,
+            chain_pruning=False,
+        )
+    )
+    state = built.state_dict()
+    index = next(i for i, name in state["weight_names"].items() if str(name).strip() == "w")
+    state["weights"][index] = weight
+    built.load_state_dict(state)
+    dataset = built.build_dataset(Dataset([Sample(R.out("a")[target], [R.exists("a")])]))
+
+    before = built.state_dict()["weights"][index]
+    built.train(dataset, epochs=1)
+    after = built.state_dict()["weights"][index]
+    gradient = [(b - a) / LEARNING_RATE for rb, ra in zip(before, after) for b, a in zip(rb, ra)]
+
+    summed = _torch_matrix_gradient(inputs, weight, target, lambda diff: diff.sum())
+    averaged = _torch_matrix_gradient(inputs, weight, target, lambda diff: diff.mean())
+
+    assert gradient == pytest.approx(summed, abs=1e-9)
+    assert max(abs(ours - theirs) for ours, theirs in zip(gradient, averaged)) > 1e-3
+
+
+def _torch_matrix_gradient(inputs, weight, target, reduce):
+    parameter = torch.nn.Parameter(torch.tensor(weight, dtype=torch.float64))
+    output = parameter @ torch.tensor(inputs, dtype=torch.float64)
+    reduce((output - torch.tensor(target, dtype=torch.float64)) ** 2).backward()
+    return [entry for row in parameter.grad.tolist() for entry in row]
