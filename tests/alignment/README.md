@@ -36,5 +36,7 @@ commit message says which break and what it did. A test that has never failed ha
 anything. Where a test was found *not* to catch something it might be assumed to cover, that is written into
 its docstring rather than left implied - see the note on `.parallel()` in `test_batching_alignment.py`.
 
-These need the backend from the `bugfixes-ai` branch of NeuraLogic; several of them check fixes that landed
-there.
+All of these pass against the jar this branch ships with, so they can be run as they are. One case is
+deliberately held back rather than added: a `(4, 1)` weight against a one-element input needs `4511aa59` on
+the NeuraLogic `bugfixes-ai` branch, and joins the parametrisation in `test_linear_alignment.py` when the
+bundled jar next carries it. The docstring there says so.

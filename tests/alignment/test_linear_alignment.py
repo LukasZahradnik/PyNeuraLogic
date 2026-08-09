@@ -87,9 +87,12 @@ def test_linear_layer_matches_torch(rows, columns):
 def test_projecting_from_one_dimension_takes_a_scalar_input():
     """torch.nn.Linear(1, 4) reads a one-element vector; here the same layer reads a scalar.
 
-    A weight declared (4, 1) arrives as a plain vector of four - the trailing dimension is not kept - so a
-    one-element input has to be a scalar rather than a list of one. Written as [x] it raises
-    "Incompatible dimensions ... (try transposition)", which is not advice that applies.
+    A weight declared (4, 1) arrives as a plain vector of four - the trailing dimension is not kept - so it
+    meets a one-element input as column times column, which as vectors has no reading. That threw, and a
+    bare scalar was the only spelling that worked; `4511aa59` in the backend lets a vector of one scale like
+    the scalar it is, so `[0.7]` now gives the same layer. That spelling belongs in the parametrisation
+    above rather than in a case of its own, and can move there once the jar bundled with this branch carries
+    the commit - it is left out for now so the branch keeps passing against the jar it ships with.
     """
     weight, target = _matrix(4, 1), _spread(4, -0.4)
 
