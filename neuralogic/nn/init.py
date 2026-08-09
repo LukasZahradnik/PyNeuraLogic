@@ -155,10 +155,12 @@ class Torch(Initializer):
     So only the weights whose fan-in is both unambiguous and large differ from :class:`~neuralogic.nn.init.Uniform`
     at all, which are the ones a wide template saturates on.
 
-    Not the default, for a measured reason: making it one stops ``test_xor_generalization`` learning even its
-    own training data, and more epochs do not recover it. Fan-in scaling is calibrated for a fixed-depth
-    network, and a template applying one weight at a recursion depth the data decides is not that. Worth
-    reaching for when a template is wide, which is where the previous default saturates.
+    Not the default, and not for anything it fails at. :class:`~neuralogic.nn.init.Glorot` is, because
+    ``sqrt(6/(fan_in+fan_out))`` comes to ``sqrt(3/fan_in)`` for a square weight, the constant that actually
+    keeps a uniformly drawn layer's output variance equal to its input's - where ``1/sqrt(fan_in)`` is
+    ``sqrt(3)`` under it, ``0.125`` against ``0.2165`` on a 64x64. Torch's own source points at pytorch issue
+    57109 about that. Reach for this one when a model here has to begin from the same distribution as the
+    same model written in torch; the activation correction applies to either.
 
     Unlike :class:`~neuralogic.nn.init.Uniform`, :class:`~neuralogic.nn.init.Glorot` and
     :class:`~neuralogic.nn.init.He`, this takes no scale - the whole point is that the spread follows the
