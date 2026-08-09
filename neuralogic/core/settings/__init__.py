@@ -3,7 +3,7 @@ from typing import Any
 
 from neuralogic.core.enums import Grounder
 from neuralogic.core.settings.settings_proxy import SettingsProxy
-from neuralogic.nn.init import Initializer, Uniform
+from neuralogic.nn.init import Glorot, Initializer
 from neuralogic.nn.loss import MSE, ErrorFunction
 from neuralogic.nn.optim import Adam, Optimizer
 
@@ -14,7 +14,7 @@ class Settings:
         *,
         optimizer: Optimizer = Adam(),
         error_function: ErrorFunction = MSE(),
-        initializer: Initializer = Uniform(),
+        initializer: Initializer = Glorot(),
         iso_value_compression: bool = True,
         chain_pruning: bool = True,
         prune_only_identities: bool = False,
