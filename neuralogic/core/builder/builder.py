@@ -198,6 +198,10 @@ class Builder:
         Any
             The built neural model.
         """
+        # Tell each weight the activation its own output runs into, while the rules are still in reach, so a
+        # shape-aware initializer can widen it accordingly. The backend does this in TemplateToNeuralPipe,
+        # which this path does not go through - it builds the NeuralModel straight from the template.
+        parsed_model.assignActivationGains(settings.settings)
         neural_model = self.neural_model(parsed_model.getAllWeights(), settings.settings)
 
         return neural_model
