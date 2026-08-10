@@ -70,7 +70,7 @@ class SAGEConv(Module):
         metadata = Metadata(aggregation=self.aggregation)
 
         return [
-            (head <= (R.get(self.feature_name)(V.J), R.get(self.edge_name)(V.J, V.I))) | metadata,
+            (head <= (R.get(self.feature_name)(V.J), R.hidden.get(self.edge_name)(V.J, V.I))) | metadata,
             (head <= R.get(self.feature_name)(V.I)) | metadata,
             R.get(self.output_name) / 1 | Metadata(transformation=self.activation),
         ]

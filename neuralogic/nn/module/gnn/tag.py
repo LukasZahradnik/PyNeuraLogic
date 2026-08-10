@@ -100,7 +100,7 @@ class TAGConv(Module):
         metadata = Metadata(aggregation=self.aggregation)
         head = R.get(self.output_name)
         feature = R.get(self.feature_name)
-        edge = R.get(self.edge_name)
+        edge = R.hidden.get(self.edge_name)
 
         hop_rules = []
 

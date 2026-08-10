@@ -42,9 +42,10 @@ def _edge_index():
 def _example(edge_value):
     """The graph as facts: a feature vector per node, and an edge fact per direction.
 
-    The edge's *value* matters, and not in a good way - see the note on SAGE below. GCN multiplies by it and
-    so wants the 1.0 that leaves a product alone; SAGE and GIN add it, and so want the 0.0 that leaves a sum
-    alone. That the same graph has to be spelled two ways for three modules is the finding, not the setup.
+    The natural 1.0 throughout. It did not use to be safe: a module passing the edge as an ordinary valued
+    body atom had its value added to every component of the neighbour's features, since a rule body combines
+    by SUM - so the same graph needed spelling two ways depending on the module. The edge atoms are `hidden`
+    now, which is what an atom there to ground rather than to count should be, and the value is ignored.
     """
     return [R.f(node)[FEATURES[node]] for node in range(NODES)] + [R.e(i, j)[edge_value] for i, j in EDGES]
 
@@ -111,18 +112,13 @@ def test_gcn_matches_torch_geometric():
 def test_sage_matches_torch_geometric():
     """SAGE keeps the node and its neighbourhood apart, one weight each, and means over the neighbours.
 
-    **The edges have to carry 0.0 here, and that is a defect rather than a convention.** The rule the module
-    emits is `h(I) :- f(J), e(J, I)` with the edge as an ordinary valued body atom, and a rule body combines
-    by SUM - so the edge's value is added to every component of the neighbour's feature vector. **Measured**:
-    with edges at the natural 1.0, node 0 comes out `[0.36, -0.865, 0.665]` where `W . mean(neighbours)` is
-    `[-0.34, -0.765, -0.285]`, the difference being exactly `W . 1`. At 0.0, the additive identity, all nine
-    numbers match PyG.
-
-    GCN escapes it only because its rule sets `combination=product`, for which 1.0 is the identity instead.
-    Marking the edge atom `hidden` fixes it properly - measured, the value then makes no difference at all,
-    7.3 included - and that is the library's own idiom for an atom that is there to ground and not to count.
+    This is the case that found the edge-value defect: the rule is `h(I) :- f(J), e(J, I)` and a body combines
+    by SUM, so while the edge was an ordinary valued atom its value was added to every component of the
+    neighbour's features. **Measured** at the time, node 0 came out `[0.36, -0.865, 0.665]` where
+    `W . mean(neighbours)` is `[-0.34, -0.765, -0.285]` - the difference being exactly `W . 1`. GCN never
+    showed it because its rule sets `combination=product`, where 1.0 is the identity instead.
     """
-    built, dataset = _built(module.SAGEConv(IN, OUT, "h", "f", "e"), {0: FIRST, 1: SECOND}, edge_value=0.0)
+    built, dataset = _built(module.SAGEConv(IN, OUT, "h", "f", "e"), {0: FIRST, 1: SECOND}, edge_value=1.0)
     layer = TorchSAGE(IN, OUT, bias=False).double()
     with torch.no_grad():
         layer.lin_l.weight.copy_(_tensor(FIRST))     # the neighbourhood
@@ -144,7 +140,7 @@ def test_gin_matches_torch_geometric():
     to one does. PyG's eps is 0 by default, so the node counts once.
     """
     identity = [[1.0 if i == j else 0.0 for j in range(IN)] for i in range(IN)]
-    built, dataset = _built(module.GINConv(IN, OUT, "h", "f", "e"), {0: FIRST, 1: FIRST, 2: identity}, edge_value=0.0)
+    built, dataset = _built(module.GINConv(IN, OUT, "h", "f", "e"), {0: FIRST, 1: FIRST, 2: identity}, edge_value=1.0)
 
     # after constructing the layer, not before: GINConv's own __init__ calls reset_parameters, which resets
     # the module handed to it - so a weight copied in first is thrown away before it is ever used
@@ -166,3 +162,8 @@ def test_gin_matches_torch_geometric():
     one_weight = [start - stepped for start, stepped in zip(before[0], _flat(layer.nn.weight.tolist()))]
 
     assert both_paths == pytest.approx(one_weight, abs=1e-9)
+
+# SGConv and TAGConv are deliberately not here. PyG runs both through `gcn_norm` - symmetric degree
+# normalisation with self-loops added - while the rules these modules emit walk the edges and sum, with
+# neither. They are different functions under the same name, so a test asserting they agree would be
+# asserting something false; see KNOWN_ISSUES.

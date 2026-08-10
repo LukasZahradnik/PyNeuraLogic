@@ -66,7 +66,7 @@ class GINConv(Module):
         metadata = Metadata(aggregation=self.aggregation)
 
         return [
-            (head <= (R.get(self.feature_name)(V.J), R.get(self.edge_name)(V.J, V.I))) | metadata,
+            (head <= (R.get(self.feature_name)(V.J), R.hidden.get(self.edge_name)(V.J, V.I))) | metadata,
             (embed(V.I) <= R.get(self.feature_name)(V.I)) | metadata,
             (head <= embed(V.I)[self.in_channels, self.in_channels]) | Metadata(transformation=self.activation),
             R.get(self.output_name) / 1 | Metadata(transformation=self.activation),

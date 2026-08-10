@@ -124,7 +124,7 @@ class RGCNConv(Module):
 
         if self.edge_name is not None:
             relation_rules = [
-                ((head <= (feature, R.get(self.edge_name)(V.J, relation, V.I))) | metadata)
+                ((head <= (feature, R.hidden.get(self.edge_name)(V.J, relation, V.I))) | metadata)
                 for relation in self.relations
             ]
         else:
