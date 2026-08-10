@@ -29,6 +29,16 @@ valid at all.
 one. The same holds for a batch: the update is the sum over its samples, so the size of a batch changes the
 size of the step.
 
+## Where the activation coverage stops, on purpose
+
+Ten transformations are compared, and the two whose Jacobian is not diagonal - softmax and layer norm - are
+the ones that would catch an engine carrying an elementwise slope where a full one belongs. The rest are
+left alone deliberately rather than forgotten: `sparsemax` has no torch counterpart to compare against
+without writing the reference too, `lukasiewicz` has none at all, and `concat`, `slice`, `reshape`, `transp`
+and `reverse` rearrange values rather than compute with them, so what could go wrong in them is shape
+handling and not arithmetic. Same for the `softmax` and `concat` aggregations. Anyone wanting them should
+know they are a deliberate gap, not an oversight.
+
 ## The rule these follow
 
 Every test here was watched failing against a deliberately broken build before being committed, and the
