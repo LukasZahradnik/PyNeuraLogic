@@ -163,7 +163,8 @@ def test_gin_matches_torch_geometric():
 
     assert both_paths == pytest.approx(one_weight, abs=1e-9)
 
-# SGConv and TAGConv are deliberately not here. PyG runs both through `gcn_norm` - symmetric degree
-# normalisation with self-loops added - while the rules these modules emit walk the edges and sum, with
-# neither. They are different functions under the same name, so a test asserting they agree would be
-# asserting something false; see KNOWN_ISSUES.
+# SGConv and TAGConv are deliberately not here. PyG runs both through `gcn_norm` - self-loops added and a
+# symmetric division by `sqrt(deg(i) * deg(j))` - while the rules these emit walk the edges and sum, with
+# neither. Giving them GCN's own normalisation, one factor per hop, was tried and does *not* close the gap:
+# the rules come out looking right and the numbers still disagree, so something further differs. Until that
+# is understood a test here would either assert something false or bake in a coincidence. See KNOWN_ISSUES.
