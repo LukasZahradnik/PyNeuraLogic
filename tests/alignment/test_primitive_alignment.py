@@ -239,3 +239,23 @@ def test_softmax_cross_entropy_over_a_vector_matches_torch():
     loss.backward()
 
     assert gradient == pytest.approx([e for row in weight.grad.tolist() for e in row], abs=1e-9)
+
+
+def test_norm_matches_torch_layer_norm_including_its_off_diagonal_gradient():
+    """NORM is layer normalisation, the second transformation here whose Jacobian is not diagonal.
+
+    Every output depends on every input twice over, through the mean and through the variance, so an engine
+    differentiating it one component at a time would be wrong in a different way than softmax would catch.
+    Compared against torch's own `layer_norm` at the same `1e-10` epsilon, with no weight or bias, since the
+    backend applies none.
+    """
+    value, gradient = _vector_value_and_gradient(Transformation.NORM)
+
+    weight = torch.nn.Parameter(torch.tensor(VECTOR_WEIGHT, dtype=torch.float64))
+    output = torch.nn.functional.layer_norm(
+        weight @ torch.tensor(VECTOR_INPUT, dtype=torch.float64), (3,), eps=1e-10
+    )
+    ((output - torch.tensor(VECTOR_TARGET, dtype=torch.float64)) ** 2).sum().backward()
+
+    assert value == pytest.approx(output.tolist(), abs=1e-9)
+    assert gradient == pytest.approx([e for row in weight.grad.tolist() for e in row], abs=1e-9)

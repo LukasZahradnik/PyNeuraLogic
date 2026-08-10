@@ -18,7 +18,7 @@ def _flat(rows):
     return [entry for row in rows for entry in row]
 
 
-def _neuralogic(aggregation):
+def _neuralogic(aggregation, target=None):
     """One rule grounded once per source, then aggregated: the weight is shared by every grounding."""
     model = Model()
     for name, value in SOURCES.items():
@@ -40,9 +40,10 @@ def _neuralogic(aggregation):
     built.load_state_dict(state)
 
     facts = [R.exists(name) for name in SOURCES]
-    dataset = built.build_dataset(Dataset([Sample(R.out("a")[TARGET], facts)]))
+    dataset = built.build_dataset(Dataset([Sample(R.out("a")[target if target is not None else TARGET], facts)]))
 
-    value = list(built(dataset)[0])
+    produced = built(dataset)[0]
+    value = [float(produced)] if isinstance(produced, float) else [float(v) for v in produced]
     before = built.state_dict()["weights"][index]
     built.train(dataset, epochs=1)
     after = built.state_dict()["weights"][index]
@@ -97,3 +98,19 @@ def test_max_picks_a_whole_grounding_rather_than_pooling_componentwise():
 
     assert value == pytest.approx(stacked[stacked.sum(1).argmax()].tolist(), abs=1e-9)
     assert value != pytest.approx(stacked.max(0).values.tolist(), abs=1e-9)
+
+
+def test_count_reports_how_many_groundings_and_sends_nothing_back():
+    """COUNT answers with the number of groundings, which no weight can move.
+
+    So the value is a property of the data rather than of the model, and the gradient through it has to be
+    zero - torch's nearest equivalent is `len`, which is not differentiable at all. The backend says as much
+    with a warning; what matters is that it also acts on it, since a count that leaked a gradient would train
+    a weight towards changing how many times a rule fires.
+    """
+    # a scalar target, since COUNT answers with one number - a vector one is only found out in the
+    # backward pass, as "scalar increment by vector", which is its own recorded complaint
+    value, gradient = _neuralogic(Aggregation.COUNT, target=3.0)
+
+    assert value == pytest.approx([float(len(SOURCES))] * len(value), abs=1e-9)
+    assert gradient == pytest.approx([0.0] * len(gradient), abs=1e-12)
