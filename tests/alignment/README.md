@@ -39,6 +39,19 @@ and `reverse` rearrange values rather than compute with them, so what could go w
 handling and not arithmetic. Same for the `softmax` and `concat` aggregations. Anyone wanting them should
 know they are a deliberate gap, not an oversight.
 
+## Check the model has no weights you are not setting
+
+A comparison only means anything if every weight is one you put there. A hand-written template picks up
+implicit weights on rules you did not think of as weighted, and those stay randomly initialised - which
+shows up as a comparison that fails *and* gives different numbers on each run. If a probe is not
+reproducible, count the weights before doubting the engine:
+
+    state = built.state_dict()
+    assert len(state["weight_names"]) == 1, state["weight_names"]
+
+That cost an afternoon on the GNN modules, where the real modules turned out to have exactly the weights
+being set and only the hand-written reconstruction did not.
+
 ## The rule these follow
 
 Every test here was watched failing against a deliberately broken build before being committed, and the
