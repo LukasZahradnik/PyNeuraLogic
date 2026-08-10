@@ -62,8 +62,12 @@ def _torch_value_and_gradient(activation, loss):
         (Transformation.RELU, torch.relu),
         (Transformation.EXP, torch.exp),
         (Transformation.SQRT, torch.sqrt),
+        (Transformation.LOG, torch.log),
+        (Transformation.INVERSE, lambda x: 1 / x),
+        (Transformation.LEAKY_RELU, lambda x: torch.nn.functional.leaky_relu(x, 0.01)),
+        (Transformation.SIGNUM, torch.sign),
     ],
-    ids=["identity", "sigmoid", "tanh", "relu", "exp", "sqrt"],
+    ids=["identity", "sigmoid", "tanh", "relu", "exp", "sqrt", "log", "inverse", "leaky_relu", "signum"],
 )
 def test_transformation_matches_torch(transformation, activation):
     """An activation has to agree with Torch in value and in what it does to the gradient passing through."""
@@ -145,3 +149,53 @@ def _torch_matrix_gradient(inputs, weight, target, reduce):
     output = parameter @ torch.tensor(inputs, dtype=torch.float64)
     reduce((output - torch.tensor(target, dtype=torch.float64)) ** 2).backward()
     return [entry for row in parameter.grad.tolist() for entry in row]
+
+
+VECTOR_INPUT = [0.7, -0.4, 0.2]
+VECTOR_WEIGHT = [[0.5, -0.2, 0.1], [0.3, 0.4, -0.6], [-0.1, 0.2, 0.8]]
+VECTOR_TARGET = [1.0, 0.0, -0.5]
+
+
+def _vector_value_and_gradient(transformation):
+    """out = transformation(W @ x) over a whole vector at once, stated on the queried head."""
+    model = Model()
+    model += R.source("a")[VECTOR_INPUT].fixed()
+    model += (R.out(V.X) <= R.source(V.X)["w":3, 3]) | [Combination.SUM, Transformation.IDENTITY]
+    model += R.out / 1 | [transformation]
+    built = model.build(
+        Settings(
+            optimizer=SGD(lr=LEARNING_RATE),
+            error_function=MSE(),
+            iso_value_compression=False,
+            chain_pruning=False,
+        )
+    )
+    state = built.state_dict()
+    index = next(i for i, name in state["weight_names"].items() if str(name).strip() == "w")
+    state["weights"][index] = VECTOR_WEIGHT
+    built.load_state_dict(state)
+    dataset = built.build_dataset(Dataset([Sample(R.out("a")[VECTOR_TARGET], [R.exists("a")])]))
+
+    value = [float(v) for v in built(dataset)[0]]
+    before = built.state_dict()["weights"][index]
+    built.train(dataset, epochs=1)
+    after = built.state_dict()["weights"][index]
+    gradient = [(b - a) / LEARNING_RATE for rb, ra in zip(before, after) for b, a in zip(rb, ra)]
+    return value, gradient
+
+
+def test_softmax_matches_torch_including_its_off_diagonal_gradient():
+    """Softmax is the first transformation here whose Jacobian is not diagonal.
+
+    Every activation checked above acts on one number at a time, so a wrong derivative can only be wrong in
+    that one place. Softmax mixes the whole vector, and each output depends on every input - so this is the
+    one that says the engine carries a full Jacobian back rather than an elementwise slope.
+    """
+    value, gradient = _vector_value_and_gradient(Transformation.SOFTMAX)
+
+    weight = torch.nn.Parameter(torch.tensor(VECTOR_WEIGHT, dtype=torch.float64))
+    output = torch.softmax(weight @ torch.tensor(VECTOR_INPUT, dtype=torch.float64), dim=0)
+    ((output - torch.tensor(VECTOR_TARGET, dtype=torch.float64)) ** 2).sum().backward()
+
+    assert value == pytest.approx(output.tolist(), abs=1e-9)
+    assert gradient == pytest.approx([e for row in weight.grad.tolist() for e in row], abs=1e-9)
