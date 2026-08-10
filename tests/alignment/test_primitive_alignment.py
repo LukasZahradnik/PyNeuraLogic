@@ -156,7 +156,7 @@ VECTOR_WEIGHT = [[0.5, -0.2, 0.1], [0.3, 0.4, -0.6], [-0.1, 0.2, 0.8]]
 VECTOR_TARGET = [1.0, 0.0, -0.5]
 
 
-def _vector_value_and_gradient(transformation):
+def _vector_value_and_gradient(transformation, error=None, target=None):
     """out = transformation(W @ x) over a whole vector at once, stated on the queried head."""
     model = Model()
     model += R.source("a")[VECTOR_INPUT].fixed()
@@ -165,7 +165,7 @@ def _vector_value_and_gradient(transformation):
     built = model.build(
         Settings(
             optimizer=SGD(lr=LEARNING_RATE),
-            error_function=MSE(),
+            error_function=error if error is not None else MSE(),
             iso_value_compression=False,
             chain_pruning=False,
         )
@@ -174,7 +174,9 @@ def _vector_value_and_gradient(transformation):
     index = next(i for i, name in state["weight_names"].items() if str(name).strip() == "w")
     state["weights"][index] = VECTOR_WEIGHT
     built.load_state_dict(state)
-    dataset = built.build_dataset(Dataset([Sample(R.out("a")[VECTOR_TARGET], [R.exists("a")])]))
+    dataset = built.build_dataset(
+        Dataset([Sample(R.out("a")[target if target is not None else VECTOR_TARGET], [R.exists("a")])])
+    )
 
     value = [float(v) for v in built(dataset)[0]]
     before = built.state_dict()["weights"][index]
@@ -198,4 +200,42 @@ def test_softmax_matches_torch_including_its_off_diagonal_gradient():
     ((output - torch.tensor(VECTOR_TARGET, dtype=torch.float64)) ** 2).sum().backward()
 
     assert value == pytest.approx(output.tolist(), abs=1e-9)
+    assert gradient == pytest.approx([e for row in weight.grad.tolist() for e in row], abs=1e-9)
+
+
+PROBABILITY_TARGET = [0.6, 0.3, 0.1]
+
+
+def test_cross_entropy_with_logits_matches_torch_on_a_scalar():
+    """`with_logits=True` is SOFTENTROPY, which takes the raw logit and squashes inside the loss itself.
+
+    The `with_logits=False` case above is compared behind a sigmoid; this is the other spelling, where
+    nothing squashes the head and the loss is expected to. Getting the two the wrong way round produces a
+    plausible number rather than an error, which is why both are pinned.
+    """
+    _, gradient = _value_and_gradient(Transformation.IDENTITY, CrossEntropy(with_logits=True))
+    _, expected = _torch_value_and_gradient(
+        lambda x: x,
+        lambda out, target: torch.nn.functional.binary_cross_entropy_with_logits(out, target),
+    )
+
+    assert gradient == pytest.approx(expected, abs=1e-9)
+
+
+def test_softmax_cross_entropy_over_a_vector_matches_torch():
+    """Over a vector, SOFTENTROPY fuses the softmax into the loss - `target - softmax(logit)`.
+
+    The source calls that a nice simplification of doing the two separately, and it is; but a fused form is
+    exactly the kind that drifts from the composition it replaces without anything noticing. Compared here
+    against torch spelling it out as `-(target * log_softmax(logit)).sum()`.
+    """
+    _, gradient = _vector_value_and_gradient(
+        Transformation.IDENTITY, CrossEntropy(with_logits=True), target=PROBABILITY_TARGET
+    )
+
+    weight = torch.nn.Parameter(torch.tensor(VECTOR_WEIGHT, dtype=torch.float64))
+    logit = weight @ torch.tensor(VECTOR_INPUT, dtype=torch.float64)
+    loss = -(torch.tensor(PROBABILITY_TARGET, dtype=torch.float64) * torch.log_softmax(logit, 0)).sum()
+    loss.backward()
+
     assert gradient == pytest.approx([e for row in weight.grad.tolist() for e in row], abs=1e-9)
