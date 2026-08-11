@@ -126,15 +126,19 @@ class NeuralModule:
         samples, _ = self._dataset_to_samples(dataset)
         sample_collection = samples if isinstance(samples, Collection) else [samples]
 
+        # Invalidate each sample immediately before evaluating it, not all of them up front. Samples built
+        # from one example share neurons, and evaluating one leaves its values on them - so an invalidation
+        # that happened before the first sample ran does not clear what the first sample wrote, and every
+        # later sample accumulates onto it. The backend's own loops (PythonTrainingStrategy) already pair
+        # the two, which is why test() is unaffected.
+        results = []
         for sample in sample_collection:
             self._trainer.invalidateSample(self._invalidation, sample._java_sample)
-
-        results = [
-            self._value_factory.from_java(
-                self._trainer.evaluateSample(self._evaluation, sample._java_sample).getOutput(),
+            results.append(
+                self._value_factory.from_java(
+                    self._trainer.evaluateSample(self._evaluation, sample._java_sample).getOutput(),
+                )
             )
-            for sample in sample_collection
-        ]
 
         if self._torch_module is None:
             return results
