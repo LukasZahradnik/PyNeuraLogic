@@ -259,3 +259,71 @@ def test_norm_matches_torch_layer_norm_including_its_off_diagonal_gradient():
 
     assert value == pytest.approx(output.tolist(), abs=1e-9)
     assert gradient == pytest.approx([e for row in weight.grad.tolist() for e in row], abs=1e-9)
+
+
+#: A scalar multiplied into a vector under a PRODUCT body, which is what an attention weight is
+SCALAR_SIDE = 2.0
+PRODUCT_INPUT = [0.5, -0.25, 0.75]
+PRODUCT_WEIGHT = [[0.5, -0.2, 0.1], [0.4, -0.6, 0.25], [-0.1, 0.2, 0.8]]
+PRODUCT_TARGET = [0.1, 0.2, -0.3]
+
+
+def _scalar_times_vector(scalar_first: bool):
+    """h(X) = s(X) * (W . v(X)), with the scalar written first or last in the body.
+
+    The two spell the same function - a product does not care about order - so they have to step to the same
+    weight. They did not: the derivative by a *scalar* input was taken as an outer product with the rest
+    rather than a dot product, so writing the scalar first threw `scalar incrementBy by matrix` while writing
+    it last worked. An attention weight is exactly a scalar multiplied into a vector message, which is how
+    this surfaced.
+    """
+    model = Model()
+    model += (R.s(V.X) <= R.a(V.X)) | [Transformation.IDENTITY]
+    parts = [R.s(V.X), R.v(V.X)["w":3, 3]]
+    model += (R.h(V.X) <= (parts if scalar_first else parts[::-1])) | [
+        Combination.PRODUCT,
+        Transformation.IDENTITY,
+    ]
+    model += R.h / 1 | [Transformation.IDENTITY]
+
+    built = model.build(
+        Settings(
+            optimizer=SGD(lr=LEARNING_RATE),
+            error_function=MSE(),
+            iso_value_compression=False,
+            chain_pruning=False,
+        )
+    )
+    state = built.state_dict()
+    index = next(i for i, name in state["weight_names"].items() if str(name).strip() == "w")
+    state["weights"][index] = PRODUCT_WEIGHT
+    built.load_state_dict(state)
+
+    example = [R.a(1)[SCALAR_SIDE], R.v(1)[PRODUCT_INPUT]]
+    data = built.build_dataset(Dataset([Sample(R.h(1)[PRODUCT_TARGET], example)]))
+    value = [float(v) for v in built(data)[0]]
+    built.train(data, epochs=1)
+    return value, [entry for row in built.state_dict()["weights"][index] for entry in row]
+
+
+@pytest.mark.parametrize("scalar_first", [True, False], ids=["scalar-first", "scalar-last"])
+def test_scalar_times_vector_product_matches_torch(scalar_first):
+    """Both body orders, each against torch, so neither a wrong shape nor a wrong sign can pass."""
+    value, after = _scalar_times_vector(scalar_first)
+
+    weight = torch.nn.Parameter(torch.tensor(PRODUCT_WEIGHT, dtype=torch.float64))
+    output = SCALAR_SIDE * (weight @ torch.tensor(PRODUCT_INPUT, dtype=torch.float64))
+    ((output - torch.tensor(PRODUCT_TARGET, dtype=torch.float64)) ** 2).sum().backward()
+    stepped = weight - LEARNING_RATE * weight.grad
+
+    assert value == pytest.approx(output.tolist(), abs=1e-9)
+    assert after == pytest.approx([entry for row in stepped.tolist() for entry in row], abs=1e-9)
+
+
+def test_scalar_times_vector_product_does_not_depend_on_body_order():
+    """The invariant the two above are instances of, stated on its own so a failure names it."""
+    first_value, first_after = _scalar_times_vector(True)
+    last_value, last_after = _scalar_times_vector(False)
+
+    assert first_value == pytest.approx(last_value, abs=1e-12)
+    assert first_after == pytest.approx(last_after, abs=1e-12)

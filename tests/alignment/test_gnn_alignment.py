@@ -300,10 +300,10 @@ def test_gatv2_matches_torch_geometric(share_weights):
     The slope is why PyG is constructed with `negative_slope=0.01`: `Transformation.LEAKY_RELU` is `0.01`
     where PyG defaults to `0.2`, and the backend keeps it in a static field, so it cannot be set per rule.
 
-    Forward only, and not by choice: a step through this template throws `Incompatible dimensions of
-    algebraic operation - scalar incrementBy by matrix`, which is the designed in-place fallback signal that
-    `Sum`, `Average` and `ElementProduct` catch and redo out of place - the softmax aggregation's gradient
-    path does not. See KNOWN_ISSUES; `test_gatv2_cannot_be_trained_yet` pins that down.
+    The step is included, and it is the reason a body that multiplies a scalar attention into a vector
+    message can be differentiated at all: `Product.derivativeFrom` used to return the derivative by a scalar
+    input as an *outer* product, so the same rule trained when the scalar was written last in the body and
+    threw when it was written first. See `tests/alignment/test_primitive_alignment.py` for that on its own.
     """
     weights = {"h__left": FIRST, "h__right": SECOND, "h__att": ATTENTION}
     if share_weights:
@@ -319,46 +319,17 @@ def test_gatv2_matches_torch_geometric(share_weights):
         if not share_weights:
             layer.lin_r.weight.copy_(_tensor(FIRST))                  # x_i, the target
 
-    value = [[float(v) for v in row] for row in built(dataset)]
-    expected = layer(_tensor(FEATURES), _edge_index()).tolist()
+    indices = _indices_by_name(built, weights)
+    value, after, _ = _forward_and_step(built, dataset, list(indices.values()))
+    expected = _torch_step(layer, lambda: layer(_tensor(FEATURES), _edge_index()))
 
-    assert _flat(value) == pytest.approx(_flat(expected), abs=1e-9)
+    assert _flat(value) == pytest.approx(_flat(expected.tolist()), abs=1e-9)
 
-
-def test_gatv2_cannot_be_trained_above_one_output_channel():
-    """The gap left over from the test above, pinned so that closing it in the backend fails here loudly.
-
-    The forward pass is exact; a step is not, and only once `out_channels > 1`. At one channel the attention
-    weight is a scalar and everything works, which is what locates the problem: it is the gradient of the
-    `1 x out` weight. `MatrixValue.incrementBy(ScalarValue)` throws when the receiver is the smaller shape,
-    by design - the comment there says so - and the callers that expect it redo the step out of place.
-    Nothing on the softmax aggregation's gradient path does.
-    """
-    weights = {"h__left": FIRST, "h__right": SECOND, "h__att": ATTENTION}
-    built, dataset = _built(module.GATv2Conv(IN, OUT, "h", "f", "e"), {}, edge_value=1.0, weights_by_name=weights)
-
-    built(dataset)                                    # the forward pass is fine
-
-    with pytest.raises(Exception, match="scalar incrementBy by matrix"):
-        built.train(dataset, epochs=1)
-
-    # one output channel, where the attention weight is a scalar rather than a 1 x out row, trains fine
-    single = Model()
-    single += module.GATv2Conv(1, 1, "h", "f", "e")
-    built = single.build(
-        Settings(optimizer=SGD(lr=LEARNING_RATE), error_function=MSE(), iso_value_compression=False, chain_pruning=False)
-    )
-    state = built.state_dict()
-    for index in state["weight_names"]:
-        state["weights"][index] = 0.5
-    built.load_state_dict(state)
-
-    scalars = [R.f(node)[float(node) - 1] for node in range(NODES)] + [R.e(i, j)[1.0] for i, j in EDGES]
-    data = built.build_dataset(
-        Dataset([Sample(R.h(node)[0.5], scalars) for node in range(NODES)]), batch_size=NODES
-    )
-    built(data)
-    built.train(data, epochs=1)
+    stepped = {"h__right": layer.lin_l.weight, "h__att": layer.att[0]}   # att is (1, heads, out)
+    if not share_weights:
+        stepped["h__left"] = layer.lin_r.weight
+    for name, weight in stepped.items():
+        assert after[indices[name]] == pytest.approx(_flat(weight.tolist()), abs=1e-9)
 
 
 def test_res_gated_matches_torch_geometric():
