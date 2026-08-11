@@ -177,28 +177,59 @@ def test_sgconv():
     ]
 
 
+#: APPNP normalises like GCN now, and its edge is a valued atom under a product rather than a hidden one
+_APPNP_SETUP = [
+    "<1.0> h1__edge(I, I).",
+    "h1__edge(I, J) :- *edge(I, J).",
+    "h1__edge_count(I, J) :- h1__edge(X, J). [aggregation=sum]",
+    "h1__edge_count(I, J) :- h1__edge(X, I). [aggregation=sum]",
+    "h1__edge_count/2 [transformation=inverse, combination=product]",
+]
+
+
+def _appnp_teleport(head):
+    return f"{head}(I) :- <0.1> h0(I). [combination=product, aggregation=sum]"
+
+
+def _appnp_propagate(head, source):
+    return (
+        f"{head}(I) :- <0.9> {source}(J), h1__edge(J, I), sqrt(h1__edge_count(J, I)). "
+        "[combination=product, aggregation=sum]"
+    )
+
+
 def test_appnp():
     model = Model()
 
     model += APPNPConv("h1", "h0", "_edge", 1, 0.1)
     model_str = str(model).split("\n")
 
-    assert model_str[0] == "h1(I) :- <0.1> h0(I). [aggregation=sum]"
-    assert model_str[1] == "h1(I) :- <0.9> h0(J), *edge(J, I). [aggregation=sum]"
+    assert model_str[:7] == [*_APPNP_SETUP, _appnp_teleport("h1"), _appnp_propagate("h1", "h0")]
 
     model = Model()
 
     model += APPNPConv("h1", "h0", "_edge", 3, 0.1)
     model_str = str(model).split("\n")
 
-    assert model_str[0] == "h1__1(I) :- <0.1> h0(I). [aggregation=sum]"
-    assert model_str[1] == "h1__1(I) :- <0.9> h0(J), *edge(J, I). [aggregation=sum]"
+    assert model_str[:11] == [
+        *_APPNP_SETUP,
+        _appnp_teleport("h1__1"),
+        _appnp_propagate("h1__1", "h0"),
+        _appnp_teleport("h1__2"),
+        _appnp_propagate("h1__2", "h1__1"),
+        _appnp_teleport("h1"),
+        _appnp_propagate("h1", "h1__2"),
+    ]
 
-    assert model_str[2] == "h1__2(I) :- <0.1> h0(I). [aggregation=sum]"
-    assert model_str[3] == "h1__2(I) :- <0.9> h1__1(J), *edge(J, I). [aggregation=sum]"
+    model = Model()
 
-    assert model_str[4] == "h1(I) :- <0.1> h0(I). [aggregation=sum]"
-    assert model_str[5] == "h1(I) :- <0.9> h1__2(J), *edge(J, I). [aggregation=sum]"
+    model += APPNPConv("h1", "h0", "_edge", 1, 0.1, normalize=False)
+    model_str = str(model).split("\n")
+
+    assert model_str[:2] == [
+        _appnp_teleport("h1"),
+        "h1(I) :- <0.9> h0(J), *edge(J, I). [combination=product, aggregation=sum]",
+    ]
 
 
 def test_res_gated():

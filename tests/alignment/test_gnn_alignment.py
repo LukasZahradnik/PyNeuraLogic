@@ -1,8 +1,11 @@
 import pytest
 import torch
 from torch_geometric.nn import (
+    APPNP as TorchAPPNP,
     GCNConv as TorchGCN,
     GINConv as TorchGIN,
+    RGCNConv as TorchRGCN,
+    ResGatedGraphConv as TorchResGated,
     SAGEConv as TorchSAGE,
     SGConv as TorchSG,
     TAGConv as TorchTAG,
@@ -32,6 +35,24 @@ TARGET = [[1.0, 0.0, -0.5], [0.2, -0.3, 0.8], [-0.6, 0.45, 0.1]]
 FIRST = [[0.5, -0.2, 0.1, 0.3], [0.4, -0.6, 0.25, -0.15], [-0.1, 0.2, 0.8, 0.05]]
 SECOND = [[0.2, 0.35, -0.4, 0.1], [-0.55, 0.15, 0.6, -0.25], [0.3, -0.45, 0.05, 0.7]]
 THIRD = [[0.15, -0.3, 0.45, -0.6], [0.7, 0.05, -0.2, 0.35], [-0.4, 0.6, 0.1, -0.25]]
+FOURTH = [[-0.25, 0.4, 0.2, -0.35], [0.1, -0.5, 0.3, 0.15], [0.55, 0.2, -0.45, 0.6]]
+
+#: One relation per edge rather than both everywhere, chosen so that both awkward cases appear at once: node 1
+#: has *two* `a` neighbours, which is what makes the per-relation mean differ from a sum - with one neighbour
+#: each the two are the same number and the test cannot tell them apart - while node 0 has no `b` neighbour
+#: and node 2 no `a`, where PyG means over an empty neighbourhood to zero and the template does not ground
+#: that rule at all.
+RELATIONS = {(0, 1): "a", (1, 0): "a", (1, 2): "b", (2, 1): "a"}
+
+
+def _relational_example():
+    return [R.f(node)[FEATURES[node]] for node in range(NODES)] + [
+        R.e(i, RELATIONS[(i, j)], j)[1.0] for i, j in EDGES
+    ]
+
+
+def _edge_type():
+    return torch.tensor([0 if RELATIONS[edge] == "a" else 1 for edge in EDGES], dtype=torch.long)
 
 
 def _tensor(value):
@@ -238,6 +259,82 @@ def test_tag_matches_torch_geometric():
     assert _flat(value) == pytest.approx(_flat(expected.tolist()), abs=1e-9)
     for index in weights:
         assert after[index] == pytest.approx(_flat(layer.lins[index].weight.tolist()), abs=1e-9)
+
+
+def test_res_gated_matches_torch_geometric():
+    """ResGated gates the neighbour's projection by a sigmoid of both endpoints, and adds a skip path.
+
+    Four weights against PyG's four, and the pairing is the part worth stating: the gate's first weight is
+    applied to the *target* and its second to the source, which is `lin_key` and `lin_query` in that order.
+    PyG puts a bias on all three of key, query and value where the template has none, so they are zeroed.
+    """
+    weights = {0: FIRST, 1: SECOND, 2: THIRD, 3: FOURTH}
+    built, dataset = _built(module.ResGatedGraphConv(IN, OUT, "h", "f", "e"), weights, edge_value=1.0)
+
+    layer = TorchResGated(IN, OUT, bias=False).double()
+    with torch.no_grad():
+        layer.lin_key.weight.copy_(_tensor(FIRST))       # k_i, the target
+        layer.lin_query.weight.copy_(_tensor(SECOND))    # q_j, the source
+        layer.lin_skip.weight.copy_(_tensor(THIRD))
+        layer.lin_value.weight.copy_(_tensor(FOURTH))
+        for lin in (layer.lin_key, layer.lin_query, layer.lin_value):
+            lin.bias.zero_()
+
+    value, after, _ = _forward_and_step(built, dataset, [0, 1, 2, 3])
+    expected = _torch_step(layer, lambda: layer(_tensor(FEATURES), _edge_index()))
+
+    assert _flat(value) == pytest.approx(_flat(expected.tolist()), abs=1e-9)
+    stepped = [layer.lin_key.weight, layer.lin_query.weight, layer.lin_skip.weight, layer.lin_value.weight]
+    for index, weight in enumerate(stepped):
+        assert after[index] == pytest.approx(_flat(weight.tolist()), abs=1e-9)
+
+
+def test_rgcn_matches_torch_geometric():
+    """RGCN means over each relation's neighbourhood separately and sums those with a root path.
+
+    The graph gives each edge one relation rather than both, so node 0 has no `b` neighbour and node 2 no
+    `a` - the template then does not ground that rule at all, where PyG means over an empty neighbourhood to
+    zero. A sum of the remaining terms has to agree, and that is what this checks.
+    """
+    weights = {0: FIRST, 1: SECOND, 2: THIRD}
+    built, dataset = _built(
+        module.RGCNConv(IN, OUT, "h", "f", "e", ["a", "b"]), weights, edge_value=None, example=_relational_example
+    )
+
+    layer = TorchRGCN(IN, OUT, num_relations=2, bias=False).double()
+    with torch.no_grad():
+        layer.root.copy_(_tensor(FIRST).t())          # PyG stores these in x out, the template out x in
+        layer.weight[0].copy_(_tensor(SECOND).t())
+        layer.weight[1].copy_(_tensor(THIRD).t())
+
+    value, after, _ = _forward_and_step(built, dataset, [0, 1, 2])
+    expected = _torch_step(layer, lambda: layer(_tensor(FEATURES), _edge_index(), _edge_type()))
+
+    assert _flat(value) == pytest.approx(_flat(expected.tolist()), abs=1e-9)
+    for index, weight in enumerate([layer.root, layer.weight[0], layer.weight[1]]):
+        assert after[index] == pytest.approx(_flat(weight.t().tolist()), abs=1e-9)
+
+
+@pytest.mark.parametrize("weighted", [False, True], ids=["unit-edges", "edge-weights"])
+@pytest.mark.parametrize("k", [1, 2, 3])
+def test_appnp_matches_torch_geometric(k, weighted):
+    """APPNP propagates with no parameters at all, so the forward value is the whole claim.
+
+    It used to be wrong twice over. Its edge was an ordinary valued atom under a body that combines by SUM,
+    so the edge's own `1.0` was added to every component of the neighbour's features - the defect `b8af77b`
+    fixed in five other modules and missed here. And it never normalised, where PyG runs `gcn_norm` with
+    self-loops. A product combination plus GCN's normalisation answers both at once, and the second reading
+    of the first: under a product an edge's value is PyG's `edge_weight`, which APPNP also accepts.
+    """
+    example = _weighted_example if weighted else None
+    built, dataset = _built(module.APPNPConv("h", "f", "e", k, 0.1), {}, edge_value=1.0, example=example)
+
+    layer = TorchAPPNP(K=k, alpha=0.1).double()
+    weights = _edge_weight_tensor() if weighted else None
+    value = [[float(v) for v in row] for row in built(dataset)]
+    expected = layer(_tensor(FEATURES), _edge_index(), weights).tolist()
+
+    assert _flat(value) == pytest.approx(_flat(expected), abs=1e-9)
 
 
 @pytest.mark.parametrize(

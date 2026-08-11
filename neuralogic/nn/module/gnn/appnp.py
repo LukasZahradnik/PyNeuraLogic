@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.factories import R, V
-from neuralogic.core.constructs.function import Aggregation, Transformation
+from neuralogic.core.constructs.function import Aggregation, Combination, Transformation
 from neuralogic.core.constructs.function.function import AggregationFunction, TransformationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.nn.module.module import Module
@@ -92,6 +92,8 @@ class APPNPConv(Module):
         alpha: float,
         activation: TransformationFunction = Transformation.IDENTITY,
         aggregation: AggregationFunction = Aggregation.SUM,
+        add_self_loops: bool | None = None,
+        normalize: bool = True,
     ):
         self.output_name = output_name
         self.feature_name = feature_name
@@ -103,35 +105,63 @@ class APPNPConv(Module):
         self.aggregation = aggregation
         self.activation = activation
 
+        if add_self_loops is None:
+            add_self_loops = normalize
+
+        self.normalize = normalize
+        self.add_self_loops = add_self_loops
+
     def __call__(self):
         head = R.get(self.output_name)(V.I)
-        metadata = Metadata(aggregation=self.aggregation)
+        metadata = Metadata(aggregation=self.aggregation, combination=Combination.PRODUCT)
         edge = R.get(self.edge_name)
+        edge_count = R.get(f"{self.output_name}__edge_count")
         feature = R.get(self.feature_name)
+
+        self_loops = []
+        normalization = []
+
+        if self.add_self_loops:
+            edge = R.get(f"{self.output_name}__edge")
+
+            self_loops = [
+                edge(V.I, V.I)[1.0].fixed(),
+                edge(V.I, V.J) <= (R.get(self.edge_name)(V.I, V.J)),
+            ]
+
+        if self.normalize:
+            # SUM, not COUNT: the degree is the sum of the incident edge values, which is what PyG's
+            # `gcn_norm` takes and what makes an edge value the `edge_weight` it looks like. Identical at 1.0.
+            count_metadata = Metadata(aggregation=Aggregation.SUM)
+
+            normalization = [
+                (edge_count(V.I, V.J) <= edge(V.X, V.J)) | count_metadata,
+                (edge_count(V.I, V.J) <= edge(V.X, V.I)) | count_metadata,
+                edge_count / 2 | Metadata(combination=Combination.PRODUCT, transformation=Transformation.INVERSE),
+            ]
+
+        def propagate(source):
+            """One hop: the previous iterate carried along an edge, normalized, and scaled by 1 - alpha."""
+            body = [source(V.J)[1 - self.alpha].fixed(), edge(V.J, V.I)]
+            if self.normalize:
+                body.append(Transformation.SQRT(edge_count(V.J, V.I)))
+            return body
 
         rules = []
         for k in range(1, self.k):
             k_head = R.get(f"{self.output_name}__{k}")(V.I)
-            rules.append((k_head <= feature(V.I)[self.alpha].fixed()) | metadata)
+            previous = feature if k == 1 else R.get(f"{self.output_name}__{k - 1}")
 
-            if k == 1:
-                rules.append((k_head <= (feature(V.J)[1 - self.alpha].fixed(), edge(V.J, V.I))) | metadata)
-            else:
-                rules.append(
-                    (k_head <= (R.get(f"{self.output_name}__{k - 1}")(V.J)[1 - self.alpha].fixed(), edge(V.J, V.I)))
-                    | metadata
-                )
-        if self.k == 1:
-            output_rule = head <= (feature(V.J)[1 - self.alpha].fixed(), edge(V.J, V.I))
-        else:
-            output_rule = head <= (
-                R.get(f"{self.output_name}__{self.k - 1}")(V.J)[1 - self.alpha].fixed(),
-                edge(V.J, V.I),
-            )
+            rules.append((k_head <= feature(V.I)[self.alpha].fixed()) | metadata)
+            rules.append((k_head <= propagate(previous)) | metadata)
+
+        last = feature if self.k == 1 else R.get(f"{self.output_name}__{self.k - 1}")
 
         return [
+            *self_loops,
+            *normalization,
             *rules,
             (head <= feature(V.I)[self.alpha].fixed()) | metadata,
-            output_rule | metadata,
+            (head <= propagate(last)) | metadata,
             R.get(self.output_name) / 1 | Metadata(transformation=self.activation),
         ]
