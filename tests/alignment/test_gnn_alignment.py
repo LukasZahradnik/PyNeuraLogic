@@ -1,6 +1,12 @@
 import pytest
 import torch
-from torch_geometric.nn import GCNConv as TorchGCN, GINConv as TorchGIN, SAGEConv as TorchSAGE
+from torch_geometric.nn import (
+    GCNConv as TorchGCN,
+    GINConv as TorchGIN,
+    SAGEConv as TorchSAGE,
+    SGConv as TorchSG,
+    TAGConv as TorchTAG,
+)
 
 import neuralogic.nn.module as module
 from neuralogic.core import Model, R, Settings
@@ -25,6 +31,7 @@ TARGET = [[1.0, 0.0, -0.5], [0.2, -0.3, 0.8], [-0.6, 0.45, 0.1]]
 
 FIRST = [[0.5, -0.2, 0.1, 0.3], [0.4, -0.6, 0.25, -0.15], [-0.1, 0.2, 0.8, 0.05]]
 SECOND = [[0.2, 0.35, -0.4, 0.1], [-0.55, 0.15, 0.6, -0.25], [0.3, -0.45, 0.05, 0.7]]
+THIRD = [[0.15, -0.3, 0.45, -0.6], [0.7, 0.05, -0.2, 0.35], [-0.4, 0.6, 0.1, -0.25]]
 
 
 def _tensor(value):
@@ -163,8 +170,83 @@ def test_gin_matches_torch_geometric():
 
     assert both_paths == pytest.approx(one_weight, abs=1e-9)
 
-# SGConv and TAGConv are deliberately not here. PyG runs both through `gcn_norm` - self-loops added and a
-# symmetric division by `sqrt(deg(i) * deg(j))` - while the rules these emit walk the edges and sum, with
-# neither. Giving them GCN's own normalisation, one factor per hop, was tried and does *not* close the gap:
-# the rules come out looking right and the numbers still disagree, so something further differs. Until that
-# is understood a test here would either assert something false or bake in a coincidence. See KNOWN_ISSUES.
+@pytest.mark.parametrize("k", [1, 2, 3])
+def test_sg_matches_torch_geometric(k):
+    """SGConv walks k hops and puts one weight over the total, normalised at every hop.
+
+    Two hops is the case worth having. It disagreed for a long time and looked like a defect in composing a
+    body where one derived atom appears at two bindings - the normalisation atom does, once per hop. It was
+    not: all three node queries sat in one dataset and the forward pass invalidated every sample before
+    evaluating any of them, so the ones sharing an intermediate normalisation atom compounded onto the
+    first. At one hop nothing is shared, which is why one hop always looked fine.
+    """
+    built, dataset = _built(module.SGConv(IN, OUT, "h", "f", "e", k=k), {1: FIRST}, edge_value=1.0)
+    layer = TorchSG(IN, OUT, K=k, bias=False).double()
+    with torch.no_grad():
+        layer.lin.weight.copy_(_tensor(FIRST))
+
+    value, after, _ = _forward_and_step(built, dataset, [1])
+    expected = _torch_step(
+        layer, lambda: layer(_tensor(FEATURES), _edge_index(), torch.ones(len(EDGES), dtype=torch.float64))
+    )
+
+    assert _flat(value) == pytest.approx(_flat(expected.tolist()), abs=1e-9)
+    assert after[1] == pytest.approx(_flat(layer.lin.weight.tolist()), abs=1e-9)
+
+
+def test_tag_matches_torch_geometric():
+    """TAGConv sums every hop up to k, one weight per hop, and normalises *without* self-loops.
+
+    The missing self-loops are the point of testing it next to SGConv: PyG calls `gcn_norm` with
+    `add_self_loops=False` here and `True` there, so the same graph divides by a different degree in the two
+    modules - 1, 2, 1 rather than 2, 3, 2 - and a template that copied GCN's normalisation wholesale would
+    pass at one hop on a regular graph and fail here.
+    """
+    weights = {0: FIRST, 1: SECOND, 2: THIRD}
+    built, dataset = _built(module.TAGConv(IN, OUT, "h", "f", "e", k=2), weights, edge_value=1.0)
+    layer = TorchTAG(IN, OUT, K=2, bias=False).double()
+    with torch.no_grad():
+        for index, weight in weights.items():
+            layer.lins[index].weight.copy_(_tensor(weight))
+
+    value, after, _ = _forward_and_step(built, dataset, [0, 1, 2])
+    expected = _torch_step(
+        layer, lambda: layer(_tensor(FEATURES), _edge_index(), torch.ones(len(EDGES), dtype=torch.float64))
+    )
+
+    assert _flat(value) == pytest.approx(_flat(expected.tolist()), abs=1e-9)
+    for index in weights:
+        assert after[index] == pytest.approx(_flat(layer.lins[index].weight.tolist()), abs=1e-9)
+
+
+def test_queries_of_one_example_do_not_leak_into_each_other():
+    """Every node of one graph asked in a single forward call, which is what node classification is.
+
+    Kept separate from the tests above because they build a fresh example object per node, so their three
+    networks share nothing - and that is exactly the shape that hid the leak. Here one example carries all
+    three queries, so they share the intermediate normalisation atoms, and a forward pass that invalidated
+    them once before evaluating anything would give the first node its right answer and compound the rest.
+    """
+    model = Model()
+    model += module.SGConv(IN, OUT, "h", "f", "e", k=2)
+    built = model.build(
+        Settings(
+            optimizer=SGD(lr=LEARNING_RATE),
+            error_function=MSE(),
+            iso_value_compression=False,
+            chain_pruning=False,
+        )
+    )
+    state = built.state_dict()
+    state["weights"][1] = FIRST
+    built.load_state_dict(state)
+
+    one = _example(1.0)  # one object, so one example carrying three queries
+    together = built.build_dataset(
+        Dataset([Sample(R.h(node)[TARGET[node]], one) for node in range(NODES)]), batch_size=NODES
+    )
+
+    at_once = [[float(v) for v in row] for row in built(together)]
+    one_by_one = [[float(v) for v in built(together[node])[0]] for node in range(NODES)]
+
+    assert _flat(at_once) == pytest.approx(_flat(one_by_one), abs=1e-12)

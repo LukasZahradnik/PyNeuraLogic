@@ -1,5 +1,5 @@
 from neuralogic.core.constructs.factories import R, V
-from neuralogic.core.constructs.function import Aggregation, Transformation
+from neuralogic.core.constructs.function import Aggregation, Combination, Transformation
 from neuralogic.core.constructs.function.function import AggregationFunction, TransformationFunction
 from neuralogic.core.constructs.metadata import Metadata
 from neuralogic.nn.module.module import Module
@@ -12,42 +12,47 @@ class TAGConv(Module):
     Which can be expressed as:
 
     .. math::
-        \mathbf{x}^{\prime}_i = act(\sum_{k=0}^K \mathbf{W}_k \cdot {agg}_{j \in \mathcal{N}^k(i)}(\mathbf{x}_j))
+        \mathbf{X}^{\prime} = act \left( \sum_{k=0}^K {\left( \mathbf{D}^{-1/2} \mathbf{A}
+        \mathbf{D}^{-1/2} \right)}^k \mathbf{X} \mathbf{W}_k \right)
 
-    Where *act* is an activation function, *agg* aggregation function, *Wk* are learnable parameters and
-    :math:`\mathcal{N}^k(i)` denotes nodes that are *k* hops away from the node *i*. This equation is translated into
-    the logic form as:
-
-    This equation is translated into the logic form as:
+    Where *act* is an activation function and *Wk* are learnable parameters, one per hop. Note this
+    normalization is **not** the one :class:`~neuralogic.nn.module.gnn.gcn.GCNConv` and
+    :class:`~neuralogic.nn.module.gnn.sg.SGConv` use: there are no self-loops, so the degree is the plain
+    degree rather than one more than it, matching PyG's ``add_self_loops=False``. The equation is translated
+    into the logic form as:
 
     .. code:: logtalk
 
-        (R.<output_name>(V.I0)[<W0>] <= R.<feature_name>(V.I0)) | [<aggregation>, Transformation.IDENTITY]
-        (R.<output_name>(V.I0)[<W1>] <= (R.<feature_name>(V.I1), R.<edge_name>(V.I1, V.I0))) | [<aggregation>, Transformation.IDENTITY]
-        (R.<output_name>(V.I0)[<W2>] <= (R.<feature_name>(V.I2), R.<edge_name>(V.I1, V.I0), R.<edge_name>(V.I2, V.I1)) | [<aggregation>, Transformation.IDENTITY]
+        (R.<output_name>__edge_count(V.I, V.J) <= R.<edge_name>(V.J, V.X)) | [Aggregation.COUNT]
+        (R.<output_name>__edge_count(V.I, V.J) <= R.<edge_name>(V.I, V.X)) | [Aggregation.COUNT]
+        R.<output_name>__edge_count / 2 | [Combination.PRODUCT, Transformation.INVERSE]
+
+        (R.<output_name>(V.I0)[<W0>] <= R.<feature_name>(V.I0)) | [<aggregation>, Combination.PRODUCT]
+        (R.<output_name>(V.I0)[<W1>] <= (R.<feature_name>(V.I1), R.<edge_name>(V.I1, V.I0), Transformation.SQRT(R.<output_name>__edge_count(V.I1, V.I0)))) | [<aggregation>, Combination.PRODUCT]
         ...
-        (R.<output_name>(V.I0)[<Wk>] <= (R.<feature_name>(V.I<k>), R.<edge_name>(V.I1, V.I0), ..., R.<edge_name>(V.I<k>, V.I<k-1>)) | [<aggregation>, Transformation.IDENTITY]
         R.<output_name> / 1 | [<activation>]
 
     Examples
     --------
 
-    The whole computation of this module (parametrized as :code:`TAGConv(1, 2, "h1", "h0", "_edge")`) is as follows:
-
-    .. code:: logtalk
-
-        (R.h1(V.I0)[2, 2] <= R.h0(V.I0)) | [Aggregation.SUM, Transformation.IDENTITY]
-        (R.h1(V.I0)[2, 1] <= (R.h0(V.I1), R._edge(V.I1, V.I0)) | [Aggregation.SUM, Transformation.IDENTITY]
-        (R.h1(V.I0)[2, 1] <= (R.h0(V.I2), R._edge(V.I1, V.I0), R._edge(V.I2, V.I1)) | [Aggregation.SUM, Transformation.IDENTITY]
-        R.h1 / 1 | [Transformation.IDENTITY]
-
     Module parametrized as :code:`TAGConv(1, 2, "h1", "h0", "_edge", 1)` translates into:
 
     .. code:: logtalk
 
-        (R.h1(V.I0)[2, 1] <= R.h0(V.I0)) | [Aggregation.SUM, Transformation.IDENTITY]
-        (R.h1(V.I0)[2, 1] <= (R.h0(V.I1), R._edge(V.I1, V.I0)) | [Aggregation.SUM, Transformation.IDENTITY]
+        (R.h1__edge_count(V.I, V.J) <= R._edge(V.J, V.X)) | [Aggregation.COUNT]
+        (R.h1__edge_count(V.I, V.J) <= R._edge(V.I, V.X)) | [Aggregation.COUNT]
+        R.h1__edge_count / 2 | [Combination.PRODUCT, Transformation.INVERSE]
+        (R.h1(V.I0)[2, 1] <= R.h0(V.I0)) | [Aggregation.SUM, Combination.PRODUCT]
+        (R.h1(V.I0)[2, 1] <= (R.h0(V.I1), R._edge(V.I1, V.I0), Transformation.SQRT(R.h1__edge_count(V.I1, V.I0)))) | [Aggregation.SUM, Combination.PRODUCT]
         R.h1 / 1 | [Transformation.IDENTITY]
+
+    Setting :code:`normalize=False` drops the counting rules and leaves the plain walk-and-sum this module
+    used to be - which is not what PyG computes. Two things to know about the edges either way, both shared
+    with :class:`~neuralogic.nn.module.gnn.sg.SGConv`: an edge valued other than ``1.0`` scales the message
+    it carries but does not enter the degree, which is a count rather than PyG's sum of edge weights, so the
+    two agree exactly at ``1.0`` and nowhere else; and without self-loops a node of degree zero has no
+    normalization atom at all, so its hop rules do not ground, where PyG makes that factor zero instead -
+    agreeing on the value and not on whether the head exists.
 
     Parameters
     ----------
@@ -71,6 +76,9 @@ class TAGConv(Module):
     aggregation : AggregationFunction
         Aggregation function of nodes' neighbors.
         Default: ``Aggregation.SUM``
+    normalize : bool
+        Add symmetric normalization. No self-loops are added either way, matching PyG.
+        Default: ``True``
 
     """
 
@@ -84,6 +92,7 @@ class TAGConv(Module):
         k: int = 2,
         activation: TransformationFunction = Transformation.IDENTITY,
         aggregation: AggregationFunction = Aggregation.SUM,
+        normalize: bool = True,
     ):
         self.output_name = output_name
         self.feature_name = feature_name
@@ -95,28 +104,38 @@ class TAGConv(Module):
         self.k = k
         self.activation = activation
         self.aggregation = aggregation
+        self.normalize = normalize
 
     def __call__(self):
-        metadata = Metadata(aggregation=self.aggregation)
+        metadata = Metadata(aggregation=self.aggregation, combination=Combination.PRODUCT)
         head = R.get(self.output_name)
         feature = R.get(self.feature_name)
-        edge = R.hidden.get(self.edge_name)
+        edge = R.get(self.edge_name)
+        edge_count = R.get(f"{self.output_name}__edge_count")
+
+        normalization = []
+        if self.normalize:
+            count_metadata = Metadata(aggregation=Aggregation.COUNT)
+
+            normalization = [
+                (edge_count(V.I, V.J) <= edge(V.J, V.X)) | count_metadata,
+                (edge_count(V.I, V.J) <= edge(V.I, V.X)) | count_metadata,
+                edge_count / 2 | Metadata(combination=Combination.PRODUCT, transformation=Transformation.INVERSE),
+            ]
 
         hop_rules = []
 
         for i in range(self.k + 1):
-            hop_rules.append(
-                (
-                    head(V.I0)[self.out_channels, self.in_channels]
-                    <= (
-                        feature(f"I{i}"),
-                        *(edge(f"I{b}", f"I{a}") for a, b in zip(range(i), range(1, i + 1))),
-                    )
-                )
-                | metadata
-            )
+            body = [feature(f"I{i}")]
+            for near, far in zip(range(i), range(1, i + 1)):
+                body.append(edge(f"I{far}", f"I{near}"))
+                if self.normalize:
+                    body.append(Transformation.SQRT(edge_count(f"I{far}", f"I{near}")))
+
+            hop_rules.append((head(V.I0)[self.out_channels, self.in_channels] <= body) | metadata)
 
         return [
+            *normalization,
             *hop_rules,
             head / 1 | Metadata(transformation=self.activation),
         ]

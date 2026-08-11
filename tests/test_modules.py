@@ -66,27 +66,41 @@ def test_sageconv():
 
 
 def test_tagconv():
-    model = Model()
+    """TAGConv normalises by the plain degree - no self-loops, which is what PyG's TAGConv does."""
+    counting = [
+        "h1__edge_count(I, J) :- *edge(J, X). [aggregation=count]",
+        "h1__edge_count(I, J) :- *edge(I, X). [aggregation=count]",
+        "h1__edge_count/2 [transformation=inverse, combination=product]",
+    ]
+    zero_hop = "{2, 1} h1(I0) :- h0(I0). [combination=product, aggregation=sum]"
+    one_hop = (
+        "{2, 1} h1(I0) :- h0(I1), *edge(I1, I0), sqrt(h1__edge_count(I1, I0)). "
+        "[combination=product, aggregation=sum]"
+    )
+    two_hop = (
+        "{2, 1} h1(I0) :- h0(I2), *edge(I1, I0), sqrt(h1__edge_count(I1, I0)), *edge(I2, I1), "
+        "sqrt(h1__edge_count(I2, I1)). [combination=product, aggregation=sum]"
+    )
+    identity = "h1/1 [transformation=identity]"
 
+    model = Model()
     model += TAGConv(1, 2, "h1", "h0", "_edge")
-    model_str = str(model).split("\n")
 
-    zero_hop = "{2, 1} h1(I0) :- h0(I0). [aggregation=sum]"
-    sec_hop = "{2, 1} h1(I0) :- h0(I1), *edge(I1, I0). [aggregation=sum]"
-    hop = "{2, 1} h1(I0) :- h0(I2), *edge(I1, I0), *edge(I2, I1). [aggregation=sum]"
-
-    assert model_str[0] == zero_hop
-    assert model_str[1] == sec_hop
-    assert model_str[2] == hop
+    assert str(model).split("\n")[:7] == [*counting, zero_hop, one_hop, two_hop, identity]
 
     model = Model()
-
     model += TAGConv(1, 2, "h1", "h0", "_edge", 1)
-    model_str = str(model).split("\n")
 
-    assert model_str[0] == zero_hop
-    assert model_str[1] == sec_hop
-    assert model_str[2] == "h1/1 [transformation=identity]"
+    assert str(model).split("\n")[:6] == [*counting, zero_hop, one_hop, identity]
+
+    model = Model()
+    model += TAGConv(1, 2, "h1", "h0", "_edge", 1, normalize=False)
+
+    assert str(model).split("\n")[:3] == [
+        zero_hop,
+        "{2, 1} h1(I0) :- h0(I1), *edge(I1, I0). [combination=product, aggregation=sum]",
+        identity,
+    ]
 
 
 def test_gatv2conv():
@@ -124,21 +138,43 @@ def test_gatv2conv():
 
 
 def test_sgconv():
-    model = Model()
+    """SGConv adds self-loops and normalises, one factor per hop - PyG's SGConv always does both."""
+    setup = [
+        "<1.0> h1__edge(I, I).",
+        "h1__edge(I, J) :- *edge(I, J).",
+        "h1__edge_count(I, J) :- h1__edge(J, X). [aggregation=count]",
+        "h1__edge_count(I, J) :- h1__edge(I, X). [aggregation=count]",
+        "h1__edge_count/2 [transformation=inverse, combination=product]",
+    ]
+    identity = "h1/1 [transformation=identity]"
 
+    model = Model()
     model += SGConv(1, 2, "h1", "h0", "_edge", k=2)
-    model_str = str(model).split("\n")
-    rule = "{2, 1} h1(I0) :- h0(I2), *edge(I1, I0), *edge(I2, I1). [aggregation=sum, duplicate_grounding=True]"
 
-    assert model_str[0] == rule
+    assert str(model).split("\n")[:7] == [
+        *setup,
+        "{2, 1} h1(I0) :- h0(I2), h1__edge(I1, I0), sqrt(h1__edge_count(I1, I0)), h1__edge(I2, I1), "
+        "sqrt(h1__edge_count(I2, I1)). [combination=product, aggregation=sum, duplicate_grounding=True]",
+        identity,
+    ]
 
     model = Model()
-
     model += SGConv(1, 2, "h1", "h0", "_edge")
-    model_str = str(model).split("\n")
-    rule = "{2, 1} h1(I0) :- h0(I1), *edge(I1, I0). [aggregation=sum, duplicate_grounding=True]"
 
-    assert model_str[0] == rule
+    assert str(model).split("\n")[:7] == [
+        *setup,
+        "{2, 1} h1(I0) :- h0(I1), h1__edge(I1, I0), sqrt(h1__edge_count(I1, I0)). "
+        "[combination=product, aggregation=sum, duplicate_grounding=True]",
+        identity,
+    ]
+
+    model = Model()
+    model += SGConv(1, 2, "h1", "h0", "_edge", normalize=False)
+
+    assert str(model).split("\n")[:2] == [
+        "{2, 1} h1(I0) :- h0(I1), *edge(I1, I0). [combination=product, aggregation=sum, duplicate_grounding=True]",
+        identity,
+    ]
 
 
 def test_appnp():
