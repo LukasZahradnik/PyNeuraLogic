@@ -7,13 +7,14 @@ from torch_geometric.nn import (
     GINConv as TorchGIN,
     RGCNConv as TorchRGCN,
     ResGatedGraphConv as TorchResGated,
+    GINEConv as TorchGINE,
     SAGEConv as TorchSAGE,
     SGConv as TorchSG,
     TAGConv as TorchTAG,
 )
 
 import neuralogic.nn.module as module
-from neuralogic.core import Model, R, Settings
+from neuralogic.core import Metadata, Model, R, Settings, Transformation, V
 from neuralogic.dataset import Dataset, Sample
 from neuralogic.nn.loss import MSE
 from neuralogic.nn.optim import SGD
@@ -40,6 +41,15 @@ FOURTH = [[-0.25, 0.4, 0.2, -0.35], [0.1, -0.5, 0.3, 0.15], [0.55, 0.2, -0.45, 0
 #: GATv2's `a`: a `1 x out_channels` weight, so one *row* rather than a vector - it is what turns the
 #: per-edge score into a single number, and a plain vector here throws "scalar incrementBy by matrix"
 ATTENTION = [[0.5, -0.2, 0.1]]
+
+#: GINE's edge features, the same width as the node features - it adds them before the relu rather than
+#: weighting by them, which is why they are vectors here and a scalar everywhere else
+EDGE_FEATURES = {
+    (0, 1): [0.1, 0.2, -0.3, 0.4],
+    (1, 0): [-0.2, 0.5, 0.1, 0.3],
+    (1, 2): [0.3, -0.1, 0.25, -0.4],
+    (2, 1): [0.15, 0.35, -0.2, 0.1],
+}
 
 #: One relation per edge rather than both everywhere, chosen so that both awkward cases appear at once: node 1
 #: has *two* `a` neighbours, which is what makes the per-relation mean differ from a sum - with one neighbour
@@ -465,6 +475,46 @@ def test_edge_value_is_torch_geometric_edge_weight(gnn, layer, indices):
     stepped = [torch_layer.lin.weight] if len(indices) == 1 else [torch_layer.lins[i].weight for i in indices]
     for index, weight in zip(indices, stepped):
         assert after[index] == pytest.approx(_flat(weight.tolist()), abs=1e-9)
+
+
+@pytest.mark.parametrize("eps", [0.0, 0.5])
+def test_gine_matches_torch_geometric(eps):
+    """GINE adds an edge feature to the neighbour before the relu, and hands the total to a caller's network.
+
+    The module's head *is* that network's input, so the comparison needs one supplied - a plain linear map
+    here, which is what makes it comparable to PyG at all. The edge is an ordinary valued atom carrying a
+    vector the width of the features, since that is what GINE adds rather than a weight.
+    """
+    model = Model()
+    model += module.GINEConv(IN, "f", "e", "gine", eps=eps)
+    model += (R.h(V.I)["w":OUT, IN] <= R.gine(V.I)) | Metadata(transformation=Transformation.IDENTITY)
+    model += R.h / 1 | Metadata(transformation=Transformation.IDENTITY)
+    built = model.build(
+        Settings(optimizer=SGD(lr=LEARNING_RATE), error_function=MSE(), iso_value_compression=False, chain_pruning=False)
+    )
+    state = built.state_dict()
+    state["weights"][_indices_by_name(built, {"w": FIRST})["w"]] = FIRST
+    built.load_state_dict(state)
+
+    example = [R.f(node)[FEATURES[node]] for node in range(NODES)] + [
+        R.e(i, j)[EDGE_FEATURES[(i, j)]] for i, j in EDGES
+    ]
+    dataset = built.build_dataset(
+        Dataset([Sample(R.h(node)[TARGET[node]], example) for node in range(NODES)]), batch_size=NODES
+    )
+
+    # after constructing the layer, not before: GINEConv.__init__ calls reset_parameters, which resets the
+    # module handed to it, so a weight copied in first is thrown away before it is ever used
+    layer = TorchGINE(torch.nn.Linear(IN, OUT, bias=False), eps=eps).double()
+    with torch.no_grad():
+        layer.nn.weight.copy_(_tensor(FIRST))
+
+    value = [[float(v) for v in row] for row in built(dataset)]
+    expected = layer(
+        _tensor(FEATURES), _edge_index(), _tensor([EDGE_FEATURES[edge] for edge in EDGES])
+    ).tolist()
+
+    assert _flat(value) == pytest.approx(_flat(expected), abs=1e-9)
 
 
 def test_queries_of_one_example_do_not_leak_into_each_other():
