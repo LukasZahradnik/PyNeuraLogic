@@ -10,6 +10,17 @@ class GCNConv(Module):
     Graph Convolutional layer from
     `"Semi-supervised Classification with Graph Convolutional Networks" <https://arxiv.org/abs/1609.02907>`_.
 
+    .. math::
+        \mathbf{X}^{\prime} = act \left( \mathbf{\hat{D}}^{-1/2} \mathbf{\hat{A}} \mathbf{\hat{D}}^{-1/2}
+        \mathbf{X} \mathbf{W} \right)
+
+    where :math:`\mathbf{\hat{A}} = \mathbf{A} + \mathbf{I}`. The body combines by product, so an edge's
+    value is PyG's ``edge_weight``: it scales the message it carries and it enters the degree. Note
+    ``__edge_count`` is a weighted **in-**degree despite its name - the two rules sum over ``V.X`` in the
+    *source* position, and they sum the edge values rather than counting the edges, both of which is what
+    ``gcn_norm`` does. Neither is visible on an undirected graph given both directions at ``1.0``, where
+    in-degree is out-degree and summing ones is counting them, which is why the name survived being either.
+
     Parameters
     ----------
 
@@ -85,12 +96,16 @@ class GCNConv(Module):
             ]
 
         if self.normalize:
-            count_metadata = Metadata(aggregation=Aggregation.COUNT)
+            # SUM rather than COUNT, so the degree is the *sum* of the incident edge values as PyG's
+            # `gcn_norm` takes it. At the natural 1.0 the two are the same number - summing ones is counting
+            # them - so this only shows up once a graph carries real edge weights, and then it is the
+            # difference between accepting them and ignoring them.
+            count_metadata = Metadata(aggregation=Aggregation.SUM)
             body = [R.get(self.feature_name)(V.J), edge(V.J, V.I), Transformation.SQRT(edge_count(V.J, V.I))]
 
             normalization = [
-                (edge_count(V.I, V.J) <= edge(V.J, V.X)) | count_metadata,
-                (edge_count(V.I, V.J) <= edge(V.I, V.X)) | count_metadata,
+                (edge_count(V.I, V.J) <= edge(V.X, V.J)) | count_metadata,
+                (edge_count(V.I, V.J) <= edge(V.X, V.I)) | count_metadata,
                 edge_count / 2 | Metadata(combination=Combination.PRODUCT, transformation=Transformation.INVERSE),
             ]
 

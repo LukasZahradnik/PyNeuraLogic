@@ -46,8 +46,8 @@ def test_gcnconv():
 
     assert model_str[0] == "<1.0> h1__edge(I, I)."
     assert model_str[1] == "h1__edge(I, J) :- edge(I, J)."
-    assert model_str[2] == "h1__edge_count(I, J) :- h1__edge(J, X). [aggregation=count]"
-    assert model_str[3] == "h1__edge_count(I, J) :- h1__edge(I, X). [aggregation=count]"
+    assert model_str[2] == "h1__edge_count(I, J) :- h1__edge(X, J). [aggregation=sum]"
+    assert model_str[3] == "h1__edge_count(I, J) :- h1__edge(X, I). [aggregation=sum]"
     assert model_str[4] == "h1__edge_count/2 [transformation=inverse, combination=product]"
     assert (
         model_str[5]
@@ -68,8 +68,8 @@ def test_sageconv():
 def test_tagconv():
     """TAGConv normalises by the plain degree - no self-loops, which is what PyG's TAGConv does."""
     counting = [
-        "h1__edge_count(I, J) :- *edge(J, X). [aggregation=count]",
-        "h1__edge_count(I, J) :- *edge(I, X). [aggregation=count]",
+        "h1__edge_count(I, J) :- *edge(X, J). [aggregation=sum]",
+        "h1__edge_count(I, J) :- *edge(X, I). [aggregation=sum]",
         "h1__edge_count/2 [transformation=inverse, combination=product]",
     ]
     zero_hop = "{2, 1} h1(I0) :- h0(I0). [combination=product, aggregation=sum]"
@@ -142,8 +142,8 @@ def test_sgconv():
     setup = [
         "<1.0> h1__edge(I, I).",
         "h1__edge(I, J) :- *edge(I, J).",
-        "h1__edge_count(I, J) :- h1__edge(J, X). [aggregation=count]",
-        "h1__edge_count(I, J) :- h1__edge(I, X). [aggregation=count]",
+        "h1__edge_count(I, J) :- h1__edge(X, J). [aggregation=sum]",
+        "h1__edge_count(I, J) :- h1__edge(X, I). [aggregation=sum]",
         "h1__edge_count/2 [transformation=inverse, combination=product]",
     ]
     identity = "h1/1 [transformation=identity]"

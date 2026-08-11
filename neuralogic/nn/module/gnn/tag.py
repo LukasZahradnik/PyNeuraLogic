@@ -23,8 +23,8 @@ class TAGConv(Module):
 
     .. code:: logtalk
 
-        (R.<output_name>__edge_count(V.I, V.J) <= R.<edge_name>(V.J, V.X)) | [Aggregation.COUNT]
-        (R.<output_name>__edge_count(V.I, V.J) <= R.<edge_name>(V.I, V.X)) | [Aggregation.COUNT]
+        (R.<output_name>__edge_count(V.I, V.J) <= R.<edge_name>(V.X, V.J)) | [Aggregation.SUM]
+        (R.<output_name>__edge_count(V.I, V.J) <= R.<edge_name>(V.X, V.I)) | [Aggregation.SUM]
         R.<output_name>__edge_count / 2 | [Combination.PRODUCT, Transformation.INVERSE]
 
         (R.<output_name>(V.I0)[<W0>] <= R.<feature_name>(V.I0)) | [<aggregation>, Combination.PRODUCT]
@@ -39,18 +39,19 @@ class TAGConv(Module):
 
     .. code:: logtalk
 
-        (R.h1__edge_count(V.I, V.J) <= R._edge(V.J, V.X)) | [Aggregation.COUNT]
-        (R.h1__edge_count(V.I, V.J) <= R._edge(V.I, V.X)) | [Aggregation.COUNT]
+        (R.h1__edge_count(V.I, V.J) <= R._edge(V.X, V.J)) | [Aggregation.SUM]
+        (R.h1__edge_count(V.I, V.J) <= R._edge(V.X, V.I)) | [Aggregation.SUM]
         R.h1__edge_count / 2 | [Combination.PRODUCT, Transformation.INVERSE]
         (R.h1(V.I0)[2, 1] <= R.h0(V.I0)) | [Aggregation.SUM, Combination.PRODUCT]
         (R.h1(V.I0)[2, 1] <= (R.h0(V.I1), R._edge(V.I1, V.I0), Transformation.SQRT(R.h1__edge_count(V.I1, V.I0)))) | [Aggregation.SUM, Combination.PRODUCT]
         R.h1 / 1 | [Transformation.IDENTITY]
 
-    Setting :code:`normalize=False` drops the counting rules and leaves the plain walk-and-sum this module
-    used to be - which is not what PyG computes. Two things to know about the edges either way, both shared
-    with :class:`~neuralogic.nn.module.gnn.sg.SGConv`: an edge valued other than ``1.0`` scales the message
-    it carries but does not enter the degree, which is a count rather than PyG's sum of edge weights, so the
-    two agree exactly at ``1.0`` and nowhere else; and without self-loops a node of degree zero has no
+    Setting :code:`normalize=False` drops the normalization rules and leaves the plain walk-and-sum this
+    module used to be - which is not what PyG computes. An edge's value is PyG's ``edge_weight``: it scales
+    the message it carries and enters the degree, which despite the ``__edge_count`` name is a weighted
+    **in-**degree, as in :class:`~neuralogic.nn.module.gnn.sg.SGConv`.
+
+    One difference from PyG that normalizing without self-loops leaves: a node of degree zero has no
     normalization atom at all, so its hop rules do not ground, where PyG makes that factor zero instead -
     agreeing on the value and not on whether the head exists.
 
@@ -115,11 +116,13 @@ class TAGConv(Module):
 
         normalization = []
         if self.normalize:
-            count_metadata = Metadata(aggregation=Aggregation.COUNT)
+            # SUM, not COUNT: the degree is the sum of the incident edge values, which is what PyG's
+            # `gcn_norm` takes and what makes an edge value the `edge_weight` it looks like. Identical at 1.0.
+            count_metadata = Metadata(aggregation=Aggregation.SUM)
 
             normalization = [
-                (edge_count(V.I, V.J) <= edge(V.J, V.X)) | count_metadata,
-                (edge_count(V.I, V.J) <= edge(V.I, V.X)) | count_metadata,
+                (edge_count(V.I, V.J) <= edge(V.X, V.J)) | count_metadata,
+                (edge_count(V.I, V.J) <= edge(V.X, V.I)) | count_metadata,
                 edge_count / 2 | Metadata(combination=Combination.PRODUCT, transformation=Transformation.INVERSE),
             ]
 

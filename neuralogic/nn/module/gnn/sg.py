@@ -23,8 +23,8 @@ class SGConv(Module):
         R.<output_name>__edge(V.I, V.I)[1.0].fixed()
         R.<output_name>__edge(V.I, V.J) <= R.<edge_name>(V.I, V.J)
 
-        (R.<output_name>__edge_count(V.I, V.J) <= R.<output_name>__edge(V.J, V.X)) | [Aggregation.COUNT]
-        (R.<output_name>__edge_count(V.I, V.J) <= R.<output_name>__edge(V.I, V.X)) | [Aggregation.COUNT]
+        (R.<output_name>__edge_count(V.I, V.J) <= R.<output_name>__edge(V.X, V.J)) | [Aggregation.SUM]
+        (R.<output_name>__edge_count(V.I, V.J) <= R.<output_name>__edge(V.X, V.I)) | [Aggregation.SUM]
         R.<output_name>__edge_count / 2 | [Combination.PRODUCT, Transformation.INVERSE]
 
         (R.<output_name>(V.I<0>)[<W>] <= (
@@ -37,14 +37,14 @@ class SGConv(Module):
         R.<output_name> / 1 | [<activation>]
 
     The body combines by product, which is what makes the normalization factors scale the features rather
-    than shift them - and it is also why the edge can stay an ordinary valued atom rather than a hidden one:
-    ``1.0`` is the identity of a product, so the natural spelling of a graph costs nothing.
+    than shift them - and it is also why the edge is an ordinary valued atom rather than a hidden one: an
+    edge's value is then PyG's ``edge_weight``, and at the natural ``1.0`` it is the identity of a product,
+    so the plain spelling of a graph costs nothing.
 
-    An edge given some other value does scale the message it carries, but that is **not** the same as PyG's
-    ``edge_weight``: ``gcn_norm`` takes the degree as the *sum* of the incident edge weights, while the
-    counting rules above count groundings and ignore their values. The two therefore agree exactly at
-    ``1.0`` and nowhere else - with ``normalize=False``, where no degree is involved, an edge value scales
-    the sum linearly as one would expect.
+    Note ``__edge_count`` is a weighted **in-**degree despite its name: the two rules sum over ``V.X`` in the
+    *source* position, and they sum the edge values rather than counting the edges. Both are what
+    ``gcn_norm`` does, and both are invisible on an undirected graph given both directions at ``1.0`` - where
+    in-degree is out-degree and summing ones is counting them - which is why the name survived being either.
 
     Examples
     --------
@@ -55,8 +55,8 @@ class SGConv(Module):
 
         R.h1__edge(V.I, V.I)[1.0].fixed()
         R.h1__edge(V.I, V.J) <= R._edge(V.I, V.J)
-        (R.h1__edge_count(V.I, V.J) <= R.h1__edge(V.J, V.X)) | [Aggregation.COUNT]
-        (R.h1__edge_count(V.I, V.J) <= R.h1__edge(V.I, V.X)) | [Aggregation.COUNT]
+        (R.h1__edge_count(V.I, V.J) <= R.h1__edge(V.X, V.J)) | [Aggregation.SUM]
+        (R.h1__edge_count(V.I, V.J) <= R.h1__edge(V.X, V.I)) | [Aggregation.SUM]
         R.h1__edge_count / 2 | [Combination.PRODUCT, Transformation.INVERSE]
         (R.h1(V.I0)[3, 2] <= (R.h0(V.I1), R.h1__edge(V.I1, V.I0), Transformation.SQRT(R.h1__edge_count(V.I1, V.I0)))) | [Aggregation.SUM, Combination.PRODUCT]
         R.h1 / 1 | [Transformation.IDENTITY]
@@ -149,11 +149,13 @@ class SGConv(Module):
             ]
 
         if self.normalize:
-            count_metadata = Metadata(aggregation=Aggregation.COUNT)
+            # SUM, not COUNT: the degree is the sum of the incident edge values, which is what PyG's
+            # `gcn_norm` takes and what makes an edge value the `edge_weight` it looks like. Identical at 1.0.
+            count_metadata = Metadata(aggregation=Aggregation.SUM)
 
             normalization = [
-                (edge_count(V.I, V.J) <= edge(V.J, V.X)) | count_metadata,
-                (edge_count(V.I, V.J) <= edge(V.I, V.X)) | count_metadata,
+                (edge_count(V.I, V.J) <= edge(V.X, V.J)) | count_metadata,
+                (edge_count(V.I, V.J) <= edge(V.X, V.I)) | count_metadata,
                 edge_count / 2 | Metadata(combination=Combination.PRODUCT, transformation=Transformation.INVERSE),
             ]
 

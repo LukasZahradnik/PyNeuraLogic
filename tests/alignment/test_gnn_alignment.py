@@ -46,18 +46,35 @@ def _edge_index():
     return torch.tensor(EDGES, dtype=torch.long).t().contiguous()
 
 
+#: A different weight per direction, so out-degree and in-degree differ and a normalisation that sums the
+#: wrong side of the edge cannot pass by symmetry. Every weight also differs from 1.0, where summing the edge
+#: values and counting the edges give the same number.
+EDGE_WEIGHTS = {(0, 1): 2.0, (1, 0): 0.5, (1, 2): 3.0, (2, 1): 1.5}
+
+
+def _weighted_example():
+    return [R.f(node)[FEATURES[node]] for node in range(NODES)] + [
+        R.e(i, j)[EDGE_WEIGHTS[(i, j)]] for i, j in EDGES
+    ]
+
+
+def _edge_weight_tensor():
+    return torch.tensor([EDGE_WEIGHTS[edge] for edge in EDGES], dtype=torch.float64)
+
+
 def _example(edge_value):
     """The graph as facts: a feature vector per node, and an edge fact per direction.
 
     The natural 1.0 throughout. It did not use to be safe: a module passing the edge as an ordinary valued
     body atom had its value added to every component of the neighbour's features, since a rule body combines
-    by SUM - so the same graph needed spelling two ways depending on the module. The edge atoms are `hidden`
-    now, which is what an atom there to ground rather than to count should be, and the value is ignored.
+    by SUM - so the same graph needed spelling two ways depending on the module. The modules whose bodies
+    combine by product take a valued edge as PyG's `edge_weight`; the rest make it `hidden`, which is what an
+    atom there to ground rather than to count should be.
     """
     return [R.f(node)[FEATURES[node]] for node in range(NODES)] + [R.e(i, j)[edge_value] for i, j in EDGES]
 
 
-def _built(gnn_module, weights, edge_value):
+def _built(gnn_module, weights, edge_value, example=None):
     model = Model()
     model += gnn_module
     built = model.build(
@@ -73,7 +90,11 @@ def _built(gnn_module, weights, edge_value):
         state["weights"][index] = value
     built.load_state_dict(state)
 
-    dataset = Dataset([Sample(R.h(node)[TARGET[node]], _example(edge_value)) for node in range(NODES)])
+    # a *factory*, called per sample, so each sample gets its own example object. Three examples of one query
+    # rather than one example of three, which keeps these tests about the arithmetic - sharing between the
+    # queries of one example has its own test below
+    evidence = example or (lambda: _example(edge_value))
+    dataset = Dataset([Sample(R.h(node)[TARGET[node]], evidence()) for node in range(NODES)])
     return built, built.build_dataset(dataset, batch_size=NODES)
 
 
@@ -217,6 +238,46 @@ def test_tag_matches_torch_geometric():
     assert _flat(value) == pytest.approx(_flat(expected.tolist()), abs=1e-9)
     for index in weights:
         assert after[index] == pytest.approx(_flat(layer.lins[index].weight.tolist()), abs=1e-9)
+
+
+@pytest.mark.parametrize(
+    "gnn, layer, indices",
+    [
+        (lambda: module.GCNConv(IN, OUT, "h", "f", "e"), lambda: TorchGCN(IN, OUT, bias=False), [1]),
+        (lambda: module.SGConv(IN, OUT, "h", "f", "e", k=2), lambda: TorchSG(IN, OUT, K=2, bias=False), [1]),
+        (lambda: module.TAGConv(IN, OUT, "h", "f", "e", k=2), lambda: TorchTAG(IN, OUT, K=2, bias=False), [0, 1, 2]),
+    ],
+    ids=["gcn", "sg", "tag"],
+)
+def test_edge_value_is_torch_geometric_edge_weight(gnn, layer, indices):
+    """An edge's value is PyG's `edge_weight`, in every module whose body combines by product.
+
+    Two things have to be right for this and neither shows on the graph the tests above use. The degree has
+    to be the *sum* of the incident edge values rather than a count of the edges, which are the same number
+    at 1.0; and it has to be the **in-**degree, which equals the out-degree whenever both directions of an
+    edge carry the same value. So the weights here are all different from 1.0 and asymmetric per direction,
+    and each of those two mistakes on its own makes this fail.
+    """
+    weights = dict(zip(indices, [FIRST, SECOND, THIRD]))
+    built, dataset = _built(gnn(), weights, edge_value=None, example=_weighted_example)
+
+    torch_layer = layer().double()
+    with torch.no_grad():
+        if len(indices) == 1:
+            torch_layer.lin.weight.copy_(_tensor(FIRST))
+        else:
+            for index, weight in weights.items():
+                torch_layer.lins[index].weight.copy_(_tensor(weight))
+
+    value, after, _ = _forward_and_step(built, dataset, indices)
+    expected = _torch_step(
+        torch_layer, lambda: torch_layer(_tensor(FEATURES), _edge_index(), _edge_weight_tensor())
+    )
+
+    assert _flat(value) == pytest.approx(_flat(expected.tolist()), abs=1e-9)
+    stepped = [torch_layer.lin.weight] if len(indices) == 1 else [torch_layer.lins[i].weight for i in indices]
+    for index, weight in zip(indices, stepped):
+        assert after[index] == pytest.approx(_flat(weight.tolist()), abs=1e-9)
 
 
 def test_queries_of_one_example_do_not_leak_into_each_other():
