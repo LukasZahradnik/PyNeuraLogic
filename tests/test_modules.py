@@ -104,37 +104,40 @@ def test_tagconv():
 
 
 def test_gatv2conv():
-    model = Model()
+    """The attention is one number per edge, softmaxed over the neighbours, and the edge only grounds.
 
+    `agg_terms=[J]` is what normalises over the sources for each target while keeping a value per edge, and
+    `$h1__att={1, 2}` sits on the *body*, because a head weight would be applied after that aggregation.
+    """
+    loops = [
+        "<1.0> h1__edge(I, I).",
+        "h1__edge(I, J) :- *edge(I, J).",
+    ]
+    normalise = (
+        "h1__attention(I, J) :- $h1__att={1, 2} h1__score(I, J). "
+        "[transformation=identity, aggregation=softmax(agg_terms=[J])]"
+    )
+    output = (
+        "h1(I) :- h1__attention(I, J), $h1__right={2, 1} h0(J), *h1__edge(J, I). "
+        "[combination=product, aggregation=sum]"
+    )
+    identity = "h1/1 [transformation=identity]"
+
+    def score(left):
+        return (
+            f"h1__score(I, J) :- ${left}={{2, 1}} h0(I), $h1__right={{2, 1}} h0(J), *h1__edge(J, I). "
+            "[transformation=leakyrelu, combination=sum]"
+        )
+
+    model = Model()
     model += GATv2Conv(1, 2, "h1", "h0", "_edge")
-    model_str = str(model).split("\n")
 
-    attention = (
-        "{2, 2} h1__attention(I, J) :- $h1__left={2, 1} h0(I), $h1__right={2, 1} h0(J). [transformation=leakyrelu]"
-    )
-    assert model_str[0] == attention
-    assert model_str[1] == "h1__attention/2 [transformation=softmax]"
-
-    h1_rule = (
-        "h1(I) :- h1__attention(I, J), $h1__right={2, 1} h0(J), *edge(J, I). [combination=product, aggregation=sum]"
-    )
-    assert model_str[2] == h1_rule
+    assert str(model).split("\n")[:6] == [*loops, score("h1__left"), normalise, output, identity]
 
     model = Model()
-
     model += GATv2Conv(1, 2, "h1", "h0", "_edge", share_weights=True)
-    model_str = str(model).split("\n")
 
-    attention = (
-        "{2, 2} h1__attention(I, J) :- $h1__right={2, 1} h0(I), $h1__right={2, 1} h0(J). [transformation=leakyrelu]"
-    )
-    assert model_str[0] == attention
-    assert model_str[1] == "h1__attention/2 [transformation=softmax]"
-
-    h1_rule = (
-        "h1(I) :- h1__attention(I, J), $h1__right={2, 1} h0(J), *edge(J, I). [combination=product, aggregation=sum]"
-    )
-    assert model_str[2] == h1_rule
+    assert str(model).split("\n")[:6] == [*loops, score("h1__right"), normalise, output, identity]
 
 
 def test_sgconv():

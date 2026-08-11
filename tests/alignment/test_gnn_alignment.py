@@ -2,6 +2,7 @@ import pytest
 import torch
 from torch_geometric.nn import (
     APPNP as TorchAPPNP,
+    GATv2Conv as TorchGAT,
     GCNConv as TorchGCN,
     GINConv as TorchGIN,
     RGCNConv as TorchRGCN,
@@ -36,6 +37,9 @@ FIRST = [[0.5, -0.2, 0.1, 0.3], [0.4, -0.6, 0.25, -0.15], [-0.1, 0.2, 0.8, 0.05]
 SECOND = [[0.2, 0.35, -0.4, 0.1], [-0.55, 0.15, 0.6, -0.25], [0.3, -0.45, 0.05, 0.7]]
 THIRD = [[0.15, -0.3, 0.45, -0.6], [0.7, 0.05, -0.2, 0.35], [-0.4, 0.6, 0.1, -0.25]]
 FOURTH = [[-0.25, 0.4, 0.2, -0.35], [0.1, -0.5, 0.3, 0.15], [0.55, 0.2, -0.45, 0.6]]
+#: GATv2's `a`: a `1 x out_channels` weight, so one *row* rather than a vector - it is what turns the
+#: per-edge score into a single number, and a plain vector here throws "scalar incrementBy by matrix"
+ATTENTION = [[0.5, -0.2, 0.1]]
 
 #: One relation per edge rather than both everywhere, chosen so that both awkward cases appear at once: node 1
 #: has *two* `a` neighbours, which is what makes the per-relation mean differ from a sum - with one neighbour
@@ -95,7 +99,15 @@ def _example(edge_value):
     return [R.f(node)[FEATURES[node]] for node in range(NODES)] + [R.e(i, j)[edge_value] for i, j in EDGES]
 
 
-def _built(gnn_module, weights, edge_value, example=None):
+def _indices_by_name(built, weights):
+    """Weight indices looked up by the template's own names, since an index moves when a rule is added."""
+    names = {str(name).strip(): index for index, name in built.state_dict()["weight_names"].items()}
+    missing = set(weights) - set(names)
+    assert not missing, f"no weight named {sorted(missing)}; the model has {sorted(names)}"
+    return {name: names[name] for name in weights}
+
+
+def _built(gnn_module, weights, edge_value, example=None, weights_by_name=None):
     model = Model()
     model += gnn_module
     built = model.build(
@@ -109,6 +121,8 @@ def _built(gnn_module, weights, edge_value, example=None):
     state = built.state_dict()
     for index, value in weights.items():
         state["weights"][index] = value
+    for name, index in _indices_by_name(built, weights_by_name or {}).items():
+        state["weights"][index] = (weights_by_name or {})[name]
     built.load_state_dict(state)
 
     # a *factory*, called per sample, so each sample gets its own example object. Three examples of one query
@@ -259,6 +273,82 @@ def test_tag_matches_torch_geometric():
     assert _flat(value) == pytest.approx(_flat(expected.tolist()), abs=1e-9)
     for index in weights:
         assert after[index] == pytest.approx(_flat(layer.lins[index].weight.tolist()), abs=1e-9)
+
+
+@pytest.mark.parametrize("share_weights", [False, True], ids=["separate-weights", "shared-weights"])
+def test_gatv2_matches_torch_geometric(share_weights):
+    """GATv2's attention is one number per edge, normalised over the neighbourhood a node attends to.
+
+    Three things had to be right and none of them showed in a test that only rendered the template. The
+    score has to be a scalar, so `a` is a `1 x out` weight - and it has to sit on the *body*, because a head
+    weight is applied after the aggregation and the softmax aggregation casts what it is given to a scalar.
+    The normalisation has to be `Aggregation.SOFTMAX(agg_terms=["J"])`, which groups the groundings over the
+    neighbours while keeping one value per edge, rather than a transformation on the predicate, which
+    softmaxes each edge's own components. And the edge has to appear in the score rule at all, hidden, or the
+    score grounds for every pair of nodes and the softmax normalises over the whole graph.
+
+    The slope is why PyG is constructed with `negative_slope=0.01`: `Transformation.LEAKY_RELU` is `0.01`
+    where PyG defaults to `0.2`, and the backend keeps it in a static field, so it cannot be set per rule.
+
+    Forward only, and not by choice: a step through this template throws `Incompatible dimensions of
+    algebraic operation - scalar incrementBy by matrix`, which is the designed in-place fallback signal that
+    `Sum`, `Average` and `ElementProduct` catch and redo out of place - the softmax aggregation's gradient
+    path does not. See KNOWN_ISSUES; `test_gatv2_cannot_be_trained_yet` pins that down.
+    """
+    weights = {"h__left": FIRST, "h__right": SECOND, "h__att": ATTENTION}
+    if share_weights:
+        weights.pop("h__left")
+
+    gnn = module.GATv2Conv(IN, OUT, "h", "f", "e", share_weights=share_weights)
+    built, dataset = _built(gnn, {}, edge_value=1.0, weights_by_name=weights)
+
+    layer = TorchGAT(IN, OUT, bias=False, negative_slope=0.01, share_weights=share_weights).double()
+    with torch.no_grad():
+        layer.att.copy_(_tensor([ATTENTION]))
+        layer.lin_l.weight.copy_(_tensor(SECOND))                     # x_j, the source
+        if not share_weights:
+            layer.lin_r.weight.copy_(_tensor(FIRST))                  # x_i, the target
+
+    value = [[float(v) for v in row] for row in built(dataset)]
+    expected = layer(_tensor(FEATURES), _edge_index()).tolist()
+
+    assert _flat(value) == pytest.approx(_flat(expected), abs=1e-9)
+
+
+def test_gatv2_cannot_be_trained_above_one_output_channel():
+    """The gap left over from the test above, pinned so that closing it in the backend fails here loudly.
+
+    The forward pass is exact; a step is not, and only once `out_channels > 1`. At one channel the attention
+    weight is a scalar and everything works, which is what locates the problem: it is the gradient of the
+    `1 x out` weight. `MatrixValue.incrementBy(ScalarValue)` throws when the receiver is the smaller shape,
+    by design - the comment there says so - and the callers that expect it redo the step out of place.
+    Nothing on the softmax aggregation's gradient path does.
+    """
+    weights = {"h__left": FIRST, "h__right": SECOND, "h__att": ATTENTION}
+    built, dataset = _built(module.GATv2Conv(IN, OUT, "h", "f", "e"), {}, edge_value=1.0, weights_by_name=weights)
+
+    built(dataset)                                    # the forward pass is fine
+
+    with pytest.raises(Exception, match="scalar incrementBy by matrix"):
+        built.train(dataset, epochs=1)
+
+    # one output channel, where the attention weight is a scalar rather than a 1 x out row, trains fine
+    single = Model()
+    single += module.GATv2Conv(1, 1, "h", "f", "e")
+    built = single.build(
+        Settings(optimizer=SGD(lr=LEARNING_RATE), error_function=MSE(), iso_value_compression=False, chain_pruning=False)
+    )
+    state = built.state_dict()
+    for index in state["weight_names"]:
+        state["weights"][index] = 0.5
+    built.load_state_dict(state)
+
+    scalars = [R.f(node)[float(node) - 1] for node in range(NODES)] + [R.e(i, j)[1.0] for i, j in EDGES]
+    data = built.build_dataset(
+        Dataset([Sample(R.h(node)[0.5], scalars) for node in range(NODES)]), batch_size=NODES
+    )
+    built(data)
+    built.train(data, epochs=1)
 
 
 def test_res_gated_matches_torch_geometric():
