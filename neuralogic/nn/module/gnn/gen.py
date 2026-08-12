@@ -10,6 +10,29 @@ class GENConv(Module):
     r"""
     GENConv layer from `"DeeperGCN: All You Need to Train Deeper GCNs" <https://arxiv.org/abs/2006.07739>`_.
 
+    .. warning::
+
+        **This module cannot be evaluated on a graph whose features are vectors.** Building a dataset for it
+        throws ``ClassCastException: VectorValue cannot be cast to ScalarValue``, so it computes nothing -
+        it is not divergent from PyG, it is unusable. Every other GNN module here is checked against
+        ``torch_geometric`` in ``tests/alignment/test_gnn_alignment.py``; this one cannot be.
+
+        The cause is not a defect and lifting it would not be a fix. ``Aggregation.SOFTMAX`` normalises over
+        *groundings*, so it wants one number per grounding - a softmax over a set of scalars, which is its
+        only reading, and the implementation is built that way throughout: an ``n x n`` Jacobian and a scalar
+        handed back to each input. The ``__gen_feat_agg`` rule below asks it to softmax vector-valued
+        groundings instead.
+
+        What the module is written against is PyG's ``SoftmaxAggregation``, which is a *different* operator:
+        ``softmax(x, index, dim=-2)`` then ``sum(x * alpha)``, i.e. one independent softmax per feature
+        channel, weighting the neighbours separately for each. That is a per-channel softmax-weighted mean
+        rather than attention. Offering it would mean adding an element-wise softmax aggregation as its own
+        function - a decision about what the library should provide, not a bug to close.
+
+        :class:`~neuralogic.nn.module.gnn.gatv2.GATv2Conv` shows the shape that *does* work within the
+        restriction: project the per-edge score to one number **before** the aggregation, with the weight on
+        the rule's body rather than its head.
+
     Parameters
     ----------
 
