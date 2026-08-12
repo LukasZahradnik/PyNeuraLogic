@@ -327,3 +327,47 @@ def test_scalar_times_vector_product_does_not_depend_on_body_order():
 
     assert first_value == pytest.approx(last_value, abs=1e-12)
     assert first_after == pytest.approx(last_after, abs=1e-12)
+
+
+@pytest.mark.parametrize("width", [1, 2, 3])
+def test_reported_error_over_a_vector_target_is_the_summed_squared_error(width):
+    """The number `validate` reports has to be the function the gradient descends, not a scaled cousin.
+
+    `SquaredDiff.evaluate` used to divide by the component count while `differentiate` did not, so for a
+    vector target the reported error was the mean where the gradient was the sum's - off by exactly the
+    output width, and invisible at width one. `Crossentropy` and `SoftEntropy` both already summed over
+    components, so this also makes the three agree. Nothing on either side of the library could see it: the
+    Java suite and this one both passed unchanged when it was fixed, which is why it is pinned here.
+    """
+    weight = [[0.5 if row == column else 0.25 for column in range(width)] for row in range(width)]
+    source = [0.7 - 0.3 * index for index in range(width)]
+    target = [0.2 * index - 0.1 for index in range(width)]
+
+    model = Model()
+    model += R.source("a")[source].fixed()
+    model += (R.out(V.X)["w":width, width] <= R.source(V.X)) | [Combination.SUM, Transformation.IDENTITY]
+    model += R.out / 1 | [Transformation.IDENTITY]
+    built = model.build(
+        Settings(
+            optimizer=SGD(lr=LEARNING_RATE),
+            error_function=MSE(),
+            iso_value_compression=False,
+            chain_pruning=False,
+        )
+    )
+    state = built.state_dict()
+    index = next(i for i, name in state["weight_names"].items() if str(name).strip() == "w")
+    state["weights"][index] = weight
+    built.load_state_dict(state)
+
+    query = R.out("a")[target] if width > 1 else R.out("a")[target[0]]
+    data = built.build_dataset(Dataset([Sample(query, [R.exists("a")])]))
+    _, _, reported = built.validate(data)[0]
+
+    output = torch.tensor(weight, dtype=torch.float64) @ torch.tensor(source, dtype=torch.float64)
+    squared = (output - torch.tensor(target, dtype=torch.float64)) ** 2
+
+    assert float(reported) == pytest.approx(float(squared.sum()), abs=1e-9)
+    if width > 1:
+        # and not the mean, which is what it used to be - stated so the test fails in the direction it came from
+        assert float(reported) != pytest.approx(float(squared.mean()), abs=1e-9)
