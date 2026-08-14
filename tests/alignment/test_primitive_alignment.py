@@ -431,3 +431,47 @@ def test_loss_reduction_steps_like_torch(reduction, keys, batch_size):
 def test_the_default_reduction_is_torch_s():
     """Stated on its own, so that changing the default fails here rather than somewhere far away."""
     assert MSE().reduction == "mean" == torch.nn.MSELoss().reduction
+
+
+@pytest.mark.parametrize("reduction", ["mean", "sum"])
+@pytest.mark.parametrize("keys, batch_size", [(["a"], 1), (["a", "b"], 2)], ids=["one-query", "two-queries"])
+def test_loss_is_what_torch_s_criterion_returns(reduction, keys, batch_size):
+    """`loss()` hands back the reduced scalar, which is what a torch criterion call returns.
+
+    Separate from `validate()`, whose per-query values are *not* reduced across the batch - each is summed
+    over its own components, torch's `reduction="none"`. Both are useful and they are different quantities;
+    the divisor between them is `Result.reductionDivisor`, the same one the trainers scale the gradient by,
+    so the reported loss and the descended one cannot drift apart.
+    """
+    model = Model()
+    for name in keys:
+        model += R.source(name)[REDUCTION_INPUTS[name]].fixed()
+    model += (R.out(V.X)["w":2, 2] <= R.source(V.X)) | [Combination.SUM, Transformation.IDENTITY]
+    model += R.out / 1 | [Transformation.IDENTITY]
+
+    built = model.build(
+        Settings(
+            optimizer=SGD(lr=LEARNING_RATE),
+            error_function=MSE(reduction=reduction),
+            iso_value_compression=False,
+            chain_pruning=False,
+        )
+    )
+    state = built.state_dict()
+    index = next(i for i, name in state["weight_names"].items() if str(name).strip() == "w")
+    state["weights"][index] = REDUCTION_WEIGHT
+    built.load_state_dict(state)
+
+    dataset = Dataset([Sample(R.out(k)[REDUCTION_TARGETS[k]], [R.exists(k)]) for k in keys])
+    data = built.build_dataset(dataset, batch_size=batch_size)
+
+    weight = torch.tensor(REDUCTION_WEIGHT, dtype=torch.float64)
+    inputs = torch.tensor([REDUCTION_INPUTS[k] for k in keys], dtype=torch.float64)
+    targets = torch.tensor([REDUCTION_TARGETS[k] for k in keys], dtype=torch.float64)
+    expected = torch.nn.MSELoss(reduction=reduction)(inputs @ weight.T, targets)
+
+    assert built.loss(data) == pytest.approx(float(expected), abs=1e-9)
+
+    # and the per-query values stay un-reduced, so the two are not accidentally the same call
+    per_query = [float(error) for _, _, error in built.validate(data)]
+    assert sum(per_query) == pytest.approx(float(((inputs @ weight.T - targets) ** 2).sum()), abs=1e-9)

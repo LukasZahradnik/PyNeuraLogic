@@ -210,6 +210,34 @@ class NeuralModule:
 
         return [ValueFactory.from_java(result) for result in results]
 
+    def loss(self, dataset) -> float:
+        """The dataset's loss, reduced the way the error function says.
+
+        This is the single number torch's criterion hands back, and the quantity the optimizer is descending:
+        the per-query errors summed and then divided by the batch's total element count under
+        ``reduction="mean"``, or left undivided under ``"sum"``.
+
+        It is deliberately separate from :meth:`validate`, whose per-query values are *not* reduced across the
+        batch - each is summed over its own components, which is torch's ``reduction="none"``. Both are
+        useful, and conflating them is what let a reported number drift away from the one being minimised
+        once before.
+
+        Parameters
+        ----------
+        dataset : Any
+            The dataset to take the loss of.
+
+        Returns
+        -------
+        float
+            The reduced loss.
+        """
+        samples, batch_size = self._dataset_to_samples(dataset)
+        sample_list = samples if isinstance(samples, Collection) else [samples]
+        sample_array = jpype.java.util.ArrayList([sample._java_sample for sample in sample_list])
+
+        return float(ValueFactory.from_java(self._strategy.reducedError(sample_array, batch_size)))
+
     def validate(self, dataset) -> Value:
         """Evaluates the model on the provided dataset and reports the error, without training on it.
 
