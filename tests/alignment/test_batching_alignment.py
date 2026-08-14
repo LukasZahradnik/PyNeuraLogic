@@ -24,7 +24,7 @@ def _trained(count, batch_size, epochs):
     built = model.build(
         Settings(
             optimizer=SGD(lr=LEARNING_RATE),
-            error_function=MSE(),
+            error_function=MSE(reduction="sum"),
             iso_value_compression=False,
             chain_pruning=False,
         )

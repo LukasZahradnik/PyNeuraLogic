@@ -196,6 +196,8 @@ class SettingsProxy:
         else:
             raise NotImplementedError
 
+        reduction = getattr(error_function, "reduction", "mean")
+        self.settings.errorReduction = getattr(self.settings_class.ErrorReduction, reduction.upper())
         self.settings.errorFunction = java_error_function
 
     @property

@@ -28,7 +28,7 @@ def test_gru_module(input_size, hidden_size, sequence_len, epochs):
     model += GRU(input_size, hidden_size, "h", "f", "h0", arity=0)
 
     model = model.build(
-        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE(reduction="sum"))
     )
 
     parameters = model.parameters()
@@ -91,7 +91,7 @@ def test_rnn_module(input_size, hidden_size, sequence_len, epochs):
     model += RNN(input_size, hidden_size, "h", "f", "h0", arity=0)
 
     model = model.build(
-        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE(reduction="sum"))
     )
 
     parameters = model.parameters()
@@ -150,7 +150,7 @@ def test_lstm_module(input_size, hidden_size, sequence_len, epochs):
     model += LSTM(input_size, hidden_size, "h", "f", "h0", "c0", arity=0)
 
     model = model.build(
-        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE(reduction="sum"))
     )
 
     parameters = model.parameters()
@@ -215,7 +215,7 @@ def test_rnn_module_with_pytorch(input_size, hidden_size, sequence_len, epochs):
     model = Model()
     model += RNN(input_size, hidden_size, "h", "f", "h0", arity=0)
 
-    model = model.build(Settings(chain_pruning=False, iso_value_compression=False, error_function=MSE()), torch=True)
+    model = model.build(Settings(chain_pruning=False, iso_value_compression=False, error_function=MSE(reduction="sum")), torch=True)
 
     parameters = model.parameters()
     pyneuralogic_tensor_parameters = model.tensor_parameters()
@@ -285,7 +285,7 @@ def test_rnn_custom(input_size, hidden_size, sequence_len, epochs):
     model += RNN(input_size, hidden_size, "h", "f", "h0", arity=0, activation=Transformation.RELU)
 
     model = model.build(
-        Settings(chain_pruning=False, iso_value_compression=False, optimizer=SGD(lr=0.001), error_function=MSE())
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=SGD(lr=0.001), error_function=MSE(reduction="sum"))
     )
 
     parameters = model.parameters()
@@ -373,7 +373,7 @@ def test_lstm_module_simple(input_size, hidden_size, sequence_len, epochs):
     ]
 
     model = model.build(
-        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE(reduction="sum"))
     )
 
     parameters = model.parameters()
@@ -455,7 +455,7 @@ def test_gru_module_simple(input_size, hidden_size, sequence_len, epochs):
     ) + R.special.next(V.Z, V.T)
 
     model = model.build(
-        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE(reduction="sum"))
     )
 
     parameters = model.parameters()

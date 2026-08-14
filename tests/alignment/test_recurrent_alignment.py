@@ -76,7 +76,7 @@ def test_recurrent_module_matches_torch(kind):
             chain_pruning=False,
             iso_value_compression=False,
             optimizer=SGD(lr=LEARNING_RATE),
-            error_function=MSE(),
+            error_function=MSE(reduction="sum"),
         )
     )
     parameters = built.parameters()

@@ -71,7 +71,7 @@ def _torch_value_and_gradient(activation, loss):
 )
 def test_transformation_matches_torch(transformation, activation):
     """An activation has to agree with Torch in value and in what it does to the gradient passing through."""
-    value, gradient = _value_and_gradient(transformation, MSE())
+    value, gradient = _value_and_gradient(transformation, MSE(reduction="sum"))
     expected_value, expected_gradient = _torch_value_and_gradient(
         activation, lambda out, target: (out - target) ** 2
     )
@@ -83,9 +83,9 @@ def test_transformation_matches_torch(transformation, activation):
 @pytest.mark.parametrize(
     "error, loss",
     [
-        (MSE(), lambda out, target: (out - target) ** 2),
+        (MSE(reduction="sum"), lambda out, target: (out - target) ** 2),
         (
-            CrossEntropy(with_logits=False),
+            CrossEntropy(with_logits=False, reduction="sum"),
             lambda out, target: torch.nn.functional.binary_cross_entropy(out, target),
         ),
     ],
@@ -121,7 +121,7 @@ def test_the_error_sums_over_a_vector_output_rather_than_averaging():
     built = model.build(
         Settings(
             optimizer=SGD(lr=LEARNING_RATE),
-            error_function=MSE(),
+            error_function=MSE(reduction="sum"),
             iso_value_compression=False,
             chain_pruning=False,
         )
@@ -165,7 +165,7 @@ def _vector_value_and_gradient(transformation, error=None, target=None):
     built = model.build(
         Settings(
             optimizer=SGD(lr=LEARNING_RATE),
-            error_function=error if error is not None else MSE(),
+            error_function=error if error is not None else MSE(reduction="sum"),
             iso_value_compression=False,
             chain_pruning=False,
         )
@@ -213,7 +213,7 @@ def test_cross_entropy_with_logits_matches_torch_on_a_scalar():
     nothing squashes the head and the loss is expected to. Getting the two the wrong way round produces a
     plausible number rather than an error, which is why both are pinned.
     """
-    _, gradient = _value_and_gradient(Transformation.IDENTITY, CrossEntropy(with_logits=True))
+    _, gradient = _value_and_gradient(Transformation.IDENTITY, CrossEntropy(with_logits=True, reduction="sum"))
     _, expected = _torch_value_and_gradient(
         lambda x: x,
         lambda out, target: torch.nn.functional.binary_cross_entropy_with_logits(out, target),
@@ -230,7 +230,7 @@ def test_softmax_cross_entropy_over_a_vector_matches_torch():
     against torch spelling it out as `-(target * log_softmax(logit)).sum()`.
     """
     _, gradient = _vector_value_and_gradient(
-        Transformation.IDENTITY, CrossEntropy(with_logits=True), target=PROBABILITY_TARGET
+        Transformation.IDENTITY, CrossEntropy(with_logits=True, reduction="sum"), target=PROBABILITY_TARGET
     )
 
     weight = torch.nn.Parameter(torch.tensor(VECTOR_WEIGHT, dtype=torch.float64))
@@ -289,7 +289,7 @@ def _scalar_times_vector(scalar_first: bool):
     built = model.build(
         Settings(
             optimizer=SGD(lr=LEARNING_RATE),
-            error_function=MSE(),
+            error_function=MSE(reduction="sum"),
             iso_value_compression=False,
             chain_pruning=False,
         )
@@ -350,7 +350,7 @@ def test_reported_error_over_a_vector_target_is_the_summed_squared_error(width):
     built = model.build(
         Settings(
             optimizer=SGD(lr=LEARNING_RATE),
-            error_function=MSE(),
+            error_function=MSE(reduction="sum"),
             iso_value_compression=False,
             chain_pruning=False,
         )
@@ -371,3 +371,63 @@ def test_reported_error_over_a_vector_target_is_the_summed_squared_error(width):
     if width > 1:
         # and not the mean, which is what it used to be - stated so the test fails in the direction it came from
         assert float(reported) != pytest.approx(float(squared.mean()), abs=1e-9)
+
+
+#: The reduction cases below train, so they need their own small setup rather than the fixed-weight helpers
+REDUCTION_WEIGHT = [[0.5, -0.2], [0.4, -0.6]]
+REDUCTION_INPUTS = {"a": [0.5, -0.25], "b": [-0.3, 0.8]}
+REDUCTION_TARGETS = {"a": [0.1, 0.2], "b": [-0.4, 0.15]}
+
+
+def _stepped_under(reduction: str, keys, batch_size: int):
+    model = Model()
+    for name in keys:
+        model += R.source(name)[REDUCTION_INPUTS[name]].fixed()
+    model += (R.out(V.X)["w":2, 2] <= R.source(V.X)) | [Combination.SUM, Transformation.IDENTITY]
+    model += R.out / 1 | [Transformation.IDENTITY]
+
+    built = model.build(
+        Settings(
+            optimizer=SGD(lr=LEARNING_RATE),
+            error_function=MSE(reduction=reduction),
+            iso_value_compression=False,
+            chain_pruning=False,
+        )
+    )
+    state = built.state_dict()
+    index = next(i for i, name in state["weight_names"].items() if str(name).strip() == "w")
+    state["weights"][index] = REDUCTION_WEIGHT
+    built.load_state_dict(state)
+
+    dataset = Dataset([Sample(R.out(k)[REDUCTION_TARGETS[k]], [R.exists(k)]) for k in keys])
+    built.train(built.build_dataset(dataset, batch_size=batch_size), epochs=1)
+    return [entry for row in built.state_dict()["weights"][index] for entry in row]
+
+
+@pytest.mark.parametrize("reduction", ["mean", "sum"])
+@pytest.mark.parametrize("keys, batch_size", [(["a"], 1), (["a", "b"], 2)], ids=["one-query", "two-queries"])
+def test_loss_reduction_steps_like_torch(reduction, keys, batch_size):
+    """`reduction` means what it means in torch: it changes the *gradient*, not only the reported number.
+
+    Torch divides by the total element count under `mean` - samples times components, not the batch alone -
+    and its gradient follows, which is the whole point of the flag being part of the graph. The engine has
+    nowhere to put a tensor, so the same divisor is applied where the batch is known: the minibatch
+    accumulation and the single-sample path, which is why both batch sizes are here.
+
+    The rest of this suite pins `reduction="sum"` explicitly because it compares against torch losses written
+    with an explicit `.sum()`. This is the one that covers the *default*.
+    """
+    stepped = _stepped_under(reduction, keys, batch_size)
+
+    weight = torch.nn.Parameter(torch.tensor(REDUCTION_WEIGHT, dtype=torch.float64))
+    inputs = torch.tensor([REDUCTION_INPUTS[k] for k in keys], dtype=torch.float64)
+    targets = torch.tensor([REDUCTION_TARGETS[k] for k in keys], dtype=torch.float64)
+    torch.nn.MSELoss(reduction=reduction)(inputs @ weight.T, targets).backward()
+    expected = weight - LEARNING_RATE * weight.grad
+
+    assert stepped == pytest.approx([entry for row in expected.tolist() for entry in row], abs=1e-9)
+
+
+def test_the_default_reduction_is_torch_s():
+    """Stated on its own, so that changing the default fails here rather than somewhere far away."""
+    assert MSE().reduction == "mean" == torch.nn.MSELoss().reduction

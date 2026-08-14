@@ -50,7 +50,7 @@ def test_gen_module(input_size, hidden_size):
     )
 
     model = model.build(
-        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE(reduction="sum"))
     )
 
     parameters = model.parameters()
@@ -120,7 +120,7 @@ def test_gine_module(input_size):
     model += neuralogic.nn.module.GINEConv(input_size, "f", "e", "h")
 
     model = model.build(
-        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE(reduction="sum"))
     )
 
     example = [
@@ -172,7 +172,7 @@ def test_gcn_module(input_size, output_size):
     model += neuralogic.nn.module.GCNConv(input_size, output_size, "h", "f", "e")
 
     model = model.build(
-        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE())
+        Settings(chain_pruning=False, iso_value_compression=False, optimizer=Adam(lr=0.001), error_function=MSE(reduction="sum"))
     )
 
     parameters = model.parameters()

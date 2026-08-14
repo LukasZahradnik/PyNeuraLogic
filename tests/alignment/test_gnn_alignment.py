@@ -123,7 +123,7 @@ def _built(gnn_module, weights, edge_value, example=None, weights_by_name=None):
     built = model.build(
         Settings(
             optimizer=SGD(lr=LEARNING_RATE),
-            error_function=MSE(),
+            error_function=MSE(reduction="sum"),
             iso_value_compression=False,
             chain_pruning=False,
         )
@@ -461,7 +461,7 @@ def test_gine_matches_torch_geometric(eps):
     model += (R.h(V.I)["w":OUT, IN] <= R.gine(V.I)) | Metadata(transformation=Transformation.IDENTITY)
     model += R.h / 1 | Metadata(transformation=Transformation.IDENTITY)
     built = model.build(
-        Settings(optimizer=SGD(lr=LEARNING_RATE), error_function=MSE(), iso_value_compression=False, chain_pruning=False)
+        Settings(optimizer=SGD(lr=LEARNING_RATE), error_function=MSE(reduction="sum"), iso_value_compression=False, chain_pruning=False)
     )
     state = built.state_dict()
     state["weights"][_indices_by_name(built, {"w": FIRST})["w"]] = FIRST
@@ -501,7 +501,7 @@ def test_queries_of_one_example_do_not_leak_into_each_other():
     built = model.build(
         Settings(
             optimizer=SGD(lr=LEARNING_RATE),
-            error_function=MSE(),
+            error_function=MSE(reduction="sum"),
             iso_value_compression=False,
             chain_pruning=False,
         )

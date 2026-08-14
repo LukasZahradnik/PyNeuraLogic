@@ -21,7 +21,7 @@ def _built(optimizer):
     built = model.build(
         Settings(
             optimizer=optimizer,
-            error_function=MSE(),
+            error_function=MSE(reduction="sum"),
             iso_value_compression=False,
             chain_pruning=False,
         )

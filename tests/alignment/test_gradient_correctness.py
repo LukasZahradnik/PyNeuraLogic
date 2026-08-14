@@ -17,7 +17,7 @@ def _single():
     model += R.source("a")[VECTOR].fixed()
     model += (R.weighted(V.X)["w":1, 2] <= R.source(V.X)) | [Transformation.IDENTITY]
     model += (R.out(V.X) <= R.weighted(V.X)) | [Combination.SUM, Transformation.IDENTITY]
-    return model, [[0.5, 0.25]], [R.exists("a")], MSE()
+    return model, [[0.5, 0.25]], [R.exists("a")], MSE(reduction="sum")
 
 
 def _shared():
@@ -28,7 +28,7 @@ def _shared():
     model += (R.left(V.X) <= R.weighted(V.X)) | [Transformation.IDENTITY]
     model += (R.right(V.X) <= R.weighted(V.X)) | [Transformation.IDENTITY]
     model += (R.out(V.X) <= (R.left(V.X), R.right(V.X))) | [Combination.SUM, Transformation.IDENTITY]
-    return model, [[0.5, 0.25]], [R.exists("a")], MSE()
+    return model, [[0.5, 0.25]], [R.exists("a")], MSE(reduction="sum")
 
 
 def _averaged():
@@ -38,7 +38,7 @@ def _averaged():
     model += R.source("b")[OTHER].fixed()
     model += (R.weighted(V.X)["w":1, 2] <= R.source(V.X)) | [Transformation.IDENTITY]
     model += (R.out("a") <= R.weighted(V.X)) | [Aggregation.AVG, Transformation.IDENTITY]
-    return model, [[0.5, 0.25]], [R.exists("a")], MSE()
+    return model, [[0.5, 0.25]], [R.exists("a")], MSE(reduction="sum")
 
 
 def _element_product():
@@ -51,14 +51,14 @@ def _element_product():
         Combination.ELPRODUCT,
         Transformation.IDENTITY,
     ]
-    return model, [[0.5, 0.25]], [R.exists("a")], MSE()
+    return model, [[0.5, 0.25]], [R.exists("a")], MSE(reduction="sum")
 
 
 def _cross_entropy():
     """A squashed output under cross-entropy, where the engine rewrites the output activation itself."""
     model, weight, facts, _ = _single()
     model += R.out / 1 | [Transformation.SIGMOID]
-    return model, weight, facts, CrossEntropy(with_logits=False)
+    return model, weight, facts, CrossEntropy(with_logits=False, reduction="sum")
 
 
 def _recurrent():
@@ -68,7 +68,7 @@ def _recurrent():
     model += (R.h(V.T)["w":1, 1] <= (R.h(V.Z), R.special.next(V.Z, V.T))) | [Transformation.IDENTITY]
     model += (R.out("a") <= R.h(3)) | [Transformation.IDENTITY]
     facts = [R.h(0)[SCALAR]] + [R.special.next(t, t + 1) for t in range(3)]
-    return model, [[0.5]], facts, MSE()
+    return model, [[0.5]], facts, MSE(reduction="sum")
 
 
 def _reused():
@@ -78,7 +78,7 @@ def _reused():
     model += (R.once(V.Z)["w":1, 1] <= R.source(V.Z)) | [Transformation.IDENTITY]
     model += (R.twice(V.Z)["w":1, 1] <= R.once(V.Z)) | [Transformation.IDENTITY]
     model += (R.out(V.Z) <= (R.once(V.Z), R.twice(V.Z))) | [Combination.SUM, Transformation.IDENTITY]
-    return model, [[0.5]], [R.exists("a")], MSE()
+    return model, [[0.5]], [R.exists("a")], MSE(reduction="sum")
 
 
 def _build(topology, weight):
