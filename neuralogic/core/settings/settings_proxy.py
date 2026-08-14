@@ -34,6 +34,8 @@ class SettingsProxy:
         chain_pruning: bool,
         prune_only_identities: bool,
         grounder: Grounder,
+        clip_grad_norm: float | None = None,
+        clip_grad_value: float | None = None,
     ):
         """
         Parameters
@@ -52,6 +54,10 @@ class SettingsProxy:
             Whether to prune only identity functions.
         grounder : Grounder
             The grounding algorithm to use.
+        clip_grad_norm : float, optional
+            Rescale the whole gradient down to this global L2 norm before each step. Default: None (off).
+        clip_grad_value : float, optional
+            Clamp every gradient element to +-this before each step. Default: None (off).
         """
         if not is_initialized():
             initialize()
@@ -149,6 +155,33 @@ class SettingsProxy:
         self._optimizer = optimizer
         self.settings.setOptimizer(java_optimizer)
         self.settings.initLearningRate = optimizer.lr
+        # the Python path builds its own Java optimizer and hands it the decay directly, as torch does; this
+        # is for the settings-driven path, the same reason initLearningRate is mirrored here
+        self.settings.weightDecay = optimizer.weight_decay
+
+    @property
+    def clip_grad_norm(self) -> float | None:
+        """The global gradient norm the whole gradient is rescaled down to before each step."""
+        value = float(self.settings.gradientClipNorm)
+        return value if value > 0 else None
+
+    @clip_grad_norm.setter
+    def clip_grad_norm(self, value: float | None) -> None:
+        if value is not None and value <= 0:
+            raise ValueError(f"clip_grad_norm must be positive when set, got {value}")
+        self.settings.gradientClipNorm = 0.0 if value is None else value
+
+    @property
+    def clip_grad_value(self) -> float | None:
+        """The bound every gradient element is clamped to before each step."""
+        value = float(self.settings.gradientClipValue)
+        return value if value > 0 else None
+
+    @clip_grad_value.setter
+    def clip_grad_value(self, value: float | None) -> None:
+        if value is not None and value <= 0:
+            raise ValueError(f"clip_grad_value must be positive when set, got {value}")
+        self.settings.gradientClipValue = 0.0 if value is None else value
 
     @property
     def initializer_const(self) -> float:

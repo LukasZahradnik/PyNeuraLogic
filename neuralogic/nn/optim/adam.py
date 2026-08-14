@@ -18,6 +18,7 @@ class Adam(Optimizer):
         betas: tuple[float, float] = (0.9, 0.999),
         eps: float = 1e-08,
         lr_decay: LRDecay | None = None,
+        weight_decay: float = 0.0,
     ):
         """
         Parameters
@@ -30,8 +31,13 @@ class Adam(Optimizer):
             Term added to the denominator to improve numerical stability. Default: 1e-08.
         lr_decay : LRDecay, optional
             Learning rate decay scheduler. Default: None.
+        weight_decay : float, optional
+            L2 penalty, exactly as :code:`torch.optim.Adam(weight_decay=)`: the term joins the gradient
+            *before* the moments and so accumulates in them. This is the coupled variant - it is not
+            :code:`AdamW`, whose decay bypasses the adaptive scaling and gives a different update from the
+            same numbers. Default: 0.0.
         """
-        super().__init__(lr, lr_decay)
+        super().__init__(lr, lr_decay, weight_decay)
         self._betas = betas
         self._eps = eps
 
@@ -57,9 +63,14 @@ class Adam(Optimizer):
 
         adam_class = jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.training.optimizers.Adam")
         self._lr_object = jpype.JClass("cz.cvut.fel.ida.algebra.values.ScalarValue")(self._lr)
-        self._optimizer = adam_class(self._lr_object, self._betas[0], self._betas[1], self._eps)
+        self._optimizer = adam_class(
+            self._lr_object, self._betas[0], self._betas[1], self._eps, self._weight_decay
+        )
 
         return self._optimizer
 
     def __str__(self) -> str:
-        return f"Adam(lr={self.lr}, betas={self.betas}, eps={self.eps}, lr_decay={self._lr_decay})"
+        return (
+            f"Adam(lr={self.lr}, betas={self.betas}, eps={self.eps}, "
+            f"weight_decay={self.weight_decay}, lr_decay={self._lr_decay})"
+        )

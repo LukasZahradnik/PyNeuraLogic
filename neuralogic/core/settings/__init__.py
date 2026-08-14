@@ -19,7 +19,14 @@ class Settings:
         chain_pruning: bool = True,
         prune_only_identities: bool = False,
         grounder: Grounder = Grounder.BUP,
+        clip_grad_norm: float | None = None,
+        clip_grad_value: float | None = None,
     ):
+        """Gradient clipping lives here rather than on the optimizer, which is where torch does *not* put it
+        either: :code:`clip_grad_norm_` is a call made between :code:`backward()` and :code:`step()`. There is
+        no such hook here - the engine owns the whole iteration - so the only place left to say it is the
+        settings. Weight decay, which torch *does* put on the optimizer, is on the optimizer.
+        """
         self.params = locals().copy()
         self.params.pop("self")
         self._proxies: weakref.WeakSet[SettingsProxy] = weakref.WeakSet()
@@ -57,6 +64,22 @@ class Settings:
     @grounder.setter
     def grounder(self, grounder: Grounder):
         self._update("grounder", grounder)
+
+    @property
+    def clip_grad_norm(self) -> float | None:
+        return self.params["clip_grad_norm"]
+
+    @clip_grad_norm.setter
+    def clip_grad_norm(self, clip_grad_norm: float | None):
+        self._update("clip_grad_norm", clip_grad_norm)
+
+    @property
+    def clip_grad_value(self) -> float | None:
+        return self.params["clip_grad_value"]
+
+    @clip_grad_value.setter
+    def clip_grad_value(self, clip_grad_value: float | None):
+        self._update("clip_grad_value", clip_grad_value)
 
     @property
     def optimizer(self) -> Optimizer:

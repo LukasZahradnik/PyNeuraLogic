@@ -9,7 +9,7 @@ class Optimizer:
     Optimizers are used to update the weights of the neural network during training.
     """
 
-    def __init__(self, lr: float, lr_decay: LRDecay | None = None):
+    def __init__(self, lr: float, lr_decay: LRDecay | None = None, weight_decay: float = 0.0):
         """
         Parameters
         ----------
@@ -17,15 +17,26 @@ class Optimizer:
             Initial learning rate.
         lr_decay : LRDecay, optional
             Learning rate decay scheduler. Default: None.
+        weight_decay : float, optional
+            L2 penalty, as in torch. Default: 0.0.
         """
         if lr_decay is not None:
             lr_decay._optimizer = self
 
+        if weight_decay < 0:
+            raise ValueError(f"weight_decay must be non-negative, got {weight_decay}")
+
         self._lr_decay = lr_decay
         self._lr = lr
+        self._weight_decay = weight_decay
 
         self._optimizer = None
         self._lr_object = None
+
+    @property
+    def weight_decay(self) -> float:
+        """The L2 penalty added to every gradient before the step."""
+        return self._weight_decay
 
     @property
     def lr(self) -> float:

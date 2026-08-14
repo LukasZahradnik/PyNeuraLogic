@@ -4,7 +4,7 @@ import torch
 from neuralogic.core import Combination, Model, R, Settings, Transformation, V
 from neuralogic.dataset import Dataset, Sample
 from neuralogic.nn.loss import MSE, CrossEntropy
-from neuralogic.nn.optim import SGD
+from neuralogic.nn.optim import SGD, Adam
 
 LEARNING_RATE = 0.1
 INPUT = 0.7
@@ -475,3 +475,202 @@ def test_loss_is_what_torch_s_criterion_returns(reduction, keys, batch_size):
     # and the per-query values stay un-reduced, so the two are not accidentally the same call
     per_query = [float(error) for _, _, error in built.validate(data)]
     assert sum(per_query) == pytest.approx(float(((inputs @ weight.T - targets) ** 2).sum()), abs=1e-9)
+
+
+#: Weight decay and clipping train *two* weights on purpose. A global gradient norm - which is what
+#: `clip_grad_norm_` takes - is indistinguishable from a per-weight one until there is more than one weight,
+#: and the same goes for a decay applied to the wrong subset. Both feed one head, so a single query already
+#: puts a gradient on both.
+CLIP_WEIGHTS = {"u": [[0.5, -0.2], [0.4, -0.6]], "v": [[0.3, 0.7], [-0.1, 0.25]]}
+CLIP_SOURCES = {"a": ([0.5, -0.25], [-0.7, 0.4]), "b": ([-0.3, 0.8], [0.6, 0.1])}
+CLIP_TARGETS = {"a": [0.1, 0.2], "b": [-0.4, 0.15]}
+
+
+def _clip_model(keys, optimizer, reduction="sum", **settings):
+    model = Model()
+    for name in keys:
+        first, second = CLIP_SOURCES[name]
+        model += R.first(name)[first].fixed()
+        model += R.second(name)[second].fixed()
+    model += (R.out(V.X)["u":2, 2] <= R.first(V.X)) | [Combination.SUM, Transformation.IDENTITY]
+    model += (R.out(V.X)["v":2, 2] <= R.second(V.X)) | [Combination.SUM, Transformation.IDENTITY]
+    model += R.out / 1 | [Transformation.IDENTITY]
+
+    built = model.build(
+        Settings(
+            optimizer=optimizer,
+            error_function=MSE(reduction=reduction),
+            iso_value_compression=False,
+            chain_pruning=False,
+            **settings,
+        )
+    )
+    state = built.state_dict()
+    indices = {
+        name: next(i for i, weight in state["weight_names"].items() if str(weight).strip() == name)
+        for name in CLIP_WEIGHTS
+    }
+    for name, index in indices.items():
+        state["weights"][index] = CLIP_WEIGHTS[name]
+    built.load_state_dict(state)
+    return built, indices
+
+
+def _lrnn_stepped(keys, optimizer, batch_size=1, single_sample=False, reduction="sum", **settings):
+    built, indices = _clip_model(keys, optimizer, reduction, **settings)
+    dataset = Dataset([Sample(R.out(k)[CLIP_TARGETS[k]], [R.exists(k)]) for k in keys])
+    data = built.build_dataset(dataset, batch_size=batch_size)
+
+    built.train(data._samples[0] if single_sample else data, epochs=1)
+
+    state = built.state_dict()
+    return [entry for name in CLIP_WEIGHTS for row in state["weights"][indices[name]] for entry in row]
+
+
+def _torch_stepped(keys, make_optimizer, clip_norm=None, clip_value=None):
+    weights = {
+        name: torch.nn.Parameter(torch.tensor(value, dtype=torch.float64))
+        for name, value in CLIP_WEIGHTS.items()
+    }
+    optimizer = make_optimizer(list(weights.values()))
+
+    loss = torch.zeros((), dtype=torch.float64)
+    for key in keys:
+        first, second = (torch.tensor(source, dtype=torch.float64) for source in CLIP_SOURCES[key])
+        output = weights["u"] @ first + weights["v"] @ second
+        loss = loss + (output - torch.tensor(CLIP_TARGETS[key], dtype=torch.float64)).pow(2).sum()
+    loss.backward()
+
+    if clip_norm is not None:
+        torch.nn.utils.clip_grad_norm_(list(weights.values()), clip_norm)
+    if clip_value is not None:
+        torch.nn.utils.clip_grad_value_(list(weights.values()), clip_value)
+    optimizer.step()
+
+    return [entry for name in CLIP_WEIGHTS for row in weights[name].detach().tolist() for entry in row]
+
+
+@pytest.mark.parametrize("keys, batch_size", [(["a"], 1), (["a", "b"], 2)], ids=["one-query", "two-queries"])
+def test_sgd_weight_decay_is_torch_s(keys, batch_size):
+    """`weight_decay` is torch's: the penalty is added to the gradient, so the learning rate scales it too.
+
+    Both trainer paths, because the decay is applied inside the optimizer while the reduction is applied
+    outside it, and only a batch above one exercises the accumulation between them.
+    """
+    stepped = _lrnn_stepped(keys, SGD(lr=LEARNING_RATE, weight_decay=0.3), batch_size)
+    expected = _torch_stepped(keys, lambda p: torch.optim.SGD(p, lr=LEARNING_RATE, weight_decay=0.3))
+
+    assert stepped == pytest.approx(expected, abs=1e-12)
+    # and it is not a no-op, so a decay that never reached the optimizer would fail here
+    assert stepped != pytest.approx(_lrnn_stepped(keys, SGD(lr=LEARNING_RATE), batch_size), abs=1e-12)
+
+
+def test_adam_weight_decay_is_coupled_l2_and_not_adamw():
+    """Which of torch's two decays this is, stated so that changing it fails here.
+
+    `Adam(weight_decay=)` adds the penalty to the gradient *before* the moments, so it accumulates in them
+    and the adaptive scaling applies to it. `AdamW` applies it to the weight directly, bypassing that. They
+    are different updates from the same numbers, and this is the first.
+    """
+    stepped = _lrnn_stepped(["a"], Adam(lr=LEARNING_RATE, weight_decay=0.3))
+
+    coupled = _torch_stepped(["a"], lambda p: torch.optim.Adam(p, lr=LEARNING_RATE, weight_decay=0.3))
+    decoupled = _torch_stepped(["a"], lambda p: torch.optim.AdamW(p, lr=LEARNING_RATE, weight_decay=0.3))
+
+    assert stepped == pytest.approx(coupled, abs=1e-12)
+    assert stepped != pytest.approx(decoupled, abs=1e-12)
+
+
+@pytest.mark.parametrize("keys, batch_size", [(["a"], 1), (["a", "b"], 2)], ids=["one-query", "two-queries"])
+def test_clip_grad_norm_is_torch_s(keys, batch_size):
+    """One norm over all the weights together, and torch's exact factor - including its epsilon.
+
+    `clip_grad_norm_` divides by `total_norm + 1e-6` rather than by `total_norm`, so a clipped gradient
+    comes out a shade under the bound instead of exactly at it. The tolerance here is tight enough that
+    dropping the epsilon fails.
+    """
+    stepped = _lrnn_stepped(keys, SGD(lr=LEARNING_RATE), batch_size, clip_grad_norm=0.05)
+    expected = _torch_stepped(keys, lambda p: torch.optim.SGD(p, lr=LEARNING_RATE), clip_norm=0.05)
+
+    assert stepped == pytest.approx(expected, abs=1e-12)
+
+
+def test_clip_grad_norm_is_global_and_not_per_weight():
+    """The distinguishing case: clipping each weight to the bound separately is a different step.
+
+    Nothing above separates the two, since torch is the reference for both this and the per-weight reading;
+    this states the difference in the engine's own terms.
+    """
+    together = _lrnn_stepped(["a"], SGD(lr=LEARNING_RATE), clip_grad_norm=0.05)
+
+    weights = {
+        name: torch.nn.Parameter(torch.tensor(v, dtype=torch.float64)) for name, v in CLIP_WEIGHTS.items()
+    }
+    first, second = (torch.tensor(source, dtype=torch.float64) for source in CLIP_SOURCES["a"])
+    output = weights["u"] @ first + weights["v"] @ second
+    (output - torch.tensor(CLIP_TARGETS["a"], dtype=torch.float64)).pow(2).sum().backward()
+    optimizer = torch.optim.SGD(list(weights.values()), lr=LEARNING_RATE)
+    for weight in weights.values():  # each on its own, which is the reading this must not be
+        torch.nn.utils.clip_grad_norm_([weight], 0.05)
+    optimizer.step()
+    separately = [e for name in CLIP_WEIGHTS for row in weights[name].detach().tolist() for e in row]
+
+    assert together != pytest.approx(separately, abs=1e-12)
+
+
+def test_a_gradient_under_the_clip_norm_is_left_exactly_alone():
+    """Torch clamps the factor at one, so an unclipped step must be bit-identical to no clipping at all."""
+    unclipped = _lrnn_stepped(["a"], SGD(lr=LEARNING_RATE))
+    generous = _lrnn_stepped(["a"], SGD(lr=LEARNING_RATE), clip_grad_norm=1e6)
+
+    assert generous == unclipped
+
+
+@pytest.mark.parametrize("keys, batch_size", [(["a"], 1), (["a", "b"], 2)], ids=["one-query", "two-queries"])
+def test_clip_grad_value_is_torch_s(keys, batch_size):
+    """`clip_grad_value_`: every element clamped to +-the bound, each weight on its own."""
+    stepped = _lrnn_stepped(keys, SGD(lr=LEARNING_RATE), batch_size, clip_grad_value=0.05)
+    expected = _torch_stepped(keys, lambda p: torch.optim.SGD(p, lr=LEARNING_RATE), clip_value=0.05)
+
+    assert stepped == pytest.approx(expected, abs=1e-12)
+
+
+def test_weight_decay_is_not_clipped():
+    """Torch's order: `clip_grad_norm_` runs on the gradient, then `step()` adds the decay to it.
+
+    So the decay term survives a bound that the gradient itself is crushed to - which is the whole reason
+    the two live in different places here as well, clipping in the trainer and decay in the optimizer.
+    """
+    stepped = _lrnn_stepped(["a"], SGD(lr=LEARNING_RATE, weight_decay=0.3), clip_grad_norm=1e-4)
+    expected = _torch_stepped(
+        ["a"], lambda p: torch.optim.SGD(p, lr=LEARNING_RATE, weight_decay=0.3), clip_norm=1e-4
+    )
+
+    assert stepped == pytest.approx(expected, abs=1e-12)
+    # a decay that had been clipped along with the gradient would be all but gone, leaving the weights put
+    assert stepped != pytest.approx(_lrnn_stepped(["a"], SGD(lr=LEARNING_RATE), clip_grad_norm=1e-4), abs=1e-9)
+
+
+@pytest.mark.parametrize("reduction", ["mean", "sum"])
+def test_one_sample_trains_the_same_whether_or_not_it_is_in_a_collection(reduction):
+    """`train(sample)` and `train([sample])` are the same descent, and were not.
+
+    The single-sample path reimplements the trainer's rather than calling it, so it stood outside the
+    reduction entirely: under `mean` it stepped as if under `sum`, off by the target width. Nothing in the
+    reported error showed it, because the reporting was shared and only the gradient diverged.
+    """
+    listed = _lrnn_stepped(["a"], SGD(lr=LEARNING_RATE), reduction=reduction)
+    single = _lrnn_stepped(["a"], SGD(lr=LEARNING_RATE), reduction=reduction, single_sample=True)
+
+    assert single == listed
+    if reduction == "mean":
+        # and under `mean` that is genuinely a different step from `sum`, which is what it used to take
+        assert listed != pytest.approx(_lrnn_stepped(["a"], SGD(lr=LEARNING_RATE), reduction="sum"), abs=1e-12)
+
+
+def test_clipping_reaches_the_single_sample_path_too():
+    """The same seam, for clipping: it is applied next to the reduction, so it is missed the same way."""
+    clipped = _lrnn_stepped(["a"], SGD(lr=LEARNING_RATE), 1, single_sample=True, clip_grad_norm=0.05)
+    expected = _torch_stepped(["a"], lambda p: torch.optim.SGD(p, lr=LEARNING_RATE), clip_norm=0.05)
+
+    assert clipped == pytest.approx(expected, abs=1e-12)
