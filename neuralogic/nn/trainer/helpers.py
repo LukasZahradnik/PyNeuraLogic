@@ -3,17 +3,18 @@ from __future__ import annotations
 from typing import Any
 
 from neuralogic.core.builder.dataset import BuiltDataset, GroundedDataset
+from neuralogic.core.builder.static_graph import StaticGraphDataset
 from neuralogic.core.neural_module import NeuralModule
 from neuralogic.dataset import Dataset
 
 
 def _ensure_built(
     module: NeuralModule,
-    dataset: Dataset | GroundedDataset | BuiltDataset,
+    dataset: Dataset | GroundedDataset | BuiltDataset | StaticGraphDataset,
     batch_size: int,
-) -> BuiltDataset:
+) -> BuiltDataset | StaticGraphDataset:
     """Convert a raw or grounded dataset to a ``BuiltDataset`` if needed."""
-    if isinstance(dataset, BuiltDataset):
+    if isinstance(dataset, (BuiltDataset, StaticGraphDataset)):
         return dataset
     if isinstance(dataset, GroundedDataset):
         return dataset.neuralize()
