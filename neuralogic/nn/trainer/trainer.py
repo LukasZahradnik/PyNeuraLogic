@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Union
 
 from neuralogic.core.builder.dataset import BuiltDataset, GroundedDataset
+from neuralogic.core.builder.static_graph import StaticGraphDataset
 from neuralogic.core.neural_module import NeuralModule
 from neuralogic.dataset import Dataset
 from neuralogic.nn.trainer.callbacks import (
@@ -27,8 +28,8 @@ class Trainer:
 
     def fit(
         self,
-        train_dataset: Dataset | GroundedDataset | BuiltDataset,
-        val_dataset: Dataset | GroundedDataset | BuiltDataset | None = None,
+        train_dataset: Dataset | GroundedDataset | BuiltDataset | StaticGraphDataset,
+        val_dataset: Dataset | GroundedDataset | BuiltDataset | StaticGraphDataset | None = None,
         *,
         epochs: int = 1,
         batch_size: int = 1,
@@ -157,7 +158,7 @@ class Trainer:
 
     def test(
         self,
-        dataset: Dataset | GroundedDataset | BuiltDataset,
+        dataset: Dataset | GroundedDataset | BuiltDataset | StaticGraphDataset,
         *,
         batch_size: int = 1,
     ) -> list:

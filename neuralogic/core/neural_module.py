@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Collection
 import jpype
 
 from neuralogic.core.builder.dataset import BuiltDataset, GroundedDataset
+from neuralogic.core.builder.static_graph import StaticGraphDataset
 
 if TYPE_CHECKING:
     from neuralogic.core.builder import DatasetBuilder
@@ -85,6 +86,49 @@ class NeuralModule:
             progress=progress,
         )
 
+    def build_static_dataset(
+        self,
+        dataset: Dataset,
+        *,
+        batch_size: int = 1,
+        learnable_facts: bool = False,
+        progress: bool = False,
+    ) -> StaticGraphDataset:
+        """Build a static-graph dataset from a logic ``Dataset``.
+
+        Only the first sample is grounded and neuralized.  The resulting
+        ``StaticGraphDataset`` reuses the same neural graph for every sample,
+        updating fact values via ``set_fact_value`` before each learning step.
+
+        Parameters
+        ----------
+        dataset : Dataset
+            The dataset with one or more samples sharing identical structure.
+        batch_size : int
+            The batch size. Default: 1.
+        learnable_facts : bool
+            Whether facts are learnable. Default: False.
+        progress : bool
+            Whether to show progress. Default: False.
+
+        Returns
+        -------
+        StaticGraphDataset
+        """
+        if self._dataset_builder is None or self._settings is None:
+            raise ValueError("model is not built")
+
+        from neuralogic.core.builder.static_graph import build_static_graph_dataset
+
+        return build_static_graph_dataset(
+            self._dataset_builder,
+            dataset,
+            self._settings,
+            batch_size=batch_size,
+            learnable_facts=learnable_facts,
+            progress=progress,
+        )
+
     def build_dataset(
         self,
         dataset: BaseDataset | GroundedDataset,
@@ -123,6 +167,9 @@ class NeuralModule:
         )
 
     def __call__(self, dataset=None):
+        if isinstance(dataset, StaticGraphDataset):
+            return self._test_static_graph(dataset)
+
         samples, _ = self._dataset_to_samples(dataset)
         sample_collection = samples if isinstance(samples, Collection) else [samples]
 
@@ -154,7 +201,8 @@ class NeuralModule:
         Parameters
         ----------
         dataset : Any
-            The dataset to train on. Can be a Dataset, GroundedDataset, BuiltDataset, or a list of samples.
+            The dataset to train on. Can be a Dataset, GroundedDataset, BuiltDataset,
+            StaticGraphDataset, or a list of samples.
         epochs : int
             The number of epochs to train. Default: 1.
 
@@ -163,6 +211,9 @@ class NeuralModule:
         Union[Tuple[Value, Value, Value], List[Tuple[Value, Value, Value]]]
             The training results (target, output, error).
         """
+        if isinstance(dataset, StaticGraphDataset):
+            return self._train_static_graph(dataset, epochs)
+
         samples, batch_size = self._dataset_to_samples(dataset)
 
         if not isinstance(samples, Collection):
@@ -200,6 +251,9 @@ class NeuralModule:
         Union[Value, List[Value]]
             The test results (outputs).
         """
+        if isinstance(dataset, StaticGraphDataset):
+            return self._test_static_graph(dataset)
+
         samples, batch_size = self._dataset_to_samples(dataset)
 
         if not isinstance(samples, Collection):
@@ -275,6 +329,71 @@ class NeuralModule:
             )
             for result in results
         ]
+    def _train_static_graph(self, dataset: StaticGraphDataset, epochs: int = 1) -> list:
+        """Train on a StaticGraphDataset by iterating over fact mappings.
+
+        For each sample's fact mapping, updates the shared neural sample's
+        fact values via ``set_fact_value``, then calls ``learnSample``.
+
+        Parameters
+        ----------
+        dataset : StaticGraphDataset
+            The static graph dataset.
+        epochs : int
+            Number of epochs. Default: 1.
+
+        Returns
+        -------
+        list
+            List of (target, output, error) tuples for every sample in every epoch.
+        """
+        results = []
+        static_sample = dataset.static_sample
+
+        for _ in range(epochs):
+            for mapping in dataset.fact_mappings:
+                for fact, value in mapping:
+                    _, java_value = self._value_factory.get_value(value)
+                    static_sample.set_fact_value(fact, java_value)
+                result = self._strategy.learnSample(static_sample._java_sample)
+                results.append((
+                    ValueFactory.from_java(result.getTarget()),
+                    ValueFactory.from_java(result.getOutput()),
+                    ValueFactory.from_java(result.errorValue()),
+                ))
+
+        self._update_tensor_parameters()
+        return results
+
+    def _test_static_graph(self, dataset: StaticGraphDataset) -> list:
+        """Evaluate on a StaticGraphDataset.
+
+        For each sample's fact mapping, updates fact values on the shared
+        neural sample, then evaluates without updating weights.
+
+        Parameters
+        ----------
+        dataset : StaticGraphDataset
+            The static graph dataset.
+
+        Returns
+        -------
+        list
+            Model outputs for every sample.
+        """
+        results = []
+        static_sample = dataset.static_sample
+
+        for mapping in dataset.fact_mappings:
+            for fact, value in mapping:
+                _, java_value = self._value_factory.get_value(value)
+                static_sample.set_fact_value(fact, java_value)
+            result = ValueFactory.from_java(
+                self._strategy.evaluateSample(static_sample._java_sample)
+            )
+            results.append(result)
+
+        return results
 
     def reset_parameters(self):
         self._strategy.resetParameters()
@@ -452,6 +571,9 @@ class NeuralModule:
         self.reset_parameters()
 
     def _dataset_to_samples(self, dataset):
+        if isinstance(dataset, StaticGraphDataset):
+            return dataset.static_sample, dataset._batch_size
+
         if isinstance(dataset, Dataset):
             dataset = self.build_dataset(dataset)
             return dataset._samples, dataset._batch_size
