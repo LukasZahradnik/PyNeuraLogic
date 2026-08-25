@@ -1,3 +1,5 @@
+import math
+
 import pytest
 import torch
 
@@ -769,3 +771,80 @@ def test_two_rules_in_one_template_can_use_different_slopes():
     )
 
     assert [float(out) for out in built(dataset)] == pytest.approx([-2.0, -0.04], abs=1e-12)
+
+
+#: The units of a queried atom used to depend on how many rules defined it, so these build the same
+#: prediction out of one, two and three rules and ask for the same answer each time.
+UNITS_FEATURES = [0.4, -0.9]
+UNITS_WEIGHT = 1.5
+
+
+def _queried_value(rule_count, error_function, stated=None):
+    """out(X) defined by `rule_count` rules, each from its own source, so only the count varies."""
+    model = Model()
+    for i in range(rule_count):
+        model += R.src(f"s{i}", V.X)[UNITS_FEATURES[i % len(UNITS_FEATURES)]].fixed()
+        model += (R.out(V.X)[f"w{i}":1, 1] <= R.src(f"s{i}", V.X)) | [Combination.SUM, Transformation.IDENTITY]
+    if stated is not None:
+        model += R.out / 1 | [stated]
+
+    built = model.build(
+        Settings(
+            optimizer=SGD(lr=0.0),
+            error_function=error_function,
+            iso_value_compression=False,
+            chain_pruning=False,
+        )
+    )
+    state = built.state_dict()
+    for index in state["weights"]:
+        if index >= 0:
+            state["weights"][index] = UNITS_WEIGHT
+    built.load_state_dict(state)
+
+    dataset = built.build_dataset(Dataset([Sample(R.out("a")[1.0], [R.exists("a")])]))
+    return float(built(dataset)[0])
+
+
+def _raw_sum(rule_count):
+    return sum(UNITS_WEIGHT * UNITS_FEATURES[i % len(UNITS_FEATURES)] for i in range(rule_count))
+
+
+@pytest.mark.parametrize("rule_count", [1, 2, 3])
+def test_an_inferred_output_function_does_not_depend_on_the_rule_count(rule_count):
+    """`CrossEntropy(with_logits=False)` wants a probability, whatever the shape of the template.
+
+    It used to get one only when the queried predicate had exactly *one* rule. A queried atom whose template
+    says IDENTITY carries a plain `Combination.State`, and that refused to take a transformation at all -
+    reading "there is no transformation here" as "one cannot be put here". With a single rule
+    `StateInitializer` had already turned the state into a `Transformation.State`, which does take one, so
+    the inference landed; with two or more it was silently dropped and `test()` handed back a logit.
+
+    Silent in both directions, which is what makes it worth a test: a caller that squashes again maps the
+    whole unit interval into [0.5, 0.731], and one that does not read logits as probabilities.
+    """
+    value = _queried_value(rule_count, CrossEntropy(with_logits=False))
+    expected = 1 / (1 + math.exp(-_raw_sum(rule_count)))
+
+    assert value == pytest.approx(expected, abs=1e-12)
+    assert 0.0 <= value <= 1.0
+
+
+@pytest.mark.parametrize("rule_count", [1, 2, 3])
+def test_a_stated_output_function_is_still_left_alone(rule_count):
+    """The other half, and the one that was already right: inference must not overrule the template.
+
+    Stating IDENTITY is how a head says it is already the final quantity. If the fix above had been "always
+    squash the query", this is what would have broken.
+    """
+    value = _queried_value(rule_count, CrossEntropy(with_logits=False), stated=Transformation.IDENTITY)
+
+    assert value == pytest.approx(_raw_sum(rule_count), abs=1e-12)
+
+
+@pytest.mark.parametrize("rule_count", [1, 2, 3])
+def test_with_logits_infers_nothing_whatever_the_rule_count(rule_count):
+    """`with_logits=True` says the head is a logit, so nothing should be put on top of it."""
+    value = _queried_value(rule_count, CrossEntropy(with_logits=True))
+
+    assert value == pytest.approx(_raw_sum(rule_count), abs=1e-12)
