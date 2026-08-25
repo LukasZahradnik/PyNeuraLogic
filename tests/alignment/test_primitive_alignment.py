@@ -848,3 +848,46 @@ def test_with_logits_infers_nothing_whatever_the_rule_count(rule_count):
     value = _queried_value(rule_count, CrossEntropy(with_logits=True))
 
     assert value == pytest.approx(_raw_sum(rule_count), abs=1e-12)
+
+
+@pytest.mark.parametrize("rule_count", [1, 2, 3])
+def test_the_inferred_output_function_reaches_the_gradient_too(rule_count):
+    """The other half, and the one the value alone would not have caught.
+
+    The units of the *reported* number were what made this visible, but the transformation the inference
+    installs is on the queried neuron, so it is in the backward pass as well: with it dropped, the step at two
+    and three rules matched a hand-computed BCE through neither sigmoid(sum) nor sum.
+
+    Oracle: with p = sigmoid(z) and z = sum(w_i x_i), binary cross-entropy has dL/dz = p - t, so one SGD step
+    is w_i - lr (p - t) x_i. This project has twice had to defend the same invariant - that the number
+    reported is the function being descended - so the gradient gets its own assertion rather than being
+    assumed to follow the value.
+    """
+    learning_rate = 0.1
+    model = Model()
+    for i in range(rule_count):
+        model += R.src(f"s{i}", V.X)[UNITS_FEATURES[i % len(UNITS_FEATURES)]].fixed()
+        model += (R.out(V.X)[f"w{i}":1, 1] <= R.src(f"s{i}", V.X)) | [Combination.SUM, Transformation.IDENTITY]
+
+    built = model.build(
+        Settings(
+            optimizer=SGD(lr=learning_rate),
+            error_function=CrossEntropy(with_logits=False, reduction="sum"),
+            iso_value_compression=False,
+            chain_pruning=False,
+        )
+    )
+    state = built.state_dict()
+    indices = sorted(i for i in state["weights"] if i >= 0)
+    for index in indices:
+        state["weights"][index] = UNITS_WEIGHT
+    built.load_state_dict(state)
+
+    built.train(built.build_dataset(Dataset([Sample(R.out("a")[1.0], [R.exists("a")])])), epochs=1)
+    stepped = [float(built.state_dict()["weights"][index]) for index in indices]
+
+    features = [UNITS_FEATURES[i % len(UNITS_FEATURES)] for i in range(rule_count)]
+    probability = 1 / (1 + math.exp(-_raw_sum(rule_count)))
+    expected = [UNITS_WEIGHT - learning_rate * (probability - 1.0) * x for x in features]
+
+    assert stepped == pytest.approx(expected, abs=1e-12)
