@@ -244,11 +244,11 @@ class NeuralSample:
         sample_fact = node[0]._atom
         sample_fact.getRawState().setValue(value)
 
-        # A fact with no weight of its own was given the library's shared `Weight.zeroWeight` by
-        # `WeightedNeuron`'s constructor - a *static* field - so writing through it would replace the logical
-        # zero for every model in this JVM, not just this one. A negative index is the library's own marker
-        # for such a weight (`NeuralNetBuilder`: "index < 0 means unit or zero weight = effectively
-        # unweighted"). The value the caller asked for is already on the neuron's own state, above.
+        # A fact with no weight of its own was given the library's shared Weight.zeroWeight by
+        # WeightedNeuron's constructor - a *static* field, so writing through it corrupts the logical zero
+        # for every model in this JVM, not just this one. Negative index is the library's own marker for
+        # such a weight (see NeuralNetBuilder: "index < 0 means unit or zero weight = effectively
+        # unweighted"). The value the caller asked for is already on the neuron's own state above.
         offset = sample_fact.offset
         if offset is not None and offset.index >= 0:
             offset.value = value
