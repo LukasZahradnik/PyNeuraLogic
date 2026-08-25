@@ -201,3 +201,38 @@ def test_static_graph_with_trainer():
     history = trainer.fit(static_dataset, epochs=5, silent=True)
 
     assert len(history.train_losses) == 5
+
+
+def test_static_graph_does_not_corrupt_the_shared_zero_weight():
+    """Setting a fact value must not write through a weight the whole JVM shares.
+
+    A fact with no weight of its own is given ``Weight.zeroWeight`` by ``WeightedNeuron``'s constructor, and
+    that is a *static* field. Writing the fact's value through it changed the logical zero for every model
+    built afterwards in the same process - which is why ``tests/test_transformer.py`` failed whenever
+    anything ran a static graph before it, while every static graph test passed.
+    """
+    import jpype
+
+    weight_class = jpype.JClass("cz.cvut.fel.ida.algebra.weights.Weight")
+
+    dataset = Dataset()
+    shared = [Relation.edge(0, 1), Relation.edge(1, 0)]
+    dataset.add_samples([
+        Sample(
+            Relation.predict(0)[1.0],
+            shared + [Relation.node_feature(0)[1.0], Relation.node_feature(1)[-1.0]],
+        ),
+        Sample(
+            Relation.predict(0)[0.0],
+            shared + [Relation.node_feature(0)[-1.0], Relation.node_feature(1)[1.0]],
+        ),
+    ])
+
+    model = Model()
+    model.add_rule(Relation.predict(Var.X)[1.0] <= (Relation.edge(Var.X, Var.Y), Relation.node_feature(Var.Y)))
+    model.build(Settings(optimizer=SGD(0.1)))
+
+    model.train(model.build_static_dataset(dataset), epochs=3)
+
+    assert float(weight_class.zeroWeight.value.get(0)) == 0.0
+    assert float(weight_class.unitWeight.value.get(0)) == 1.0
