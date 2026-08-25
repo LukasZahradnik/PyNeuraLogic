@@ -30,22 +30,33 @@ class StaticGraphDataset:
         The batch size.
     """
 
-    __slots__ = ("static_sample", "_fact_mappings", "_batch_size")
+    __slots__ = ("static_sample", "_fact_mappings", "_batch_size", "_targets")
 
     def __init__(
         self,
         static_sample: NeuralSample,
-        fact_mappings: list[list[tuple[BaseRelation, float]]],
+        fact_mappings: list[list[tuple[BaseRelation, Any]]],
         batch_size: int = 1,
+        targets: list[Any] | None = None,
     ):
         self.static_sample = static_sample
         self._fact_mappings = fact_mappings
         self._batch_size = batch_size
+        self._targets = [None] * len(fact_mappings) if targets is None else targets
 
     @property
-    def fact_mappings(self) -> list[list[tuple[BaseRelation, float]]]:
+    def fact_mappings(self) -> list[list[tuple[BaseRelation, Any]]]:
         """Return the per-sample fact→value mappings."""
         return self._fact_mappings
+
+    @property
+    def targets(self) -> list[Any]:
+        """Each sample's own target, in the same order as :attr:`fact_mappings`.
+
+        The static sample carries the *first* sample's target, so without these every sample would be
+        fitted to that one label.
+        """
+        return self._targets
 
     def __len__(self) -> int:
         return len(self._fact_mappings)
@@ -70,8 +81,13 @@ class StaticGraphDataset:
         return count
 
 
-def _extract_fact_value(entry: Any) -> float | None:
-    """Extract the scalar value from a fact entry.
+def _extract_fact_value(entry: Any) -> Any | None:
+    """Extract the value from a fact entry, as written.
+
+    The value is handed on unchanged rather than reduced to a number, because a fact's value need not be a
+    scalar: a fixed-width feature vector per example is the ordinary case for the kind of problem a static
+    graph is for. ``ValueFactory.get_value`` converts whatever this returns, and keeping only the first
+    element of a vector made the write fail with "scalar increment by vector".
 
     Parameters
     ----------
@@ -80,21 +96,17 @@ def _extract_fact_value(entry: Any) -> float | None:
 
     Returns
     -------
-    float or None
-        The fact's value, or ``None`` if the entry is a Rule (should be skipped).
+    Any or None
+        The fact's value - a number, or a sequence for a vector-valued fact - or ``None`` if the entry is a
+        Rule (should be skipped).
     """
     if isinstance(entry, Rule):
         return None
     if isinstance(entry, WeightedRelation):
         weight = entry.weight
-        if isinstance(weight, (float, int)):
-            return float(weight)
-        # For tuple/list weights, the first scalar value is used
-        if isinstance(weight, (tuple, list)):
-            if len(weight) == 0:
-                return 1.0
-            if isinstance(weight[0], (float, int)):
-                return float(weight[0])
+        if isinstance(weight, (tuple, list)) and len(weight) == 0:
+            return 1.0
+        return weight
     # Default: unweighted facts have value 1.0
     return 1.0
 
@@ -164,8 +176,26 @@ def build_static_graph_dataset(
     if not isinstance(dataset, LogicDataset) or len(dataset.samples) == 0:
         raise ValueError("Static graph requires a Dataset with at least one sample")
 
+    if batch_size != 1:
+        # learnSample is called one sample at a time, so a batch above one would be accepted and then
+        # quietly ignored - the updates would never be accumulated into a single step
+        raise NotImplementedError(
+            f"a static graph trains one sample at a time, so batch_size must be 1, got {batch_size}"
+        )
+
+    for index, sample in enumerate(dataset.samples):
+        if isinstance(sample.query, list):
+            raise NotImplementedError(
+                f"sample {index} has several queries; a static graph reuses one neural sample, and that "
+                f"holds one query"
+            )
+
     # Build fact mappings for all samples
     fact_mappings = _build_fact_mappings(dataset)
+    targets = [
+        _extract_fact_value(sample.query) if sample.query is not None else None
+        for sample in dataset.samples
+    ]
 
     # Build only the first sample
     first_sample = dataset.samples[0]
@@ -183,4 +213,5 @@ def build_static_graph_dataset(
         static_sample=built[0],
         fact_mappings=fact_mappings,
         batch_size=batch_size,
+        targets=targets,
     )
