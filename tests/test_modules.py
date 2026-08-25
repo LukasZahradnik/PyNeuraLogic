@@ -126,7 +126,7 @@ def test_gatv2conv():
     def score(left):
         return (
             f"h1__score(I, J) :- ${left}={{2, 1}} h0(I), $h1__right={{2, 1}} h0(J), *h1__edge(J, I). "
-            "[transformation=leakyrelu, combination=sum]"
+            "[transformation=leakyrelu(0.2), combination=sum]"
         )
 
     model = Model()

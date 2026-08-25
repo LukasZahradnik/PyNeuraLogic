@@ -674,3 +674,98 @@ def test_clipping_reaches_the_single_sample_path_too():
     expected = _torch_stepped(["a"], lambda p: torch.optim.SGD(p, lr=LEARNING_RATE), clip_norm=0.05)
 
     assert clipped == pytest.approx(expected, abs=1e-12)
+
+
+#: The activation cases above run at a *positive* pre-activation (`START * INPUT` is `0.63`), so a leaky
+#: slope never engages there at all. These drive it negative, which is the only place the slope exists.
+NEGATIVE_START = -0.9
+
+
+def _leaky_value_and_gradient(transformation):
+    """The same one-weight model as `_built`, but with the pre-activation on the negative side."""
+    model = Model()
+    model += R.source("a")[INPUT].fixed()
+    model += (R.out(V.X)["w":1, 1] <= R.source(V.X)) | [Combination.SUM, Transformation.IDENTITY]
+    model += R.out / 1 | [transformation]
+    built = model.build(
+        Settings(
+            optimizer=SGD(lr=LEARNING_RATE),
+            error_function=MSE(reduction="sum"),
+            iso_value_compression=False,
+            chain_pruning=False,
+        )
+    )
+    state = built.state_dict()
+    index = next(i for i, name in state["weight_names"].items() if str(name).strip() == "w")
+    state["weights"][index] = NEGATIVE_START
+    built.load_state_dict(state)
+
+    dataset = built.build_dataset(Dataset([Sample(R.out("a")[TARGET], [R.exists("a")])]))
+    value = float(built(dataset)[0])
+    before = float(built.state_dict()["weights"][index])
+    built.train(dataset, epochs=1)
+    gradient = (before - float(built.state_dict()["weights"][index])) / LEARNING_RATE
+    return value, gradient
+
+
+def _torch_leaky_value_and_gradient(slope):
+    weight = torch.nn.Parameter(torch.tensor([NEGATIVE_START], dtype=torch.float64))
+    output = torch.nn.functional.leaky_relu(weight * INPUT, slope)
+    ((output - torch.tensor([TARGET], dtype=torch.float64)) ** 2).sum().backward()
+    return float(output.item()), float(weight.grad.item())
+
+
+@pytest.mark.parametrize("slope", [0.2, 0.5, 0.0, 1.0], ids=["pyg-default", "half", "hard-relu", "linear"])
+def test_leaky_relu_takes_the_slope_it_is_given(slope):
+    """The slope used to be one mutable static, global to the JVM, so no rule could ask for one.
+
+    Both halves are checked, and the gradient is the one that matters: on the negative side the slope *is*
+    the derivative, so a value that agreed while the gradient did not would be the worse failure.
+    """
+    value, gradient = _leaky_value_and_gradient(Transformation.LEAKY_RELU(slope))
+    expected_value, expected_gradient = _torch_leaky_value_and_gradient(slope)
+
+    assert value == pytest.approx(expected_value, abs=1e-12)
+    assert gradient == pytest.approx(expected_gradient, abs=1e-12)
+
+
+def test_leaky_relu_without_a_slope_is_still_the_backend_default():
+    """Asking for nothing has to keep meaning what it meant, which is `0.01`."""
+    value, gradient = _leaky_value_and_gradient(Transformation.LEAKY_RELU)
+    expected_value, expected_gradient = _torch_leaky_value_and_gradient(0.01)
+
+    assert value == pytest.approx(expected_value, abs=1e-12)
+    assert gradient == pytest.approx(expected_gradient, abs=1e-12)
+
+
+def test_two_rules_in_one_template_can_use_different_slopes():
+    """What a single static could not express, and the reason this is per rule at all."""
+    model = Model()
+    model += R.source("a")[-4.0].fixed()
+    model += (R.soft(V.X)["u":1, 1] <= R.source(V.X)) | [Combination.SUM, Transformation.IDENTITY]
+    model += R.soft / 1 | [Transformation.LEAKY_RELU(0.5)]
+    model += (R.hard(V.X)["v":1, 1] <= R.source(V.X)) | [Combination.SUM, Transformation.IDENTITY]
+    model += R.hard / 1 | [Transformation.LEAKY_RELU(0.01)]
+
+    built = model.build(
+        Settings(
+            optimizer=SGD(lr=0.0),
+            error_function=MSE(reduction="sum"),
+            iso_value_compression=False,
+            chain_pruning=False,
+        )
+    )
+    state = built.state_dict()
+    for name in ("u", "v"):
+        index = next(i for i, n in state["weight_names"].items() if str(n).strip() == name)
+        state["weights"][index] = 1.0
+    built.load_state_dict(state)
+
+    dataset = built.build_dataset(
+        Dataset([
+            Sample(R.soft("a")[0.0], [R.exists("a")]),
+            Sample(R.hard("a")[0.0], [R.exists("a")]),
+        ])
+    )
+
+    assert [float(out) for out in built(dataset)] == pytest.approx([-2.0, -0.04], abs=1e-12)

@@ -30,9 +30,9 @@ class GATv2Conv(Module):
     than over a neighbourhood. PyG's GATv2 takes edge *features* through a projection rather than an edge
     weight, so there is nothing for the edge's own value to mean here.
 
-    Note the slope: ``Transformation.LEAKY_RELU`` is ``0.01`` where PyG's ``negative_slope`` defaults to
-    ``0.2``, and the backend keeps that slope in a static field, so it cannot be set per rule. A comparison
-    against PyG has to pass ``negative_slope=0.01`` to agree.
+    The slope defaults to PyG's ``0.2``, not to the backend's own ``0.01``: this module exists to be PyG's
+    layer, and quietly using a different slope made every comparison bend PyG instead. It is a per-rule
+    slope now, so ``negative_slope`` says what it says.
 
     Parameters
     ----------
@@ -54,6 +54,8 @@ class GATv2Conv(Module):
         Default: ``Transformation.IDENTITY``
     add_self_loops : bool
         Let a node attend to itself, as PyG does. Default: ``True``
+    negative_slope : float
+        The LeakyReLU slope of the attention score. Default: ``0.2``, as in PyG.
 
     """
 
@@ -67,6 +69,7 @@ class GATv2Conv(Module):
         share_weights: bool = False,
         activation: TransformationFunction = Transformation.IDENTITY,
         add_self_loops: bool = True,
+        negative_slope: float = 0.2,
     ):
         self.output_name = output_name
         self.feature_name = feature_name
@@ -78,6 +81,7 @@ class GATv2Conv(Module):
         self.share_weights = share_weights
         self.activation = activation
         self.add_self_loops = add_self_loops
+        self.negative_slope = negative_slope
 
     def __call__(self):
         w1 = f"{self.output_name}__right"
@@ -110,7 +114,10 @@ class GATv2Conv(Module):
                 feature(V.J)[w1 : self.out_channels, self.in_channels],
                 edge(V.J, V.I),
             ))
-            | Metadata(combination=Combination.SUM, transformation=Transformation.LEAKY_RELU),
+            | Metadata(
+                combination=Combination.SUM,
+                transformation=Transformation.LEAKY_RELU(self.negative_slope),
+            ),
             # `a` on the body rather than the head: a head weight applies after the aggregation, and the
             # softmax aggregation casts every input to a scalar, so it has to be one number by then
             (attention(V.I, V.J) <= score(V.I, V.J)[f"{self.output_name}__att" : 1, self.out_channels])

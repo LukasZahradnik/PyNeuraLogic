@@ -4,6 +4,7 @@ from neuralogic.core.constructs.function.function import (
     CombinationFunction,
     TransformationFunction,
 )
+from neuralogic.core.constructs.function.leaky_relu import LeakyReLuTransformation
 from neuralogic.core.constructs.function.reshape import Reshape
 from neuralogic.core.constructs.function.slice import Slice
 from neuralogic.core.constructs.function.softmax import SoftmaxAggregation
@@ -20,7 +21,7 @@ class Transformation:
     TANH: TransformationFunction = TransformationFunction("TANH")
     SIGNUM: TransformationFunction = TransformationFunction("SIGNUM")
     RELU: TransformationFunction = TransformationFunction("RELU", namespace="transformation.elementwise.ReLu")
-    LEAKY_RELU: TransformationFunction = TransformationFunction(
+    LEAKY_RELU: TransformationFunction = LeakyReLuTransformation(
         "LEAKYRELU", namespace="transformation.elementwise.LeakyReLu"
     )
     LUKASIEWICZ: TransformationFunction = TransformationFunction(

@@ -297,8 +297,9 @@ def test_gatv2_matches_torch_geometric(share_weights):
     softmaxes each edge's own components. And the edge has to appear in the score rule at all, hidden, or the
     score grounds for every pair of nodes and the softmax normalises over the whole graph.
 
-    The slope is why PyG is constructed with `negative_slope=0.01`: `Transformation.LEAKY_RELU` is `0.01`
-    where PyG defaults to `0.2`, and the backend keeps it in a static field, so it cannot be set per rule.
+    PyG is constructed with its own default slope now. The backend used to keep the LeakyReLU slope in a
+    static field, so no rule could ask for one and this comparison had to bend PyG down to `0.01` instead;
+    the slope is per rule, and the module defaults to PyG's `0.2`.
 
     The step is included, and it is the reason a body that multiplies a scalar attention into a vector
     message can be differentiated at all: `Product.derivativeFrom` used to return the derivative by a scalar
@@ -312,7 +313,7 @@ def test_gatv2_matches_torch_geometric(share_weights):
     gnn = module.GATv2Conv(IN, OUT, "h", "f", "e", share_weights=share_weights)
     built, dataset = _built(gnn, {}, edge_value=1.0, weights_by_name=weights)
 
-    layer = TorchGAT(IN, OUT, bias=False, negative_slope=0.01, share_weights=share_weights).double()
+    layer = TorchGAT(IN, OUT, bias=False, share_weights=share_weights).double()
     with torch.no_grad():
         layer.att.copy_(_tensor([ATTENTION]))
         layer.lin_l.weight.copy_(_tensor(SECOND))                     # x_j, the source
