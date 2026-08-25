@@ -100,13 +100,59 @@ def test_nothing_to_save_without_learnable_facts():
     assert _dataset(built, learnable_facts=False).state_dict()["weights"] == {}
 
 
-def test_a_literal_the_dataset_does_not_have_is_refused():
-    """Silently ignoring it would leave a model half restored and say nothing."""
+def test_parameters_that_do_not_match_the_dataset_are_refused():
+    """Silently ignoring them would leave a model half restored and say nothing."""
     built = _model()
     data = _dataset(built)
 
-    with pytest.raises(ValueError, match="no learnable example fact"):
+    with pytest.raises(ValueError, match="do not match this dataset"):
         data.load_state_dict({"weights": {"emb(nowhere)": [1.0, 2.0]}})
+
+
+def test_trained_parameters_carry_onto_another_dataset_for_the_constants_they_share():
+    """Training embeddings on one set and using them on another is the point of naming them by literal.
+
+    A constant the training set never saw has nothing to carry over and keeps what its example wrote - the
+    untrained value - which is what an unseen token does in torch too. It is reported rather than assumed.
+    """
+    built = _model()
+    train = _dataset(built)
+    built.train(train, epochs=20)
+    trained = train.state_dict()
+
+    # a second dataset over "b", which training saw, and "c", which it did not
+    test = built.build_dataset(
+        Dataset(
+            [
+                Sample(R.out("b")[TARGETS["b"]], [R.emb("b")[FACTS["b"]]]),
+                Sample(R.out("c")[0.7], [R.emb("c")[FACTS["b"]]]),
+            ]
+        ),
+        learnable_facts=True,
+    )
+
+    with pytest.raises(ValueError, match="do not match this dataset"):
+        test.load_state_dict(trained)  # strict is right to refuse: the two are not the same set
+
+    report = test.load_state_dict(trained, strict=False)
+
+    assert report.unexpected_keys == ["emb(a)"], "trained here, no fact to attach it to there"
+    assert report.missing_keys == ["emb(c)"], "a fact here that training never saw"
+
+    carried = test.state_dict()["weights"]
+    assert carried["emb(b)"] == pytest.approx(trained["weights"]["emb(b)"], abs=1e-12)
+    assert carried["emb(c)"] == pytest.approx(FACTS["b"], abs=1e-12), "untrained, as the example wrote it"
+    assert carried["emb(b)"] != pytest.approx(FACTS["b"], abs=1e-9), "and b really did move in training"
+
+
+def test_the_same_dataset_round_trips_without_asking_for_strict_false():
+    """The ordinary save and restore has no missing or unexpected keys at all."""
+    built = _model()
+    data = _dataset(built)
+    built.train(data, epochs=5)
+
+    report = data.load_state_dict(data.state_dict())
+    assert report.missing_keys == [] and report.unexpected_keys == []
 
 
 def test_facts_sharing_one_named_weight_cannot_be_given_different_values():

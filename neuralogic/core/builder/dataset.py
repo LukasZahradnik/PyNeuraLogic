@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 import jpype
 
@@ -9,6 +9,13 @@ from neuralogic.core.constructs.java_objects import ValueFactory
 
 if TYPE_CHECKING:
     from neuralogic.core.builder import Builder
+
+
+class IncompatibleKeys(NamedTuple):
+    """What :meth:`BuiltDataset.load_state_dict` could not match up, in torch's shape."""
+
+    missing_keys: list[str]
+    unexpected_keys: list[str]
 
 
 class BuiltDataset:
@@ -61,45 +68,70 @@ class BuiltDataset:
             }
         }
 
-    def load_state_dict(self, state_dict: dict) -> None:
+    def load_state_dict(self, state_dict: dict, strict: bool = True) -> IncompatibleKeys:
         """Sets this dataset's example-fact parameters from a :meth:`state_dict` shaped dictionary.
+
+        With ``strict=False`` this is also how a parameter reaches a dataset it was not trained on - the
+        embeddings learned for the training set, carried onto the test set for the constants the two share::
+
+            test_data.load_state_dict(train_data.state_dict(), strict=False)
+
+        A constant the training set never saw keeps whatever its example wrote, untrained, and comes back in
+        ``missing_keys``; a trained parameter with no fact to attach to here comes back in
+        ``unexpected_keys``. Both are ordinary in that use and neither is in the round trip of one dataset,
+        which is why ``strict`` defaults to refusing them.
 
         Parameters
         ----------
         state_dict : dict
-            ``{"weights": {literal: value}}``. A literal this dataset has no learnable fact for is an error
-            rather than a silent no-op - it means the saved parameters and the data have drifted apart, and
-            carrying on would leave a model that is half restored.
+            ``{"weights": {literal: value}}``.
+        strict : bool
+            Whether the literals must match this dataset's exactly, as in torch. Default: True.
+
+        Returns
+        -------
+        IncompatibleKeys
+            ``missing_keys`` - this dataset's learnable facts the dictionary said nothing about - and
+            ``unexpected_keys`` - literals in the dictionary this dataset has no learnable fact for.
 
         Raises
         ------
         ValueError
-            If a literal is unknown here, or if two literals that share one weight are given different
-            values. Facts can share a weight when the example named it, and then only one of the two values
-            could survive; which one is an accident of iteration order, so neither is written.
+            Under ``strict``, if either list is non-empty: the saved parameters and the data have drifted
+            apart, and carrying on would leave a model half restored. Always, if two literals that share one
+            weight are given different values - facts share a weight when the example named it, and then
+            only one of the two values could survive, which one being an accident of iteration order.
         """
         parameters = self._example_parameters()
         weights = state_dict["weights"] if "weights" in state_dict else state_dict
 
-        unknown = [literal for literal in weights if literal not in parameters]
-        if unknown:
+        unexpected = [literal for literal in weights if literal not in parameters]
+        missing = [literal for literal in parameters if literal not in weights]
+
+        if strict and (unexpected or missing):
             raise ValueError(
-                f"no learnable example fact for {unknown[:5]}"
-                f"{' and ' + str(len(unknown) - 5) + ' more' if len(unknown) > 5 else ''} in this dataset"
+                f"parameters do not match this dataset: {len(missing)} missing {missing[:3]}, "
+                f"{len(unexpected)} unexpected {unexpected[:3]}. Pass strict=False to carry over only what "
+                f"the two have in common, which is what moving trained parameters to another dataset means"
             )
 
-        by_weight: dict[int, tuple[str, Any]] = {}
+        shared: dict[int, tuple[str, Any]] = {}
         for literal, value in weights.items():
+            if literal in unexpected:
+                continue
             index = int(parameters[literal].index)
-            seen = by_weight.get(index)
+            seen = shared.get(index)
             if seen is not None and seen[1] != value:
                 raise ValueError(
                     f"{seen[0]} and {literal} share one weight, so they cannot be given different values"
                 )
-            by_weight[index] = (literal, value)
+            shared[index] = (literal, value)
 
         for literal, value in weights.items():
-            _set_value(parameters[literal].value, value)
+            if literal not in unexpected:
+                _set_value(parameters[literal].value, value)
+
+        return IncompatibleKeys(missing, unexpected)
 
 
 def _set_value(weight_value, value) -> None:
