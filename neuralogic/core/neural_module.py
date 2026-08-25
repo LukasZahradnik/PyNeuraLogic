@@ -351,10 +351,16 @@ class NeuralModule:
         static_sample = dataset.static_sample
 
         for _ in range(epochs):
-            for mapping in dataset.fact_mappings:
+            for index, mapping in enumerate(dataset.fact_mappings):
                 for fact, value in mapping:
                     _, java_value = self._value_factory.get_value(value)
                     static_sample.set_fact_value(fact, java_value)
+                # The shared sample carries the first sample's target, so this sample's has to be put in
+                # place as well - otherwise every one of them is fitted to that first label.
+                target = dataset.targets[index]
+                if target is not None:
+                    _, java_target = self._value_factory.get_value(target)
+                    static_sample._java_sample.target = java_target
                 result = self._strategy.learnSample(static_sample._java_sample)
                 results.append((
                     ValueFactory.from_java(result.getTarget()),
