@@ -329,6 +329,7 @@ class NeuralModule:
             )
             for result in results
         ]
+
     def _train_static_graph(self, dataset: StaticGraphDataset, epochs: int = 1) -> list:
         """Train on a StaticGraphDataset by iterating over fact mappings.
 
@@ -362,11 +363,13 @@ class NeuralModule:
                     _, java_target = self._value_factory.get_value(target)
                     static_sample._java_sample.target = java_target
                 result = self._strategy.learnSample(static_sample._java_sample)
-                results.append((
-                    ValueFactory.from_java(result.getTarget()),
-                    ValueFactory.from_java(result.getOutput()),
-                    ValueFactory.from_java(result.errorValue()),
-                ))
+                results.append(
+                    (
+                        ValueFactory.from_java(result.getTarget()),
+                        ValueFactory.from_java(result.getOutput()),
+                        ValueFactory.from_java(result.errorValue()),
+                    )
+                )
 
         self._update_tensor_parameters()
         return results
@@ -394,9 +397,7 @@ class NeuralModule:
             for fact, value in mapping:
                 _, java_value = self._value_factory.get_value(value)
                 static_sample.set_fact_value(fact, java_value)
-            result = ValueFactory.from_java(
-                self._strategy.evaluateSample(static_sample._java_sample)
-            )
+            result = ValueFactory.from_java(self._strategy.evaluateSample(static_sample._java_sample))
             results.append(result)
 
         return results

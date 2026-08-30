@@ -63,8 +63,7 @@ class BuiltDataset:
         """
         return {
             "weights": {
-                literal: ValueFactory.from_java(weight.value)
-                for literal, weight in self._example_parameters().items()
+                literal: ValueFactory.from_java(weight.value) for literal, weight in self._example_parameters().items()
             }
         }
 
@@ -122,9 +121,7 @@ class BuiltDataset:
             index = int(parameters[literal].index)
             seen = shared.get(index)
             if seen is not None and seen[1] != value:
-                raise ValueError(
-                    f"{seen[0]} and {literal} share one weight, so they cannot be given different values"
-                )
+                raise ValueError(f"{seen[0]} and {literal} share one weight, so they cannot be given different values")
             shared[index] = (literal, value)
 
         for literal, value in weights.items():

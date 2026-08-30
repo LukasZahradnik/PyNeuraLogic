@@ -109,11 +109,14 @@ class GATv2Conv(Module):
             # the score per edge: leaky relu of the two endpoints' projections summed. The hidden edge is
             # there only to restrict the grounding to the neighbourhood - without it this grounds for every
             # pair of nodes, and the softmax below then normalizes over the whole graph
-            (score(V.I, V.J) <= (
-                feature(V.I)[w2 : self.out_channels, self.in_channels],
-                feature(V.J)[w1 : self.out_channels, self.in_channels],
-                edge(V.J, V.I),
-            ))
+            (
+                score(V.I, V.J)
+                <= (
+                    feature(V.I)[w2 : self.out_channels, self.in_channels],
+                    feature(V.J)[w1 : self.out_channels, self.in_channels],
+                    edge(V.J, V.I),
+                )
+            )
             | Metadata(
                 combination=Combination.SUM,
                 transformation=Transformation.LEAKY_RELU(self.negative_slope),
@@ -125,11 +128,14 @@ class GATv2Conv(Module):
                 aggregation=Aggregation.SOFTMAX(agg_terms=["J"]),
                 transformation=Transformation.IDENTITY,
             ),
-            (head(V.I) <= (
-                attention(V.I, V.J),
-                feature(V.J)[w1 : self.out_channels, self.in_channels],
-                edge(V.J, V.I),
-            ))
+            (
+                head(V.I)
+                <= (
+                    attention(V.I, V.J),
+                    feature(V.J)[w1 : self.out_channels, self.in_channels],
+                    edge(V.J, V.I),
+                )
+            )
             | Metadata(aggregation=Aggregation.SUM, combination=Combination.PRODUCT),
             head / 1 | Metadata(transformation=self.activation),
         ]

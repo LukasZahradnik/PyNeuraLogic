@@ -63,9 +63,7 @@ class Adam(Optimizer):
 
         adam_class = jpype.JClass("cz.cvut.fel.ida.neural.networks.computation.training.optimizers.Adam")
         self._lr_object = jpype.JClass("cz.cvut.fel.ida.algebra.values.ScalarValue")(self._lr)
-        self._optimizer = adam_class(
-            self._lr_object, self._betas[0], self._betas[1], self._eps, self._weight_decay
-        )
+        self._optimizer = adam_class(self._lr_object, self._betas[0], self._betas[1], self._eps, self._weight_decay)
 
         return self._optimizer
 

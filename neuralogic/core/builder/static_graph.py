@@ -186,16 +186,12 @@ def build_static_graph_dataset(
     for index, sample in enumerate(dataset.samples):
         if isinstance(sample.query, list):
             raise NotImplementedError(
-                f"sample {index} has several queries; a static graph reuses one neural sample, and that "
-                f"holds one query"
+                f"sample {index} has several queries; a static graph reuses one neural sample, and that holds one query"
             )
 
     # Build fact mappings for all samples
     fact_mappings = _build_fact_mappings(dataset)
-    targets = [
-        _extract_fact_value(sample.query) if sample.query is not None else None
-        for sample in dataset.samples
-    ]
+    targets = [_extract_fact_value(sample.query) if sample.query is not None else None for sample in dataset.samples]
 
     # Build only the first sample
     first_sample = dataset.samples[0]
