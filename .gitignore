@@ -9,3 +9,8 @@ build/
 
 .ipynb_checkpoints/
 docs/_build/
+
+# Built from backend.pin by scripts/backend_jar.py, not tracked
+neuralogic/jar/NeuraLogic.jar
+.backend/
+*.egg-info/

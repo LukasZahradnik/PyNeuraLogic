@@ -1,0 +1,12 @@
+# The backend this frontend is built and tested against.
+#
+# Both sides changing at once: push the backend branch, point ref at it, push
+# the frontend branch - CI builds that commit and tests against it. On merge,
+# move ref to the merged commit. repo may be any fork; ref may be a branch
+# while the work is in flight, and should be a commit once it lands.
+#
+# scripts/backend_jar.py reads this. It also takes --jar PATH to install a jar
+# you already built, which is the local loop and needs no network.
+
+repo = GustikS/NeuraLogic
+ref = 18eaa7e00423c141ec4412f62a017bda240f9e20

@@ -20,6 +20,16 @@ jobs:
       with:
         python-version: "3.13"
 
+    # The jar is not tracked, so the wheel gets one the same way the tests do - built from backend.pin.
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '17'
+        cache: maven
+
+    - name: Build the pinned backend
+      run: python scripts/backend_jar.py
+
     - name: Build
       run: uv build
 

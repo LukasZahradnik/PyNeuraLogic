@@ -216,6 +216,18 @@ def initialize(
     if jar_path is not None:
         params["classpath"] = jar_path
 
+    if not os.path.isfile(params["classpath"]):
+        # The jar is not tracked, so a fresh checkout has none until it is built. Say that, rather than
+        # letting jpype fail further in with a class it could not find.
+        raise FileNotFoundError(
+            f"no backend jar at {params['classpath']}\n"
+            "In a source checkout, build the backend this frontend is pinned to:\n"
+            "    python scripts/backend_jar.py\n"
+            "or hand over one you already built, with either\n"
+            "    python scripts/backend_jar.py --jar PATH\n"
+            "    neuralogic.initialize(jar_path=PATH)"
+        )
+
     if debug_mode:
         port = int(debug_port)
         server = "y" if is_debug_server else "n"
