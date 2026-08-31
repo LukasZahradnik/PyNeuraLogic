@@ -8,9 +8,7 @@ on:
 
 jobs:
 
-  # The jar is not tracked; backend.pin names the commit it comes from. Build it once - a jar is platform
-  # independent, so one build serves the whole matrix - and hand it over as a workflow artifact, which needs
-  # no token even when the pin points at somebody else's fork.
+  # Built once from backend.pin - a jar is platform independent, so one build serves the matrix.
   backend:
     runs-on: ubuntu-latest
 

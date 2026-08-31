@@ -1,22 +1,10 @@
-# The backend this frontend is built and tested against.
+# The backend this frontend is built and tested against; scripts/backend_jar.py reads it.
 #
 #   repo   owner/name on GitHub, or a path to a local clone
-#   ref    a commit, a branch or a tag
+#   ref    a commit, or a branch while both sides are in flight
 #
-# Both sides changing at once: push the backend branch, point ref at it, push the
-# frontend branch - CI builds that commit and tests against it. On merge, move ref
-# to the merged commit.
-#
-#   repo = LukasZahradnik/NeuraLogic      somebody else's fork, no extra permission needed
-#   ref  = my-feature-branch              a branch, while the work is in flight
-#   repo = ../NeuraLogic                  a local clone, for a branch pushed nowhere yet
-#
-# A commit can be checked against the jar's stamp offline, and a branch cannot -
-# scripts/backend_jar.py --check says which of the two it did. So a branch is for work
-# in flight; what lands should name a commit.
-#
-# The script also takes --jar PATH to install a jar you already built, which needs
-# neither network nor Maven.
+# --check verifies a commit offline. A branch it can only report, since whether the jar
+# is that branch's tip is a question for the network.
 
 repo = GustikS/NeuraLogic
 ref = 18eaa7e00423c141ec4412f62a017bda240f9e20

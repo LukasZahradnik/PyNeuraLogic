@@ -1,16 +1,9 @@
 #!/usr/bin/env python3
-"""Put the backend jar this frontend is pinned to in place.
+"""Put the backend jar named in backend.pin in place. CI runs this too - the pin is a recipe for both.
 
-The jar is not tracked in this repository. What is tracked is backend.pin, naming the backend repository
-and the commit this frontend belongs to, and this script turns that into neuralogic/jar/NeuraLogic.jar.
-CI runs exactly this, which is the point: the pin is a recipe both a person and a workflow can execute.
-
-    python scripts/backend_jar.py                 build the pinned commit and install it
-    python scripts/backend_jar.py --jar PATH      install a jar you already built, no network, no Maven
-    python scripts/backend_jar.py --check         only report whether the installed jar matches the pin
-
---jar is the local loop: build the backend however you like - your own clone, your own fork, an IDE run -
-and hand the result over. Nothing here needs to be involved in how it was made.
+    backend_jar.py                build the pinned backend and install it
+    backend_jar.py --jar PATH     install one you already built; no network, no Maven
+    backend_jar.py --check        report whether the installed jar matches the pin
 """
 
 import argparse
@@ -80,8 +73,7 @@ def build(repo, ref, workdir):
     """Clone or update the pinned backend and package it. Any fork, any branch, any commit."""
     workdir.mkdir(parents=True, exist_ok=True)
     clone = workdir / "NeuraLogic"
-    # A local clone is a legitimate source: it is how you build a branch that is not pushed anywhere,
-    # which during work on both sides at once is most of them.
+    # A local clone is how a branch that is pushed nowhere gets built at all.
     local = pathlib.Path(repo).expanduser()
     if "://" in repo:
         url = repo
@@ -97,9 +89,7 @@ def build(repo, ref, workdir):
 
     sha = subprocess.run(["git", "-C", str(clone), "rev-parse", "HEAD"],
                          check=True, capture_output=True, text=True).stdout.strip()
-    # MAVEN names one explicitly; otherwise take whatever is on PATH, which on Windows resolves the
-    # .cmd through PATHEXT. Resolving it here rather than going through a shell keeps a path with
-    # spaces in it - an IDE-shipped Maven, for one - from being split into arguments.
+    # Resolved rather than run through a shell, so a Maven path with spaces survives.
     mvn = os.environ.get("MAVEN") or shutil.which("mvn")
     if mvn is None:
         raise SystemExit("no mvn on PATH. Set MAVEN, or install one you already build the backend with")
@@ -132,8 +122,6 @@ def main(argv=None):
             return 1
 
         if not names_a_commit(ref):
-            # A branch moves. Whether this jar is its tip is a question for the network, and this
-            # check is meant to work without one - so say what is known and do not imply the rest.
             print(f"the pin names a branch, so this is as far as an offline check goes:\n"
                   f"  pinned:    {repo} at {ref}\n"
                   f"  installed: {commit}\n"

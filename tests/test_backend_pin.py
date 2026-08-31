@@ -1,8 +1,7 @@
-"""The jar in the tree has to be the backend this frontend says it belongs to.
+"""The jar in the tree has to be the backend backend.pin says it is.
 
-Without this the mismatch still gets caught - by whichever test happens to call the missing thing first,
-reporting a frontend file and an attribute that is not there. That has happened, and cost a release. Here
-it is one assertion that names both sides.
+Otherwise the mismatch is caught by whichever test calls the missing thing first, reporting a frontend
+file and an attribute that is not there - which is how it once reached a release.
 """
 
 import importlib.util
@@ -35,10 +34,7 @@ def test_the_jar_in_the_tree_is_the_pinned_backend():
         f"whether it is {repo} at {ref}"
     )
     if not backend_jar.names_a_commit(ref):
-        # A branch pin is for work in flight on both sides at once. Which commit its tip is right now
-        # is a question for the network, and a test suite is the wrong place to ask one - so this
-        # asserts what can be known offline and says so rather than asserting something weaker in
-        # silence.
+        # A branch's tip is a question for the network, which a test suite should not ask.
         return
 
     assert commit.startswith(ref) or ref.startswith(commit), (
@@ -47,11 +43,10 @@ def test_the_jar_in_the_tree_is_the_pinned_backend():
 
 
 def test_a_missing_jar_is_reported_as_itself(tmp_path):
-    """The cost of not tracking the jar is that a fresh checkout has none, and that has to read as such.
+    """A fresh checkout has no jar, and that has to read as such.
 
-    In a fresh interpreter, deliberately: initialize() refuses a second call while a JVM is live, so
-    in-process this would report "already initialized" and never reach the jar - which is exactly the
-    shape of mistake that makes a test pass without testing anything.
+    In a subprocess: initialize() refuses a second call while a JVM is live, so in-process this said
+    "already initialized" and never reached the jar - passing without testing anything.
     """
     program = """
 import neuralogic
