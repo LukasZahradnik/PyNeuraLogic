@@ -63,6 +63,11 @@ def describe(jar=JAR):
     return f"{commit} built {entries.get('Backend-Built', 'at an unknown time')}"
 
 
+def names_a_commit(ref):
+    """A commit can be checked against a jar stamp without asking anybody. A branch name cannot."""
+    return len(ref) >= 7 and all(c in "0123456789abcdef" for c in ref.lower())
+
+
 def install(source, dest=JAR):
     if not zipfile.is_zipfile(source):
         raise SystemExit(f"{source} is not a jar")
@@ -75,7 +80,15 @@ def build(repo, ref, workdir):
     """Clone or update the pinned backend and package it. Any fork, any branch, any commit."""
     workdir.mkdir(parents=True, exist_ok=True)
     clone = workdir / "NeuraLogic"
-    url = repo if "://" in repo else f"https://github.com/{repo}.git"
+    # A local clone is a legitimate source: it is how you build a branch that is not pushed anywhere,
+    # which during work on both sides at once is most of them.
+    local = pathlib.Path(repo).expanduser()
+    if "://" in repo:
+        url = repo
+    elif local.is_dir():
+        url = str(local.resolve())
+    else:
+        url = f"https://github.com/{repo}.git"
     if not (clone / ".git").is_dir():
         subprocess.run(["git", "clone", "--filter=blob:none", url, str(clone)], check=True)
     subprocess.run(["git", "-C", str(clone), "remote", "set-url", "origin", url], check=True)
@@ -84,9 +97,14 @@ def build(repo, ref, workdir):
 
     sha = subprocess.run(["git", "-C", str(clone), "rev-parse", "HEAD"],
                          check=True, capture_output=True, text=True).stdout.strip()
-    mvn = os.environ.get("MAVEN", "mvn")
+    # MAVEN names one explicitly; otherwise take whatever is on PATH, which on Windows resolves the
+    # .cmd through PATHEXT. Resolving it here rather than going through a shell keeps a path with
+    # spaces in it - an IDE-shipped Maven, for one - from being split into arguments.
+    mvn = os.environ.get("MAVEN") or shutil.which("mvn")
+    if mvn is None:
+        raise SystemExit("no mvn on PATH. Set MAVEN, or install one you already build the backend with")
     subprocess.run([mvn, "-B", "-DskipTests", f"-Dbackend.commit={sha}", "package"],
-                   cwd=clone, check=True, shell=os.name == "nt")
+                   cwd=clone, check=True)
     return clone / BUILT
 
 
@@ -106,12 +124,29 @@ def main(argv=None):
             print(f"no backend jar. Run: python scripts/backend_jar.py", file=sys.stderr)
             return 1
         commit = entries.get("Backend-Commit", "unstamped")
+        if commit in ("unstamped", "unknown"):
+            print("the installed jar carries no commit stamp: it was built either outside this "
+                  "recipe, or from a backend older than the commit that started stamping them. "
+                  f"Either way there is no telling whether it is {repo} at {ref}.\n"
+                  "Run: python scripts/backend_jar.py", file=sys.stderr)
+            return 1
+
+        if not names_a_commit(ref):
+            # A branch moves. Whether this jar is its tip is a question for the network, and this
+            # check is meant to work without one - so say what is known and do not imply the rest.
+            print(f"the pin names a branch, so this is as far as an offline check goes:\n"
+                  f"  pinned:    {repo} at {ref}\n"
+                  f"  installed: {commit}\n"
+                  f"Whether that is the current tip of {ref} cannot be told from here.")
+            return 0
+
         if not commit.startswith(ref) and not ref.startswith(commit):
             print(f"the installed jar is not the pinned backend.\n"
                   f"  pinned:    {repo} at {ref}\n"
                   f"  installed: {commit}\n"
-                  f"Run: python scripts/backend_jar.py", file=sys.stderr)
+                  "Run: python scripts/backend_jar.py", file=sys.stderr)
             return 1
+
         print(f"jar matches the pin: {describe()}")
         return 0
 
