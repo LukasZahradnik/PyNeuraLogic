@@ -1,10 +1,22 @@
-# The backend this frontend is built and tested against; scripts/backend_jar.py reads it.
+# The backend this frontend is built and tested against. scripts/backend_jar.py reads this,
+# builds what it names, and installs the result at neuralogic/jar/NeuraLogic.jar - which is no
+# longer tracked. CI runs the same script, so this is one recipe a person and a workflow both
+# execute.
 #
 #   repo   owner/name on GitHub, or a path to a local clone
-#   ref    a commit, or a branch while both sides are in flight
+#   ref    a commit, a branch or a tag - fetched and built as it stands
 #
-# --check verifies a commit offline. A branch it can only report, since whether the jar
-# is that branch's tip is a question for the network.
+# Changing the backend and the frontend together: push the backend branch, point ref at it,
+# push the frontend branch. CI builds that branch and tests this frontend against it. When the
+# backend side merges, move ref to the commit it merged as.
+#
+#   ref  = my-feature-branch              a branch in the repo named below
+#   repo = ../NeuraLogic                  a local clone, for a branch pushed nowhere yet
+#   repo = LukasZahradnik/NeuraLogic      a fork, if that is where the work happens to be
+#
+# A commit is what should land here. --check compares one against the jar's own manifest stamp
+# with no network at all; a branch it can only report on, because whether the installed jar is
+# that branch's current tip is a question only the remote can answer.
 
 repo = GustikS/NeuraLogic
 ref = 18eaa7e00423c141ec4412f62a017bda240f9e20

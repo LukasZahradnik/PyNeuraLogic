@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
-"""Put the backend jar named in backend.pin in place. CI runs this too - the pin is a recipe for both.
+"""Put the backend jar named in backend.pin in place.
 
-    backend_jar.py                build the pinned backend and install it
-    backend_jar.py --jar PATH     install one you already built; no network, no Maven
-    backend_jar.py --check        report whether the installed jar matches the pin
+The jar is not tracked in this repository. backend.pin names the backend repository and the ref this
+frontend belongs to, and this script turns that into neuralogic/jar/NeuraLogic.jar. CI runs the same
+script, which is the whole point: the pin is one recipe, executed identically by a person and by a
+workflow, so what CI tested is what you can reproduce.
+
+    backend_jar.py                clone or update the pinned repository, build that ref, install it
+    backend_jar.py --jar PATH     install a jar you already built; no network, no Maven
+    backend_jar.py --check        report whether the installed jar is the pinned one
+
+--jar is the local loop: build the backend however you like - your own clone, an IDE run - and hand
+the result over. Nothing here needs to know how it was made.
 """
 
 import argparse
@@ -70,7 +78,13 @@ def install(source, dest=JAR):
 
 
 def build(repo, ref, workdir):
-    """Clone or update the pinned backend and package it. Any fork, any branch, any commit."""
+    """Fetch the pinned ref and package it.
+
+    One path covers a commit, a branch and a tag: git fetch takes any of the three and leaves it at
+    FETCH_HEAD, which is then checked out detached. The commit stamped into the jar is read back from
+    the checkout afterwards, not taken from the pin - so a branch pin still yields a jar that names the
+    exact commit it was built from, which is what --check reads later.
+    """
     workdir.mkdir(parents=True, exist_ok=True)
     clone = workdir / "NeuraLogic"
     # A local clone is how a branch that is pushed nowhere gets built at all.
@@ -122,6 +136,8 @@ def main(argv=None):
             return 1
 
         if not names_a_commit(ref):
+            # Nothing here can tell a current branch tip from a stale one without asking the remote,
+            # and this check is meant to run offline. Report, and leave the claim unmade.
             print(f"the pin names a branch, so this is as far as an offline check goes:\n"
                   f"  pinned:    {repo} at {ref}\n"
                   f"  installed: {commit}\n"
