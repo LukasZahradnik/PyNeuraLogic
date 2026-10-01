@@ -204,6 +204,58 @@ def to_dot_source(drawer: Any, obj: Any) -> str:
     return str(drawer.getGraphSource(obj))
 
 
+def to_graphml_source(drawer: Any, obj: Any) -> str | None:
+    """Renders the object into its GraphML source representation.
+
+    Parameters
+    ----------
+    drawer : Any
+        The drawer to use.
+    obj : Any
+        The object to render.
+
+    Returns
+    -------
+    str | None
+        The GraphML source, or None if the backend graphviz-based conversion failed.
+    """
+    graphml = drawer.getGraphMLSource(obj)
+
+    if graphml is None:
+        return None
+
+    return str(graphml)
+
+
+def graphml_to_networkx(graphml: str | None) -> Any:
+    """Loads a GraphML string into a networkx graph.
+
+    Parameters
+    ----------
+    graphml : str | None
+        The GraphML source.
+
+    Returns
+    -------
+    networkx.DiGraph
+        The graph read from the GraphML source.
+    """
+    if graphml is None:
+        raise RuntimeError(
+            "GraphML conversion failed. Try to install GraphViz (https://graphviz.org/download/) and ensure it is "
+            "available on your PATH"
+        )
+
+    try:
+        import networkx as nx
+    except ImportError as e:
+        raise ImportError(
+            "networkx is required for GraphML to networkx conversion. Install it with `pip install networkx`."
+        ) from e
+
+    return nx.read_graphml(io.StringIO(graphml))
+
+
 def draw_model(
     model: Any,
     filename: str | None = None,
@@ -358,7 +410,7 @@ def model_to_dot_source(model: Any) -> str:
     if model._need_sync:
         model._sync_model()
 
-    model = model._model
+    model = model._parsed_model
     template_drawer = get_model_drawer(get_drawing_settings())
 
     return to_dot_source(template_drawer, model)
@@ -382,6 +434,134 @@ def sample_to_dot_source(sample: Any, value_detail: int = 0) -> str:
     sample_drawer = get_sample_drawer(get_drawing_settings(value_detail=value_detail))
 
     return to_dot_source(sample_drawer, sample._java_sample)
+
+
+def model_to_graphml_source(model: Any, value_detail: int = 0) -> str | None:
+    """Renders the model into its GraphML source representation.
+
+    Parameters
+    ----------
+    model : NeuralModule
+        The model to render.
+    value_detail : int
+        The level of detail for values. Default: 0.
+
+    Returns
+    -------
+    str | None
+        The GraphML source, or None if the backend graphviz-based conversion failed.
+    """
+    if model._need_sync:
+        model._sync_model()
+
+    template_drawer = get_model_drawer(get_drawing_settings(value_detail=value_detail))
+
+    return to_graphml_source(template_drawer, model._parsed_model)
+
+
+def sample_to_graphml_source(sample: Any, value_detail: int = 0) -> str | None:
+    """Renders the sample into its GraphML source representation.
+
+    Parameters
+    ----------
+    sample : Any
+        The sample to render.
+    value_detail : int
+        The level of detail for values. Default: 0.
+
+    Returns
+    -------
+    str | None
+        The GraphML source, or None if the backend graphviz-based conversion failed.
+    """
+    sample_drawer = get_sample_drawer(get_drawing_settings(value_detail=value_detail))
+
+    return to_graphml_source(sample_drawer, sample._java_sample)
+
+
+def save_model_graphml(model: Any, path: str, value_detail: int = 0) -> None:
+    """Saves the model graph as a GraphML file consumable by networkx.
+
+    Parameters
+    ----------
+    model : NeuralModule
+        The model to save.
+    path : str
+        The destination file path. Parent directories are created if needed.
+    value_detail : int
+        The level of detail for values. Default: 0.
+    """
+    if model._need_sync:
+        model._sync_model()
+
+    path = os.path.abspath(path)
+    template_drawer = get_model_drawer(get_drawing_settings(value_detail=value_detail))
+    template_drawer.saveGraphML(model._parsed_model, path)
+
+    if not os.path.exists(path):
+        raise RuntimeError(
+            "GraphML saving failed. Try to install GraphViz (https://graphviz.org/download/) and ensure it is "
+            "available on your PATH"
+        )
+
+
+def save_sample_graphml(sample: Any, path: str, value_detail: int = 0) -> None:
+    """Saves the sample graph as a GraphML file consumable by networkx.
+
+    Parameters
+    ----------
+    sample : Any
+        The sample to save.
+    path : str
+        The destination file path. Parent directories are created if needed.
+    value_detail : int
+        The level of detail for values. Default: 0.
+    """
+    path = os.path.abspath(path)
+    sample_drawer = get_sample_drawer(get_drawing_settings(value_detail=value_detail))
+    sample_drawer.saveGraphML(sample._java_sample, path)
+
+    if not os.path.exists(path):
+        raise RuntimeError(
+            "GraphML saving failed. Try to install GraphViz (https://graphviz.org/download/) and ensure it is "
+            "available on your PATH"
+        )
+
+
+def model_to_networkx(model: Any, value_detail: int = 0) -> Any:
+    """Converts the model into a networkx graph.
+
+    Parameters
+    ----------
+    model : NeuralModule
+        The model to convert.
+    value_detail : int
+        The level of detail for values. Default: 0.
+
+    Returns
+    -------
+    networkx.DiGraph
+        The model as a directed graph. Node labels are stored in the "label" attribute.
+    """
+    return graphml_to_networkx(model_to_graphml_source(model, value_detail))
+
+
+def sample_to_networkx(sample: Any, value_detail: int = 0) -> Any:
+    """Converts the sample into a networkx graph.
+
+    Parameters
+    ----------
+    sample : Any
+        The sample to convert.
+    value_detail : int
+        The level of detail for values. Default: 0.
+
+    Returns
+    -------
+    networkx.DiGraph
+        The sample as a directed graph. Node labels are stored in the "label" attribute.
+    """
+    return graphml_to_networkx(sample_to_graphml_source(sample, value_detail))
 
 
 def is_jupyter() -> bool:
