@@ -14,7 +14,7 @@ from neuralogic.core.constructs.java_objects import ValueFactory
 from neuralogic.dataset import Dataset
 from neuralogic.dataset.base import BaseDataset
 from neuralogic.setup import initialize, is_initialized
-from neuralogic.utils.visualize import draw_model
+from neuralogic.utils.visualize import DrawingSettings, draw_model
 
 Value = list | float
 
@@ -166,6 +166,45 @@ class NeuralModule:
             progress=progress,
         )
 
+    def vectorize(self, dataset: BaseDataset):
+        """Builds a PyTorch vectorized network from the provided dataset.
+
+        Parameters
+        ----------
+        dataset : BaseDataset
+            The dataset to build and vectorize.
+
+        Returns
+        -------
+        torch.nn.Module
+            The vectorized PyTorch model.
+        """
+        if self._dataset_builder is None:
+            raise ValueError("model is not built")
+
+        from compute_graph_vectorize.engines.torch import (
+            build_torch_model,
+            torch_simple_forward_pass_runner,
+        )
+        from compute_graph_vectorize.engines.torch.settings import TorchModuleSettings
+        from compute_graph_vectorize.sources.builders import from_neuralogic
+        from compute_graph_vectorize.sources.neuralogic_settings import NeuralogicSettings
+        from compute_graph_vectorize.vectorize.pipeline.pipeline import create_vectorized_network_compiler
+        from compute_graph_vectorize.vectorize.settings import VectorizeSettings
+
+        settings = NeuralogicSettings(chain_pruning=False, iso_value_compression=False)
+        built_dataset = self._dataset_builder.build_dataset(dataset, settings.create_proxy())
+
+        network = from_neuralogic(list(built_dataset), settings)
+
+        compiler = create_vectorized_network_compiler(
+            VectorizeSettings(),
+            forward_pass_runner=torch_simple_forward_pass_runner,
+        )
+
+        vectorized_network = compiler(network)
+        return build_torch_model(vectorized_network, TorchModuleSettings(), debug=False)
+
     def __call__(self, dataset=None):
         if isinstance(dataset, StaticGraphDataset):
             return self._test_static_graph(dataset)
@@ -194,6 +233,52 @@ class NeuralModule:
 
     def forward(self, dataset):
         return self(dataset)
+
+    @staticmethod
+    def _result_to_tuple(result):
+        return (
+            ValueFactory.from_java(result.getTarget()),
+            ValueFactory.from_java(result.getOutput()),
+            ValueFactory.from_java(result.errorValue()),
+        )
+
+    @staticmethod
+    def _java_metrics_to_dict(java_metrics) -> dict:
+        return {str(entry.getKey()): float(entry.getValue()) for entry in java_metrics.entrySet()}
+
+    def train_with_metrics(self, dataset, epochs: int = 1, metrics=None):
+        """Trains like :meth:`train` and also computes Java deep metrics.
+
+        Parameters
+        ----------
+        dataset : Any
+            Same inputs as :meth:`train`.
+        epochs : int
+            Number of epochs. Default: 1.
+        metrics : Sequence[str] or None
+            Java metric names to compute (``auc_roc``, ``auc_pr``,
+            ``best_accuracy``, ``best_threshold``, ``saturation``).
+
+        Returns
+        -------
+        tuple
+            ``(results, java_metrics)`` where ``results`` has the same shape as
+            :meth:`train` and ``java_metrics`` is a ``dict[str, float]``.
+        """
+        metric_list = [str(m) for m in metrics or []]
+
+        if isinstance(dataset, StaticGraphDataset):
+            return self._train_static_graph_with_metrics(dataset, epochs, metric_list)
+
+        samples, batch_size = self._dataset_to_samples(dataset)
+        sample_list = samples if isinstance(samples, Collection) else [samples]
+        sample_array = jpype.java.util.ArrayList([sample._java_sample for sample in sample_list])
+        java_metrics = jpype.java.util.ArrayList(metric_list)
+
+        epoch_result = self._strategy.learnSamplesWithMetrics(sample_array, epochs, batch_size, java_metrics)
+        results = [self._result_to_tuple(result) for result in epoch_result.getResults()]
+        self._update_tensor_parameters()
+        return results, self._java_metrics_to_dict(epoch_result.getMetrics())
 
     def train(self, dataset, epochs: int = 1) -> Value:
         """Trains the model on the provided dataset.
@@ -292,6 +377,37 @@ class NeuralModule:
 
         return float(ValueFactory.from_java(self._strategy.reducedError(sample_array, batch_size)))
 
+    def validate_with_metrics(self, dataset, metrics=None):
+        """Evaluates like :meth:`validate` and also computes Java deep metrics.
+
+        Parameters
+        ----------
+        dataset : Any
+            Same inputs as :meth:`validate`.
+        metrics : Sequence[str] or None
+            Java metric names to compute (``auc_roc``, ``auc_pr``,
+            ``best_accuracy``, ``best_threshold``, ``saturation``).
+
+        Returns
+        -------
+        tuple
+            ``(results, java_metrics)`` where ``results`` has the same shape as
+            :meth:`validate` and ``java_metrics`` is a ``dict[str, float]``.
+        """
+        metric_list = [str(m) for m in metrics or []]
+
+        if isinstance(dataset, StaticGraphDataset):
+            return self._validate_static_graph_with_metrics(dataset, metric_list)
+
+        samples, batch_size = self._dataset_to_samples(dataset)
+        sample_list = samples if isinstance(samples, Collection) else [samples]
+        sample_array = jpype.java.util.ArrayList([sample._java_sample for sample in sample_list])
+        java_metrics = jpype.java.util.ArrayList(metric_list)
+
+        epoch_result = self._strategy.validateSamplesWithMetrics(sample_array, batch_size, java_metrics)
+        results = [self._result_to_tuple(result) for result in epoch_result.getResults()]
+        return results, self._java_metrics_to_dict(epoch_result.getMetrics())
+
     def validate(self, dataset) -> Value:
         """Evaluates the model on the provided dataset and reports the error, without training on it.
 
@@ -374,6 +490,36 @@ class NeuralModule:
         self._update_tensor_parameters()
         return results
 
+    def _train_static_graph_with_metrics(self, dataset: StaticGraphDataset, epochs: int, metrics: list) -> tuple:
+        """Train a static graph and compute Java deep metrics from the epoch's results."""
+        results = []
+        java_results = jpype.java.util.ArrayList()
+        static_sample = dataset.static_sample
+
+        for _ in range(epochs):
+            for index, mapping in enumerate(dataset.fact_mappings):
+                for fact, value in mapping:
+                    _, java_value = self._value_factory.get_value(value)
+                    static_sample.set_fact_value(fact, java_value)
+                target = dataset.targets[index]
+                if target is not None:
+                    _, java_target = self._value_factory.get_value(target)
+                    static_sample._java_sample.target = java_target
+                result = self._strategy.learnSample(static_sample._java_sample)
+                java_results.add(result)
+                results.append(self._result_to_tuple(result))
+
+        self._update_tensor_parameters()
+
+        # The static graph shares one neural sample across all fact mappings, so
+        # saturation is sampled once on that graph rather than once per mapping.
+        java_samples = jpype.java.util.ArrayList([static_sample._java_sample])
+        java_metrics = jpype.java.util.ArrayList(metrics)
+        metric_dict = self._java_metrics_to_dict(
+            self._strategy.computeMetrics(java_samples, java_results, java_metrics, True)
+        )
+        return results, metric_dict
+
     def _test_static_graph(self, dataset: StaticGraphDataset) -> list:
         """Evaluate on a StaticGraphDataset.
 
@@ -401,6 +547,31 @@ class NeuralModule:
             results.append(result)
 
         return results
+
+    def _validate_static_graph_with_metrics(self, dataset: StaticGraphDataset, metrics: list) -> tuple:
+        """Validate a static graph and compute Java deep metrics without updating weights."""
+        results = []
+        java_results = jpype.java.util.ArrayList()
+        static_sample = dataset.static_sample
+
+        for index, mapping in enumerate(dataset.fact_mappings):
+            for fact, value in mapping:
+                _, java_value = self._value_factory.get_value(value)
+                static_sample.set_fact_value(fact, java_value)
+            target = dataset.targets[index]
+            if target is not None:
+                _, java_target = self._value_factory.get_value(target)
+                static_sample._java_sample.target = java_target
+            result = self._strategy.validateSample(static_sample._java_sample)
+            java_results.add(result)
+            results.append(self._result_to_tuple(result))
+
+        java_samples = jpype.java.util.ArrayList([static_sample._java_sample])
+        java_metrics = jpype.java.util.ArrayList(metrics)
+        metric_dict = self._java_metrics_to_dict(
+            self._strategy.computeMetrics(java_samples, java_results, java_metrics, False)
+        )
+        return results, metric_dict
 
     def reset_parameters(self):
         self._strategy.resetParameters()
@@ -538,12 +709,13 @@ class NeuralModule:
         img_type="png",
         value_detail: int = 0,
         graphviz_path: str | None = None,
+        settings: DrawingSettings | None = None,
         *args,
         **kwargs,
     ):
         if self._dataset_builder is None or self._settings is None:
             raise ValueError("model is not built")
-        return draw_model(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
+        return draw_model(self, filename, show, img_type, value_detail, graphviz_path, settings, *args, **kwargs)
 
     def _initialize_neural_module(self, dataset_builder: DatasetBuilder, settings: SettingsProxy, model, torch: bool):
         self._dataset_builder = dataset_builder

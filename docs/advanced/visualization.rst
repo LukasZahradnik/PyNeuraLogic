@@ -157,3 +157,83 @@ the :code:`sample_to_dot_source` function, respectively.
 
     0 [shape = tripleoctagon]
     }
+
+Customizing Drawings
+####################
+
+Beyond the ``value_detail`` parameter, drawings can be fully styled through the standalone
+:code:`DrawingSettings` class from :code:`neuralogic.utils.visualize`. It is separate from the training
+settings (:code:`SettingsProxy`) and only configures the drawing backend.
+
+.. code-block:: Python
+
+    from neuralogic.utils.visualize import DrawingSettings, draw_model
+
+
+    ds = DrawingSettings()
+    ds.value_decimals = 4
+    ds.display_values = False
+    ds.display_weights = False
+    ds.set_node_attr("fact", "fillcolor", "#fff2cc")
+    ds.set_edge_attr("ruleToHead", "color", "red")
+    ds.set_graph_attr("bgcolor", "white")
+
+    draw_model(model, filename="model.svg", img_type="svg", settings=ds)
+
+Value detail is controlled by:
+
+- :code:`value_decimals` - number of decimal places for numeric values (0 = integers only)
+- :code:`display_values` - master switch for all numeric values
+- :code:`display_gradients` - show gradients in neural-network drawings
+- :code:`display_dimensions` - show value dimensions
+- :code:`display_functions` - show combination/transformation function names
+- :code:`display_weights` - show weight labels on edges
+
+Styles are addressed by semantic element names rather than raw Graphviz attributes:
+
+- Template drawing: :code:`literal`, :code:`fact`, :code:`rule`; edges :code:`ruleToBody`, :code:`negatedRuleToBody`, :code:`ruleToHead`, :code:`bodyToFact`
+- Grounding drawing: :code:`groundLiteral`, :code:`groundHeadRule`, :code:`groundRule`, :code:`target`; edges :code:`headToGroundRule`, :code:`groundHeadRuleToGroundRule`, :code:`groundRuleToLiteral`, :code:`compactRuleEdge`
+- Neural-network drawing: :code:`atomNeuron`, :code:`weightedAtomNeuron`, :code:`negationNeuron`, :code:`aggregationNeuron`, :code:`ruleNeuron`, :code:`weightedRuleNeuron`, :code:`factNeuron`, :code:`targetNeuron`; edges :code:`unweightedInput`, :code:`weightedInput`, :code:`fixedWeightInput`
+- Pipeline drawing: :code:`pipe`, :code:`identityPipe`, :code:`branch`, :code:`merge`, :code:`start`, :code:`terminal`; edges :code:`pipelineEdge`, :code:`pipelineTypeEdge`
+
+Graph-level attributes (e.g. :code:`bgcolor`, :code:`rankdir`, :code:`splines`, :code:`fontname`,
+:code:`nodesep`, :code:`ranksep`) can be set with :code:`set_graph_attr`.
+
+Pipeline Drawing
+################
+
+Backend pipelines can be drawn the same way via :code:`draw_pipeline`:
+
+.. code-block:: Python
+
+    from neuralogic.utils.visualize import draw_pipeline
+
+    draw_pipeline(pipeline, settings=ds)
+
+Pipeline export helpers are :code:`pipeline_to_dot_source`, :code:`pipeline_to_graphml_source`,
+:code:`pipeline_to_networkx` and :code:`save_pipeline_graphml`.
+
+GraphML and networkx Export
+###########################
+
+In addition to DOT source, graphs can be exported to GraphML - an XML format that can be loaded
+directly with :code:`networkx.read_graphml(...)`. The export helpers accept the same optional
+:code:`settings=DrawingSettings(...)` argument as the drawing functions.
+
+.. code-block:: Python
+
+    from neuralogic.utils.visualize import (
+        model_to_graphml_source,
+        model_to_networkx,
+        save_model_graphml,
+    )
+
+
+    graphml = model_to_graphml_source(model, settings=ds)
+    graph = model_to_networkx(model, settings=ds)          # networkx.DiGraph
+    save_model_graphml(model, "model.graphml", settings=ds)
+
+Sample-level variants are :code:`sample_to_graphml_source`, :code:`sample_to_networkx` and
+:code:`save_sample_graphml`. Node labels are stored in the :code:`"label"` node attribute of the
+returned :code:`networkx.DiGraph`.
+

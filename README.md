@@ -114,6 +114,12 @@ To install PyNeuraLogic's latest release from the PyPI repository, use the follo
 $ pip install neuralogic
 ```
 
+To use PyNeuraLogic's PyTorch integrations, install it with the `torch` extra:
+
+```commandline
+$ pip install "neuralogic[torch]"
+```
+
 
 <details>
 <summary>Prerequisites</summary>

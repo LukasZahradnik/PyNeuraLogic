@@ -58,6 +58,7 @@ examples = [
 torch = [
     "torch",
     "torch_geometric",
+    "compute-graph-vectorize @ git+https://github.com/NeuraLogic/nn-structural-graph-vectorizer-compiler.git",
 ]
 
 [tool.setuptools.packages.find]
@@ -95,6 +96,9 @@ omit = [
 
 [tool.coverage.report]
 exclude_lines = ["raise", "except"]
+
+[tool.uv.extra-build-dependencies]
+torch-scatter = ["torch"]
 
 [tool.pyright]
 typeCheckingMode = "basic"
