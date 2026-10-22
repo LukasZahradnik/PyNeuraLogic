@@ -43,6 +43,25 @@ class Metric(str, Enum):
     PRECISION_MACRO = "precision_macro"
     RECALL_MACRO = "recall_macro"
     F1_MACRO = "f1_macro"
+    # Java-computed deep metrics (AUC / best threshold / saturation)
+    AUC_ROC = "auc_roc"
+    AUC_PR = "auc_pr"
+    BEST_ACCURACY = "best_accuracy"
+    BEST_THRESHOLD = "best_threshold"
+    SATURATION = "saturation"
+
+
+# Metrics the Java PythonTrainingStrategy computes; Trainer.fit routes these to
+# the Java backend instead of the Python implementations above.
+JAVA_METRIC_NAMES = frozenset(
+    {
+        "auc_roc",
+        "auc_pr",
+        "best_accuracy",
+        "best_threshold",
+        "saturation",
+    }
+)
 
 
 def _to_arrays(targets: list, outputs: list):
@@ -64,7 +83,7 @@ def _class_indices(arr) -> np.ndarray:
     if arr.ndim == 0:
         return np.asarray(int(arr >= 0.5)).reshape(1)
     if arr.ndim == 1:
-        return np.asarray(int(np.argmax(arr))).reshape(1)
+        return (arr >= 0.5).astype(int)
     # 2D: row-wise argmax
     return np.argmax(arr, axis=-1)
 
@@ -202,7 +221,13 @@ def compute_metrics(
     """
     result: dict[str, float] = {}
     for name in names:
-        key = str(name)
+        key = name.value if isinstance(name, Metric) else str(name)
+        if key in JAVA_METRIC_NAMES:
+            warnings.warn(
+                f"Metric '{key}' is computed by the Java training strategy; "
+                "collect it through Trainer.fit(metrics=[...]) instead."
+            )
+            continue
         if key not in _METRIC_REGISTRY:
             warnings.warn(f"Unknown metric '{key}'. Available: {sorted(_METRIC_REGISTRY)}")
             continue
@@ -213,6 +238,7 @@ def compute_metrics(
 
 def _validate_metrics(metrics: list[str]) -> None:
     """Warn about unknown metric names."""
-    unknown = [m for m in metrics if str(m) not in _METRIC_REGISTRY]
+    known = set(_METRIC_REGISTRY) | JAVA_METRIC_NAMES
+    unknown = [m.value if isinstance(m, Metric) else str(m) for m in metrics if (m.value if isinstance(m, Metric) else str(m)) not in known]
     if unknown:
         warnings.warn(f"Unknown metric(s): {unknown}. Available: {sorted(_METRIC_REGISTRY)}")

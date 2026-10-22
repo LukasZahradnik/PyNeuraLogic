@@ -16,7 +16,7 @@ from neuralogic.nn.trainer.callbacks import (
 )
 from neuralogic.nn.trainer.helpers import _build_logs, _ensure_built, _mean, _unpack_results
 from neuralogic.nn.trainer.history import TrainerHistory
-from neuralogic.nn.trainer.metrics import Metric, _validate_metrics, compute_metrics
+from neuralogic.nn.trainer.metrics import JAVA_METRIC_NAMES, Metric, _validate_metrics, compute_metrics
 
 
 class Trainer:
@@ -67,7 +67,11 @@ class Trainer:
             ``None`` (no checkpointing).
         metrics : Sequence[str or Metric] or None
             Extra metrics to compute, e.g. ``[Metric.ACCURACY]`` or
-            ``["mae", "r2"]``.  Loss is always tracked.  Default ``None``.
+            ``["mae", "r2"]``.  Loss is always tracked.  The deep
+            classification metrics ``auc_roc``, ``auc_pr``,
+            ``best_accuracy``, ``best_threshold`` and the ``saturation``
+            ratio are computed by the Java training strategy.  Default
+            ``None``.
         silent : bool
             If ``True``, suppress the tqdm progress bar.  Default ``False``.
         callbacks : Sequence[TrainerCallback] or None
@@ -80,8 +84,10 @@ class Trainer:
         TrainerHistory
             Losses and metrics for every epoch.
         """
-        metric_names = [str(m) for m in metrics] if metrics else []
+        metric_names = [m.value if isinstance(m, Metric) else str(m) for m in metrics] if metrics else []
         _validate_metrics(metric_names)
+        java_metric_names = [name for name in metric_names if name in JAVA_METRIC_NAMES]
+        python_metric_names = [name for name in metric_names if name not in JAVA_METRIC_NAMES]
 
         built_train = _ensure_built(self.model, train_dataset, batch_size)
         built_val = _ensure_built(self.model, val_dataset, batch_size) if val_dataset is not None else None
@@ -111,19 +117,33 @@ class Trainer:
                 history.stopped_early = True
                 break
 
-            train_results = self.model.train(built_train, epochs=1)
+            if java_metric_names:
+                train_results, train_java_metrics = self.model.train_with_metrics(built_train, epochs=1, metrics=java_metric_names)
+                train_mets = dict(train_java_metrics)
+            else:
+                train_results = self.model.train(built_train, epochs=1)
+                train_mets = {}
             train_targets, train_outputs, train_errors = _unpack_results(train_results)
+            if python_metric_names and train_outputs:
+                train_mets.update(compute_metrics(train_targets, train_outputs, python_metric_names))
             train_loss = _mean(train_errors)
             history.train_losses.append(train_loss)
 
             val_loss: float | None = None
+            val_mets: dict[str, float] = {}
             if built_val is not None:
                 # Validation used to train on the validation set and restore the weights afterwards. The
                 # weights did come back, but the optimizer's own state did not - a state_dict carries weight
                 # values only - so Adam kept the moments it picked up from validation and every later epoch
                 # drifted. Evaluating touches neither.
-                val_results = self.model.validate(built_val)
+                if java_metric_names:
+                    val_results, val_java_metrics = self.model.validate_with_metrics(built_val, metrics=java_metric_names)
+                    val_mets = dict(val_java_metrics)
+                else:
+                    val_results = self.model.validate(built_val)
                 val_targets, val_outputs, val_errors = _unpack_results(val_results)
+                if python_metric_names and val_outputs:
+                    val_mets.update(compute_metrics(val_targets, val_outputs, python_metric_names))
                 val_loss = _mean(val_errors)
                 history.val_losses.append(val_loss)
 
@@ -137,13 +157,10 @@ class Trainer:
                 lr_decay.decay(epoch)
 
             logs = _build_logs(train_loss, val_loss, current_lr)
-            if metric_names and train_outputs:
-                train_mets = compute_metrics(train_targets, train_outputs, metric_names)
-                for name, value in train_mets.items():
-                    history.train_metrics.setdefault(name, []).append(value)
-                    logs[f"train_{name}"] = value
-            if metric_names and built_val is not None and val_outputs:
-                val_mets = compute_metrics(val_targets, val_outputs, metric_names)  # type: ignore[possibly-unbound]
+            for name, value in train_mets.items():
+                history.train_metrics.setdefault(name, []).append(value)
+                logs[f"train_{name}"] = value
+            if built_val is not None:
                 for name, value in val_mets.items():
                     history.val_metrics.setdefault(name, []).append(value)
                     logs[f"val_{name}"] = value
