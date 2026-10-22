@@ -2,15 +2,44 @@ from __future__ import annotations
 
 import io
 import os
-import tempfile
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import jpype
 
 from neuralogic.setup import get_default_graphviz_path
-
-if TYPE_CHECKING:
-    from neuralogic.core.settings import SettingsProxy
+from neuralogic.utils.visualize.drawing_settings import (
+    DrawingSettings,
+)
+from neuralogic.utils.visualize.drawing_settings import (
+    EdgeAttributeKey as EdgeAttributeKey,
+)
+from neuralogic.utils.visualize.drawing_settings import (
+    EdgeAttributes as EdgeAttributes,
+)
+from neuralogic.utils.visualize.drawing_settings import (
+    EdgeStyleKey as EdgeStyleKey,
+)
+from neuralogic.utils.visualize.drawing_settings import (
+    EdgeStyles as EdgeStyles,
+)
+from neuralogic.utils.visualize.drawing_settings import (
+    GraphAttributeKey as GraphAttributeKey,
+)
+from neuralogic.utils.visualize.drawing_settings import (
+    GraphAttributes as GraphAttributes,
+)
+from neuralogic.utils.visualize.drawing_settings import (
+    NodeAttributeKey as NodeAttributeKey,
+)
+from neuralogic.utils.visualize.drawing_settings import (
+    NodeAttributes as NodeAttributes,
+)
+from neuralogic.utils.visualize.drawing_settings import (
+    NodeStyleKey as NodeStyleKey,
+)
+from neuralogic.utils.visualize.drawing_settings import (
+    NodeStyles as NodeStyles,
+)
 
 
 def get_graphviz_path(path: str | None = None) -> str | None:
@@ -24,58 +53,51 @@ def get_graphviz_path(path: str | None = None) -> str | None:
 
 def get_drawing_settings(
     img_type: str = "png", value_detail: int = 0, graphviz_path: str | None = None
-) -> SettingsProxy:
-    """Returns the default settings instance for drawing with a specified image type.
+) -> DrawingSettings:
+    """Returns standalone drawing settings configured with the specified image type.
 
     Parameters
     ----------
     img_type : str
         The image type. Default: "png".
     value_detail : int
-        The level of detail for values. Default: 0.
+        The level of detail for values (0, 1 or 2). Default: 0.
     graphviz_path : str, optional
         The path to the Graphviz executable. Default: None.
 
     Returns
     -------
-    SettingsProxy
-        The settings proxy for drawing.
+    DrawingSettings
+        Standalone drawing settings. Style and value detail can be further
+        configured on the returned object before it is passed to a drawer.
     """
-    from neuralogic.core.settings import Settings
-
-    settings = Settings().create_proxy()
-
-    graphviz = get_graphviz_path(graphviz_path)
-    if graphviz is not None:
-        settings.settings.graphvizPath = graphviz
-
-    settings.settings.drawing = False
-    settings.settings.storeNotShow = True
-    settings.settings.imgType = img_type.lower()
-    settings.settings.outDir = tempfile.gettempdir()
-
-    if value_detail not in [0, 1, 2]:
-        raise ValueError(f"Invalid value_detail - {value_detail}. Expected 0, 1, or 2.")
-
-    settings_class = settings.settings_class
-    details = [
-        settings_class.shortNumberFormat,
-        settings_class.detailedNumberFormat,
-        settings_class.superDetailedNumberFormat,
-    ]
-
-    settings.settings.defaultNumberFormat = details[value_detail]
-
+    settings = DrawingSettings(value_detail=value_detail)
+    settings._set_img_type(img_type)
+    settings._set_graphviz_path(graphviz_path)
     return settings
 
 
-def get_model_drawer(settings: SettingsProxy) -> Any:
+def _resolve_drawing_settings(
+    settings: DrawingSettings | None,
+    img_type: str,
+    value_detail: int,
+    graphviz_path: str | None,
+) -> DrawingSettings:
+    if settings is None:
+        return get_drawing_settings(img_type, value_detail, graphviz_path)
+
+    settings._set_img_type(img_type)
+    settings._set_graphviz_path(graphviz_path)
+    return settings
+
+
+def get_model_drawer(settings: DrawingSettings) -> Any:
     """Returns the model drawer.
 
     Parameters
     ----------
-    settings : SettingsProxy
-        The settings proxy.
+    settings : DrawingSettings
+        The drawing settings.
 
     Returns
     -------
@@ -85,13 +107,13 @@ def get_model_drawer(settings: SettingsProxy) -> Any:
     return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.TemplateDrawer")(settings.settings)
 
 
-def get_sample_drawer(settings: SettingsProxy) -> Any:
+def get_sample_drawer(settings: DrawingSettings) -> Any:
     """Returns the sample drawer.
 
     Parameters
     ----------
-    settings : SettingsProxy
-        The settings proxy.
+    settings : DrawingSettings
+        The drawing settings.
 
     Returns
     -------
@@ -101,13 +123,13 @@ def get_sample_drawer(settings: SettingsProxy) -> Any:
     return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.NeuralNetDrawer")(settings.settings)
 
 
-def get_grounding_drawer(settings: SettingsProxy) -> Any:
+def get_grounding_drawer(settings: DrawingSettings) -> Any:
     """Returns the grounding drawer.
 
     Parameters
     ----------
-    settings : SettingsProxy
-        The settings proxy.
+    settings : DrawingSettings
+        The drawing settings.
 
     Returns
     -------
@@ -117,7 +139,20 @@ def get_grounding_drawer(settings: SettingsProxy) -> Any:
     return jpype.JClass("cz.cvut.fel.ida.pipelines.debugging.drawing.GroundingDrawer")(settings.settings)
 
 
-# todo gusta: + groundingDrawer, pipelineDrawer...
+def get_pipeline_drawer(settings: DrawingSettings) -> Any:
+    """Returns the pipeline drawer.
+
+    Parameters
+    ----------
+    settings : DrawingSettings
+        The drawing settings.
+
+    Returns
+    -------
+    Any
+        The pipeline drawer.
+    """
+    return jpype.JClass("cz.cvut.fel.ida.pipelines.debuging.drawing.PipelineDrawer")(settings.settings)
 
 
 def draw(
@@ -263,6 +298,7 @@ def draw_model(
     img_type: str = "png",
     value_detail: int = 0,
     graphviz_path: str | None = None,
+    settings: DrawingSettings | None = None,
     *args: Any,
     **kwargs: Any,
 ) -> Any:
@@ -285,6 +321,10 @@ def draw_model(
         The level of detail for values. Default: 0.
     graphviz_path : str, optional
         The path to the Graphviz executable. Default: None.
+    settings : DrawingSettings, optional
+        Styling settings. When provided, they control value detail and graph
+        styling, while ``filename``, ``img_type`` and ``graphviz_path`` from this
+        call still control the output.
     args : Any
         Additional arguments for the drawer.
     kwargs : Any
@@ -299,7 +339,8 @@ def draw_model(
         model._sync_model()
 
     model = model._parsed_model
-    template_drawer = get_model_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
+    drawing_settings = _resolve_drawing_settings(settings, img_type, value_detail, graphviz_path)
+    template_drawer = get_model_drawer(drawing_settings)
 
     return draw(template_drawer, model, filename, show, img_type, *args, **kwargs)
 
@@ -311,6 +352,7 @@ def draw_grounding(
     img_type: str = "png",
     value_detail: int = 0,
     graphviz_path: str | None = None,
+    settings: DrawingSettings | None = None,
     *args: Any,
     **kwargs: Any,
 ) -> Any:
@@ -333,6 +375,10 @@ def draw_grounding(
         The level of detail for values. Default: 0.
     graphviz_path : str, optional
         The path to the Graphviz executable. Default: None.
+    settings : DrawingSettings, optional
+        Styling settings. When provided, they control value detail and graph
+        styling, while ``filename``, ``img_type`` and ``graphviz_path`` from this
+        call still control the output.
     args : Any
         Additional arguments for the drawer.
     kwargs : Any
@@ -343,7 +389,8 @@ def draw_grounding(
     Union[Any, bytes, None]
         The grounding drawing.
     """
-    grounding_drawer = get_grounding_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
+    drawing_settings = _resolve_drawing_settings(settings, img_type, value_detail, graphviz_path)
+    grounding_drawer = get_grounding_drawer(drawing_settings)
 
     return draw(grounding_drawer, grounding, filename, show, img_type, *args, **kwargs)
 
@@ -355,6 +402,7 @@ def draw_sample(
     img_type: str = "png",
     value_detail: int = 0,
     graphviz_path: str | None = None,
+    settings: DrawingSettings | None = None,
     *args: Any,
     **kwargs: Any,
 ) -> Any:
@@ -377,6 +425,10 @@ def draw_sample(
         The level of detail for values. Default: 0.
     graphviz_path : str, optional
         The path to the Graphviz executable. Default: None.
+    settings : DrawingSettings, optional
+        Styling settings. When provided, they control value detail and graph
+        styling, while ``filename``, ``img_type`` and ``graphviz_path`` from this
+        call still control the output.
     args : Any
         Additional arguments for the drawer.
     kwargs : Any
@@ -389,18 +441,71 @@ def draw_sample(
     """
     draw_object = sample._java_sample
 
-    sample_drawer = get_sample_drawer(get_drawing_settings(img_type, value_detail, graphviz_path))
+    drawing_settings = _resolve_drawing_settings(settings, img_type, value_detail, graphviz_path)
+    sample_drawer = get_sample_drawer(drawing_settings)
 
     return draw(sample_drawer, draw_object, filename, show, img_type, *args, **kwargs)
 
 
-def model_to_dot_source(model: Any) -> str:
+def draw_pipeline(
+    pipeline: Any,
+    filename: str | None = None,
+    show: bool = True,
+    img_type: str = "png",
+    value_detail: int = 0,
+    graphviz_path: str | None = None,
+    settings: DrawingSettings | None = None,
+    *args: Any,
+    **kwargs: Any,
+) -> Any:
+    """Draws a backend pipeline either as an image of type img_type either into:
+        * a file - if filename is specified),
+        * an IPython Image or Image popup - if show is True
+        * or bytes otherwise
+
+    Parameters
+    ----------
+    pipeline : Any
+        The backend pipeline (``cz.cvut.fel.ida.pipelines.Pipeline``) to draw.
+    filename : str, optional
+        The filename to draw into. Default: None.
+    show : bool
+        Whether to show the image. Default: True.
+    img_type : str
+        The image type. Default: "png".
+    value_detail : int
+        The level of detail for values. Default: 0.
+    graphviz_path : str, optional
+        The path to the Graphviz executable. Default: None.
+    settings : DrawingSettings, optional
+        Styling settings. When provided, they control value detail and graph
+        styling, while ``filename``, ``img_type`` and ``graphviz_path`` from this
+        call still control the output.
+    args : Any
+        Additional arguments for the drawer.
+    kwargs : Any
+        Additional keyword arguments for the drawer.
+
+    Returns
+    -------
+    Union[Any, bytes, None]
+        The pipeline drawing.
+    """
+    drawing_settings = _resolve_drawing_settings(settings, img_type, value_detail, graphviz_path)
+    pipeline_drawer = get_pipeline_drawer(drawing_settings)
+
+    return draw(pipeline_drawer, pipeline, filename, show, img_type, *args, **kwargs)
+
+
+def model_to_dot_source(model: Any, settings: DrawingSettings | None = None) -> str:
     """Renders the model into its dot source representation.
 
     Parameters
     ----------
     model : NeuralModule
         The model to render.
+    settings : DrawingSettings, optional
+        Standalone drawing settings. When provided, they are used instead of the defaults.
 
     Returns
     -------
@@ -411,12 +516,14 @@ def model_to_dot_source(model: Any) -> str:
         model._sync_model()
 
     model = model._parsed_model
-    template_drawer = get_model_drawer(get_drawing_settings())
+    template_drawer = get_model_drawer(settings or get_drawing_settings())
 
     return to_dot_source(template_drawer, model)
 
 
-def sample_to_dot_source(sample: Any, value_detail: int = 0) -> str:
+def sample_to_dot_source(
+    sample: Any, value_detail: int = 0, settings: DrawingSettings | None = None
+) -> str:
     """Renders the sample into its dot source representation.
 
     Parameters
@@ -425,18 +532,22 @@ def sample_to_dot_source(sample: Any, value_detail: int = 0) -> str:
         The sample to render.
     value_detail : int
         The level of detail for values. Default: 0.
+    settings : DrawingSettings, optional
+        Standalone drawing settings. When provided, ``value_detail`` is ignored.
 
     Returns
     -------
     str
         The dot source representation.
     """
-    sample_drawer = get_sample_drawer(get_drawing_settings(value_detail=value_detail))
+    sample_drawer = get_sample_drawer(settings or get_drawing_settings(value_detail=value_detail))
 
     return to_dot_source(sample_drawer, sample._java_sample)
 
 
-def model_to_graphml_source(model: Any, value_detail: int = 0) -> str | None:
+def model_to_graphml_source(
+    model: Any, value_detail: int = 0, settings: DrawingSettings | None = None
+) -> str | None:
     """Renders the model into its GraphML source representation.
 
     Parameters
@@ -445,6 +556,8 @@ def model_to_graphml_source(model: Any, value_detail: int = 0) -> str | None:
         The model to render.
     value_detail : int
         The level of detail for values. Default: 0.
+    settings : DrawingSettings, optional
+        Standalone drawing settings. When provided, ``value_detail`` is ignored.
 
     Returns
     -------
@@ -454,12 +567,14 @@ def model_to_graphml_source(model: Any, value_detail: int = 0) -> str | None:
     if model._need_sync:
         model._sync_model()
 
-    template_drawer = get_model_drawer(get_drawing_settings(value_detail=value_detail))
+    template_drawer = get_model_drawer(settings or get_drawing_settings(value_detail=value_detail))
 
     return to_graphml_source(template_drawer, model._parsed_model)
 
 
-def sample_to_graphml_source(sample: Any, value_detail: int = 0) -> str | None:
+def sample_to_graphml_source(
+    sample: Any, value_detail: int = 0, settings: DrawingSettings | None = None
+) -> str | None:
     """Renders the sample into its GraphML source representation.
 
     Parameters
@@ -468,18 +583,22 @@ def sample_to_graphml_source(sample: Any, value_detail: int = 0) -> str | None:
         The sample to render.
     value_detail : int
         The level of detail for values. Default: 0.
+    settings : DrawingSettings, optional
+        Standalone drawing settings. When provided, ``value_detail`` is ignored.
 
     Returns
     -------
     str | None
         The GraphML source, or None if the backend graphviz-based conversion failed.
     """
-    sample_drawer = get_sample_drawer(get_drawing_settings(value_detail=value_detail))
+    sample_drawer = get_sample_drawer(settings or get_drawing_settings(value_detail=value_detail))
 
     return to_graphml_source(sample_drawer, sample._java_sample)
 
 
-def save_model_graphml(model: Any, path: str, value_detail: int = 0) -> None:
+def save_model_graphml(
+    model: Any, path: str, value_detail: int = 0, settings: DrawingSettings | None = None
+) -> None:
     """Saves the model graph as a GraphML file consumable by networkx.
 
     Parameters
@@ -490,12 +609,14 @@ def save_model_graphml(model: Any, path: str, value_detail: int = 0) -> None:
         The destination file path. Parent directories are created if needed.
     value_detail : int
         The level of detail for values. Default: 0.
+    settings : DrawingSettings, optional
+        Standalone drawing settings. When provided, ``value_detail`` is ignored.
     """
     if model._need_sync:
         model._sync_model()
 
     path = os.path.abspath(path)
-    template_drawer = get_model_drawer(get_drawing_settings(value_detail=value_detail))
+    template_drawer = get_model_drawer(settings or get_drawing_settings(value_detail=value_detail))
     template_drawer.saveGraphML(model._parsed_model, path)
 
     if not os.path.exists(path):
@@ -505,7 +626,9 @@ def save_model_graphml(model: Any, path: str, value_detail: int = 0) -> None:
         )
 
 
-def save_sample_graphml(sample: Any, path: str, value_detail: int = 0) -> None:
+def save_sample_graphml(
+    sample: Any, path: str, value_detail: int = 0, settings: DrawingSettings | None = None
+) -> None:
     """Saves the sample graph as a GraphML file consumable by networkx.
 
     Parameters
@@ -516,9 +639,11 @@ def save_sample_graphml(sample: Any, path: str, value_detail: int = 0) -> None:
         The destination file path. Parent directories are created if needed.
     value_detail : int
         The level of detail for values. Default: 0.
+    settings : DrawingSettings, optional
+        Standalone drawing settings. When provided, ``value_detail`` is ignored.
     """
     path = os.path.abspath(path)
-    sample_drawer = get_sample_drawer(get_drawing_settings(value_detail=value_detail))
+    sample_drawer = get_sample_drawer(settings or get_drawing_settings(value_detail=value_detail))
     sample_drawer.saveGraphML(sample._java_sample, path)
 
     if not os.path.exists(path):
@@ -528,7 +653,106 @@ def save_sample_graphml(sample: Any, path: str, value_detail: int = 0) -> None:
         )
 
 
-def model_to_networkx(model: Any, value_detail: int = 0) -> Any:
+def pipeline_to_dot_source(
+    pipeline: Any, value_detail: int = 0, settings: DrawingSettings | None = None
+) -> str:
+    """Renders the pipeline into its dot source representation.
+
+    Parameters
+    ----------
+    pipeline : Any
+        The backend pipeline to render.
+    value_detail : int
+        The level of detail for values. Default: 0.
+    settings : DrawingSettings, optional
+        Standalone drawing settings. When provided, ``value_detail`` is ignored.
+
+    Returns
+    -------
+    str
+        The dot source representation.
+    """
+    pipeline_drawer = get_pipeline_drawer(settings or get_drawing_settings(value_detail=value_detail))
+
+    return to_dot_source(pipeline_drawer, pipeline)
+
+
+def pipeline_to_graphml_source(
+    pipeline: Any, value_detail: int = 0, settings: DrawingSettings | None = None
+) -> str | None:
+    """Renders the pipeline into its GraphML source representation.
+
+    Parameters
+    ----------
+    pipeline : Any
+        The backend pipeline to render.
+    value_detail : int
+        The level of detail for values. Default: 0.
+    settings : DrawingSettings, optional
+        Standalone drawing settings. When provided, ``value_detail`` is ignored.
+
+    Returns
+    -------
+    str | None
+        The GraphML source, or None if the backend graphviz-based conversion failed.
+    """
+    pipeline_drawer = get_pipeline_drawer(settings or get_drawing_settings(value_detail=value_detail))
+
+    return to_graphml_source(pipeline_drawer, pipeline)
+
+
+def save_pipeline_graphml(
+    pipeline: Any, path: str, value_detail: int = 0, settings: DrawingSettings | None = None
+) -> None:
+    """Saves the pipeline graph as a GraphML file consumable by networkx.
+
+    Parameters
+    ----------
+    pipeline : Any
+        The backend pipeline to save.
+    path : str
+        The destination file path. Parent directories are created if needed.
+    value_detail : int
+        The level of detail for values. Default: 0.
+    settings : DrawingSettings, optional
+        Standalone drawing settings. When provided, ``value_detail`` is ignored.
+    """
+    path = os.path.abspath(path)
+    pipeline_drawer = get_pipeline_drawer(settings or get_drawing_settings(value_detail=value_detail))
+    pipeline_drawer.saveGraphML(pipeline, path)
+
+    if not os.path.exists(path):
+        raise RuntimeError(
+            "GraphML saving failed. Try to install GraphViz (https://graphviz.org/download/) and ensure it is "
+            "available on your PATH"
+        )
+
+
+def pipeline_to_networkx(
+    pipeline: Any, value_detail: int = 0, settings: DrawingSettings | None = None
+) -> Any:
+    """Converts the pipeline into a networkx graph.
+
+    Parameters
+    ----------
+    pipeline : Any
+        The backend pipeline to convert.
+    value_detail : int
+        The level of detail for values. Default: 0.
+    settings : DrawingSettings, optional
+        Standalone drawing settings. When provided, ``value_detail`` is ignored.
+
+    Returns
+    -------
+    networkx.DiGraph
+        The pipeline as a directed graph. Node labels are stored in the "label" attribute.
+    """
+    return graphml_to_networkx(pipeline_to_graphml_source(pipeline, value_detail, settings))
+
+
+def model_to_networkx(
+    model: Any, value_detail: int = 0, settings: DrawingSettings | None = None
+) -> Any:
     """Converts the model into a networkx graph.
 
     Parameters
@@ -537,16 +761,20 @@ def model_to_networkx(model: Any, value_detail: int = 0) -> Any:
         The model to convert.
     value_detail : int
         The level of detail for values. Default: 0.
+    settings : DrawingSettings, optional
+        Standalone drawing settings. When provided, ``value_detail`` is ignored.
 
     Returns
     -------
     networkx.DiGraph
         The model as a directed graph. Node labels are stored in the "label" attribute.
     """
-    return graphml_to_networkx(model_to_graphml_source(model, value_detail))
+    return graphml_to_networkx(model_to_graphml_source(model, value_detail, settings))
 
 
-def sample_to_networkx(sample: Any, value_detail: int = 0) -> Any:
+def sample_to_networkx(
+    sample: Any, value_detail: int = 0, settings: DrawingSettings | None = None
+) -> Any:
     """Converts the sample into a networkx graph.
 
     Parameters
@@ -555,13 +783,15 @@ def sample_to_networkx(sample: Any, value_detail: int = 0) -> Any:
         The sample to convert.
     value_detail : int
         The level of detail for values. Default: 0.
+    settings : DrawingSettings, optional
+        Standalone drawing settings. When provided, ``value_detail`` is ignored.
 
     Returns
     -------
     networkx.DiGraph
         The sample as a directed graph. Node labels are stored in the "label" attribute.
     """
-    return graphml_to_networkx(sample_to_graphml_source(sample, value_detail))
+    return graphml_to_networkx(sample_to_graphml_source(sample, value_detail, settings))
 
 
 def is_jupyter() -> bool:

@@ -1,7 +1,12 @@
+from __future__ import annotations
+
 import enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from neuralogic.utils.visualize import DrawingSettings
 
 
 class NeuronType(str, enum.Enum):
@@ -262,6 +267,7 @@ class NeuralSample:
         img_type: str = "png",
         value_detail: int = 0,
         graphviz_path: str | None = None,
+        settings: DrawingSettings | None = None,
         *args: Any,
         **kwargs: Any,
     ) -> Any:
@@ -280,6 +286,8 @@ class NeuralSample:
             The level of detail for values. Default: 0.
         graphviz_path : str, optional
             The path to the Graphviz executable. Default: None.
+        settings : DrawingSettings, optional
+            Styling settings. When provided, they control value detail and graph styling.
 
         Returns
         -------
@@ -288,7 +296,7 @@ class NeuralSample:
         """
         from neuralogic.utils.visualize import draw_sample
 
-        return draw_sample(self, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
+        return draw_sample(self, filename, show, img_type, value_detail, graphviz_path, settings, *args, **kwargs)
 
     def __str__(self) -> str:
         return str(self._java_sample)
@@ -312,6 +320,7 @@ class Grounding:
         img_type: str = "png",
         value_detail: int = 0,
         graphviz_path: str | None = None,
+        settings: DrawingSettings | None = None,
         *args: Any,
         **kwargs: Any,
     ) -> Any:
@@ -330,6 +339,8 @@ class Grounding:
             The level of detail for values. Default: 0.
         graphviz_path : str, optional
             The path to the Graphviz executable. Default: None.
+        settings : DrawingSettings, optional
+            Styling settings. When provided, they control value detail and graph styling.
 
         Returns
         -------
@@ -338,7 +349,7 @@ class Grounding:
         """
         from neuralogic.utils.visualize import draw_grounding
 
-        return draw_grounding(self._grounding, filename, show, img_type, value_detail, graphviz_path, *args, **kwargs)
+        return draw_grounding(self._grounding, filename, show, img_type, value_detail, graphviz_path, settings, *args, **kwargs)
 
     def __hash__(self):
         return hash(self._grounding)
